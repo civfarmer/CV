@@ -76,10 +76,10 @@
     </aside>
 
     <!-- Main Content Area -->
-    <main class="flex-1 flex flex-col h-full relative bg-white dark:bg-slate-900">
+    <main class="flex-1 flex flex-col h-full relative bg-white dark:bg-slate-900 overflow-x-hidden">
         
         <!-- Top App Bar -->
-        <header class="h-14 bg-white dark:bg-slate-800 border-b border-slate-300 dark:border-slate-700 flex items-center justify-between px-6 sticky top-0 z-20 shadow-sm">
+        <header class="h-14 bg-white dark:bg-slate-800 border-b border-slate-300 dark:border-slate-700 flex items-center justify-between px-6 sticky top-0 z-20 shadow-sm w-full">
             <div class="font-bold text-lg md:hidden text-corporate-accent uppercase tracking-wide">C. Farmer | CV</div>
             <div class="hidden md:flex items-center text-xs text-slate-500 dark:text-slate-400 font-mono" id="status-bar">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
@@ -110,14 +110,17 @@
         </header>
 
         <!-- Scrollable Content -->
-        <div class="flex-1 overflow-y-auto p-6 md:p-10 relative" id="main-scroll-area">
+        <div class="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 md:p-10 relative" id="main-scroll-area">
             
             <!-- Standard UI View. Note the increased pb-36 to prevent bottoming out issues on mobile -->
-            <div id="standard-view" class="max-w-5xl mx-auto space-y-12 pb-36 md:pb-16">
+            <div id="standard-view" class="max-w-5xl mx-auto space-y-12 pb-36 md:pb-16 w-full">
                 
                 <!-- Document Header (Print-style redundancy for corporate feel) -->
                 <div class="border-b-2 border-corporate-accent pb-6 mb-8 pt-4 md:pt-0">
-                    <h1 class="text-3xl md:text-4xl font-serif font-bold text-slate-900 dark:text-white mb-2">CHRISTOPHER IAIN VICTOR FARMER</h1>
+                    <h1 class="text-3xl md:text-4xl font-serif font-bold text-slate-900 dark:text-white mb-2 break-words">
+                        <span class="hidden md:inline">CHRISTOPHER IAIN VICTOR FARMER</span>
+                        <span class="md:hidden">CHRISTOPHER I.V. FARMER</span>
+                    </h1>
                     
                     <!-- Mobile Contact Info -->
                     <div class="flex flex-col gap-2 mb-4 mt-3 md:hidden">
@@ -401,17 +404,17 @@
 
             </div>
 
-            <!-- Developer / JSON View. Note increased padding for mobile. -->
-            <div id="dev-view" class="hidden max-w-5xl mx-auto h-full pb-36 md:pb-16">
-                <div class="bg-[#1e1e1e] rounded-sm p-6 h-full overflow-auto shadow-inner border border-slate-800">
-                    <pre><code id="json-container" class="font-mono text-sm leading-relaxed text-slate-300"></code></pre>
+            <!-- Developer / JSON View. Added whitespace-pre-wrap and break-words for proper mobile resizing -->
+            <div id="dev-view" class="hidden max-w-5xl mx-auto h-full pb-36 md:pb-16 w-full">
+                <div class="bg-[#1e1e1e] rounded-sm p-4 md:p-6 h-full overflow-y-auto overflow-x-hidden shadow-inner border border-slate-800 w-full">
+                    <pre class="whitespace-pre-wrap break-words w-full"><code id="json-container" class="font-mono text-xs md:text-sm leading-relaxed text-slate-300 block w-full"></code></pre>
                 </div>
             </div>
 
         </div>
     </main>
 
-    <!-- Mobile Bottom Navigation (Now with 5 items including Refs) -->
+    <!-- Mobile Bottom Navigation -->
     <nav class="md:hidden fixed bottom-0 w-full bg-white dark:bg-slate-800 border-t border-slate-300 dark:border-slate-700 flex justify-around p-3 z-30 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
         <a href="#summary" class="flex flex-col items-center text-corporate-accent">
             <i data-lucide="user" class="w-5 h-5 mb-1"></i>
@@ -501,7 +504,7 @@
         });
 
 
-        // System Data (For Developer View)
+        // Fully Expanded System Data (For Developer View)
         const cvData = {
             "candidate": {
                 "name": "Christopher Iain Victor Farmer",
@@ -510,74 +513,174 @@
                 "permit": "Swiss B Permit",
                 "contact": "civfarmer@gmail.com",
                 "phone": "+33 6 82 91 37 80",
+                "languages": [
+                    "English (Native)",
+                    "French (A2 - Actively training to B2)",
+                    "Spanish (Basic)"
+                ],
                 "clearance": "SRA QWE Verified (5+ Years)"
             },
+            "professional_summary": "Dynamic Legal, Compliance, and Operations leader with over 8 years of experience building and executing governance frameworks, regulatory compliance programs, and commercial strategies. LL.M. in Legal Practice, specializing in International Law, actively preparing for SRA SQE 1 & 2 examinations, possessing over 5 years of SRA Qualifying Work Experience (QWE). Proven track record of steering complex, multi-site organisations through regulatory turbulence, securing significant institutional funding, and digitising operational workflows. Demonstrated capability in acting as the legal nexus for operations serving vulnerable populations, scaling a regional CIC into the largest adult education provider in three counties outside of universities and colleges. Highly adept at contract lifecycle management, risk mitigation, HR advisory, and the strategic implementation of AI and automation to reduce operational overhead. Ready to leverage deep expertise in administrative processes, international law, and data-driven compliance to support scaling ventures, financial institutions, and corporate entities in the Swiss market.",
             "core_competencies": {
-                "legal_governance": [
-                    "5+ years SRA QWE (contract drafting, dispute resolution)",
-                    "Board advisory, shareholder agreements, conflict controls",
-                    "End-to-end CLM (Supplier agreements, MOUs, institutional grants)",
-                    "Mitigated £70,000+ in potential damages"
+                "legal_advisory_and_governance": [
+                    "5+ years of demonstrable legal practice experience (SRA QWE) encompassing contract drafting, administrative decision-making, dispute resolution, and policy architecture.",
+                    "Extensive experience advising executive boards and acting as a Trustee. Established scalable governance frameworks, delegations of authority, and conflict-of-interest controls.",
+                    "End-to-end ownership of supplier agreements, MOUs, service delivery contracts, and institutional grant terms.",
+                    "Early assessment, evidence preservation, and settlement strategy formulation. Mitigated £70,000+ in potential damages."
                 ],
-                "cyber_resilience": [
-                    "Doctorate-Level Expertise: Economic/Cyber Warfare LL.M (100%)",
-                    "Expert in predicting state-actor methodologies",
-                    "Mapping geopolitical cyber-threats to FINMA/EU DORA resilience"
+                "cyber_resilience_and_operational_risk": [
+                    "Invited to pursue doctoral research based on an LL.M. dissertation (awarded 100%) exploring Economic/Cyber Warfare enforcement gaps.",
+                    "Expert in predicting state-actor methodologies and exploiting international legal vulnerabilities via third-party intermediaries.",
+                    "Capable of mapping geopolitical cyber-threats to institutional risk management and regulatory resilience (e.g., FINMA, EU DORA)."
                 ],
-                "regulatory_compliance": [
-                    "Compliance by default frameworks (EEC, UK Gov, Lottery)",
-                    "100% audit pass rates; incident reporting pipelines (GDPR)",
-                    "Deep understanding of AML/CFT, cross-border restrictions"
+                "regulatory_compliance_and_risk_management": [
+                    "Built 'compliance by default' programs across 8 operational sites. Converted statutory/funder requirements into actionable checklists.",
+                    "Maintained 100% audit pass rates. Designed robust risk registers and incident reporting pipelines (GDPR).",
+                    "Deep understanding of AML/CFT concepts, cross-border restrictions, and institutional risk management."
                 ],
-                "financial_operations": [
-                    "Secured & managed £500,000+ in public/lottery funding",
-                    "Vendor risk management and procurement protocols",
-                    "Budget scrutiny and deficit mitigation (Financial War-rooms)"
+                "financial_procurement_and_commercial_operations": [
+                    "Partnered with leadership to secure and manage over £500,000 in public and lottery funding.",
+                    "Designed vendor risk management protocols ensuring value-for-money documentation and strict supplier due diligence.",
+                    "Board-level experience in budget scrutiny, deficit mitigation, and establishing 'financial war-rooms' during strain."
                 ]
             },
             "experience": [
                 {
                     "company": "Keystone Analytics",
                     "role": "Consultant (Legal, Financial & Strategic Advisory)",
+                    "location": "Remote",
                     "timeline": "Intermittent / Project-Based",
                     "achievements": [
-                        "Directed funding strategy pivot remedying a full year's financial loss in 3 months.",
-                        "Lead VC Consultant for $2M+ public-private solar farm initiative.",
-                        "Navigated banking regulations to secure non-dilutive funding pipelines.",
-                        "Steered legal establishment of semi-private ambulance service and SaaS dispatch app."
+                        "Directed a critical funding strategy pivot that remedied a full year's financial loss within a 3-month period. Prevented business shutdown and drastically reduced capital burn while advising on the finalisation of core tech products.",
+                        "Acted as Lead VC Consultant for a major public-private solar farm initiative ($2M+ Target). Directed strategic advisory for the comprehensive white paper and authored the investor pitch deck.",
+                        "Successfully navigated complex banking regulations to secure alternative funding pipelines for the solar venture, protecting the parent company from excessive equity dilution.",
+                        "Delivered comprehensive technical, legal, and financial consultation to the Philippine fintech division, guiding the development of proprietary trading tools, application creation, agentic workflows, and integrated data scraping systems.",
+                        "Steered the legal establishment and operational compliance regulations for new physical child enterprises, most notably a semi-private ambulance service and its accompanying SaaS dispatch application."
                     ]
                 },
                 {
                     "company": "Red Spark Learning C.I.C.",
                     "role": "Director / Head of Legal & Compliance",
-                    "timeline": "Jan 2015 – Aug 2024",
+                    "location": "Herefordshire, UK",
+                    "timeline": "Jan 2018 – Aug 2024 (Assistant to Director: Jan 2015 - Jan 2018)",
                     "achievements": [
-                        "Advised executive board on statutory obligations and CIC regulatory filings.",
-                        "Negotiated high volume of commercial contracts and NGO Institutional Funding frameworks.",
-                        "Spearheaded GDPR compliance frameworks across 8 sites (DPIAs, SARs).",
+                        "Advised the executive board on statutory obligations, conflicts of interest, and Community Interest Company (CIC) regulatory filings (Companies Act 2006). Created and governed the comprehensive legal policy suite.",
+                        "Drafted, reviewed, and negotiated a high volume of commercial contracts, supplier agreements, and NGO Institutional Funding frameworks. Strictly controlled liability, indemnity, and termination clauses.",
+                        "Managed early-stage dispute resolution for vendor conflicts and complex stakeholder grievances. Drafted settlement agreements, successfully avoiding costly tribunal proceedings.",
+                        "Spearheaded GDPR compliance frameworks across 8 sites. Executed Data Protection Impact Assessments (DPIAs) for cloud rollouts and managed Subject Access Requests (SARs).",
+                        "Maintained impeccable audit readiness for highly scrutinized EEC, Lottery, and central government funds. Designed live dashboards and risk registers to track obligations.",
                         "Successfully procured a £200,000 EEC and Lottery Bid Partnership, driving infrastructure expansion.",
-                        "Pioneered critical infrastructure pivot during COVID-19, migrating services online (30% cost reduction)."
+                        "Directed internal administrative matters including capability reviews, conflict resolution, and complex grievance procedures ensuring procedural fairness and defensible recordkeeping.",
+                        "Pioneered a critical infrastructure pivot during COVID-19 lockdowns, successfully migrating all services online. Automated manual workflows, reducing operating costs by 30%."
                     ]
                 },
                 {
                     "company": "HVOSS",
                     "role": "Board Member / Trustee",
-                    "timeline": "Oct 2022 – Jul 2024"
+                    "location": "Herefordshire, UK",
+                    "timeline": "Oct 2022 – Jul 2024",
+                    "achievements": [
+                        "Established and led a 'financial war-room' to combat a growing deficit and manage cashflow priorities following the loss of key funding streams.",
+                        "Guided the executive team through complex legal disputes and restructuring processes, mitigating over £70,000 in potential damages.",
+                        "Devised strategic business plans and strengthened internal controls, contributing to a near 60% increase in new revenue streams."
+                    ]
                 },
                 {
                     "company": "Independent Investment Portfolio",
                     "role": "Private Investor & Portfolio Manager",
-                    "timeline": "Jan 2021 – Present"
+                    "location": "Geneva, CH / UK",
+                    "timeline": "Jan 2021 – Present",
+                    "achievements": [
+                        "Conducted meticulous fundamental and technical analysis of US, UK, and EU equities. Tracked the market impacts of geopolitical events and international policy shifts.",
+                        "Achieved ~150% financial growth on equity investments over a 12-month period, with an approximately 75% return in 2024.",
+                        "Authored tailored scripts for algorithmic trading and market sentiment analysis using Python (lightweight_charts), MetaTrader (MQL5), and ThinkOrSwim (thinkScript). Integrated real-time data via IBKR API."
+                    ]
+                }
+            ],
+            "education": [
+                {
+                    "degree": "LL.M. (Masters of Law): Legal Practice",
+                    "institution": "University of Worcester (Honours)",
+                    "timeline": "Sep 2022 – Jun 2024",
+                    "specialisations": "International Law, operational mechanics of legal systems, law of international organizations, treaty interpretation, administrative law, privileges and immunities, and commercial contract law.",
+                    "dissertation": "Economic and Cyber Warfare. Awarded full marks (100%) and a formal offer to continue research to the doctorate level."
+                },
+                {
+                    "degree": "B.A. (Hons) Politics, Philosophy and Economics (Economics Major)",
+                    "institution": "Goldsmiths, University of London (Summa Cum Laude)",
+                    "timeline": "Sep 2016 – Jun 2020",
+                    "key_modules": "Macroeconomics, International Economics, Banking, Political Theory, African Conflict and Peacekeeping, and Game Theory.",
+                    "extracurriculars": "Proofread master's theses upon faculty request; active in Model United Nations and debate societies."
                 }
             ],
             "technical_stack": {
-                "grc_tools": ["LexisNexis", "Westlaw", "DocuSign CLM", "OneTrust", "Chainalysis"],
-                "ai_automation": ["Agentic LLMs", "Claude Code", "GenAI control mapping"],
-                "programming": ["Python", "MQL5", "thinkScript", "SQL", "APIs", "HTML/CSS/JS"],
-                "systems": ["Jira", "Confluence", "Taiga", "Moodle"]
+                "legal_and_grc_tools": "Legal drafting, LexisNexis (incl. Risk Solutions), Westlaw, GDPR framework enforcement, Risk Registers, Policy architectures, DocuSign CLM, iManage/NetDocuments.",
+                "industry_platform_familiarity": [
+                    "Refinitiv World-Check",
+                    "Chainalysis",
+                    "OneTrust",
+                    "TrustArc",
+                    "NAVEX Global",
+                    "ServiceNow GRC"
+                ],
+                "ai_and_automation": [
+                    "Agentic LLM workflows",
+                    "Claude Code",
+                    "structured prompting for compliance auditing",
+                    "GenAI control mapping",
+                    "automated drafting with human-in-the-loop guardrails"
+                ],
+                "project_management": [
+                    "Jira",
+                    "Confluence",
+                    "Taiga",
+                    "Microsoft Office 365",
+                    "Google Docs"
+                ],
+                "data_and_productivity": [
+                    "Advanced Microsoft Excel",
+                    "PowerPoint",
+                    "Power BI",
+                    "MS Access",
+                    "Adobe Creative Suite / Adobe Photoshop"
+                ],
+                "programming_and_scripting": [
+                    "Python",
+                    "MQL5",
+                    "thinkScript",
+                    "VBA",
+                    "R",
+                    "Java",
+                    "C#",
+                    "API integration",
+                    "HTML",
+                    "CSS",
+                    "JavaScript"
+                ],
+                "operating_systems_and_databases": [
+                    "Windows",
+                    "Linux",
+                    "MacOS",
+                    "Oracle or similar systems"
+                ],
+                "tech_operations": "Led paper-to-Moodle digitisation and workflow automation for operational continuity. Built small Python/API tools for data retrieval and reporting automation; capable of validating logic/output (not a production developer). Data literate incl. basic SQL interpretation."
             },
-            "memberships": ["ACAMS", "IAPP", "ICA", "International Law Association", "SRA Candidate"],
-            "references_status": "Protected. Human verification required via UI."
+            "certifications_and_memberships": [
+                "Candidate: SRA SQE 1 & 2 (Preparing for late-year examination to formalise admission as a Solicitor of England & Wales, supported by 5+ years of verified QWE).",
+                "Member: Association of Certified Anti-Money Laundering Specialists (ACAMS)",
+                "Member: International Association of Privacy Professionals (IAPP)",
+                "Member: International Compliance Association (ICA)",
+                "Member: International Law Association",
+                "Professional Development Targets: Actively preparing to undertake industry-standard compliance certifications including CAMS and CIPP/E to further formalise cross-border financial and data privacy expertise."
+            ],
+            "references": {
+                "status": "Protected to prevent automated scraping. Human verification required via UI.",
+                "contacts_available": [
+                    "Zack Robinson (CEO, Keystone Analytics)",
+                    "Dr. Chris Monaghan (Head of Law, Univ. of Worcester)",
+                    "Patricia Ann Newby, M.A. (Managing Director, Red Spark Learning C.I.C.)"
+                ]
+            }
         };
 
         // Render JSON with syntax highlighting
