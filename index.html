@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christopher Farmer | Executive CV</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons for professional app-like iconography -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        corporate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            accent: '#2563eb' // Professional Blue
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['Fira Code', 'Consolas', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for an app-like feel */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        
+        /* JSON Syntax Highlighting */
+        .json-key { color: #e06c75; }
+        .json-string { color: #98c379; }
+        .json-number { color: #d19a66; }
+        .json-boolean { color: #56b6c2; }
+    </style>
+</head>
+<body class="bg-corporate-50 dark:bg-corporate-900 text-slate-800 dark:text-slate-200 font-sans transition-colors duration-200 flex h-screen overflow-hidden">
+
+    <!-- Desktop Sidebar (App Navigation) -->
+    <aside class="hidden md:flex flex-col w-64 bg-white dark:bg-corporate-800 border-r border-slate-200 dark:border-slate-700 h-full shadow-sm z-20">
+        <div class="p-6 border-b border-slate-200 dark:border-slate-700">
+            <div class="w-16 h-16 rounded-full bg-corporate-accent text-white flex items-center justify-center text-2xl font-bold mb-4">
+                CF
+            </div>
+            <h1 class="text-xl font-bold text-slate-900 dark:text-white leading-tight">Christopher<br>Farmer</h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2 font-medium">Head of Legal & Compliance</p>
+        </div>
+        
+        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1" id="nav-menu">
+            <!-- Navigation items injected via JS for easy active state management -->
+        </nav>
+
+        <div class="p-4 border-t border-slate-200 dark:border-slate-700 space-y-3">
+            <a href="mailto:civfarmer@gmail.com" class="flex items-center text-sm text-slate-600 dark:text-slate-400 hover:text-corporate-accent transition-colors">
+                <i data-lucide="mail" class="w-4 h-4 mr-3"></i> civfarmer@gmail.com
+            </a>
+            <a href="https://linkedin.com/in/civfarmer" target="_blank" class="flex items-center text-sm text-slate-600 dark:text-slate-400 hover:text-corporate-accent transition-colors">
+                <i data-lucide="linkedin" class="w-4 h-4 mr-3"></i> LinkedIn Profile
+            </a>
+            <div class="flex items-center text-sm text-slate-600 dark:text-slate-400">
+                <i data-lucide="map-pin" class="w-4 h-4 mr-3"></i> Geneva, CH (B Permit)
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col h-full relative">
+        
+        <!-- Top App Bar -->
+        <header class="h-16 bg-white/80 dark:bg-corporate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-6 sticky top-0 z-20">
+            <div class="font-semibold text-lg md:hidden">C. Farmer | CV</div>
+            <div class="hidden md:block text-sm text-slate-500 dark:text-slate-400 font-mono" id="status-bar">
+                > System.Init("Legal_Compliance_Executive");
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <!-- The "Coding Flair" Toggle -->
+                <button id="devModeToggle" class="flex items-center px-3 py-1.5 text-xs font-mono font-medium rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors border border-slate-200 dark:border-slate-600">
+                    <i data-lucide="code" class="w-3.5 h-3.5 mr-2"></i> <span>Dev Mode</span>
+                </button>
+                <!-- Dark Mode Toggle -->
+                <button id="themeToggle" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors">
+                    <i data-lucide="moon" class="w-5 h-5 dark:hidden"></i>
+                    <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Scrollable Content -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 relative" id="main-scroll-area">
+            
+            <!-- Standard UI View -->
+            <div id="standard-view" class="max-w-4xl mx-auto space-y-12 pb-24 md:pb-8">
+                
+                <!-- Summary Section -->
+                <section id="summary" class="scroll-mt-24">
+                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center">
+                        <i data-lucide="user" class="w-6 h-6 mr-3 text-corporate-accent"></i> Professional Summary
+                    </h2>
+                    <div class="bg-white dark:bg-corporate-800 p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 leading-relaxed text-slate-700 dark:text-slate-300">
+                        <p class="mb-4">Dynamic Legal, Compliance, and Operations leader with over 8 years of experience building and executing governance frameworks, regulatory compliance programs, and commercial strategies. LL.M. in Legal Practice, specializing in International Law, actively preparing for SRA SQE 1 & 2 examinations, possessing over 5 years of SRA Qualifying Work Experience (QWE).</p>
+                        <p>Proven track record of steering complex, multi-site organisations through regulatory turbulence, securing significant institutional funding, and digitising operational workflows. Demonstrated capability in acting as the legal nexus for operations serving vulnerable populations, scaling a regional CIC into the largest adult education provider in three counties outside of universities and colleges. Ready to leverage deep expertise in administrative processes, international law, and data-driven compliance to support scaling ventures, financial institutions, and corporate entities in the Swiss market.</p>
+                    </div>
+                </section>
+
+                <!-- Core Competencies Section -->
+                <section id="competencies" class="scroll-mt-24">
+                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center">
+                        <i data-lucide="shield-check" class="w-6 h-6 mr-3 text-corporate-accent"></i> Core Competencies
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Card 1 -->
+                        <div class="bg-white dark:bg-corporate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hover:border-corporate-accent/50 transition-colors group">
+                            <h3 class="font-bold text-slate-900 dark:text-white mb-3 flex items-center group-hover:text-corporate-accent transition-colors">
+                                <i data-lucide="scale" class="w-4 h-4 mr-2"></i> Legal Advisory & Governance
+                            </h3>
+                            <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                                <li>• 5+ years SRA QWE (contract drafting, dispute resolution).</li>
+                                <li>• Board advisory, shareholder agreements, conflict controls.</li>
+                                <li>• CLM: Supplier agreements, MOUs, institutional grants.</li>
+                                <li>• Mitigated £70k+ in potential damages during board tenure.</li>
+                            </ul>
+                        </div>
+                        <!-- Card 2 -->
+                        <div class="bg-white dark:bg-corporate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hover:border-corporate-accent/50 transition-colors group">
+                            <h3 class="font-bold text-slate-900 dark:text-white mb-3 flex items-center group-hover:text-corporate-accent transition-colors">
+                                <i data-lucide="globe-lock" class="w-4 h-4 mr-2"></i> Cyber Resilience & Risk
+                            </h3>
+                            <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                                <li>• Doctorate-Level Expertise: Economic/Cyber Warfare LL.M (100%).</li>
+                                <li>• Predicting state-actor methodologies and legal vulnerabilities.</li>
+                                <li>• Mapping geopolitical cyber-threats to FINMA/EU DORA resilience.</li>
+                            </ul>
+                        </div>
+                        <!-- Card 3 -->
+                        <div class="bg-white dark:bg-corporate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hover:border-corporate-accent/50 transition-colors group">
+                            <h3 class="font-bold text-slate-900 dark:text-white mb-3 flex items-center group-hover:text-corporate-accent transition-colors">
+                                <i data-lucide="file-check-2" class="w-4 h-4 mr-2"></i> Regulatory Compliance
+                            </h3>
+                            <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                                <li>• "Compliance by default" frameworks across 8 operational sites.</li>
+                                <li>• 100% audit pass rates; robust incident reporting pipelines (GDPR).</li>
+                                <li>• Deep understanding of AML/CFT, cross-border restrictions.</li>
+                            </ul>
+                        </div>
+                        <!-- Card 4 -->
+                        <div class="bg-white dark:bg-corporate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hover:border-corporate-accent/50 transition-colors group">
+                            <h3 class="font-bold text-slate-900 dark:text-white mb-3 flex items-center group-hover:text-corporate-accent transition-colors">
+                                <i data-lucide="cpu" class="w-4 h-4 mr-2"></i> Digital Transformation
+                            </h3>
+                            <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                                <li>• Agentic AI & automated drafting with human-in-the-loop guardrails.</li>
+                                <li>• Built Python/API tools for compliance dashboards.</li>
+                                <li>• Led full paper-to-Moodle migration (30% cost reduction).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Experience Section -->
+                <section id="experience" class="scroll-mt-24">
+                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center">
+                        <i data-lucide="briefcase" class="w-6 h-6 mr-3 text-corporate-accent"></i> Professional Experience
+                    </h2>
+                    <div class="space-y-6">
+                        
+                        <!-- Experience Item 1 -->
+                        <div class="bg-white dark:bg-corporate-800 p-6 rounded-2xl shadow-sm border-l-4 border-corporate-accent">
+                            <div class="flex flex-col md:flex-row md:justify-between md:items-start mb-4">
+                                <div>
+                                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Keystone Analytics</h3>
+                                    <p class="text-corporate-accent font-medium text-sm">Consultant (Legal, Financial & Strategic Advisory)</p>
+                                </div>
+                                <span class="text-xs font-mono bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full mt-2 md:mt-0 w-fit">Intermittent / Project-Based</span>
+                            </div>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 italic mb-4">Multinational enterprise (Las Vegas parent, Philippine fintech arm, physical service subsidiaries).</p>
+                            <ul class="space-y-3 text-sm text-slate-700 dark:text-slate-300">
+                                <li><strong class="text-slate-900 dark:text-white">Strategic Turnaround & Financial Recovery:</strong> Directed a critical funding strategy pivot that remedied a full year's financial loss within a 3-month period.</li>
+                                <li><strong class="text-slate-900 dark:text-white">Venture Capital & Joint Ventures ($2M+ Target):</strong> Acted as Lead VC Consultant for a major public-private solar farm initiative. Directed strategic advisory for the white paper and authored the investor pitch deck.</li>
+                                <li><strong class="text-slate-900 dark:text-white">Non-Dilutive Funding Strategy:</strong> Navigated complex banking regulations to secure alternative funding pipelines, protecting against equity dilution.</li>
+                                <li><strong class="text-slate-900 dark:text-white">Fintech & Technical Advisory:</strong> Guided development of proprietary trading tools, agentic workflows, and integrated data scraping systems.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Experience Item 2 -->
+                        <div class="bg-white dark:bg-corporate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                            <div class="flex flex-col md:flex-row md:justify-between md:items-start mb-4">
+                                <div>
+                                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Red Spark Learning C.I.C.</h3>
+                                    <p class="text-corporate-accent font-medium text-sm">Director / Head of Legal & Compliance</p>
+                                </div>
+                                <span class="text-xs font-mono bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full mt-2 md:mt-0 w-fit">Jan 2018 - Aug 2024</span>
+                            </div>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 italic mb-4">Scaled regional CIC into the largest adult education provider in three counties (8+ locations, 15 staff).</p>
+                            <ul class="space-y-3 text-sm text-slate-700 dark:text-slate-300">
+                                <li><strong class="text-slate-900 dark:text-white">Legal Advisory & Governance (SRA QWE):</strong> Advised board on statutory obligations, conflicts of interest, and CIC regulatory filings.</li>
+                                <li><strong class="text-slate-900 dark:text-white">Commercial Contracting & Public Sector Grants:</strong> Negotiated high-volume contracts and NGO Institutional Funding frameworks, strictly controlling liability and indemnity.</li>
+                                <li><strong class="text-slate-900 dark:text-white">Dispute Resolution (SRA QWE):</strong> Managed early-stage dispute resolution, drafting settlement agreements and successfully avoiding costly tribunal proceedings.</li>
+                                <li><strong class="text-slate-900 dark:text-white">Data Protection:</strong> Spearheaded GDPR compliance, executing DPIAs for cloud rollouts and managing Subject Access Requests.</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Collapsible Previous Experience -->
+                        <details class="group bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
+                            <summary class="flex items-center justify-between p-4 cursor-pointer font-medium text-slate-700 dark:text-slate-300">
+                                <span>View Additional Experience (HVOSS, Independent Portfolio)</span>
+                                <i data-lucide="chevron-down" class="w-5 h-5 transition-transform group-open:rotate-180"></i>
+                            </summary>
+                            <div class="p-4 pt-0 space-y-4 border-t border-slate-200 dark:border-slate-700 mt-2">
+                                <div class="pt-4">
+                                    <h4 class="font-bold text-slate-900 dark:text-white">HVOSS - Board Member / Trustee</h4>
+                                    <p class="text-xs text-slate-500 mb-2">Oct 2022 - Jul 2024</p>
+                                    <p class="text-sm text-slate-600 dark:text-slate-400">Established "financial war-room" during funding shocks. Mitigated £70k+ in legal damages during restructuring and drove 60% revenue stream increase via strategic business planning.</p>
+                                </div>
+                                <div class="pt-4 border-t border-slate-200 dark:border-slate-700">
+                                    <h4 class="font-bold text-slate-900 dark:text-white">Independent Investment Portfolio - Private Investor</h4>
+                                    <p class="text-xs text-slate-500 mb-2">Jan 2021 - Present</p>
+                                    <p class="text-sm text-slate-600 dark:text-slate-400">Achieved ~150% financial growth via macroeconomic research. Authored Python, MQL5, and thinkScript automation scripts integrated with IBKR APIs.</p>
+                                </div>
+                            </div>
+                        </details>
+                    </div>
+                </section>
+
+                <!-- Technical Skills Section -->
+                <section id="skills" class="scroll-mt-24">
+                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center">
+                        <i data-lucide="terminal" class="w-6 h-6 mr-3 text-corporate-accent"></i> Technical Proficiencies
+                    </h2>
+                    <div class="bg-white dark:bg-corporate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                        
+                        <div class="mb-6">
+                            <h3 class="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mb-3">Legal, GRC & Industry Platforms</h3>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm">LexisNexis</span>
+                                <span class="px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm">Westlaw</span>
+                                <span class="px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm">GDPR Frameworks</span>
+                                <span class="px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm">DocuSign CLM</span>
+                                <span class="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-lg text-sm">Refinitiv World-Check</span>
+                                <span class="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-lg text-sm">Chainalysis</span>
+                                <span class="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-lg text-sm">OneTrust</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <h3 class="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mb-3">AI, Automation & Programming</h3>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-3 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-lg text-sm font-mono">Python</span>
+                                <span class="px-3 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-lg text-sm font-mono">SQL</span>
+                                <span class="px-3 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-lg text-sm font-mono">APIs</span>
+                                <span class="px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm">Agentic LLMs</span>
+                                <span class="px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm">Claude Code</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+                
+                <!-- Education & Certs -->
+                <section id="education" class="scroll-mt-24">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center">
+                                <i data-lucide="graduation-cap" class="w-6 h-6 mr-3 text-corporate-accent"></i> Education
+                            </h2>
+                            <div class="space-y-4">
+                                <div class="bg-white dark:bg-corporate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                                    <h3 class="font-bold text-slate-900 dark:text-white">LL.M. Legal Practice</h3>
+                                    <p class="text-sm text-corporate-accent mb-2">University of Worcester (Honours)</p>
+                                    <p class="text-xs text-slate-600 dark:text-slate-400">Dissertation: Economic and Cyber Warfare (100% grade, doctorate offer). Focused on systems surrounding international finance.</p>
+                                </div>
+                                <div class="bg-white dark:bg-corporate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                                    <h3 class="font-bold text-slate-900 dark:text-white">B.A. (Hons) Politics, Philosophy, Economics</h3>
+                                    <p class="text-sm text-corporate-accent mb-2">Goldsmiths, University of London (Summa Cum Laude)</p>
+                                    <p class="text-xs text-slate-600 dark:text-slate-400">Modules: Macroeconomics, Banking, Game Theory.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center">
+                                <i data-lucide="award" class="w-6 h-6 mr-3 text-corporate-accent"></i> Certifications & Memberships
+                            </h2>
+                            <div class="bg-white dark:bg-corporate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 h-full">
+                                <ul class="space-y-3 text-sm text-slate-700 dark:text-slate-300">
+                                    <li class="flex items-start"><i data-lucide="check-circle-2" class="w-4 h-4 mr-2 mt-0.5 text-emerald-500"></i> <strong>SRA Candidate:</strong> SQE 1 & 2 preparation (5+ years QWE).</li>
+                                    <li class="flex items-start"><i data-lucide="check-circle-2" class="w-4 h-4 mr-2 mt-0.5 text-emerald-500"></i> Member: ACAMS (Anti-Money Laundering)</li>
+                                    <li class="flex items-start"><i data-lucide="check-circle-2" class="w-4 h-4 mr-2 mt-0.5 text-emerald-500"></i> Member: IAPP (Privacy Professionals)</li>
+                                    <li class="flex items-start"><i data-lucide="check-circle-2" class="w-4 h-4 mr-2 mt-0.5 text-emerald-500"></i> Member: ICA (Compliance Association)</li>
+                                    <li class="flex items-start"><i data-lucide="target" class="w-4 h-4 mr-2 mt-0.5 text-blue-500"></i> <strong>Targets:</strong> CAMS & CIPP/E Certifications</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- Developer / JSON View (Hidden by default) -->
+            <div id="dev-view" class="hidden max-w-4xl mx-auto h-full pb-24 md:pb-8">
+                <div class="bg-[#282c34] rounded-xl p-6 h-full overflow-auto shadow-inner border border-slate-800">
+                    <pre><code id="json-container" class="font-mono text-sm leading-relaxed text-slate-300"></code></pre>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Mobile Bottom Navigation (App-like feel) -->
+    <nav class="md:hidden fixed bottom-0 w-full bg-white dark:bg-corporate-800 border-t border-slate-200 dark:border-slate-700 flex justify-around p-3 z-30 pb-safe">
+        <a href="#summary" class="flex flex-col items-center text-corporate-accent">
+            <i data-lucide="user" class="w-5 h-5 mb-1"></i>
+            <span class="text-[10px] font-medium">Profile</span>
+        </a>
+        <a href="#experience" class="flex flex-col items-center text-slate-500 dark:text-slate-400 hover:text-corporate-accent transition-colors">
+            <i data-lucide="briefcase" class="w-5 h-5 mb-1"></i>
+            <span class="text-[10px] font-medium">Experience</span>
+        </a>
+        <a href="#skills" class="flex flex-col items-center text-slate-500 dark:text-slate-400 hover:text-corporate-accent transition-colors">
+            <i data-lucide="terminal" class="w-5 h-5 mb-1"></i>
+            <span class="text-[10px] font-medium">Tech</span>
+        </a>
+        <a href="#education" class="flex flex-col items-center text-slate-500 dark:text-slate-400 hover:text-corporate-accent transition-colors">
+            <i data-lucide="graduation-cap" class="w-5 h-5 mb-1"></i>
+            <span class="text-[10px] font-medium">Edu</span>
+        </a>
+    </nav>
+
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // System Data (For Developer View)
+        const cvData = {
+            "candidate": {
+                "name": "Christopher Iain Victor Farmer",
+                "title": "Head of Legal & Compliance",
+                "location": "Geneva, CH (Permit B)",
+                "contact": "civfarmer@gmail.com",
+                "clearance": "SRA QWE Verified (5+ Years)"
+            },
+            "core_execution": [
+                "Corporate Governance & Board Advisory",
+                "FINMA/EU DORA Resilience Mapping",
+                "Contract Lifecycle Management (CLM)",
+                "Agentic AI Workflow Design"
+            ],
+            "experience": [
+                {
+                    "company": "Keystone Analytics",
+                    "role": "Consultant (Legal, Financial & Strategic)",
+                    "impact": ["Remedied full year financial loss in 3 months", "Lead VC Consultant for $2M+ Joint Venture", "Secured non-dilutive funding pipelines"]
+                },
+                {
+                    "company": "Red Spark Learning C.I.C.",
+                    "role": "Director / Head of Legal & Compliance",
+                    "impact": ["Scaled to largest regional adult ed provider", "100% audit pass rates", "Migrated paper to cloud ops (30% cost reduction)"]
+                }
+            ],
+            "technical_stack": {
+                "grc_tools": ["LexisNexis", "OneTrust", "Chainalysis", "DocuSign CLM"],
+                "languages": ["Python", "SQL", "JavaScript", "MQL5"],
+                "systems": ["Agentic LLMs", "APIs", "Jira"]
+            }
+        };
+
+        // Render JSON with syntax highlighting
+        function syntaxHighlight(json) {
+            if (typeof json != 'string') {
+                json = JSON.stringify(json, undefined, 4);
+            }
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                let cls = 'json-number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'json-key';
+                    } else {
+                        cls = 'json-string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'json-boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'text-gray-500';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+        document.getElementById('json-container').innerHTML = syntaxHighlight(cvData);
+
+        // State Management
+        let isDevMode = false;
+        
+        // Setup Sidebar Navigation
+        const sections = [
+            { id: 'summary', icon: 'user', label: 'Profile' },
+            { id: 'competencies', icon: 'shield-check', label: 'Competencies' },
+            { id: 'experience', icon: 'briefcase', label: 'Experience' },
+            { id: 'skills', icon: 'terminal', label: 'Tech Stack' },
+            { id: 'education', icon: 'graduation-cap', label: 'Edu & Certs' }
+        ];
+
+        const navMenu = document.getElementById('nav-menu');
+        sections.forEach((sec, idx) => {
+            const a = document.createElement('a');
+            a.href = `#${sec.id}`;
+            a.className = `flex items-center px-4 py-3 rounded-xl transition-all font-medium text-sm mb-1 ${idx === 0 ? 'bg-corporate-100 dark:bg-slate-700/50 text-corporate-accent' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`;
+            a.innerHTML = `<i data-lucide="${sec.icon}" class="w-5 h-5 mr-3"></i> ${sec.label}`;
+            a.addEventListener('click', () => updateActiveNav(a));
+            navMenu.appendChild(a);
+        });
+        lucide.createIcons(); // Re-render newly injected icons
+
+        function updateActiveNav(clickedElement) {
+            if(isDevMode) return; // Disable spy in dev mode
+            Array.from(navMenu.children).forEach(child => {
+                child.className = 'flex items-center px-4 py-3 rounded-xl transition-all font-medium text-sm mb-1 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800';
+            });
+            clickedElement.className = 'flex items-center px-4 py-3 rounded-xl transition-all font-medium text-sm mb-1 bg-corporate-100 dark:bg-slate-700/50 text-corporate-accent';
+        }
+
+        // Toggles
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        
+        // Check system preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            html.classList.add('dark');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+        });
+
+        const devModeToggle = document.getElementById('devModeToggle');
+        const standardView = document.getElementById('standard-view');
+        const devView = document.getElementById('dev-view');
+        const statusBar = document.getElementById('status-bar');
+
+        devModeToggle.addEventListener('click', () => {
+            isDevMode = !isDevMode;
+            if (isDevMode) {
+                standardView.classList.add('hidden');
+                devView.classList.remove('hidden');
+                devModeToggle.classList.add('bg-corporate-accent', 'text-white', 'border-corporate-accent');
+                devModeToggle.classList.remove('bg-slate-100', 'text-slate-600');
+                statusBar.innerText = '> Fetching profile.json ... 200 OK';
+            } else {
+                devView.classList.add('hidden');
+                standardView.classList.remove('hidden');
+                devModeToggle.classList.remove('bg-corporate-accent', 'text-white', 'border-corporate-accent');
+                devModeToggle.classList.add('bg-slate-100', 'text-slate-600');
+                statusBar.innerText = '> System.Init("Legal_Compliance_Executive");';
+            }
+        });
+
+    </script>
+</body>
+</html>
