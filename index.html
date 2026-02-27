@@ -79,14 +79,20 @@
     <main class="flex-1 flex flex-col h-full relative bg-white dark:bg-slate-900 overflow-x-hidden">
         
         <!-- Top App Bar -->
-        <header class="h-14 bg-white dark:bg-slate-800 border-b border-slate-300 dark:border-slate-700 flex items-center justify-between px-6 sticky top-0 z-20 shadow-sm w-full">
-            <div class="font-bold text-lg md:hidden text-corporate-accent uppercase tracking-wide">C. Farmer | CV</div>
+        <header class="h-14 bg-white dark:bg-slate-800 border-b border-slate-300 dark:border-slate-700 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-20 shadow-sm w-full">
+            
+            <!-- Responsive Mobile Header Title -->
+            <div class="font-bold text-lg md:hidden text-corporate-accent uppercase tracking-wide truncate flex-shrink min-w-0 pr-2">
+                <span class="hidden min-[380px]:inline">C. Farmer | CV</span>
+                <span class="inline min-[380px]:hidden">C. Farmer</span>
+            </div>
+            
             <div class="hidden md:flex items-center text-xs text-slate-500 dark:text-slate-400 font-mono" id="status-bar">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
                 SYSTEM.READY // LEGAL_COMPLIANCE_EXEC
             </div>
             
-            <div class="flex items-center space-x-2 sm:space-x-4">
+            <div class="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
                 <!-- Mobile Contact Quick Links -->
                 <div class="flex md:hidden items-center space-x-1 sm:space-x-2 border-r border-slate-300 dark:border-slate-600 pr-2">
                     <a href="mailto:civfarmer@gmail.com" class="p-1.5 text-slate-500 hover:text-corporate-accent dark:text-slate-400 dark:hover:text-white transition-colors">
@@ -302,7 +308,7 @@
                     <div class="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 p-6 rounded-md shadow-sm text-sm text-slate-700 dark:text-slate-300 space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
                             <div class="font-bold text-slate-900 dark:text-white">Legal & GRC Tools:</div>
-                            <div class="md:col-span-3">Legal drafting, LexisNexis (incl. Risk Solutions), Westlaw, GDPR framework enforcement, Risk Registers, Policy architectures, DocuSign CLM, iManage/NetDocuments. <br><em class="text-xs text-slate-500">Industry Platform Familiarity:</em> Refinitiv World-Check, Chainalysis, OneTrust, TrustArc, NAVEX Global, ServiceNow GRC.</div>
+                            <div class="md:col-span-3">Legal drafting, LexisNexis (incl. Risk Solutions), Westlaw, GDPR framework enforcement, Risk Registers, Policy architectures, DocuSign CLM, iManage/NetDocuments. <br><strong class="font-semibold text-slate-800 dark:text-slate-200 mt-1 inline-block">Industry Platform Familiarity:</strong> Refinitiv World-Check, Chainalysis, OneTrust, TrustArc, NAVEX Global, ServiceNow GRC.</div>
                         </div>
                         <div class="border-t border-slate-200 dark:border-slate-700"></div>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
@@ -322,7 +328,7 @@
                         <div class="border-t border-slate-200 dark:border-slate-700"></div>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
                             <div class="font-bold text-slate-900 dark:text-white">Programming:</div>
-                            <div class="md:col-span-3 font-mono text-xs mt-1">Python, MQL5, thinkScript, VBA, R, Java, C#, API integration, HTML, CSS, JavaScript.</div>
+                            <div class="md:col-span-3">Python, MQL5, thinkScript, VBA, R, Java, C#, API integration, HTML, CSS, JavaScript.</div>
                         </div>
                         <div class="border-t border-slate-200 dark:border-slate-700"></div>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
