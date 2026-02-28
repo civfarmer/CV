@@ -6,9 +6,15 @@
     <title>Christopher Farmer | Executive CV</title>
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons for professional app-like iconography -->
+    <!-- Lucide Icons for general UI -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- FontAwesome for specific Tech/Brand scannability -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- PDF.js for native mobile-perfect document rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -46,10 +52,15 @@
         .json-boolean { color: #56b6c2; }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-sans transition-colors duration-200 flex h-screen overflow-hidden antialiased">
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-sans transition-colors duration-200 flex h-screen overflow-hidden antialiased relative">
+
+    <!-- Animated Procedural Geneva Skyline (Technical Showcase) -->
+    <div class="fixed bottom-0 left-0 w-full h-[350px] pointer-events-none z-0 overflow-hidden" style="-webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 10%, rgba(0,0,0,0) 90%); mask-image: linear-gradient(to top, rgba(0,0,0,1) 10%, rgba(0,0,0,0) 90%);">
+        <canvas id="skyline-canvas" class="w-full h-full opacity-30 dark:opacity-20 transition-opacity duration-500"></canvas>
+    </div>
 
     <!-- Desktop Sidebar (Corporate Portal Navigation) -->
-    <aside class="hidden md:flex flex-col w-72 bg-white dark:bg-slate-800 border-r border-slate-300 dark:border-slate-700 h-full shadow-sm z-20">
+    <aside class="hidden md:flex flex-col w-72 bg-white dark:bg-slate-800 border-r border-slate-300 dark:border-slate-700 h-full shadow-sm z-20 relative">
         <div class="p-8 border-b border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
             <h1 class="text-2xl font-bold text-corporate-accent dark:text-blue-400 leading-tight uppercase tracking-wide mb-2">C. Farmer</h1>
             <p class="text-sm text-slate-600 dark:text-slate-300 font-medium">Head of Legal & Compliance</p>
@@ -69,14 +80,17 @@
             <a href="https://linkedin.com/in/civfarmer" target="_blank" class="flex items-center text-sm text-slate-600 dark:text-slate-300 hover:text-corporate-accent transition-colors font-medium">
                 <i data-lucide="linkedin" class="w-4 h-4 mr-3 text-slate-400"></i> LinkedIn Profile
             </a>
-            <div class="flex items-center text-sm text-slate-600 dark:text-slate-300 font-medium">
+            <button onclick="openPdfModal('Christopher Farmer | Executive CV', './Christopher_Farmer_CV_2026.pdf')" class="flex items-center text-sm text-slate-600 dark:text-slate-300 hover:text-corporate-accent transition-colors font-medium w-full text-left">
+                <i data-lucide="file-text" class="w-4 h-4 mr-3 text-slate-400"></i> View/Download PDF CV
+            </button>
+            <div class="flex items-center text-sm text-slate-600 dark:text-slate-300 font-medium mt-2">
                 <i data-lucide="map-pin" class="w-4 h-4 mr-3 text-slate-400"></i> Geneva, CH (B Permit)
             </div>
         </div>
     </aside>
 
     <!-- Main Content Area -->
-    <main class="flex-1 flex flex-col h-full relative bg-white dark:bg-slate-900 overflow-x-hidden">
+    <main class="flex-1 flex flex-col h-full relative overflow-x-hidden z-10">
         
         <!-- Top App Bar -->
         <header class="h-14 bg-white dark:bg-slate-800 border-b border-slate-300 dark:border-slate-700 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-20 shadow-sm w-full">
@@ -103,8 +117,13 @@
                     </a>
                 </div>
 
+                <!-- View PDF CV Button -->
+                <button onclick="openPdfModal('Christopher Farmer | Executive CV', './Christopher_Farmer_CV_2026.pdf')" class="flex items-center px-2 sm:px-3 py-1.5 text-xs font-bold rounded-sm bg-corporate-accent text-white hover:bg-corporate-accentDark transition-colors shadow-sm">
+                    <i data-lucide="file-text" class="w-3.5 h-3.5 sm:mr-1.5"></i> <span class="hidden sm:inline">PDF CV</span>
+                </button>
+
                 <!-- The "Coding Flair" Toggle -->
-                <button id="devModeToggle" class="flex items-center px-2 sm:px-3 py-1.5 text-xs font-mono font-bold rounded-sm bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors border border-slate-300 dark:border-slate-600">
+                <button id="devModeToggle" class="flex items-center px-2 sm:px-3 py-1.5 text-xs font-mono font-bold rounded-sm bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors border border-slate-300 dark:border-slate-600 shadow-sm">
                     <i data-lucide="code" class="w-3.5 h-3.5 mr-1 sm:mr-2"></i> <span>DEV_MODE</span>
                 </button>
                 <!-- Dark Mode Toggle -->
@@ -118,11 +137,11 @@
         <!-- Scrollable Content -->
         <div class="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 md:p-10 relative" id="main-scroll-area">
             
-            <!-- Standard UI View. Note the increased pb-36 to prevent bottoming out issues on mobile -->
+            <!-- Standard UI View -->
             <div id="standard-view" class="max-w-5xl mx-auto space-y-12 pb-36 md:pb-16 w-full">
                 
-                <!-- Document Header (Print-style redundancy for corporate feel) -->
-                <div class="border-b-2 border-corporate-accent pb-6 mb-8 pt-4 md:pt-0">
+                <!-- Document Header -->
+                <div class="border-b-2 border-corporate-accent pb-6 mb-8 pt-4 md:pt-0 relative z-10">
                     <h1 class="text-3xl md:text-4xl font-serif font-bold text-slate-900 dark:text-white mb-2 break-words">
                         <span class="hidden md:inline">CHRISTOPHER IAIN VICTOR FARMER</span>
                         <span class="md:hidden">CHRISTOPHER I.V. FARMER</span>
@@ -143,16 +162,17 @@
                 </div>
 
                 <!-- Summary Section -->
-                <section id="summary" class="scroll-mt-20">
+                <section id="summary" class="scroll-mt-20 relative z-10">
                     <h2 class="text-xl font-bold text-corporate-accent dark:text-blue-400 uppercase tracking-wider mb-4 border-b border-slate-200 dark:border-slate-700 pb-2">Professional Summary</h2>
                     <div class="prose prose-slate dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                        <p class="mb-3">Dynamic Legal, Compliance, and Operations leader with over 8 years of experience building and executing governance frameworks, regulatory compliance programs, and commercial strategies. LL.M. in Legal Practice, specializing in International Law, actively preparing for SRA SQE 1 & 2 examinations, possessing over 5 years of SRA Qualifying Work Experience (QWE). Proven track record of steering complex, multi-site organisations through regulatory turbulence, securing significant institutional funding, and digitising operational workflows.</p>
-                        <p>Demonstrated capability in acting as the legal nexus for operations serving vulnerable populations, scaling a regional CIC into the largest adult education provider in three counties outside of universities and colleges. Highly adept at contract lifecycle management, risk mitigation, HR advisory, and the strategic implementation of AI and automation to reduce operational overhead. Ready to leverage deep expertise in administrative processes, international law, and data-driven compliance to support scaling ventures, financial institutions, and corporate entities in the Swiss market.</p>
+                        <p class="mb-3">Legal, Compliance, and Operations lead (LL.M., Legal Practice) serving as the legal nexus for complex operations. With 8+ years of experience, I build scalable governance frameworks, execute regulatory compliance, and establish robust procurement protocols. I drive contract lifecycle management, operational risk mitigation, and the strategic implementation of AI and integrated systems to reduce overhead.</p>
+                        <p class="mb-3">Uniquely positioned at the intersection of law and technology, I bridge the gap between engineering and legal teams. Fundamentally a legal and operations head, I bring technical fluency, independently review code, audit agentic AI workflows, and verify software architecture against strict legal requirements.</p>
+                        <p>I pair this technical edge with a rigorous understanding of ever-evolving global methodology. Drawing on advanced research in international Law, focused on economic and cyber warfare, I track rapid regulatory policy shifts and modern malicious-actor methodologies. Able to translate these complex geopolitical and cyber threats into proactive business defense strategies, ensuring continuous regulatory and operational resilience.</p>
                     </div>
                 </section>
 
                 <!-- Core Competencies Section -->
-                <section id="competencies" class="scroll-mt-20">
+                <section id="competencies" class="scroll-mt-20 relative z-10">
                     <h2 class="text-xl font-bold text-corporate-accent dark:text-blue-400 uppercase tracking-wider mb-4 border-b border-slate-200 dark:border-slate-700 pb-2">Core Competencies & Expertise</h2>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
@@ -210,7 +230,7 @@
                 </section>
 
                 <!-- Professional Experience Section -->
-                <section id="experience" class="scroll-mt-20">
+                <section id="experience" class="scroll-mt-20 relative z-10">
                     <h2 class="text-xl font-bold text-corporate-accent dark:text-blue-400 uppercase tracking-wider mb-6 border-b border-slate-200 dark:border-slate-700 pb-2">Professional Experience</h2>
                     
                     <div class="space-y-8">
@@ -220,18 +240,33 @@
                             <div class="hidden md:block absolute left-0 top-0 bottom-0 w-1 bg-slate-200 dark:bg-slate-700"></div>
                             <div class="md:pl-6">
                                 <div class="flex flex-col md:flex-row md:justify-between md:items-baseline mb-2">
-                                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Keystone Analytics</h3>
+                                    <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center"><i class="fa-solid fa-globe text-corporate-accent mr-2 text-base"></i> Keystone Analytics</h3>
                                     <span class="text-sm font-bold text-corporate-accent dark:text-blue-400">Intermittent / Project-Based</span>
                                 </div>
                                 <p class="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1">Consultant (Legal, Financial & Strategic Advisory) | Remote</p>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 italic mb-3">Consulted for a multinational enterprise comprising a Las Vegas parent company, a Philippine fintech arm, and associated physical service subsidiaries.</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 italic mb-4">Consulted for a multinational enterprise comprising a Texas parent company, a Philippine fintech arm, and associated physical service subsidiaries.</p>
                                 
-                                <ul class="list-disc pl-5 space-y-1.5 text-sm text-slate-700 dark:text-slate-300">
-                                    <li><strong>Strategic Turnaround & Financial Recovery:</strong> Directed a critical funding strategy pivot that remedied a full year's financial loss within a 3-month period. Prevented business shutdown and drastically reduced capital burn while advising on the finalisation of core tech products.</li>
-                                    <li><strong>Venture Capital & Joint Ventures ($2M+ Target):</strong> Acted as Lead VC Consultant for a major public-private solar farm initiative (a joint venture between a hotel magnate and the government energy provider). Directed strategic advisory for the comprehensive white paper and authored the investor pitch deck.</li>
-                                    <li><strong>Non-Dilutive Funding Strategy:</strong> Successfully navigated complex banking regulations to secure alternative funding pipelines for the solar venture, protecting the parent company from excessive equity dilution.</li>
-                                    <li><strong>Fintech & Technical Advisory:</strong> Delivered comprehensive technical, legal, and financial consultation to the Philippine fintech division, guiding the development of proprietary trading tools, application creation, agentic workflows, and integrated data scraping systems.</li>
-                                    <li><strong>Business Establishment:</strong> Steered the legal establishment and operational compliance regulations for new physical child enterprises, most notably a semi-private ambulance service and its accompanying SaaS dispatch application.</li>
+                                <ul class="space-y-3 text-sm text-slate-700 dark:text-slate-300">
+                                    <li class="flex items-start">
+                                        <i class="fa-solid fa-chart-line text-emerald-600 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Financial Strategy"></i>
+                                        <div><strong>Strategic Turnaround & Financial Recovery:</strong> Remedied a full year's financial loss within a 3-month period, preventing business shutdown and drastically reducing capital burn, by directing a critical funding strategy pivot and advising on the market logistics and regulatory compliance of core tech products.</div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fa-solid fa-handshake text-slate-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Joint Ventures"></i>
+                                        <div><strong>Venture Capital & Joint Ventures:</strong> Targeted $2M+ in funding as Lead VC Consultant for a major public-private solar farm initiative (a joint venture between a hotel magnate and the government energy provider), by directing strategic advisory for the comprehensive white paper and authoring the investor pitch deck.</div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fa-solid fa-building-columns text-slate-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Banking Regulations"></i>
+                                        <div><strong>Non-Dilutive Funding Strategy:</strong> Secured alternative non-dilutive funding pipelines for the solar venture, protecting the parent company from excessive equity dilution, by successfully navigating and leveraging complex banking regulations.</div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fa-solid fa-database text-slate-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Data Analytics"></i>
+                                        <div><strong>Fintech Regulatory & Data Advisory:</strong> Ensured maximum market efficacy and regulatory alignment for the Philippine fintech division's offerings by delivering comprehensive legal, compliance, and financial data analysis consultation during the rollout of proprietary trading tools and agentic workflows.</div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fa-brands fa-app-store-ios text-blue-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="App Store"></i>
+                                        <div><strong>Humanitarian & Commercial Partnerships:</strong> Established the legal and operational compliance frameworks for joint humanitarian child enterprises, including a semi-private ambulance service and its accompanying SaaS dispatch application, alongside co-authoring commercial applications available on the App Store.</div>
+                                    </li>
                                 </ul>
                             </div>
                         </div>
@@ -241,22 +276,46 @@
                             <div class="hidden md:block absolute left-0 top-0 bottom-0 w-1 bg-slate-200 dark:bg-slate-700"></div>
                             <div class="md:pl-6">
                                 <div class="flex flex-col md:flex-row md:justify-between md:items-baseline mb-2">
-                                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Red Spark Learning C.I.C.</h3>
+                                    <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center"><i class="fa-solid fa-book-open text-corporate-accent mr-2 text-base"></i> Red Spark Learning C.I.C.</h3>
                                     <span class="text-sm font-bold text-corporate-accent dark:text-blue-400">Jan 2015 – Aug 2024</span>
                                 </div>
                                 <p class="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1">Director / Head of Legal & Compliance (Jan 2018 - Aug 2024) | Herefordshire, UK</p>
                                 <p class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">Assistant to Director / Business Development Support (Jan 2015 - Jan 2018)</p>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 italic mb-3">Scaled regional CIC into the largest adult education provider in three counties outside of universities (8+ locations, 15 staff).</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 italic mb-4">An educational community interest company operating across 8+ locations with 15 staff.</p>
                                 
-                                <ul class="list-disc pl-5 space-y-1.5 text-sm text-slate-700 dark:text-slate-300">
-                                    <li><strong>Legal Advisory & Corporate Governance (SRA QWE):</strong> Advised the executive board on statutory obligations, conflicts of interest, and Community Interest Company (CIC) regulatory filings (Companies Act 2006). Created and governed the comprehensive legal policy suite.</li>
-                                    <li><strong>Commercial Contracting & Public Sector Grants (SRA QWE):</strong> Drafted, reviewed, and negotiated a high volume of commercial contracts, supplier agreements, and NGO Institutional Funding frameworks. Strictly controlled liability, indemnity, and termination clauses.</li>
-                                    <li><strong>Dispute Resolution & Pre-Litigation (SRA QWE):</strong> Managed early-stage dispute resolution for vendor conflicts and complex stakeholder grievances. Drafted settlement agreements, successfully avoiding costly tribunal proceedings.</li>
-                                    <li><strong>Data Protection & Information Law:</strong> Spearheaded GDPR compliance frameworks across 8 sites. Executed Data Protection Impact Assessments (DPIAs) for cloud rollouts and managed Subject Access Requests (SARs).</li>
-                                    <li><strong>Compliance & Audit Operations:</strong> Maintained impeccable audit readiness for highly scrutinized EEC, Lottery, and central government funds. Designed live dashboards and risk registers to track obligations.</li>
-                                    <li><strong>Commercial Growth & Bid Writing:</strong> Successfully procured a £200,000 EEC and Lottery Bid Partnership, driving infrastructure expansion.</li>
-                                    <li><strong>HR Advisory & Crisis Management:</strong> Directed internal administrative matters including capability reviews, conflict resolution, and complex grievance procedures ensuring procedural fairness and defensible recordkeeping.</li>
-                                    <li><strong>Digital Transformation:</strong> Pioneered a critical infrastructure pivot during COVID-19 lockdowns, successfully migrating all services online. Automated manual workflows, reducing operating costs by 30%.</li>
+                                <ul class="space-y-3 text-sm text-slate-700 dark:text-slate-300">
+                                    <li class="flex items-start">
+                                        <i class="fa-solid fa-arrow-trend-up text-emerald-600 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Operational Leadership"></i>
+                                        <div><strong>Operational Leadership & Commercial Growth:</strong> Scaled a regional CIC into the largest adult education provider in three counties (outside of universities and colleges) serving vulnerable populations, driving major infrastructure expansion by successfully procuring a £200,000 EEC and Lottery Bid Partnership.</div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fa-solid fa-chart-pie text-blue-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Data Dashboards"></i>
+                                        <div><strong>Compliance & Audit Operations:</strong> Maintained 100% audit pass rates for highly scrutinized EEC, Lottery, and central government funds by designing live compliance dashboards and automated risk registers to track obligations.</div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fa-solid fa-scale-balanced text-slate-600 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Legal Advisory"></i>
+                                        <div><strong>Legal Advisory & Corporate Governance (SRA QWE):</strong> Secured strict adherence to statutory obligations and Companies Act 2006 requirements by advising the executive board on conflicts of interest, CIC regulatory filings, and architecting the organisation's comprehensive legal policy suite.</div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fa-solid fa-file-signature text-corporate-accent mt-1 mr-3 w-5 text-center flex-shrink-0" title="Contract Lifecycle"></i>
+                                        <div><strong>Commercial Contracting & Public Sector Grants (SRA QWE):</strong> Strictly controlled liability and protected organisational interests by drafting, reviewing, and negotiating a high volume of commercial contracts, supplier agreements, and NGO Institutional Funding frameworks.</div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fa-solid fa-gavel text-slate-600 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Dispute Resolution"></i>
+                                        <div><strong>Dispute Resolution & Pre-Litigation (SRA QWE):</strong> Successfully avoided costly tribunal proceedings by managing early-stage dispute resolution for vendor conflicts and drafting strategic settlement agreements.</div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fa-solid fa-graduation-cap text-orange-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Moodle LMS"></i>
+                                        <div><strong>Digital Transformation:</strong> Reduced operating costs by 30% and ensured total business continuity during COVID-19 lockdowns by pioneering a critical infrastructure pivot, successfully migrating all educational services online and automating manual workflows.</div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fa-solid fa-user-shield text-corporate-accent mt-1 mr-3 w-5 text-center flex-shrink-0" title="GDPR & Privacy"></i>
+                                        <div><strong>Data Protection & Information Law:</strong> Maintained rigorous data protection across 8 operational sites by spearheading GDPR compliance frameworks, executing Data Protection Impact Assessments (DPIAs) for cloud rollouts, and managing statutory Subject Access Requests (SARs).</div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fa-solid fa-users-gear text-slate-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="HR Advisory"></i>
+                                        <div><strong>HR Advisory & Crisis Management:</strong> Ensured procedural fairness and defensible HR outcomes by directing complex internal administrative matters, capability reviews, and high-risk grievance procedures in strict adherence to employment law.</div>
+                                    </li>
                                 </ul>
                             </div>
                         </div>
@@ -266,34 +325,57 @@
                             <div class="hidden md:block absolute left-0 top-0 bottom-0 w-1 bg-slate-200 dark:bg-slate-700"></div>
                             <div class="md:pl-6">
                                 <div class="flex flex-col md:flex-row md:justify-between md:items-baseline mb-2">
-                                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">HVOSS</h3>
+                                    <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center"><i class="fa-solid fa-hands-holding-circle text-corporate-accent mr-2 text-base"></i> HVOSS</h3>
                                     <span class="text-sm font-bold text-corporate-accent dark:text-blue-400">Oct 2022 – Jul 2024</span>
                                 </div>
                                 <p class="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1">Board Member / Trustee | Herefordshire, UK</p>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 italic mb-3">Provided non-executive governance, legal insight, and strategic financial oversight during acute financial challenge.</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 italic mb-4">Provided non-executive governance, legal insight, and strategic financial oversight during acute financial challenge.</p>
                                 
-                                <ul class="list-disc pl-5 space-y-1.5 text-sm text-slate-700 dark:text-slate-300">
-                                    <li><strong>Crisis Governance & Financial Stabilisation:</strong> Established and led a "financial war-room" to combat a growing deficit and manage cashflow priorities following the loss of key funding streams.</li>
-                                    <li><strong>Legal Risk Mitigation:</strong> Guided the executive team through complex legal disputes and restructuring processes, mitigating over £70,000 in potential damages.</li>
-                                    <li><strong>Strategic Turnaround:</strong> Devised strategic business plans and strengthened internal controls, contributing to a near 60% increase in new revenue streams.</li>
+                                <ul class="space-y-3 text-sm text-slate-700 dark:text-slate-300">
+                                    <li class="flex items-start">
+                                        <i class="fa-solid fa-arrow-trend-up text-emerald-600 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Revenue Growth"></i>
+                                        <div><strong>Strategic Turnaround & Revenue Generation:</strong> Devised strategic business plans and strengthened internal controls, contributing to a near 60% increase in new revenue streams and a 50% reduction in costs associated with key legacy contracts.</div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fa-solid fa-shield-halved text-corporate-accent mt-1 mr-3 w-5 text-center flex-shrink-0" title="Risk Mitigation"></i>
+                                        <div><strong>Legal Risk Mitigation:</strong> Guided the executive team through complex legal disputes and restructuring processes, mitigating over £70,000 in potential damages and ensuring defensible, fair redundancy processes.</div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fa-solid fa-briefcase-medical text-red-600 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Crisis Management"></i>
+                                        <div><strong>Crisis Governance & Financial Stabilisation:</strong> Established and led a "financial war-room" to combat a growing deficit and manage cashflow priorities following the loss of key funding streams and the sudden illness of the CFO.</div>
+                                    </li>
                                 </ul>
                             </div>
                         </div>
 
-                        <!-- Independent Portfolio -->
+                        <!-- Proprietary Fintech Development -->
                         <div class="relative pl-6 md:pl-0">
                             <div class="hidden md:block absolute left-0 top-0 bottom-0 w-1 bg-slate-200 dark:bg-slate-700"></div>
                             <div class="md:pl-6">
                                 <div class="flex flex-col md:flex-row md:justify-between md:items-baseline mb-2">
-                                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Independent Investment Portfolio</h3>
+                                    <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center"><i class="fa-solid fa-microchip text-corporate-accent mr-2 text-base"></i> Proprietary Fintech Development</h3>
                                     <span class="text-sm font-bold text-corporate-accent dark:text-blue-400">Jan 2021 – Present</span>
                                 </div>
-                                <p class="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1">Private Investor & Portfolio Manager | Geneva, CH / UK</p>
+                                <p class="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1">Algorithmic Risk Management, Data Analysis & Quantitative Trading | Geneva, CH</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 italic mb-4">Established a dedicated entity for quantitative risk management and market data analysis.</p>
                                 
-                                <ul class="list-disc pl-5 space-y-1.5 text-sm text-slate-700 dark:text-slate-300 mt-3">
-                                    <li><strong>Financial Analysis & Market Research:</strong> Conducted meticulous fundamental and technical analysis of US, UK, and EU equities. Tracked the market impacts of geopolitical events and international policy shifts.</li>
-                                    <li><strong>Performance:</strong> Achieved ~150% financial growth on equity investments over a 12-month period, with an approximately 75% return in 2024.</li>
-                                    <li><strong>Algorithmic Automation:</strong> Authored tailored scripts for algorithmic trading and market sentiment analysis using Python (lightweight_charts), MetaTrader (MQL5), and ThinkOrSwim (thinkScript). Integrated real-time data via IBKR API.</li>
+                                <ul class="space-y-3 text-sm text-slate-700 dark:text-slate-300 mt-3">
+                                    <li class="flex items-start">
+                                        <i class="fa-solid fa-chart-column text-emerald-600 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Quantitative Performance"></i>
+                                        <div><strong>Quantitative Performance & ROI:</strong> Achieved exceptionally high year-on-year investment returns—culminating in a >74% ROI in 2024 before ceasing operations—by deploying proprietary quantitative trading systems built to synthesize deep company value analysis, pattern spotting, and the tracking of real-world macroeconomic policy shifts.</div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fa-brands fa-python text-blue-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Python"></i>
+                                        <div><strong>Methodology & Automation:</strong> Engineered automated scripts (leveraging Python, Pandas, and Matplotlib) to scrape real-time market data, detecting geopolitical trends and regulatory changes to inform quantitative trading strategies.</div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fa-solid fa-brain text-purple-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="AI / Sentiment Analysis"></i>
+                                        <div><strong>Data Analytics & Sentiment Parsing:</strong> Developed proprietary analytical tools to aggregate and detect market analyst sentiment, featuring dynamic filtering based on the delta between current asset prices and predictive targets.</div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fa-solid fa-gears text-slate-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Automated Workflows"></i>
+                                        <div><strong>IP Utilisation & Enterprise Scaling:</strong> The proprietary IP and automated workflows built here were subsequently utilized in enterprise consulting for Keystone Analytics, whose CEO was integral to the initial development phase.</div>
+                                    </li>
                                 </ul>
                             </div>
                         </div>
@@ -301,11 +383,56 @@
                     </div>
                 </section>
 
+                <!-- War Room Scenarios Section (Interactive Modals) -->
+                <section id="war-room" class="scroll-mt-20 relative z-10">
+                    <h2 class="text-xl font-bold text-corporate-accent dark:text-blue-400 uppercase tracking-wider mb-6 border-b border-slate-200 dark:border-slate-700 pb-2">War Room Scenarios: Operations & Crisis Management</h2>
+                    
+                    <p class="text-sm text-slate-600 dark:text-slate-400 mb-6">Deep-dive analyses detailing critical operational pivots, deficit mitigation, and regulatory crisis management frameworks.</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Card 1 -->
+                        <div onclick="openPdfModal('Keystone Analytics: Regulatory Deployment', './Keystone_Regulatory_Case_Study.pdf')" class="group cursor-pointer bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md p-5 shadow-sm hover:shadow-md hover:border-corporate-accent transition-all flex flex-col h-full">
+                            <div class="w-10 h-10 rounded-sm bg-orange-50 dark:bg-orange-900/30 text-orange-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <i data-lucide="shield-check" class="w-5 h-5"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-900 dark:text-white text-base mb-2">Keystone Regulatory Turnaround</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 flex-1">Navigating complex international banking regulations to secure non-dilutive VC funding pipelines.</p>
+                            <span class="text-xs font-bold text-corporate-accent uppercase flex items-center group-hover:underline">
+                                View Case Study <i data-lucide="arrow-right" class="w-3 h-3 ml-1"></i>
+                            </span>
+                        </div>
+
+                        <!-- Card 2 -->
+                        <div onclick="openPdfModal('Red Spark Operational Scaling & COVID-19 Pivot', './RedSpark_Scaling_Case_Study.pdf')" class="group cursor-pointer bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md p-5 shadow-sm hover:shadow-md hover:border-corporate-accent transition-all flex flex-col h-full">
+                            <div class="w-10 h-10 rounded-sm bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <i data-lucide="layers" class="w-5 h-5"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-900 dark:text-white text-base mb-2">Red Spark Operational Scaling</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 flex-1">Rapid digital transformation, automated compliance pipelines, and 100% audit readiness across 8 sites.</p>
+                            <span class="text-xs font-bold text-corporate-accent uppercase flex items-center group-hover:underline">
+                                View Case Study <i data-lucide="arrow-right" class="w-3 h-3 ml-1"></i>
+                            </span>
+                        </div>
+                        
+                        <!-- Card 3 -->
+                        <div onclick="openPdfModal('HVOSS Crisis Governance & Deficit Mitigation', './HVOSS_Crisis_Case_Study.pdf')" class="group cursor-pointer bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md p-5 shadow-sm hover:shadow-md hover:border-corporate-accent transition-all flex flex-col h-full">
+                            <div class="w-10 h-10 rounded-sm bg-blue-50 dark:bg-blue-900/30 text-corporate-accent flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <i data-lucide="trending-down" class="w-5 h-5"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-900 dark:text-white text-base mb-2">HVOSS Financial Turnaround</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 flex-1">Deficit mitigation, legal risk management, and the establishment of a Board-level "Financial War-Room".</p>
+                            <span class="text-xs font-bold text-corporate-accent uppercase flex items-center group-hover:underline">
+                                View Case Study <i data-lucide="arrow-right" class="w-3 h-3 ml-1"></i>
+                            </span>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- Technical Skills Section -->
-                <section id="skills" class="scroll-mt-20">
+                <section id="skills" class="scroll-mt-20 relative z-10">
                     <h2 class="text-xl font-bold text-corporate-accent dark:text-blue-400 uppercase tracking-wider mb-6 border-b border-slate-200 dark:border-slate-700 pb-2">Technical & Digital Proficiencies</h2>
                     
-                    <div class="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 p-6 rounded-md shadow-sm text-sm text-slate-700 dark:text-slate-300 space-y-4">
+                    <div class="bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm border border-slate-300 dark:border-slate-700 p-6 rounded-md shadow-sm text-sm text-slate-700 dark:text-slate-300 space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
                             <div class="font-bold text-slate-900 dark:text-white">Legal & GRC Tools:</div>
                             <div class="md:col-span-3">Legal drafting, LexisNexis (incl. Risk Solutions), Westlaw, GDPR framework enforcement, Risk Registers, Policy architectures, DocuSign CLM, iManage/NetDocuments. <br><strong class="font-semibold text-slate-800 dark:text-slate-200 mt-1 inline-block">Industry Platform Familiarity:</strong> Refinitiv World-Check, Chainalysis, OneTrust, TrustArc, NAVEX Global, ServiceNow GRC.</div>
@@ -328,7 +455,7 @@
                         <div class="border-t border-slate-200 dark:border-slate-700"></div>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
                             <div class="font-bold text-slate-900 dark:text-white">Programming:</div>
-                            <div class="md:col-span-3">Python, MQL5, thinkScript, VBA, R, Java, C#, API integration, HTML, CSS, JavaScript.</div>
+                            <div class="md:col-span-3">Python, Pandas, Matplotlib, MQL5, thinkScript, VBA, R, Java, C#, API integration, HTML, CSS, JavaScript.</div>
                         </div>
                         <div class="border-t border-slate-200 dark:border-slate-700"></div>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
@@ -344,7 +471,7 @@
                 </section>
                 
                 <!-- Education -->
-                <section id="education" class="scroll-mt-20">
+                <section id="education" class="scroll-mt-20 relative z-10">
                     <h2 class="text-xl font-bold text-corporate-accent dark:text-blue-400 uppercase tracking-wider mb-6 border-b border-slate-200 dark:border-slate-700 pb-2">Education</h2>
                     <div class="space-y-6">
                         <div>
@@ -374,7 +501,7 @@
                 </section>
 
                 <!-- Certs & Memberships -->
-                <section id="certifications" class="scroll-mt-20">
+                <section id="certifications" class="scroll-mt-20 relative z-10">
                     <h2 class="text-xl font-bold text-corporate-accent dark:text-blue-400 uppercase tracking-wider mb-4 border-b border-slate-200 dark:border-slate-700 pb-2">Professional Memberships & Certifications</h2>
                     <ul class="space-y-2 text-sm text-slate-700 dark:text-slate-300 list-disc pl-5">
                         <li><strong>Candidate: SRA SQE 1 & 2</strong> (Preparing for late-year examination to formalise admission as a Solicitor of England & Wales, supported by 5+ years of verified QWE).</li>
@@ -387,15 +514,15 @@
                 </section>
 
                 <!-- References Section (Protected) -->
-                <section id="references" class="scroll-mt-20">
+                <section id="references" class="scroll-mt-20 relative z-10">
                     <h2 class="text-xl font-bold text-corporate-accent dark:text-blue-400 uppercase tracking-wider mb-6 border-b border-slate-200 dark:border-slate-700 pb-2">References</h2>
                     
                     <!-- Anti-Scraping Protection Screen -->
-                    <div id="references-container" class="text-center bg-slate-50 dark:bg-slate-800/50 p-8 md:p-12 rounded-sm border border-slate-200 dark:border-slate-700 transition-all">
+                    <div id="references-container" class="text-center bg-slate-50/90 dark:bg-slate-800/90 backdrop-blur-sm p-8 md:p-12 rounded-sm border border-slate-200 dark:border-slate-700 transition-all shadow-sm">
                         <i data-lucide="lock" class="w-10 h-10 mx-auto mb-4 text-slate-400"></i>
                         <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">References Protected</h3>
                         <p class="text-sm text-slate-600 dark:text-slate-400 mb-6 max-w-md mx-auto">To prevent automated data scraping, the contact information for my professional references is hidden by default.</p>
-                        <button id="reveal-refs-btn" class="bg-corporate-accent hover:bg-corporate-accentDark text-white px-6 py-2.5 rounded-sm text-sm font-bold tracking-wide transition-colors">
+                        <button id="reveal-refs-btn" class="bg-corporate-accent hover:bg-corporate-accentDark text-white px-6 py-2.5 rounded-sm text-sm font-bold tracking-wide transition-colors shadow-sm">
                             Reveal References
                         </button>
                     </div>
@@ -410,15 +537,40 @@
 
             </div>
 
-            <!-- Developer / JSON View. Added whitespace-pre-wrap and break-words for proper mobile resizing -->
-            <div id="dev-view" class="hidden max-w-5xl mx-auto h-full pb-36 md:pb-16 w-full">
-                <div class="bg-[#1e1e1e] rounded-sm p-4 md:p-6 h-full overflow-y-auto overflow-x-hidden shadow-inner border border-slate-800 w-full">
+            <!-- Developer / JSON View -->
+            <div id="dev-view" class="hidden max-w-5xl mx-auto h-full pb-36 md:pb-16 w-full relative z-10">
+                <div class="bg-[#1e1e1e]/95 backdrop-blur-sm rounded-sm p-4 md:p-6 h-full overflow-y-auto overflow-x-hidden shadow-inner border border-slate-800 w-full">
                     <pre class="whitespace-pre-wrap break-words w-full"><code id="json-container" class="font-mono text-xs md:text-sm leading-relaxed text-slate-300 block w-full"></code></pre>
                 </div>
             </div>
 
         </div>
     </main>
+
+    <!-- Full Screen PDF Modal (PDF.js Canvas Renderer) -->
+    <div id="pdf-modal" class="fixed inset-0 z-50 hidden bg-slate-900/95 backdrop-blur-md flex-col transition-opacity">
+        <div class="flex justify-between items-center p-4 bg-white dark:bg-slate-800 shadow-md z-10 relative">
+            <div class="flex items-center space-x-3 overflow-hidden">
+                <div class="w-8 h-8 rounded bg-corporate-accent text-white flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                </div>
+                <h3 id="pdf-title" class="font-bold text-sm md:text-lg text-slate-900 dark:text-white truncate">Document Preview</h3>
+            </div>
+            <div class="flex items-center space-x-2 md:space-x-4 flex-shrink-0 pl-2">
+                <button id="pdf-download-btn" class="text-xs md:text-sm flex items-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 px-3 py-1.5 rounded-sm font-medium transition-colors">
+                    <i data-lucide="download" class="w-4 h-4 md:mr-2"></i> <span class="hidden md:inline">Download</span>
+                </button>
+                <button onclick="closePdfModal()" class="text-xs md:text-sm flex items-center bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-sm font-bold transition-colors">
+                    <i data-lucide="x" class="w-4 h-4 md:mr-2"></i> <span class="hidden md:inline">Close</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Scrollable container for rendered PDF Canvases -->
+        <div id="pdf-viewer-container" class="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 flex flex-col items-center relative" style="-webkit-overflow-scrolling: touch;">
+            <!-- Canvases injected dynamically via PDF.js -->
+        </div>
+    </div>
 
     <!-- Mobile Bottom Navigation -->
     <nav class="md:hidden fixed bottom-0 w-full bg-white dark:bg-slate-800 border-t border-slate-300 dark:border-slate-700 flex justify-around p-3 z-30 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
@@ -430,13 +582,13 @@
             <i data-lucide="briefcase" class="w-5 h-5 mb-1"></i>
             <span class="text-[10px] font-medium">Exp</span>
         </a>
+        <a href="#war-room" class="flex flex-col items-center text-slate-500 dark:text-slate-400 hover:text-corporate-accent transition-colors">
+            <i data-lucide="swords" class="w-5 h-5 mb-1"></i>
+            <span class="text-[10px] font-medium">Cases</span>
+        </a>
         <a href="#skills" class="flex flex-col items-center text-slate-500 dark:text-slate-400 hover:text-corporate-accent transition-colors">
             <i data-lucide="terminal" class="w-5 h-5 mb-1"></i>
             <span class="text-[10px] font-medium">Tech</span>
-        </a>
-        <a href="#education" class="flex flex-col items-center text-slate-500 dark:text-slate-400 hover:text-corporate-accent transition-colors">
-            <i data-lucide="graduation-cap" class="w-5 h-5 mb-1"></i>
-            <span class="text-[10px] font-medium">Edu</span>
         </a>
         <a href="#references" class="flex flex-col items-center text-slate-500 dark:text-slate-400 hover:text-corporate-accent transition-colors">
             <i data-lucide="users" class="w-5 h-5 mb-1"></i>
@@ -447,6 +599,227 @@
     <script>
         // Initialize Icons
         lucide.createIcons();
+
+        // ----------------------------------------------------
+        // PDF.js Modal & Native Canvas Rendering Logic
+        // ----------------------------------------------------
+        function openPdfModal(title, url) {
+            const modal = document.getElementById('pdf-modal');
+            const container = document.getElementById('pdf-viewer-container');
+            const titleEl = document.getElementById('pdf-title');
+            const downloadBtn = document.getElementById('pdf-download-btn');
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            titleEl.innerText = title;
+            
+            downloadBtn.onclick = () => {
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = title.replace(/\s+/g, '_') + '.pdf';
+                a.target = '_blank';
+                a.click();
+            };
+            
+            // Loading State
+            container.innerHTML = `
+                <div class="text-slate-300 py-20 flex flex-col items-center w-full h-full justify-center">
+                    <i data-lucide="loader-2" class="w-10 h-10 animate-spin mb-4 text-corporate-accent"></i>
+                    <span class="font-mono text-sm tracking-wide">Initializing Secure Document Wrapper...</span>
+                </div>`;
+            lucide.createIcons();
+
+            // Fetch and Render PDF
+            pdfjsLib.getDocument(url).promise.then(pdf => {
+                container.innerHTML = ''; // clear loading ui
+                for(let i = 1; i <= pdf.numPages; i++) {
+                    pdf.getPage(i).then(page => {
+                        const canvas = document.createElement('canvas');
+                        canvas.className = 'max-w-full shadow-xl rounded-sm bg-white mb-6 md:mb-10 w-full md:w-auto md:max-w-5xl mx-auto block border border-slate-200';
+                        container.appendChild(canvas);
+                        
+                        // Mobile Responsive Scaling Framework
+                        const viewportBase = page.getViewport({ scale: 1 });
+                        const containerWidth = container.clientWidth - (window.innerWidth < 768 ? 32 : 64);
+                        
+                        let scale = containerWidth / viewportBase.width;
+                        if (scale > 2.5) scale = 2.5; // Prevent over-zooming on massive desktop screens
+                        
+                        // Leverage device pixel ratio for crystal clear retina/mobile rendering
+                        const outputScale = window.devicePixelRatio || 1;
+                        const viewport = page.getViewport({ scale: scale });
+                        
+                        canvas.width = Math.floor(viewport.width * outputScale);
+                        canvas.height = Math.floor(viewport.height * outputScale);
+                        canvas.style.width = Math.floor(viewport.width) + "px";
+                        canvas.style.height = Math.floor(viewport.height) + "px";
+                        
+                        const ctx = canvas.getContext('2d');
+                        const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
+
+                        const renderContext = {
+                            canvasContext: ctx,
+                            transform: transform,
+                            viewport: viewport
+                        };
+                        page.render(renderContext);
+                    });
+                }
+            }).catch(err => {
+                console.error("PDF Render Error:", err);
+                container.innerHTML = `
+                    <div class="text-slate-300 py-20 flex flex-col items-center text-center px-6 w-full h-full justify-center">
+                        <i data-lucide="file-warning" class="w-16 h-16 mb-4 text-red-400 opacity-80"></i>
+                        <h4 class="text-xl font-bold mb-2 text-white">Document Currently Unavailable</h4>
+                        <p class="text-sm text-slate-400 max-w-md mb-8 leading-relaxed">The requested case study PDF cannot be rendered in the browser preview right now. Ensure the PDF file is located in the same directory.</p>
+                        <button onclick="document.getElementById('pdf-download-btn').click()" class="bg-corporate-accent hover:bg-corporate-accentDark text-white px-8 py-3 rounded-sm font-bold tracking-wide transition-colors flex items-center shadow-md">
+                            <i data-lucide="download" class="w-4 h-4 mr-2"></i> Try Downloading Directly
+                        </button>
+                    </div>`;
+                lucide.createIcons();
+            });
+        }
+
+        function closePdfModal() {
+            const modal = document.getElementById('pdf-modal');
+            const container = document.getElementById('pdf-viewer-container');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            container.innerHTML = ''; // Free memory when closed
+        }
+
+        // ----------------------------------------------------
+        // Skyline Animation Script (Geneva Procedural Canvas)
+        // ----------------------------------------------------
+        const cvs = document.getElementById('skyline-canvas');
+        if (cvs) {
+            const ctx = cvs.getContext('2d');
+            let w, h;
+            let particles = [];
+            let clouds = [];
+
+            function resizeCanvas() {
+                w = cvs.width = window.innerWidth;
+                h = cvs.height = 350; // Fixed height container
+            }
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+
+            // Particle System for Jet d'Eau
+            class Particle {
+                constructor() { this.reset(); }
+                reset() {
+                    // Position Jet d'Eau relative to screen width
+                    this.x = w * 0.75 + (Math.random() * 8 - 4);
+                    this.y = h - 20; // Start at lake level
+                    this.vx = (Math.random() - 0.5) * 0.4;
+                    this.vy = -(Math.random() * 3 + 4); // Initial upward thrust
+                    this.life = Math.random() * 0.6 + 0.4;
+                    this.age = 0;
+                    this.size = Math.random() * 1.5 + 0.5;
+                }
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.vy += 0.08; // Gravity effect pulling water down
+                    this.vx += (Math.random() - 0.5) * 0.1; // Slight wind dispersion
+                    this.age += 0.01;
+                }
+                draw(ctx, color) {
+                    ctx.globalAlpha = Math.max(0, 1 - (this.age / this.life));
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
+            }
+
+            for(let i=0; i<150; i++) particles.push(new Particle());
+
+            // Simple procedural clouds
+            clouds = [
+                {x: w * 0.1, y: 80, speed: 0.05, scale: 1},
+                {x: w * 0.5, y: 120, speed: 0.08, scale: 0.8},
+                {x: w * 0.8, y: 50, speed: 0.03, scale: 1.2}
+            ];
+
+            function drawCloud(ctx, x, y, scale, color) {
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(x, y, 20*scale, Math.PI*0.5, Math.PI*1.5);
+                ctx.arc(x+20*scale, y-10*scale, 20*scale, Math.PI, Math.PI*2);
+                ctx.arc(x+45*scale, y, 20*scale, Math.PI*1.5, Math.PI*0.5);
+                ctx.fill();
+            }
+
+            function animateSkyline() {
+                ctx.clearRect(0, 0, w, h);
+                const isDark = document.documentElement.classList.contains('dark');
+                
+                // Color Palettes based on theme
+                const mountainColor = isDark ? '#1e293b' : '#cbd5e1'; 
+                const cityColor = isDark ? '#334155' : '#94a3b8';
+                const waterColor = isDark ? '#0f4c81' : '#e2e8f0'; 
+                const jetColor = isDark ? '#60a5fa' : '#3b82f6';
+                const cloudColor = isDark ? 'rgba(71, 85, 105, 0.3)' : 'rgba(203, 213, 225, 0.5)';
+
+                // Draw Mountains (Salève / Jura profile)
+                ctx.fillStyle = mountainColor;
+                ctx.beginPath();
+                ctx.moveTo(0, h);
+                for(let x=0; x<=w; x+=40) {
+                    ctx.lineTo(x, h - 90 - Math.sin(x/150)*30 - Math.cos(x/80)*20);
+                }
+                ctx.lineTo(w, h);
+                ctx.fill();
+
+                // Draw Clouds
+                clouds.forEach(c => {
+                    c.x += c.speed;
+                    if(c.x > w + 100) c.x = -100;
+                    drawCloud(ctx, c.x, c.y, c.scale, cloudColor);
+                });
+
+                // City Base (Ground)
+                ctx.fillStyle = cityColor;
+                ctx.fillRect(0, h - 35, w, 35);
+
+                // Draw Skyline Buildings
+                const bXs = [0.1, 0.15, 0.25, 0.4, 0.45, 0.55, 0.65, 0.85, 0.9];
+                bXs.forEach((bx, i) => {
+                    let bh = 20 + (i%3)*15;
+                    ctx.fillRect(w * bx, h - 35 - bh, 30 + (i%2)*10, bh);
+                });
+
+                // Draw St Pierre Cathedral Profile (Fixed relative left)
+                let cx = w * 0.3;
+                ctx.fillRect(cx, h - 75, 40, 40); // Base
+                ctx.fillRect(cx - 10, h - 100, 15, 65); // Tower left
+                ctx.fillRect(cx + 35, h - 100, 15, 65); // Tower right
+                ctx.beginPath();
+                ctx.moveTo(cx + 10, h - 75);
+                ctx.lineTo(cx + 20, h - 120); // Spire
+                ctx.lineTo(cx + 30, h - 75);
+                ctx.fill();
+
+                // Draw Lac Léman (Lake Geneva)
+                ctx.fillStyle = waterColor;
+                ctx.fillRect(0, h - 20, w, 20);
+
+                // Animate Jet d'Eau Particles
+                particles.forEach(p => {
+                    p.update();
+                    if(p.age >= p.life || p.y > h) p.reset();
+                    p.draw(ctx, jetColor);
+                });
+
+                requestAnimationFrame(animateSkyline);
+            }
+            animateSkyline();
+        }
+        // ----------------------------------------------------
+
 
         // Anti-Scraping Logic for References
         const revealBtn = document.getElementById('reveal-refs-btn');
@@ -488,7 +861,7 @@
                 const phoneHtml = r.phone ? `<p><i data-lucide="phone" class="w-3.5 h-3.5 inline mr-1 text-slate-400"></i> ${r.phone}</p>` : '';
                 
                 htmlString += `
-                    <div class="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-sm border border-slate-200 dark:border-slate-700 ${colSpanClass}">
+                    <div class="bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm p-5 rounded-sm border border-slate-200 dark:border-slate-700 shadow-sm ${colSpanClass}">
                         <h3 class="font-bold text-slate-900 dark:text-white text-base">${r.name}</h3>
                         <p class="text-slate-600 dark:text-slate-400 font-medium mb-2">${r.title}</p>
                         <div class="space-y-1 text-slate-700 dark:text-slate-300">
@@ -501,9 +874,8 @@
             });
 
             refContent.innerHTML = htmlString;
-            lucide.createIcons(); // Re-render newly added icons
+            lucide.createIcons(); 
             
-            // Swap visibility
             refContainer.classList.add('hidden');
             refContent.classList.remove('hidden');
             refContent.classList.add('grid', 'grid-cols-1', 'md:grid-cols-2');
@@ -526,7 +898,7 @@
                 ],
                 "clearance": "SRA QWE Verified (5+ Years)"
             },
-            "professional_summary": "Dynamic Legal, Compliance, and Operations leader with over 8 years of experience building and executing governance frameworks, regulatory compliance programs, and commercial strategies. LL.M. in Legal Practice, specializing in International Law, actively preparing for SRA SQE 1 & 2 examinations, possessing over 5 years of SRA Qualifying Work Experience (QWE). Proven track record of steering complex, multi-site organisations through regulatory turbulence, securing significant institutional funding, and digitising operational workflows. Demonstrated capability in acting as the legal nexus for operations serving vulnerable populations, scaling a regional CIC into the largest adult education provider in three counties outside of universities and colleges. Highly adept at contract lifecycle management, risk mitigation, HR advisory, and the strategic implementation of AI and automation to reduce operational overhead. Ready to leverage deep expertise in administrative processes, international law, and data-driven compliance to support scaling ventures, financial institutions, and corporate entities in the Swiss market.",
+            "professional_summary": "Legal, Compliance, and Operations lead (LL.M., Legal Practice) serving as the legal nexus for complex operations. With 8+ years of experience, I build scalable governance frameworks, execute regulatory compliance, and establish robust procurement protocols. I drive contract lifecycle management, operational risk mitigation, and the strategic implementation of AI and integrated systems to reduce overhead.\n\nUniquely positioned at the intersection of law and technology, I bridge the gap between engineering and legal teams. Fundamentally a legal and operations head, I bring technical fluency, independently review code, audit agentic AI workflows, and verify software architecture against strict legal requirements.\n\nI pair this technical edge with a rigorous understanding of ever-evolving global methodology. Drawing on advanced research in international Law, focused on economic and cyber warfare, I track rapid regulatory policy shifts and modern malicious-actor methodologies. Able to translate these complex geopolitical and cyber threats into proactive business defense strategies, ensuring continuous regulatory and operational resilience.",
             "core_competencies": {
                 "legal_advisory_and_governance": [
                     "5+ years of demonstrable legal practice experience (SRA QWE) encompassing contract drafting, administrative decision-making, dispute resolution, and policy architecture.",
@@ -557,11 +929,11 @@
                     "location": "Remote",
                     "timeline": "Intermittent / Project-Based",
                     "achievements": [
-                        "Directed a critical funding strategy pivot that remedied a full year's financial loss within a 3-month period. Prevented business shutdown and drastically reduced capital burn while advising on the finalisation of core tech products.",
-                        "Acted as Lead VC Consultant for a major public-private solar farm initiative ($2M+ Target). Directed strategic advisory for the comprehensive white paper and authored the investor pitch deck.",
-                        "Successfully navigated complex banking regulations to secure alternative funding pipelines for the solar venture, protecting the parent company from excessive equity dilution.",
-                        "Delivered comprehensive technical, legal, and financial consultation to the Philippine fintech division, guiding the development of proprietary trading tools, application creation, agentic workflows, and integrated data scraping systems.",
-                        "Steered the legal establishment and operational compliance regulations for new physical child enterprises, most notably a semi-private ambulance service and its accompanying SaaS dispatch application."
+                        "Remedied a full year's financial loss within a 3-month period, preventing business shutdown and drastically reducing capital burn, by directing a critical funding strategy pivot and advising on the market logistics and regulatory compliance of core tech products.",
+                        "Targeted $2M+ in funding as Lead VC Consultant for a major public-private solar farm initiative (a joint venture between a hotel magnate and the government energy provider), by directing strategic advisory for the comprehensive white paper and authoring the investor pitch deck.",
+                        "Secured alternative non-dilutive funding pipelines for the solar venture, protecting the parent company from excessive equity dilution, by successfully navigating and leveraging complex banking regulations.",
+                        "Ensured maximum market efficacy and regulatory alignment for the Philippine fintech division's offerings by delivering comprehensive legal, compliance, and financial data analysis consultation during the rollout of proprietary trading tools and agentic workflows.",
+                        "Established the legal and operational compliance frameworks for joint humanitarian child enterprises, including a semi-private ambulance service and its accompanying SaaS dispatch application, alongside co-authoring commercial applications available on the App Store."
                     ]
                 },
                 {
@@ -570,14 +942,14 @@
                     "location": "Herefordshire, UK",
                     "timeline": "Jan 2018 – Aug 2024 (Assistant to Director: Jan 2015 - Jan 2018)",
                     "achievements": [
-                        "Advised the executive board on statutory obligations, conflicts of interest, and Community Interest Company (CIC) regulatory filings (Companies Act 2006). Created and governed the comprehensive legal policy suite.",
-                        "Drafted, reviewed, and negotiated a high volume of commercial contracts, supplier agreements, and NGO Institutional Funding frameworks. Strictly controlled liability, indemnity, and termination clauses.",
-                        "Managed early-stage dispute resolution for vendor conflicts and complex stakeholder grievances. Drafted settlement agreements, successfully avoiding costly tribunal proceedings.",
-                        "Spearheaded GDPR compliance frameworks across 8 sites. Executed Data Protection Impact Assessments (DPIAs) for cloud rollouts and managed Subject Access Requests (SARs).",
-                        "Maintained impeccable audit readiness for highly scrutinized EEC, Lottery, and central government funds. Designed live dashboards and risk registers to track obligations.",
-                        "Successfully procured a £200,000 EEC and Lottery Bid Partnership, driving infrastructure expansion.",
-                        "Directed internal administrative matters including capability reviews, conflict resolution, and complex grievance procedures ensuring procedural fairness and defensible recordkeeping.",
-                        "Pioneered a critical infrastructure pivot during COVID-19 lockdowns, successfully migrating all services online. Automated manual workflows, reducing operating costs by 30%."
+                        "Scaled a regional CIC into the largest adult education provider in three counties (outside of universities and colleges) serving vulnerable populations, driving major infrastructure expansion by successfully procuring a £200,000 EEC and Lottery Bid Partnership.",
+                        "Maintained 100% audit pass rates for highly scrutinized EEC, Lottery, and central government funds by designing live compliance dashboards and automated risk registers to track obligations.",
+                        "Secured strict adherence to statutory obligations and Companies Act 2006 requirements by advising the executive board on conflicts of interest, CIC regulatory filings, and architecting the organisation's comprehensive legal policy suite.",
+                        "Strictly controlled liability and protected organisational interests by drafting, reviewing, and negotiating a high volume of commercial contracts, supplier agreements, and NGO Institutional Funding frameworks.",
+                        "Successfully avoided costly tribunal proceedings by managing early-stage dispute resolution for vendor conflicts and drafting strategic settlement agreements.",
+                        "Reduced operating costs by 30% and ensured total business continuity during COVID-19 lockdowns by pioneering a critical infrastructure pivot, successfully migrating all educational services online and automating manual workflows.",
+                        "Maintained rigorous data protection across 8 operational sites by spearheading GDPR compliance frameworks, executing Data Protection Impact Assessments (DPIAs) for cloud rollouts, and managing statutory Subject Access Requests (SARs).",
+                        "Ensured procedural fairness and defensible HR outcomes by directing complex internal administrative matters, capability reviews, and high-risk grievance procedures in strict adherence to employment law."
                     ]
                 },
                 {
@@ -586,22 +958,28 @@
                     "location": "Herefordshire, UK",
                     "timeline": "Oct 2022 – Jul 2024",
                     "achievements": [
-                        "Established and led a 'financial war-room' to combat a growing deficit and manage cashflow priorities following the loss of key funding streams.",
-                        "Guided the executive team through complex legal disputes and restructuring processes, mitigating over £70,000 in potential damages.",
-                        "Devised strategic business plans and strengthened internal controls, contributing to a near 60% increase in new revenue streams."
+                        "Devised strategic business plans and strengthened internal controls, contributing to a near 60% increase in new revenue streams and a 50% reduction in costs associated with key legacy contracts.",
+                        "Guided the executive team through complex legal disputes and restructuring processes, mitigating over £70,000 in potential damages and ensuring defensible, fair redundancy processes.",
+                        "Established and led a 'financial war-room' to combat a growing deficit and manage cashflow priorities following the loss of key funding streams and the sudden illness of the CFO."
                     ]
                 },
                 {
-                    "company": "Independent Investment Portfolio",
-                    "role": "Private Investor & Portfolio Manager",
-                    "location": "Geneva, CH / UK",
+                    "company": "Proprietary Fintech Development",
+                    "role": "Algorithmic Risk Management, Data Analysis & Quantitative Trading",
+                    "location": "Geneva, CH",
                     "timeline": "Jan 2021 – Present",
                     "achievements": [
-                        "Conducted meticulous fundamental and technical analysis of US, UK, and EU equities. Tracked the market impacts of geopolitical events and international policy shifts.",
-                        "Achieved ~150% financial growth on equity investments over a 12-month period, with an approximately 75% return in 2024.",
-                        "Authored tailored scripts for algorithmic trading and market sentiment analysis using Python (lightweight_charts), MetaTrader (MQL5), and ThinkOrSwim (thinkScript). Integrated real-time data via IBKR API."
+                        "Achieved exceptionally high year-on-year investment returns—culminating in a >74% ROI in 2024 before ceasing operations—by deploying proprietary quantitative trading systems built to synthesize deep company value analysis, pattern spotting, and the tracking of real-world macroeconomic policy shifts.",
+                        "Engineered automated scripts (leveraging Python, Pandas, and Matplotlib) to scrape real-time market data, detecting geopolitical trends and regulatory changes to inform quantitative trading strategies.",
+                        "Developed proprietary analytical tools to aggregate and detect market analyst sentiment, featuring dynamic filtering based on the delta between current asset prices and predictive targets.",
+                        "Established a dedicated entity for quantitative risk management. The proprietary IP and automated workflows built here were subsequently utilized in enterprise consulting for Keystone Analytics, whose CEO was integral to the initial development phase."
                     ]
                 }
+            ],
+            "war_room_scenarios": [
+                "Keystone Analytics Regulatory Deployment",
+                "Red Spark Operational Scaling & COVID-19 Pivot",
+                "HVOSS Crisis Governance & Deficit Mitigation"
             ],
             "education": [
                 {
@@ -652,6 +1030,8 @@
                 ],
                 "programming_and_scripting": [
                     "Python",
+                    "Pandas",
+                    "Matplotlib",
                     "MQL5",
                     "thinkScript",
                     "VBA",
@@ -689,7 +1069,6 @@
             }
         };
 
-        // Render JSON with syntax highlighting
         function syntaxHighlight(json) {
             if (typeof json != 'string') {
                 json = JSON.stringify(json, undefined, 4);
@@ -721,6 +1100,7 @@
             { id: 'summary', icon: 'user', label: 'Profile Summary' },
             { id: 'competencies', icon: 'shield-check', label: 'Core Competencies' },
             { id: 'experience', icon: 'briefcase', label: 'Professional Experience' },
+            { id: 'war-room', icon: 'swords', label: 'War Room Scenarios' },
             { id: 'skills', icon: 'terminal', label: 'Tech Proficiencies' },
             { id: 'education', icon: 'graduation-cap', label: 'Education' },
             { id: 'certifications', icon: 'award', label: 'Memberships' },
@@ -736,10 +1116,10 @@
             a.addEventListener('click', () => updateActiveNav(a));
             navMenu.appendChild(a);
         });
-        lucide.createIcons(); // Re-render newly injected icons
+        lucide.createIcons();
 
         function updateActiveNav(clickedElement) {
-            if(isDevMode) return; // Disable spy in dev mode
+            if(isDevMode) return; 
             Array.from(navMenu.children).forEach(child => {
                 child.className = 'flex items-center px-4 py-2.5 rounded-sm transition-all font-medium text-sm mb-1 border-l-4 border-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800';
             });
@@ -750,7 +1130,6 @@
         const themeToggle = document.getElementById('themeToggle');
         const html = document.documentElement;
         
-        // Check system preference
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             html.classList.add('dark');
         }
