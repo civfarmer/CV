@@ -50,6 +50,14 @@
         .json-string { color: #98c379; }
         .json-number { color: #d19a66; }
         .json-boolean { color: #56b6c2; }
+
+        @media print {
+          aside, nav, #devModeToggle, #themeToggle, #pdf-modal, canvas, #skyline-canvas { display: none !important; }
+          body { overflow: visible !important; }
+          main { height: auto !important; }
+          #main-scroll-area { overflow: visible !important; padding: 0 !important; }
+          #standard-view { max-width: none !important; }
+        }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-sans transition-colors duration-200 flex h-screen overflow-hidden antialiased relative">
@@ -124,7 +132,7 @@
 
                 <!-- The "Coding Flair" Toggle -->
                 <button id="devModeToggle" class="flex items-center px-2 sm:px-3 py-1.5 text-xs font-mono font-bold rounded-sm bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors border border-slate-300 dark:border-slate-600 shadow-sm">
-                    <i data-lucide="code" class="w-3.5 h-3.5 mr-1 sm:mr-2"></i> <span>DEV_MODE</span>
+                    <i data-lucide="code" class="w-3.5 h-3.5 mr-1 sm:mr-2"></i> <span>DATA_VIEW</span>
                 </button>
                 <!-- Dark Mode Toggle -->
                 <button id="themeToggle" class="p-1.5 text-slate-500 hover:text-corporate-accent dark:text-slate-400 dark:hover:text-white transition-colors">
@@ -165,9 +173,9 @@
                 <section id="summary" class="scroll-mt-20 relative z-10">
                     <h2 class="text-xl font-bold text-corporate-accent dark:text-blue-400 uppercase tracking-wider mb-4 border-b border-slate-200 dark:border-slate-700 pb-2">Professional Summary</h2>
                     <div class="prose prose-slate dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                        <p class="mb-3">Legal, Compliance, and Operations lead (LL.M., Legal Practice) serving as the legal nexus for complex operations. With 8+ years of experience, I build scalable governance frameworks, execute regulatory compliance, and establish robust procurement protocols. I drive contract lifecycle management, operational risk mitigation, and the strategic implementation of AI and integrated systems to reduce overhead.</p>
-                        <p class="mb-3">Uniquely positioned at the intersection of law and technology, I bridge the gap between engineering and legal teams. Fundamentally a legal and operations head, I bring technical fluency, independently review code, audit agentic AI workflows, and verify software architecture against strict legal requirements.</p>
-                        <p>I pair this technical edge with a rigorous understanding of ever-evolving global methodology. Drawing on advanced research in international Law, focused on economic and cyber warfare, I track rapid regulatory policy shifts and modern malicious-actor methodologies. Able to translate these complex geopolitical and cyber threats into proactive business defense strategies, ensuring continuous regulatory and operational resilience.</p>
+                        <p class="mb-3">Dynamic Legal and Compliance leader holding an LL.M. in Legal Practice (International Law), acting as the legal nexus for complex operations. With over 8 years of experience, I build scalable governance frameworks, regulatory compliance documentation, and robust procurement protocols. I am highly adept at contract lifecycle management, risk mitigation, HR advisory, and the strategic implementation of AI and automation to reduce operational overhead.</p>
+                        <p class="mb-3">Uniquely positioned at the intersection of law and technology, I bridge the gap between engineering and legal teams. I provide legal and governance counsel backed by hands-on technical fluency. While my primary focus is regulatory alignment, I possess the literacy to independently assess code and system designs. Rather than disrupting developer productivity for summaries, I utilize agentic workflows to parse technical outputs, enabling me to directly apply legal scrutiny and verify compliance at the execution level.</p>
+                        <p class="mb-3">I pair this technical edge with a rigorous understanding of ever-evolving global methodology. Drawing on advanced research in international Law, focused on economic and cyber warfare, I track rapid regulatory policy shifts and modern malicious-actor methodologies. Able to translate these complex geopolitical and cyber threats into proactive business defense strategies, ensuring continuous regulatory and operational resilience.</p>
                     </div>
                 </section>
 
@@ -177,53 +185,58 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
                         
-                        <!-- Legal Advisory -->
-                        <div>
-                            <h3 class="font-bold text-slate-900 dark:text-white mb-2 flex items-center">
-                                <i data-lucide="scale" class="w-4 h-4 mr-2 text-corporate-accent"></i> Legal Advisory & Corporate Governance
-                            </h3>
-                            <ul class="list-disc pl-5 space-y-1.5 text-slate-700 dark:text-slate-300">
-                                <li><strong>Qualifying Work Experience (QWE):</strong> 5+ years of demonstrable legal practice experience encompassing contract drafting, administrative decision-making, dispute resolution, and policy architecture.</li>
-                                <li><strong>Corporate Governance:</strong> Extensive experience advising executive boards and acting as a Trustee. Established scalable governance frameworks, delegations of authority, and conflict-of-interest controls.</li>
-                                <li><strong>Contract Lifecycle Management (CLM):</strong> End-to-end ownership of supplier agreements, MOUs, service delivery contracts, and grant terms.</li>
-                                <li><strong>Dispute Resolution:</strong> Early assessment, evidence preservation, and settlement strategy formulation. Mitigated £70,000+ in potential damages.</li>
-                            </ul>
+                        <!-- Left Column (Eliminates awkward row-height gaps) -->
+                        <div class="space-y-8">
+                            <!-- Legal Advisory -->
+                            <div>
+                                <h3 class="font-bold text-slate-900 dark:text-white mb-2 flex items-center">
+                                    <i data-lucide="scale" class="w-4 h-4 mr-2 text-corporate-accent"></i> Legal Advisory & Corporate Governance
+                                </h3>
+                                <ul class="list-disc pl-5 space-y-1.5 text-slate-700 dark:text-slate-300">
+                                    <li><strong>Qualifying Work Experience (QWE):</strong> 5+ years of demonstrable legal practice experience encompassing contract drafting, administrative decision-making, dispute resolution, and policy architecture.</li>
+                                    <li><strong>Corporate Governance:</strong> Extensive experience advising executive boards and acting as a Trustee. Established scalable governance frameworks, delegations of authority, and conflict-of-interest controls.</li>
+                                    <li><strong>Contract Lifecycle Management (CLM):</strong> End-to-end ownership of supplier agreements, MOUs, service delivery contracts, and grant terms.</li>
+                                    <li><strong>Dispute Resolution:</strong> Early assessment, evidence preservation, and settlement strategy formulation. Mitigated £70,000+ in potential damages.</li>
+                                </ul>
+                            </div>
+
+                            <!-- Finance & Procurement -->
+                            <div>
+                                <h3 class="font-bold text-slate-900 dark:text-white mb-2 flex items-center">
+                                    <i data-lucide="pie-chart" class="w-4 h-4 mr-2 text-corporate-accent"></i> Financial & Commercial Operations
+                                </h3>
+                                <ul class="list-disc pl-5 space-y-1.5 text-slate-700 dark:text-slate-300">
+                                    <li><strong>Public Sector Grant Management & NGO Institutional Funding:</strong> Partnered with leadership to secure and manage over £500,000 in public and lottery funding. Navigated strict funder compliance, milestone reporting, and payment conditions.</li>
+                                    <li><strong>Procurement Controls:</strong> Designed vendor risk management and procurement protocols for publicly funded environments, ensuring value-for-money documentation, separation of duties, and strict supplier due diligence.</li>
+                                    <li><strong>Financial Oversight:</strong> Board-level experience in budget scrutiny, cashflow prioritisation, deficit mitigation, and establishing "financial war-rooms" during periods of organisational strain.</li>
+                                </ul>
+                            </div>
                         </div>
 
-                        <!-- Cyber Resilience -->
-                        <div>
-                            <h3 class="font-bold text-slate-900 dark:text-white mb-2 flex items-center">
-                                <i data-lucide="shield-alert" class="w-4 h-4 mr-2 text-corporate-accent"></i> Cyber Resilience & Operational Risk
-                            </h3>
-                            <ul class="list-disc pl-5 space-y-1.5 text-slate-700 dark:text-slate-300">
-                                <li><strong>Doctorate-Level Expertise:</strong> Invited to pursue doctoral research based on an LL.M. dissertation (awarded 100%) exploring Economic/Cyber Warfare enforcement gaps.</li>
-                                <li><strong>Operational Security Insight:</strong> Expert in predicting state-actor methodologies and exploiting international legal vulnerabilities via third-party intermediaries.</li>
-                                <li>Capable of mapping geopolitical cyber-threats to institutional risk management and regulatory resilience (e.g., FINMA, EU DORA).</li>
-                            </ul>
-                        </div>
-
-                        <!-- Regulatory Compliance -->
-                        <div>
-                            <h3 class="font-bold text-slate-900 dark:text-white mb-2 flex items-center">
-                                <i data-lucide="file-check-2" class="w-4 h-4 mr-2 text-corporate-accent"></i> Regulatory Compliance & Risk Management
-                            </h3>
-                            <ul class="list-disc pl-5 space-y-1.5 text-slate-700 dark:text-slate-300">
-                                <li><strong>Framework Design:</strong> Built "compliance by default" programs across 8 operational sites. Converted statutory/funder requirements into actionable checklists.</li>
-                                <li><strong>Operational Integrity:</strong> Maintained 100% audit pass rates. Designed robust risk registers and incident reporting pipelines (GDPR).</li>
-                                <li><strong>Swiss Sector Readiness:</strong> Deep understanding of AML/CFT concepts, cross-border restrictions, and institutional risk management.</li>
-                            </ul>
-                        </div>
-
-                        <!-- Finance & Procurement -->
-                        <div>
-                            <h3 class="font-bold text-slate-900 dark:text-white mb-2 flex items-center">
-                                <i data-lucide="pie-chart" class="w-4 h-4 mr-2 text-corporate-accent"></i> Financial & Commercial Operations
-                            </h3>
-                            <ul class="list-disc pl-5 space-y-1.5 text-slate-700 dark:text-slate-300">
-                                <li><strong>Public Sector Grant Management:</strong> Partnered with leadership to secure and manage over £500,000 in public and lottery funding.</li>
-                                <li><strong>Procurement Controls:</strong> Designed vendor risk management protocols ensuring value-for-money documentation and strict supplier due diligence.</li>
-                                <li><strong>Financial Oversight:</strong> Board-level experience in budget scrutiny, deficit mitigation, and establishing "financial war-rooms" during strain.</li>
-                            </ul>
+                        <!-- Right Column (Eliminates awkward row-height gaps) -->
+                        <div class="space-y-8">
+                            <!-- Regulatory Compliance -->
+                            <div>
+                                <h3 class="font-bold text-slate-900 dark:text-white mb-2 flex items-center">
+                                    <i data-lucide="file-check-2" class="w-4 h-4 mr-2 text-corporate-accent"></i> Regulatory Compliance & Risk Management
+                                </h3>
+                                <ul class="list-disc pl-5 space-y-1.5 text-slate-700 dark:text-slate-300">
+                                    <li><strong>Framework Design:</strong> Built and embedded "compliance by default" programs across 8 operational sites. Converted complex statutory and funder requirements (EEC, UK Government, National Lottery) into actionable checklists, approval gates, and evidence logs matched with both human safeguards and training.</li>
+                                    <li><strong>Operational Integrity & Audit Readiness:</strong> Maintained 100% audit pass rates. Designed robust risk registers and incident reporting pipelines to track and remediate compliance failures, safeguarding concerns, and data breaches (GDPR).</li>
+                                    <li><strong>Swiss & Financial Sector Readiness:</strong> Understanding of AML/CFT concepts, cross-border restrictions, and institutional risk management. Positioned to operationalise FINMA-aligned compliance controls using risk-based methodologies and rigorous evidence trails.</li>
+                                </ul>
+                            </div>
+                            
+                            <!-- Digital Transformation -->
+                            <div>
+                                <h3 class="font-bold text-slate-900 dark:text-white mb-2 flex items-center">
+                                    <i data-lucide="layers" class="w-4 h-4 mr-2 text-corporate-accent"></i> Digital Transformation & AI Integration
+                                </h3>
+                                <ul class="list-disc pl-5 space-y-1.5 text-slate-700 dark:text-slate-300">
+                                    <li><strong>System Implementation:</strong> Spearheaded the full migration of paper-based operational and educational services to cloud-based systems (Moodle), ensuring operational continuity during COVID-19 and reducing operating costs by 30%.</li>
+                                    <li><strong>Agentic AI & Automation:</strong> Advanced capability in designing structured LLM workflows for policy gap analysis, control mapping, and automated drafting. Built Python/API tools to retrieve data and automate compliance dashboards, maintaining strict human-in-the-loop governance.</li>
+                                </ul>
+                            </div>
                         </div>
 
                     </div>
@@ -233,174 +246,199 @@
                 <section id="experience" class="scroll-mt-20 relative z-10">
                     <h2 class="text-xl font-bold text-corporate-accent dark:text-blue-400 uppercase tracking-wider mb-6 border-b border-slate-200 dark:border-slate-700 pb-2">Professional Experience</h2>
                     
-                    <div class="space-y-8">
-                        
-                        <!-- Keystone -->
-                        <div class="relative pl-6 md:pl-0">
-                            <div class="hidden md:block absolute left-0 top-0 bottom-0 w-1 bg-slate-200 dark:bg-slate-700"></div>
-                            <div class="md:pl-6">
-                                <div class="flex flex-col md:flex-row md:justify-between md:items-baseline mb-2">
-                                    <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center">
-                                        <i class="fa-solid fa-globe text-corporate-accent mr-2 text-base"></i> Keystone Analytics
-                                    </h3>
-                                    <span class="text-sm font-bold text-corporate-accent dark:text-blue-400">Intermittent / Project-Based</span>
+                    <!-- Executive Legal Leadership -->
+                    <div class="mb-8">
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 pb-2 mb-6">Executive Legal Leadership</h3>
+                        <div class="space-y-8">
+                            
+                            <!-- Red Spark -->
+                            <div class="relative pl-6 md:pl-0">
+                                <div class="hidden md:block absolute left-0 top-0 bottom-0 w-1 bg-slate-200 dark:bg-slate-700"></div>
+                                <div class="md:pl-6">
+                                    <div class="flex flex-col md:flex-row md:justify-between md:items-baseline mb-2">
+                                        <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center">
+                                            <i class="fa-solid fa-book-open text-corporate-accent mr-2 text-base"></i> Red Spark Learning C.I.C.
+                                        </h3>
+                                        <span class="text-sm font-bold text-corporate-accent dark:text-blue-400">Jan 2015 – Aug 2024</span>
+                                    </div>
+                                    <p class="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1">Director / Head of Legal & Compliance (Jan 2018 - Aug 2024) | Herefordshire, UK</p>
+                                    <p class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">Assistant to Director / Business Development Support (Jan 2015 - Jan 2018)</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 italic mb-2">An educational community interest company that grew to become the largest adult learning provider in the three counties (surpassed only by local colleges and universities), operating across 8+ locations with 15 staff, delivering adult learning programmes to vulnerable and hard-to-reach communities.</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4"><strong>Mandate:</strong> Act as the legal and operational backbone of the organisation. Protect funding eligibility, establish corporate governance, manage commercial contracts, and ensure compliance with stringent UK education, GDPR, and safeguarding regulations.</p>
+                                    
+                                    <ul class="list-disc pl-5 text-xs text-slate-600 dark:text-slate-400 mb-4 space-y-1">
+                                      <li>Policy suite ownership: governance, HR, safeguarding, data protection, complaints, incident management.</li>
+                                      <li>Contract/grant drafting & negotiation: suppliers, partners, service delivery, funding terms, variations, terminations.</li>
+                                      <li>Operational controls: risk register, obligations tracker, audit evidence logs, remediation/action tracking.</li>
+                                    </ul>
+
+                                    <ul class="space-y-3 text-sm text-slate-700 dark:text-slate-300">
+                                        <li class="flex items-start">
+                                            <i class="fa-solid fa-graduation-cap text-orange-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Moodle"></i>
+                                            <div><strong>Digital Transformation:</strong> Reduced operating costs by 30% and ensured total business continuity during COVID-19 lockdowns by pioneering a critical infrastructure pivot, successfully migrating all educational services online and automating manual workflows.</div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fa-solid fa-user-shield text-corporate-accent mt-1 mr-3 w-5 text-center flex-shrink-0" title="GDPR"></i>
+                                            <div><strong>Data Protection & Information Law:</strong> Maintained rigorous data protection across 8 operational sites by spearheading GDPR compliance frameworks, executing Data Protection Impact Assessments (DPIAs) for cloud rollouts, and managing statutory Subject Access Requests (SARs).</div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fa-solid fa-scale-balanced text-slate-600 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Governance"></i>
+                                            <div><strong>Legal Advisory & Corporate Governance (SRA QWE):</strong> Secured strict adherence to statutory obligations and Companies Act 2006 requirements by advising the executive board on conflicts of interest, CIC regulatory filings, and architecting the organisation's comprehensive legal policy suite.</div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fa-solid fa-chart-pie text-blue-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Automation"></i>
+                                            <div><strong>Compliance & Audit Operations:</strong> Maintained 100% audit pass rates for highly scrutinized EEC, Lottery, and central government funds by designing live compliance dashboards and automated risk registers to track obligations.</div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fa-solid fa-file-signature text-corporate-accent mt-1 mr-3 w-5 text-center flex-shrink-0" title="Procurement"></i>
+                                            <div><strong>Commercial Contracting & Public Sector Grants (SRA QWE):</strong> Strictly controlled liability and protected organisational interests by drafting, reviewing, and negotiating a high volume of commercial contracts, supplier agreements, and NGO Institutional Funding frameworks.</div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fa-solid fa-users-gear text-slate-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Containment"></i>
+                                            <div><strong>HR Advisory & Crisis Management:</strong> Ensured procedural fairness and defensible HR outcomes by directing complex internal administrative matters, capability reviews, and high-risk grievance procedures in strict adherence to employment law.</div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fa-solid fa-gavel text-slate-600 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Advocacy"></i>
+                                            <div><strong>Dispute Resolution & Pre-Litigation (SRA QWE):</strong> Successfully avoided costly tribunal proceedings by managing early-stage dispute resolution for vendor conflicts and drafting strategic settlement agreements.</div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fa-solid fa-arrow-trend-up text-emerald-600 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Business Development"></i>
+                                            <div><strong>Operational Leadership & Commercial Growth:</strong> Scaled a regional CIC into the largest adult education provider in three counties (outside of universities and colleges) serving vulnerable populations, driving major infrastructure expansion by successfully procuring a £200,000 EEC and Lottery Bid Partnership.</div>
+                                        </li>
+                                    </ul>
                                 </div>
-                                <p class="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1">Consultant (Legal, Financial & Strategic Advisory) | Remote</p>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 italic mb-4">Consulted for a multinational enterprise comprising a Texas parent company, a Philippine fintech arm, and associated physical service subsidiaries.</p>
-                                
-                                <ul class="space-y-3 text-sm text-slate-700 dark:text-slate-300">
-                                    <li class="flex items-start">
-                                        <i class="fa-solid fa-chart-line text-emerald-600 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Corporate Restructuring"></i>
-                                        <div><strong>Strategic Turnaround & Financial Recovery:</strong> Remedied a full year's financial loss within a 3-month period, preventing business shutdown and drastically reducing capital burn, by directing a critical funding strategy pivot and advising on the market logistics and regulatory compliance of core tech products.</div>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <i class="fa-solid fa-handshake text-slate-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Deal Structuring"></i>
-                                        <div><strong>Venture Capital & Joint Ventures:</strong> Targeted $2M+ in funding as Lead VC Consultant for a major public-private solar farm initiative (a joint venture between a hotel magnate and the government energy provider), by directing strategic advisory for the comprehensive white paper and authoring the investor pitch deck.</div>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <i class="fa-solid fa-building-columns text-slate-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Capital Stack Design"></i>
-                                        <div><strong>Non-Dilutive Funding Strategy:</strong> Secured alternative non-dilutive funding pipelines for the solar venture, protecting the parent company from excessive equity dilution, by successfully navigating and leveraging complex banking regulations.</div>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <i class="fa-solid fa-database text-blue-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="System Auditing"></i>
-                                        <div><strong>Fintech Regulatory & Data Advisory:</strong> Ensured maximum market efficacy and regulatory alignment for the Philippine fintech division's offerings by delivering comprehensive legal, compliance, and financial data analysis consultation during the rollout of proprietary trading tools and agentic workflows.</div>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <i class="fa-brands fa-app-store-ios text-blue-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="SaaS consultation"></i>
-                                        <div><strong>Humanitarian & Commercial Partnerships:</strong> Established the legal and operational compliance frameworks for joint humanitarian child enterprises, including a semi-private ambulance service and its accompanying SaaS dispatch application, alongside co-authoring commercial applications available on the App Store.</div>
-                                    </li>
-                                </ul>
                             </div>
                         </div>
-
-                        <!-- Red Spark -->
-                        <div class="relative pl-6 md:pl-0">
-                            <div class="hidden md:block absolute left-0 top-0 bottom-0 w-1 bg-slate-200 dark:bg-slate-700"></div>
-                            <div class="md:pl-6">
-                                <div class="flex flex-col md:flex-row md:justify-between md:items-baseline mb-2">
-                                    <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center">
-                                        <i class="fa-solid fa-book-open text-corporate-accent mr-2 text-base"></i> Red Spark Learning C.I.C.
-                                    </h3>
-                                    <span class="text-sm font-bold text-corporate-accent dark:text-blue-400">Jan 2015 – Aug 2024</span>
-                                </div>
-                                <p class="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1">Director / Head of Legal & Compliance (Jan 2018 - Aug 2024) | Herefordshire, UK</p>
-                                <p class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">Assistant to Director / Business Development Support (Jan 2015 - Jan 2018)</p>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 italic mb-4">An educational community interest company operating across 8+ locations with 15 staff.</p>
-                                
-                                <ul class="space-y-3 text-sm text-slate-700 dark:text-slate-300">
-                                    <li class="flex items-start">
-                                        <i class="fa-solid fa-arrow-trend-up text-emerald-600 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Tender Management"></i>
-                                        <div><strong>Operational Leadership & Commercial Growth:</strong> Scaled a regional CIC into the largest adult education provider in three counties (outside of universities and colleges) serving vulnerable populations, driving major infrastructure expansion by successfully procuring a £200,000 EEC and Lottery Bid Partnership.</div>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <i class="fa-solid fa-chart-pie text-blue-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Power BI Automation"></i>
-                                        <div><strong>Compliance & Audit Operations:</strong> Maintained 100% audit pass rates for highly scrutinized EEC, Lottery, and central government funds by designing live compliance dashboards and automated risk registers to track obligations.</div>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <i class="fa-solid fa-scale-balanced text-slate-600 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Policy Architecture"></i>
-                                        <div><strong>Legal Advisory & Corporate Governance (SRA QWE):</strong> Secured strict adherence to statutory obligations and Companies Act 2006 requirements by advising the executive board on conflicts of interest, CIC regulatory filings, and architecting the organisation's comprehensive legal policy suite.</div>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <i class="fa-solid fa-file-signature text-corporate-accent mt-1 mr-3 w-5 text-center flex-shrink-0" title="DocuSign CLM"></i>
-                                        <div><strong>Commercial Contracting & Public Sector Grants (SRA QWE):</strong> Strictly controlled liability and protected organisational interests by drafting, reviewing, and negotiating a high volume of commercial contracts, supplier agreements, and NGO Institutional Funding frameworks.</div>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <i class="fa-solid fa-gavel text-slate-600 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Mediation & Negotiation"></i>
-                                        <div><strong>Dispute Resolution & Pre-Litigation (SRA QWE):</strong> Successfully avoided costly tribunal proceedings by managing early-stage dispute resolution for vendor conflicts and drafting strategic settlement agreements.</div>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <i class="fa-solid fa-graduation-cap text-orange-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Moodle LMS Deployment"></i>
-                                        <div><strong>Digital Transformation:</strong> Reduced operating costs by 30% and ensured total business continuity during COVID-19 lockdowns by pioneering a critical infrastructure pivot, successfully migrating all educational services online and automating manual workflows.</div>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <i class="fa-solid fa-user-shield text-corporate-accent mt-1 mr-3 w-5 text-center flex-shrink-0" title="Privacy Architecture"></i>
-                                        <div><strong>Data Protection & Information Law:</strong> Maintained rigorous data protection across 8 operational sites by spearheading GDPR compliance frameworks, executing Data Protection Impact Assessments (DPIAs) for cloud rollouts, and managing statutory Subject Access Requests (SARs).</div>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <i class="fa-solid fa-users-gear text-slate-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Employment Mediation"></i>
-                                        <div><strong>HR Advisory & Crisis Management:</strong> Ensured procedural fairness and defensible HR outcomes by directing complex internal administrative matters, capability reviews, and high-risk grievance procedures in strict adherence to employment law.</div>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <!-- HVOSS -->
-                        <div class="relative pl-6 md:pl-0">
-                            <div class="hidden md:block absolute left-0 top-0 bottom-0 w-1 bg-slate-200 dark:bg-slate-700"></div>
-                            <div class="md:pl-6">
-                                <div class="flex flex-col md:flex-row md:justify-between md:items-baseline mb-2">
-                                    <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center">
-                                        <i class="fa-solid fa-hands-holding-circle text-corporate-accent mr-2 text-base"></i> HVOSS (Herefordshire Voluntary Organisations Support Service)
-                                    </h3>
-                                    <span class="text-sm font-bold text-corporate-accent dark:text-blue-400">Oct 2022 – Jul 2024</span>
-                                </div>
-                                <p class="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1">Board Member / Trustee | Herefordshire, UK</p>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 italic mb-4">Non-executive governance, legal and financial oversight for a charitable company supporting Herefordshire’s VCSE sector.</p>
-                                
-                                <ul class="space-y-3 text-sm text-slate-700 dark:text-slate-300">
-                                    <li class="flex items-start">
-                                        <i class="fa-solid fa-chart-line text-emerald-600 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Organizational Scaling"></i>
-                                        <div><strong>Operating scale and complexity:</strong> Oversaw governance in an organisation operating at significant scale, with total income rising from £590,632 (FY22) to £933,558 (FY23), increasing complexity of delivery, restricted funding stewardship, and financial controls.</div>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <i class="fa-solid fa-file-invoice-dollar text-red-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Deficit Modeling"></i>
-                                        <div><strong>Financial stewardship under volatility:</strong> Helped steer trustee governance through a period of funding volatility and sustained financial pressure, with statutory filings showing two consecutive deficit years: net movement in funds (£36,772) FY23 and (£28,128) FY24.</div>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <i class="fa-solid fa-money-bill-wave text-blue-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Treasury Management"></i>
-                                        <div><strong>Liquidity and resilience oversight:</strong> Maintained a cash-first oversight stance to support continuity of services despite deficit conditions, with cash at bank reported at £291,139 (FY23) and £273,645 (FY24).</div>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <i class="fa-solid fa-scale-balanced text-slate-600 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Financial Restructuring"></i>
-                                        <div><strong>Balance sheet pressure and sustainability:</strong> Supported board-level sustainability decisions and prioritisation as total funds reduced from £349,578 (FY22) to £284,678 (FY24) (a £64,900 contraction), strengthening governance under constraint.</div>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <i class="fa-solid fa-vault text-amber-600 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Fiduciary Auditing"></i>
-                                        <div><strong>Restricted-funds stewardship:</strong> Strengthened stewardship of restricted funding by reinforcing purpose discipline and governance around cost allocation and sustainability as restricted fund balances moved from £159,076 (FY22) to £63,620 (FY24) (a £95,456 reduction).</div>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <i class="fa-solid fa-clipboard-check text-corporate-accent mt-1 mr-3 w-5 text-center flex-shrink-0" title="Statutory Reporting"></i>
-                                        <div><strong>Governance, compliance and assurance:</strong> Maintained compliance-grade governance and reporting discipline (Charities SORP/FRS 102; Companies Act), ensuring decisions were evidence-led, proportionate, and defensible.</div>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <!-- Proprietary Fintech Development -->
-                        <div class="relative pl-6 md:pl-0">
-                            <div class="hidden md:block absolute left-0 top-0 bottom-0 w-1 bg-slate-200 dark:bg-slate-700"></div>
-                            <div class="md:pl-6">
-                                <div class="flex flex-col md:flex-row md:justify-between md:items-baseline mb-2">
-                                    <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center">
-                                        <i class="fa-solid fa-microchip text-corporate-accent mr-2 text-base"></i> Proprietary Fintech Development
-                                    </h3>
-                                    <span class="text-sm font-bold text-corporate-accent dark:text-blue-400">Jan 2021 – Present</span>
-                                </div>
-                                <p class="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1">Algorithmic Risk Management, Data Analysis & Quantitative Trading | Geneva, CH</p>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 italic mb-4">Established a dedicated entity for quantitative risk management and market data analysis.</p>
-                                
-                                <ul class="space-y-3 text-sm text-slate-700 dark:text-slate-300 mt-3">
-                                    <li class="flex items-start">
-                                        <i class="fa-solid fa-chart-column text-emerald-600 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Value Investing Methodology"></i>
-                                        <div><strong>Quantitative Performance & ROI:</strong> Achieved exceptionally high year-on-year investment returns—culminating in a >74% ROI in 2024 before ceasing operations—by deploying proprietary quantitative trading systems built to synthesize deep company value analysis, pattern spotting, and the tracking of real-world macroeconomic policy shifts.</div>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <i class="fa-brands fa-python text-blue-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Data Engineering"></i>
-                                        <div><strong>Methodology & Automation:</strong> Engineered automated scripts (leveraging Python, Pandas, and Matplotlib) to scrape real-time market data, detecting geopolitical trends and regulatory changes to inform quantitative trading strategies.</div>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <i class="fa-solid fa-brain text-purple-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="NLP Integration"></i>
-                                        <div><strong>Data Analytics & Sentiment Parsing:</strong> Developed proprietary analytical tools to aggregate and detect market analyst sentiment, featuring dynamic filtering based on the delta between current asset prices and predictive targets.</div>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <i class="fa-solid fa-gears text-slate-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="B2B Tech Deployment"></i>
-                                        <div><strong>IP Utilisation & Enterprise Scaling:</strong> The proprietary IP and automated workflows built here were subsequently utilized in enterprise consulting for Keystone Analytics, whose CEO was integral to the initial development phase.</div>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
                     </div>
+
+                    <!-- Technical & Strategic Advisory -->
+                    <div class="mb-8">
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 pb-2 mb-6">Technical & Strategic Advisory</h3>
+                        <div class="space-y-8">
+                            
+                            <!-- Proprietary Fintech Development -->
+                            <div class="relative pl-6 md:pl-0">
+                                <div class="hidden md:block absolute left-0 top-0 bottom-0 w-1 bg-slate-200 dark:bg-slate-700"></div>
+                                <div class="md:pl-6">
+                                    <div class="flex flex-col md:flex-row md:justify-between md:items-baseline mb-2">
+                                        <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center">
+                                            <i class="fa-solid fa-microchip text-corporate-accent mr-2 text-base"></i> Proprietary Fintech Development
+                                        </h3>
+                                        <span class="text-sm font-bold text-corporate-accent dark:text-blue-400">Jan 2021 – Present</span>
+                                    </div>
+                                    <p class="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1">Algorithmic Risk Management, Data Analysis & Quantitative Trading | Geneva, CH / UK</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 italic mb-4">Built and operated a proprietary quantitative trading and risk-management stack synthesizing company fundamentals, technical pattern detection, and real-world macroeconomic policy shifts into systematic signals, position sizing, and risk limits.</p>
+                                    
+                                    <ul class="space-y-3 text-sm text-slate-700 dark:text-slate-300 mt-3">
+                                        <li class="flex items-start">
+                                            <i class="fa-solid fa-chart-column text-emerald-600 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Trading"></i>
+                                            <div><strong>Quantitative Performance & ROI:</strong> Achieved exceptionally high year-on-year investment returns—culminating in a >74% ROI in 2024 before ceasing operations—by deploying proprietary quantitative trading systems built to synthesize deep company value analysis, pattern spotting, and the tracking of real-world macroeconomic policy shifts.</div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fa-brands fa-python text-blue-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Python"></i>
+                                            <div><strong>Methodology & Automation:</strong> Engineered automated scripts (leveraging Python, Pandas, and Matplotlib) to scrape real-time market data, detecting geopolitical trends and regulatory changes to inform quantitative trading strategies.</div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fa-solid fa-brain text-purple-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Apps Development"></i>
+                                            <div><strong>Data Analytics & Sentiment Parsing:</strong> Developed proprietary analytical tools to aggregate and detect market analyst sentiment, featuring dynamic filtering based on the delta between current asset prices and predictive targets.</div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fa-solid fa-gears text-slate-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Agentic Systems"></i>
+                                            <div><strong>IP Utilisation & Enterprise Scaling:</strong> The proprietary IP and automated workflows built here were subsequently utilized in enterprise consulting for Keystone Analytics, whose CEO was integral to the initial development phase.</div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Keystone -->
+                            <div class="relative pl-6 md:pl-0">
+                                <div class="hidden md:block absolute left-0 top-0 bottom-0 w-1 bg-slate-200 dark:bg-slate-700"></div>
+                                <div class="md:pl-6">
+                                    <div class="flex flex-col md:flex-row md:justify-between md:items-baseline mb-2">
+                                        <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center">
+                                            <i class="fa-solid fa-globe text-corporate-accent mr-2 text-base"></i> Keystone Analytics
+                                        </h3>
+                                        <span class="text-sm font-bold text-corporate-accent dark:text-blue-400">Intermittent / Project-Based</span>
+                                    </div>
+                                    <p class="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1">Consultant (Legal, Financial & Strategic Advisory) | Remote</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 italic mb-4">Consulted for a multinational enterprise comprising a Las Vegas parent company, a Philippine fintech arm, and associated physical service subsidiaries.</p>
+                                    
+                                    <ul class="space-y-3 text-sm text-slate-700 dark:text-slate-300">
+                                        <li class="flex items-start">
+                                            <i class="fa-solid fa-chart-line text-emerald-600 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Remediation"></i>
+                                            <div><strong>Strategic Turnaround & Financial Recovery:</strong> Played a key role in a funding pivot and cost-control strategy that remediated a large financial loss within 3 months. Materially reduced capital burn while advising on the commercial, compliance, and rollout frameworks for core tech products.</div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fa-solid fa-handshake text-slate-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Venture Capital"></i>
+                                            <div><strong>Venture Capital & Joint Ventures:</strong> Targeted $2M+ in funding as Lead VC Consultant for a major public-private solar farm initiative (a joint venture between a hotel magnate and the government energy provider), by directing strategic advisory for the comprehensive white paper and authoring the investor pitch deck.</div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fa-solid fa-building-columns text-slate-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Non-Dilutive Funding"></i>
+                                            <div><strong>Non-Dilutive Funding Strategy:</strong> Successfully navigated complex banking regulations to secure alternative funding pipelines for the solar venture, creating supporting materials (requirements, constraints, sequencing) aimed at reducing dilution risk and improving sponsor readiness for lender/investor discussions.</div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fa-solid fa-database text-blue-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Fintech Regulatory"></i>
+                                            <div><strong>Foreign Governance & Algorithmic Strategy:</strong> Consulted on legal structuring, HR strategy, and contract compliance for a foreign entity operating in the Philippines. Concurrently co-developed the foundational financial logic for their proprietary trading tools, supplying engineering teams with comprehensive data models that mapped fundamental market events and advanced technical indicators to guide predictive agentic workflows.<em class="text-xs text-slate-500 dark:text-slate-400 mt-1 block">(Example: Architected logic enabling agentic systems to bypass surface-level market panic by correlating public staffing reductions against sustained client contract revenue to identify high-conviction value indicators.)</em></div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fa-brands fa-app-store-ios text-blue-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Humanitarian"></i>
+                                            <div><strong>Humanitarian & Commercial Partnerships:</strong> Established the legal and operational compliance frameworks for joint humanitarian child enterprises, including a semi-private ambulance service and its accompanying SaaS dispatch application, alongside co-authoring commercial applications available on the App Store.</div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Board Appointments & Governance -->
+                    <div class="mb-8">
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 pb-2 mb-6">Board Appointments & Governance</h3>
+                        <div class="space-y-8">
+
+                            <!-- HVOSS -->
+                            <div class="relative pl-6 md:pl-0">
+                                <div class="hidden md:block absolute left-0 top-0 bottom-0 w-1 bg-slate-200 dark:bg-slate-700"></div>
+                                <div class="md:pl-6">
+                                    <div class="flex flex-col md:flex-row md:justify-between md:items-baseline mb-2">
+                                        <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center">
+                                            <i class="fa-solid fa-hands-holding-circle text-corporate-accent mr-2 text-base"></i> HVOSS (Herefordshire Voluntary Organisations Support Service)
+                                        </h3>
+                                        <span class="text-sm font-bold text-corporate-accent dark:text-blue-400">Oct 2022 – Jul 2024</span>
+                                    </div>
+                                    <p class="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1">Board Member / Trustee | Herefordshire, UK</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 italic mb-4">Non-executive governance, legal and financial oversight for a charitable company supporting Herefordshire’s VCSE sector.</p>
+                                    
+                                    <ul class="space-y-3 text-sm text-slate-700 dark:text-slate-300">
+                                        <li class="flex items-start">
+                                            <i class="fa-solid fa-chart-line text-emerald-600 mt-1 mr-3 w-5 text-center flex-shrink-0" title="governance"></i>
+                                            <div><strong>Operating scale and complexity:</strong> Oversaw governance in an organisation operating at significant scale, with total income rising from £590,632 (FY22) to £933,558 (FY23), increasing complexity of delivery, restricted funding stewardship, and financial controls.</div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fa-solid fa-file-invoice-dollar text-red-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Crisis management"></i>
+                                            <div><strong>Financial stewardship under volatility:</strong> Helped steer trustee governance through a period of funding volatility and sustained financial pressure, with statutory filings showing two consecutive deficit years: net movement in funds (£36,772) FY23 and (£28,128) FY24.</div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fa-solid fa-money-bill-wave text-blue-500 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Treasury Management"></i>
+                                            <div><strong>Liquidity and resilience oversight:</strong> Maintained a cash-first oversight stance to support continuity of services despite deficit conditions, with cash at bank reported at £291,139 (FY23) and £273,645 (FY24).</div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fa-solid fa-scale-balanced text-slate-600 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Financial Restructuring"></i>
+                                            <div><strong>Balance sheet pressure and sustainability:</strong> Supported board-level sustainability decisions and prioritisation as total funds reduced from £349,578 (FY22) to £284,678 (FY24) (a £64,900 contraction), strengthening governance under constraint.</div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fa-solid fa-vault text-amber-600 mt-1 mr-3 w-5 text-center flex-shrink-0" title="Fiduciary Auditing"></i>
+                                            <div><strong>Restricted-funds stewardship:</strong> Strengthened stewardship of restricted funding by reinforcing purpose discipline and governance around cost allocation and sustainability as restricted fund balances moved from £159,076 (FY22) to £63,620 (FY24) (a £95,456 reduction).</div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fa-solid fa-shield-halved text-corporate-accent mt-1 mr-3 w-5 text-center flex-shrink-0" title="Stabilisation"></i>
+                                            <div><strong>Governance, compliance and assurance:</strong> Maintained compliance-grade governance and reporting discipline (Charities SORP/FRS 102; Companies Act), ensuring decisions were evidence-led, proportionate, and defensible.</div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </section>
 
                 <!-- War Room Scenarios Section (Interactive Modals) -->
@@ -428,7 +466,7 @@
                                 <i data-lucide="layers" class="w-5 h-5"></i>
                             </div>
                             <h3 class="font-bold text-slate-900 dark:text-white text-base mb-2">Red Spark Operational Architecture</h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 flex-1">Converted an 8-site, paper-based operation into a compliance-led digital model under COVID pressure. Built an automated legal/compliance pipeline delivering &lt;1% funding exceptions, &lt;15-minute audit retrieval, and zero reportable data breaches.</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 flex-1">Pioneered a critical infrastructure pivot under COVID-19 pressure, converting an 8-site, paper-based operation into a compliance-led digital model. Engineered an automated legal pipeline delivering &lt;1% funding exceptions, &lt;15-minute audit retrieval, and no known reportable data breaches.</p>
                             <span class="text-xs font-bold text-corporate-accent uppercase flex items-center group-hover:underline">
                                 View Case Study <i data-lucide="arrow-right" class="w-3 h-3 ml-1"></i>
                             </span>
@@ -464,7 +502,7 @@
                             <div class="font-bold text-slate-900 dark:text-white flex items-start mt-0.5">
                                 <i data-lucide="shield-check" class="w-4 h-4 mr-2 text-corporate-accent flex-shrink-0 mt-0.5"></i> <span>Compliance Platforms:</span>
                             </div>
-                            <div class="md:col-span-3 text-slate-600 dark:text-slate-400"><span class="italic">Familiarity:</span> Refinitiv World-Check, Chainalysis, OneTrust, TrustArc, NAVEX Global, ServiceNow GRC.</div>
+                            <div class="md:col-span-3 text-slate-600 dark:text-slate-400"><span class="italic">Platform familiarity (concepts / exposure):</span> World-Check, Chainalysis, OneTrust, TrustArc, NAVEX, ServiceNow GRC.</div>
                         </div>
                         <div class="border-t border-slate-200 dark:border-slate-700"></div>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
@@ -478,7 +516,7 @@
                             <div class="font-bold text-slate-900 dark:text-white flex items-start mt-0.5">
                                 <i data-lucide="kanban" class="w-4 h-4 mr-2 text-corporate-accent flex-shrink-0 mt-0.5"></i> <span>Delivery & Collab:</span>
                             </div>
-                            <div class="md:col-span-3">Jira, Confluence, Taiga; Microsoft 365, Google Workspace.</div>
+                            <div class="md:col-span-3">Jira, Confluence, Taiga; Microsoft 365; Google Docs.</div>
                         </div>
                         <div class="border-t border-slate-200 dark:border-slate-700"></div>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
@@ -536,7 +574,14 @@
                             <p class="text-sm font-medium text-slate-800 dark:text-slate-200 mb-2">University of Worcester (Honours)</p>
                             <ul class="list-disc pl-5 space-y-1 text-sm text-slate-700 dark:text-slate-300">
                                 <li><strong>Specialisations:</strong> International Law (specifically focusing on systems surrounding international finance), operational mechanics of legal systems, law of international organizations, treaty interpretation, administrative law, privileges and immunities, and commercial contract law.</li>
-                                <li><strong>Dissertation:</strong> <em>Economic and Cyber Warfare.</em> Awarded full marks (100%) and a formal offer to continue research to the doctorate level.</li>
+                                <li>
+                                    <strong>Dissertation:</strong> <em>Economic and Cyber Warfare: The Unregulated War.</em> Awarded full marks (100%) and four prestigious doctoral research offers. Authored cutting-edge research proposing a comprehensive legislative framework (UK-EWPRA) to regulate state and non-state actors utilizing cyber-attacks, algorithmic exploitation, and proxy financial tactics.
+                                    <div class="mt-2 mb-1">
+                                        <button onclick="openPdfModal('The Unregulated War', './The Unregulated War.pdf')" class="inline-flex items-center px-2.5 py-1.5 text-xs font-bold rounded-sm bg-corporate-accent/10 text-corporate-accent dark:bg-blue-900/30 dark:text-blue-400 hover:bg-corporate-accent hover:text-white dark:hover:bg-blue-500 dark:hover:text-white transition-colors border border-corporate-accent/20 dark:border-blue-800/50 shadow-sm">
+                                            <i data-lucide="file-text" class="w-3.5 h-3.5 mr-1.5"></i> View Full Thesis
+                                        </button>
+                                    </div>
+                                </li>
                             </ul>
                         </div>
                         
@@ -548,7 +593,7 @@
                             <p class="text-sm font-medium text-slate-800 dark:text-slate-200 mb-2">Goldsmiths, University of London (Summa Cum Laude) | Economics Major</p>
                             <ul class="list-disc pl-5 space-y-1 text-sm text-slate-700 dark:text-slate-300">
                                 <li><strong>Key Modules:</strong> Macroeconomics, International Economics, Banking, Political Theory, African Conflict and Peacekeeping, and Game Theory.</li>
-                                <li><strong>Extracurriculars:</strong> Proofread master's theses upon faculty request; active in Model United Nations and debate societies.</li>
+                                <li><strong>Extracurriculars:</strong> Proofread master's theses upon faculty request; active in Model United Nations and debate societies; contributed to articles for the university newspaper, and served as a featured radio commentator delivering objective, non-partisan factual assessments of complex and highly debated macroeconomic and public policy shifts.</li>
                             </ul>
                         </div>
                     </div>
@@ -563,7 +608,7 @@
                         <li><strong>Member:</strong> International Association of Privacy Professionals (IAPP)</li>
                         <li><strong>Member:</strong> International Compliance Association (ICA)</li>
                         <li><strong>Member:</strong> International Law Association</li>
-                        <li class="pt-2"><strong>Professional Development Targets:</strong> Actively preparing to undertake industry-standard compliance certifications including <strong>CAMS</strong> and <strong>CIPP/E</strong> to further formalise cross-border financial and data privacy expertise.</li>
+                        <li class="pt-2"><strong>Professional Development Targets:</strong> Actively preparing to undertake industry-standard compliance certifications including <strong>CAMS</strong> and <strong>CIPP/E</strong> to further formalise AML and privacy capability for Swiss/European roles.</li>
                     </ul>
                 </section>
 
@@ -900,7 +945,7 @@
                 {
                     name: "Patricia Ann Newby, M.A.",
                     title: "Managing Director, Red Spark Learning C.I.C.",
-                    contact: ["Tricia", "mail2business.com"].join('@'),
+                    contact: ["Tricia.Newby", "hotmail.com"].join('@'),
                     phone: "+33 (0) 6 76 97 13 90",
                     rel: "Direct supervisor for 5 years at Red Spark Learning, overseeing project management, strategy development and general operations.",
                     span: 2
@@ -950,7 +995,7 @@
                 ],
                 "clearance": "SRA QWE Verified (5+ Years)"
             },
-            "professional_summary": "Legal, Compliance, and Operations lead (LL.M., Legal Practice) serving as the legal nexus for complex operations. With 8+ years of experience, I build scalable governance frameworks, execute regulatory compliance, and establish robust procurement protocols. I drive contract lifecycle management, operational risk mitigation, and the strategic implementation of AI and integrated systems to reduce overhead.\n\nUniquely positioned at the intersection of law and technology, I bridge the gap between engineering and legal teams. Fundamentally a legal and operations head, I bring technical fluency, independently review code, audit agentic AI workflows, and verify software architecture against strict legal requirements.\n\nI pair this technical edge with a rigorous understanding of ever-evolving global methodology. Drawing on advanced research in international Law, focused on economic and cyber warfare, I track rapid regulatory policy shifts and modern malicious-actor methodologies. Able to translate these complex geopolitical and cyber threats into proactive business defense strategies, ensuring continuous regulatory and operational resilience.",
+            "professional_summary": "Dynamic Legal and Compliance leader holding an LL.M. in Legal Practice (International Law), acting as the legal nexus for complex operations. With over 8 years of experience, I build scalable governance frameworks, regulatory compliance documentation, and robust procurement protocols. I am highly adept at contract lifecycle management, risk mitigation, HR advisory, and the strategic implementation of AI and automation to reduce operational overhead.\n\nUniquely positioned at the intersection of law and technology, I bridge the gap between engineering and legal teams. I provide legal and governance counsel backed by hands-on technical fluency. While my primary focus is regulatory alignment, I possess the literacy to independently assess code and system designs. Rather than disrupting developer productivity for summaries, I utilize agentic workflows to parse technical outputs, enabling me to directly apply legal scrutiny and verify compliance at the execution level.\n\nI pair this technical edge with a rigorous understanding of ever-evolving global methodology. Drawing on advanced research in international Law, focused on economic and cyber warfare, I track rapid regulatory policy shifts and modern malicious-actor methodologies. Able to translate these complex geopolitical and cyber threats into proactive business defense strategies, ensuring continuous regulatory and operational resilience.\n\nNot admitted as a solicitor; legal and compliance experience delivered in-house within director and trustee capacities, with formal admission pursued via the SQE pathway.",
             "core_competencies": {
                 "legal_advisory_and_governance": [
                     "5+ years of demonstrable legal practice experience (SRA QWE) encompassing contract drafting, administrative decision-making, dispute resolution, and policy architecture.",
@@ -958,80 +1003,107 @@
                     "End-to-end ownership of supplier agreements, MOUs, service delivery contracts, and institutional grant terms.",
                     "Early assessment, evidence preservation, and settlement strategy formulation. Mitigated £70,000+ in potential damages."
                 ],
-                "cyber_resilience_and_operational_risk": [
-                    "Invited to pursue doctoral research based on an LL.M. dissertation (awarded 100%) exploring Economic/Cyber Warfare enforcement gaps.",
-                    "Expert in predicting state-actor methodologies and exploiting international legal vulnerabilities via third-party intermediaries.",
-                    "Capable of mapping geopolitical cyber-threats to institutional risk management and regulatory resilience (e.g., FINMA, EU DORA)."
-                ],
                 "regulatory_compliance_and_risk_management": [
-                    "Built 'compliance by default' programs across 8 operational sites. Converted statutory/funder requirements into actionable checklists.",
-                    "Maintained 100% audit pass rates. Designed robust risk registers and incident reporting pipelines (GDPR).",
-                    "Deep understanding of AML/CFT concepts, cross-border restrictions, and institutional risk management."
+                    "Built and embedded 'compliance by default' programs across 8 operational sites. Converted complex statutory and funder requirements (EEC, UK Government, National Lottery) into actionable checklists, approval gates, and evidence logs matched with both human safeguards and training.",
+                    "Maintained 100% audit pass rates. Designed robust risk registers and incident reporting pipelines to track and remediate compliance failures, safeguarding concerns, and data breaches (GDPR).",
+                    "Understanding of AML/CFT concepts, cross-border restrictions, and institutional risk management. Positioned to operationalise FINMA-aligned compliance controls using risk-based methodologies and rigorous evidence trails."
                 ],
                 "financial_procurement_and_commercial_operations": [
-                    "Partnered with leadership to secure and manage over £500,000 in public and lottery funding.",
-                    "Designed vendor risk management protocols ensuring value-for-money documentation and strict supplier due diligence.",
-                    "Board-level experience in budget scrutiny, deficit mitigation, and establishing 'financial war-rooms' during strain."
+                    "Partnered with leadership to secure and manage over £500,000 in public and lottery funding. Navigated strict funder compliance, milestone reporting, and payment conditions.",
+                    "Designed vendor risk management and procurement protocols for publicly funded environments, ensuring value-for-money documentation, separation of duties, and strict supplier due diligence.",
+                    "Board-level experience in budget scrutiny, cashflow prioritisation, deficit mitigation, and establishing 'financial war-rooms' during periods of organisational strain."
+                ],
+                "digital_transformation_and_ai_integration": [
+                    "Spearheaded the full migration of paper-based operational and educational services to cloud-based systems (Moodle), ensuring operational continuity during COVID-19 and reducing operating costs by 30%.",
+                    "Advanced capability in designing structured LLM workflows for policy gap analysis, control mapping, and automated drafting. Built Python/API tools to retrieve data and automate compliance dashboards, maintaining strict human-in-the-loop governance."
                 ]
             },
-            "experience": [
-                {
-                    "company": "Keystone Analytics",
-                    "role": "Consultant (Legal, Financial & Strategic Advisory)",
-                    "location": "Remote",
-                    "timeline": "Intermittent / Project-Based",
-                    "achievements": [
-                        "Remedied a full year's financial loss within a 3-month period, preventing business shutdown and drastically reducing capital burn, by directing a critical funding strategy pivot and advising on the market logistics and regulatory compliance of core tech products.",
-                        "Targeted $2M+ in funding as Lead VC Consultant for a major public-private solar farm initiative (a joint venture between a hotel magnate and the government energy provider), by directing strategic advisory for the comprehensive white paper and authoring the investor pitch deck.",
-                        "Secured alternative non-dilutive funding pipelines for the solar venture, protecting the parent company from excessive equity dilution, by successfully navigating and leveraging complex banking regulations.",
-                        "Ensured maximum market efficacy and regulatory alignment for the Philippine fintech division's offerings by delivering comprehensive legal, compliance, and financial data analysis consultation during the rollout of proprietary trading tools and agentic workflows.",
-                        "Established the legal and operational compliance frameworks for joint humanitarian child enterprises, including a semi-private ambulance service and its accompanying SaaS dispatch application, alongside co-authoring commercial applications available on the App Store."
-                    ]
-                },
-                {
-                    "company": "Red Spark Learning C.I.C.",
-                    "role": "Director / Head of Legal & Compliance",
-                    "location": "Herefordshire, UK",
-                    "timeline": "Jan 2018 – Aug 2024 (Assistant to Director: Jan 2015 - Jan 2018)",
-                    "achievements": [
-                        "Scaled a regional CIC into the largest adult education provider in three counties (outside of universities and colleges) serving vulnerable populations, driving major infrastructure expansion by successfully procuring a £200,000 EEC and Lottery Bid Partnership.",
-                        "Maintained 100% audit pass rates for highly scrutinized EEC, Lottery, and central government funds by designing live compliance dashboards and automated risk registers to track obligations.",
-                        "Secured strict adherence to statutory obligations and Companies Act 2006 requirements by advising the executive board on conflicts of interest, CIC regulatory filings, and architecting the organisation's comprehensive legal policy suite.",
-                        "Strictly controlled liability and protected organisational interests by drafting, reviewing, and negotiating a high volume of commercial contracts, supplier agreements, and NGO Institutional Funding frameworks.",
-                        "Successfully avoided costly tribunal proceedings by managing early-stage dispute resolution for vendor conflicts and drafting strategic settlement agreements.",
-                        "Reduced operating costs by 30% and ensured total business continuity during COVID-19 lockdowns by pioneering a critical infrastructure pivot, successfully migrating all educational services online and automating manual workflows.",
-                        "Maintained rigorous data protection across 8 operational sites by spearheading GDPR compliance frameworks, executing Data Protection Impact Assessments (DPIAs) for cloud rollouts, and managing statutory Subject Access Requests (SARs).",
-                        "Ensured procedural fairness and defensible HR outcomes by directing complex internal administrative matters, capability reviews, and high-risk grievance procedures in strict adherence to employment law."
-                    ]
-                },
-                {
-                    "company": "HVOSS",
-                    "role": "Board Member / Trustee",
-                    "location": "Herefordshire, UK",
-                    "timeline": "Oct 2022 – Jul 2024",
-                    "achievements": [
-                        "Crisis finance governance (deficit control): Joined during a projected ~£100k+ year-end deficit with multi-project shortfalls (Community Wheels ~£20k - 30k, BBO ~£11k, Talk Community ~£6k); supported emergency board action to convene a Funding/Finance review group and prioritise corrective decisions and cashflow controls.",
-                        "Turnaround tracking (forecast → recovery): Oversaw scrutiny of management accounts where Oct-2022 half-year accounts forecast a £108k deficit, improving by May-2023 to -£13k (year-end journals expected to adjust to ~-£58k due to Community Wheels spend considered ‘community essential’), while confirming ~£290k cash on a reconciled balance sheet and strengthening reporting discipline.",
-                        "Cashflow protection + contract/overhead governance: Supported liquidity optimisation including exploring £100k–£150k placement into a 30-day notice account; enforced audit-trail discipline by refusing £3.6k ineligible partner costs embedded in a £30k+ invoice; supported stabilisation of fixed overheads via Broad Street lease extension (+5 years from 2023 to end-2028)."
-                    ]
-                },
-                {
-                    "company": "Proprietary Fintech Development",
-                    "role": "Algorithmic Risk Management, Data Analysis & Quantitative Trading",
-                    "location": "Geneva, CH",
-                    "timeline": "Jan 2021 – Present",
-                    "achievements": [
-                        "Achieved exceptionally high year-on-year investment returns—culminating in a >74% ROI in 2024 before ceasing operations—by deploying proprietary quantitative trading systems built to synthesize deep company value analysis, pattern spotting, and the tracking of real-world macroeconomic policy shifts.",
-                        "Engineered automated scripts (leveraging Python, Pandas, and Matplotlib) to scrape real-time market data, detecting geopolitical trends and regulatory changes to inform quantitative trading strategies.",
-                        "Developed proprietary analytical tools to aggregate and detect market analyst sentiment, featuring dynamic filtering based on the delta between current asset prices and predictive targets.",
-                        "Established a dedicated entity for quantitative risk management. The proprietary IP and automated workflows built here were subsequently utilized in enterprise consulting for Keystone Analytics, whose CEO was integral to the initial development phase."
-                    ]
-                }
-            ],
+            "professional_experience": {
+                "executive_legal_leadership": [
+                    {
+                        "company": "Red Spark Learning C.I.C.",
+                        "role": "Director / Head of Legal & Compliance",
+                        "location": "Herefordshire, UK",
+                        "timeline": "Jan 2018 – Aug 2024 (Assistant to Director: Jan 2015 - Jan 2018)",
+                        "description": "An educational community interest company that grew to become the largest adult learning provider in the three counties (surpassed only by local colleges and universities), operating across 8+ locations with 15 staff, delivering adult learning programmes to vulnerable and hard-to-reach communities.",
+                        "mandate": "Act as the legal and operational backbone of the organisation. Protect funding eligibility, establish corporate governance, manage commercial contracts, and ensure compliance with stringent UK education, GDPR, and safeguarding regulations.",
+                        "selected_deliverables": [
+                            "Policy suite ownership: governance, HR, safeguarding, data protection, complaints, incident management.",
+                            "Contract/grant drafting & negotiation: suppliers, partners, service delivery, funding terms, variations, terminations.",
+                            "Operational controls: risk register, obligations tracker, audit evidence logs, remediation/action tracking."
+                        ],
+                        "achievements": [
+                            "Digital Transformation: Reduced operating costs by 30% and ensured total business continuity during COVID-19 lockdowns by pioneering a critical infrastructure pivot, successfully migrating all educational services online and automating manual workflows.",
+                            "Data Protection & Information Law: Maintained rigorous data protection across 8 operational sites by spearheading GDPR compliance frameworks, executing Data Protection Impact Assessments (DPIAs) for cloud rollouts, and managing statutory Subject Access Requests (SARs).",
+                            "Legal Advisory & Corporate Governance (SRA QWE): Secured strict adherence to statutory obligations and Companies Act 2006 requirements by advising the executive board on conflicts of interest, CIC regulatory filings, and architecting the organisation's comprehensive legal policy suite.",
+                            "Compliance & Audit Operations: Maintained 100% audit pass rates for highly scrutinized EEC, Lottery, and central government funds by designing live compliance dashboards and automated risk registers to track obligations.",
+                            "Commercial Contracting & Public Sector Grants (SRA QWE): Strictly controlled liability and protected organisational interests by drafting, reviewing, and negotiating a high volume of commercial contracts, supplier agreements, and NGO Institutional Funding frameworks.",
+                            "HR Advisory & Crisis Management: Ensured procedural fairness and defensible HR outcomes by directing complex internal administrative matters, capability reviews, and high-risk grievance procedures in strict adherence to employment law.",
+                            "Dispute Resolution & Pre-Litigation (SRA QWE): Successfully avoided costly tribunal proceedings by managing early-stage dispute resolution for vendor conflicts and drafting strategic settlement agreements.",
+                            "Operational Leadership & Commercial Growth: Scaled a regional CIC into the largest adult education provider in three counties (outside of universities and colleges) serving vulnerable populations, driving major infrastructure expansion by successfully procuring a £200,000 EEC and Lottery Bid Partnership."
+                        ]
+                    }
+                ],
+                "technical_and_strategic_advisory": [
+                    {
+                        "company": "Proprietary Fintech Development",
+                        "role": "Algorithmic Risk Management, Data Analysis & Quantitative Trading",
+                        "location": "Geneva, CH / UK",
+                        "timeline": "Jan 2021 – Present",
+                        "description": "Built and operated a proprietary quantitative trading and risk-management stack synthesizing company fundamentals, technical pattern detection, and real-world macroeconomic policy shifts into systematic signals, position sizing, and risk limits.",
+                        "achievements": [
+                            "Quantitative Performance & ROI: Achieved exceptionally high year-on-year investment returns—culminating in a >74% ROI in 2024 before ceasing operations—by deploying proprietary quantitative trading systems built to synthesize deep company value analysis, pattern spotting, and the tracking of real-world macroeconomic policy shifts.",
+                            "Methodology & Automation: Engineered automated scripts (leveraging Python, Pandas, and Matplotlib) to scrape real-time market data, detecting geopolitical trends and regulatory changes to inform quantitative trading strategies.",
+                            "Data Analytics & Sentiment Parsing: Developed proprietary analytical tools to aggregate and detect market analyst sentiment, featuring dynamic filtering based on the delta between current asset prices and predictive targets.",
+                            "IP Utilisation & Enterprise Scaling: The proprietary IP and automated workflows built here were subsequently utilized in enterprise consulting for Keystone Analytics, whose CEO was integral to the initial development phase."
+                        ]
+                    },
+                    {
+                        "company": "Keystone Analytics",
+                        "role": "Consultant (Legal, Financial & Strategic Advisory)",
+                        "location": "Remote",
+                        "timeline": "Intermittent / Project-Based",
+                        "description": "Consulted for a multinational enterprise comprising a Las Vegas parent company, a Philippine fintech arm, and associated physical service subsidiaries.",
+                        "achievements": [
+                            "Strategic Turnaround & Financial Recovery: Played a key role in a funding pivot and cost-control strategy that remediated a large financial loss within 3 months. Materially reduced capital burn while advising on the commercial, compliance, and rollout frameworks for core tech products.",
+                            "Venture Capital & Joint Ventures: Targeted $2M+ in funding as Lead VC Consultant for a major public-private solar farm initiative (a joint venture between a hotel magnate and the government energy provider), by directing strategic advisory for the comprehensive white paper and authoring the investor pitch deck.",
+                            "Non-Dilutive Funding Strategy: Successfully navigated complex banking regulations to secure alternative funding pipelines for the solar venture, creating supporting materials (requirements, constraints, sequencing) aimed at reducing dilution risk and improving sponsor readiness for lender/investor discussions.",
+                            "Foreign Governance & Algorithmic Strategy: Consulted on legal structuring, HR strategy, and contract compliance for a foreign entity operating in the Philippines. Concurrently co-developed the foundational financial logic for their proprietary trading tools, supplying engineering teams with comprehensive data models that mapped fundamental market events and advanced technical indicators to guide predictive agentic workflows. (Example: Architected logic enabling agentic systems to bypass surface-level market panic by correlating public staffing reductions against sustained client contract revenue to identify high-conviction value indicators.)",
+                            "Humanitarian & Commercial Partnerships: Established the legal and operational compliance frameworks for joint humanitarian child enterprises, including a semi-private ambulance service and its accompanying SaaS dispatch application, alongside co-authoring commercial applications available on the App Store."
+                        ]
+                    }
+                ],
+                "board_appointments_and_governance": [
+                    {
+                        "company": "HVOSS (Herefordshire Voluntary Organisations Support Service)",
+                        "role": "Board Member / Trustee",
+                        "location": "Herefordshire, UK",
+                        "timeline": "Oct 2022 – Jul 2024",
+                        "description": "Non-executive governance, legal and financial oversight for a charitable company supporting Herefordshire’s VCSE sector.",
+                        "achievements": [
+                            "Operating scale and complexity: Oversaw governance in an organisation operating at significant scale, with total income rising from £590,632 (FY22) to £933,558 (FY23), increasing complexity of delivery, restricted funding stewardship, and financial controls.",
+                            "Financial stewardship under volatility: Helped steer trustee governance through a period of funding volatility and sustained financial pressure, with statutory filings showing two consecutive deficit years: net movement in funds (£36,772) FY23 and (£28,128) FY24.",
+                            "Liquidity and resilience oversight: Maintained a cash-first oversight stance to support continuity of services despite deficit conditions, with cash at bank reported at £291,139 (FY23) and £273,645 (FY24).",
+                            "Balance sheet pressure and sustainability: Supported board-level sustainability decisions and prioritisation as total funds reduced from £349,578 (FY22) to £284,678 (FY24) (a £64,900 contraction), strengthening governance under constraint.",
+                            "Restricted-funds stewardship: Strengthened stewardship of restricted funding by reinforcing purpose discipline and governance around cost allocation and sustainability as restricted fund balances moved from £159,076 (FY22) to £63,620 (FY24) (a £95,456 reduction).",
+                            "Governance, compliance and assurance: Maintained compliance-grade governance and reporting discipline (Charities SORP/FRS 102; Companies Act), ensuring decisions were evidence-led, proportionate, and defensible."
+                        ]
+                    }
+                ]
+            },
             "war_room_scenarios": [
-                "Keystone Advisory Report: Cross-border regulatory compliance (FDI/FCPA) & capital stack structuring for VC funding.",
-                "Red Spark Operational Architecture: Converted an 8-site, paper-based operation into a compliance-led digital model under COVID pressure. Built an automated legal/compliance pipeline delivering <1% funding exceptions, <15-minute audit retrieval, and zero reportable data breaches.",
-                "HVOSS-esque Crisis Playbook: Simulated case study showing board-grade crisis governance: legal mapping, insolvency decision triggers, 13-week cash controls, restricted-funds protection, options appraisal, creditor/standstill strategy, stakeholder communications, and governance reforms following a £450k deficit shock in a £3.2m-turnover charity."
+                {
+                    "title": "Keystone Advisory Report",
+                    "description": "Converted an early-stage solar pitch deck into an institutional advisory report. Navigated complex cross-border regulations (FDI restrictions, FCPA/PEP controls) and modelled capital stack structuring to secure non-dilutive VC funding pipelines."
+                },
+                {
+                    "title": "Red Spark Operational Architecture",
+                    "description": "Pioneered a critical infrastructure pivot under COVID-19 pressure, converting an 8-site, paper-based operation into a compliance-led digital model. Engineered an automated legal pipeline delivering <1% funding exceptions, <15-minute audit retrieval, and no known reportable data breaches."
+                },
+                {
+                    "title": "HVOSS-esque Crisis Playbook",
+                    "description": "Simulated case study showing board-grade crisis governance: legal mapping, insolvency decision triggers, 13-week cash controls, restricted-funds protection, options appraisal, creditor/standstill strategy, stakeholder communications, and governance reforms following a £450k deficit shock in a £3.2m-turnover charity."
+                }
             ],
             "education": [
                 {
@@ -1039,22 +1111,22 @@
                     "institution": "University of Worcester (Honours)",
                     "timeline": "Sep 2022 – Jun 2024",
                     "specialisations": "International Law, operational mechanics of legal systems, law of international organizations, treaty interpretation, administrative law, privileges and immunities, and commercial contract law.",
-                    "dissertation": "Economic and Cyber Warfare. Awarded full marks (100%) and a formal offer to continue research to the doctorate level."
+                    "dissertation": "Economic and Cyber Warfare: The Unregulated War. Awarded full marks (100%) and four prestigious doctoral research offers. Authored cutting-edge research proposing a comprehensive legislative framework (UK-EWPRA) to regulate state and non-state actors utilizing cyber-attacks, algorithmic exploitation, and proxy financial tactics."
                 },
                 {
                     "degree": "B.A. (Hons) Politics, Philosophy and Economics (Economics Major)",
                     "institution": "Goldsmiths, University of London (Summa Cum Laude)",
                     "timeline": "Sep 2016 – Jun 2020",
                     "key_modules": "Macroeconomics, International Economics, Banking, Political Theory, African Conflict and Peacekeeping, and Game Theory.",
-                    "extracurriculars": "Proofread master's theses upon faculty request; active in Model United Nations and debate societies."
+                    "extracurriculars": "Proofread master's theses upon faculty request; active in Model United Nations and debate societies; contributed to articles for the university newspaper, and served as a featured radio commentator delivering objective, non-partisan factual assessments of complex and highly debated macroeconomic and public policy shifts."
                 }
             ],
-            "technical_stack": {
-                "legal_and_grc_tools": "Legal drafting; LexisNexis (incl. Risk Solutions), Westlaw; GDPR enforcement; risk registers; policy architecture; DocuSign CLM; iManage/NetDocuments.",
-                "compliance_platforms_familiarity": "Refinitiv World-Check, Chainalysis, OneTrust, TrustArc, NAVEX Global, ServiceNow GRC.",
-                "ai_and_automation_governance_led": "Agentic LLM workflows; Claude Code; structured prompting for compliance auditing; GenAI control mapping; automated drafting with human-in-the-loop guardrails.",
-                "delivery_and_collaboration": "Jira, Confluence, Taiga; Microsoft 365, Google Workspace.",
-                "data_bi_and_creative_tools": "Excel (advanced), PowerPoint, Power BI, MS Access; Adobe Creative Suite (Photoshop).",
+            "technical_and_digital_proficiencies": {
+                "legal_grc_and_policy": "Legal drafting; LexisNexis (incl. Risk Solutions), Westlaw; GDPR enforcement; risk registers; policy architecture; DocuSign CLM; iManage/NetDocuments.",
+                "compliance_platforms": "Platform familiarity (concepts / exposure): World-Check, Chainalysis, OneTrust, TrustArc, NAVEX, ServiceNow GRC.",
+                "ai_and_automation": "Agentic LLM workflows; Claude Code; structured prompting for compliance auditing; GenAI control mapping; automated drafting with human-in-the-loop guardrails.",
+                "delivery_and_collab": "Jira, Confluence, Taiga; Microsoft 365; Google Docs.",
+                "data_bi_and_creative": "Excel (advanced), PowerPoint, Power BI, MS Access; Adobe Creative Suite (Photoshop).",
                 "technical_stack_automation_focused": {
                     "web": "HTML, CSS, JavaScript",
                     "scripting": "Python (pandas, matplotlib; data cleaning/validation; regex; basic web scraping for policy/ops monitoring), VBA",
@@ -1065,15 +1137,15 @@
                     "additional_familiarity": "R, Java, C# (reading/editing/adapting scripts; not production development)"
                 },
                 "operating_systems_and_databases": "Windows, Linux, macOS; Oracle or similar systems.",
-                "tech_operations_applied": "Led paper-to-Moodle digitisation and workflow automation for operational continuity; built small Python/API tools for data retrieval and reporting automation; able to validate logic/output and control design."
+                "tech_operations": "Led paper-to-Moodle digitisation and workflow automation for operational continuity; built small Python/API tools for data retrieval and reporting automation; able to validate logic/output and control design."
             },
-            "certifications_and_memberships": [
+            "professional_memberships_and_certifications": [
                 "Candidate: SRA SQE 1 & 2 (Preparing for late-year examination to formalise admission as a Solicitor of England & Wales, supported by 5+ years of verified QWE).",
                 "Member: Association of Certified Anti-Money Laundering Specialists (ACAMS)",
                 "Member: International Association of Privacy Professionals (IAPP)",
                 "Member: International Compliance Association (ICA)",
                 "Member: International Law Association",
-                "Professional Development Targets: Actively preparing to undertake industry-standard compliance certifications including CAMS and CIPP/E to further formalise cross-border financial and data privacy expertise."
+                "Professional Development Targets: Actively preparing to undertake industry-standard compliance certifications including CAMS and CIPP/E to further formalise AML and privacy capability for Swiss/European roles."
             ],
             "references": {
                 "status": "Protected to prevent automated scraping. Human verification required via UI.",
