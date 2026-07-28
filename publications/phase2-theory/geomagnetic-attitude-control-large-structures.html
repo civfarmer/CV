@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f17'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='27' font-weight='700' fill='%23d4b24c' text-anchor='middle'%3ECF%3C/text%3E%3C/svg%3E">
+<title>Geomagnetic Attitude Control and Slew Dynamics of Very Large Flexible Space Structures</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{
+    --bg:#0b0f17; --bg2:#0e1420; --surface:#131b2a; --surface2:#182133;
+    --ink:#e9eef7; --ink2:#aab7cc; --muted:#7d8ba3; --line:#233145; --line2:#2c3d54;
+    --accent:#43b3a6; --accent-ink:#84d6ca; --gold:#d4b24c; --gold-soft:#e6cf8f;
+    --good:#43c59e; --warn:#e0a13a; --shadow:0 18px 50px -20px rgba(0,0,0,.7);
+    --radius:14px; --measure:70ch;
+    --font-display:'Zilla Slab',Georgia,'Times New Roman',serif;
+    --font-body:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --font-mono:'IBM Plex Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
+  }
+  html[data-theme="light"]{
+    --bg:#f4f1ec; --bg2:#ebe6dd; --surface:#ffffff; --surface2:#faf7f2;
+    --ink:#221e18; --ink2:#4c473e; --muted:#675f54; --line:#e7e1d6; --line2:#d9d2c5;
+    --accent:#0d5f57; --accent-ink:#0a463f; --gold:#836819; --gold-soft:#6f5714; --good:#0e7a52;
+    --shadow:0 18px 44px -24px rgba(15,30,60,.35);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:radial-gradient(1100px 700px at 82% -8%,rgba(67,179,166,.10),transparent 60%),var(--bg);
+    color:var(--ink);font-family:var(--font-body);line-height:1.72;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  a{color:var(--accent-ink);text-decoration:none}
+  a:hover{text-decoration:underline}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+  ::selection{background:color-mix(in oklab,var(--accent) 32%,transparent)}
+
+  /* Top bar */
+  .top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    padding:11px clamp(16px,4vw,34px);background:color-mix(in oklab,var(--bg),transparent 8%);
+    backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:11px;color:var(--ink);min-width:0}
+  .crest{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;flex:0 0 auto;
+    background:linear-gradient(145deg,#0e7b6f,#0b655b);color:#fff;font-family:var(--font-display);font-weight:700;font-size:14px;box-shadow:var(--shadow)}
+  .brand .nm{font-family:var(--font-display);font-weight:700;font-size:14.5px;line-height:1.05}
+  .brand .rl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+  .topacts{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:8px 13px;border-radius:10px;font-weight:600;font-size:13px;
+    border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer;transition:.16s;white-space:nowrap;font-family:var(--font-body)}
+  .btn:hover{border-color:var(--accent);transform:translateY(-1px);text-decoration:none}
+  .btn svg{width:16px;height:16px}
+  .btn.icon{padding:8px;width:36px}
+
+  /* Article */
+  main.wrap{max-width:calc(var(--measure) + 8rem);margin:0 auto;padding:clamp(26px,5vw,52px) clamp(18px,5vw,40px) 40px}
+  article.paper{max-width:var(--measure);margin:0 auto;font-size:1.05rem}
+  article.paper > *{max-width:var(--measure)}
+  .paper h1,.paper h2,.paper h3,.paper h4,.paper h5{font-family:var(--font-display);font-weight:600;line-height:1.18;color:var(--ink);letter-spacing:-.005em}
+  .paper h1{font-size:clamp(27px,4.4vw,40px);line-height:1.1;margin:0 0 .5rem;letter-spacing:-.015em}
+  .paper h2{font-size:clamp(20px,2.9vw,27px);margin:2.4rem 0 .9rem;padding-bottom:.35rem;border-bottom:1px solid var(--line)}
+  .paper h3{font-size:clamp(17px,2.2vw,21px);margin:1.9rem 0 .7rem}
+  .paper h4{font-size:16px;margin:1.5rem 0 .5rem;color:var(--ink2)}
+  .paper p{margin:0 0 1.05rem;overflow-wrap:anywhere;word-break:break-word}
+  .paper li{overflow-wrap:anywhere;word-break:break-word}
+  .paper strong{color:var(--ink);font-weight:700}
+  .paper em{color:inherit}
+  /* Byline: first bold paragraph right after the title */
+  .paper h1 + p{font-size:1.06rem;color:var(--ink);margin-bottom:.4rem}
+  .paper h1 + p + p em{color:var(--muted);font-size:.92rem}
+  .paper ul,.paper ol{margin:0 0 1.1rem;padding-left:1.5rem}
+  .paper li{margin:.3rem 0}
+  .paper li::marker{color:var(--accent)}
+  .paper a{color:var(--accent-ink);border-bottom:1px solid color-mix(in oklab,var(--accent) 35%,transparent)}
+  .paper a:hover{border-bottom-color:var(--accent);text-decoration:none}
+  .paper hr{border:none;border-top:1px solid var(--line);margin:2rem 0}
+
+  /* Blockquote (scope notes) */
+  .paper blockquote{margin:1.4rem 0;padding:1rem 1.2rem;border:1px solid var(--line2);border-left:3px solid var(--gold);
+    border-radius:12px;background:color-mix(in oklab,var(--gold) 7%,var(--surface));color:var(--ink2)}
+  .paper blockquote p{margin:0 0 .6rem}
+  .paper blockquote p:last-child{margin-bottom:0}
+  .paper blockquote strong{color:var(--ink)}
+
+  /* Tables */
+  .paper .tablewrap{overflow-x:auto;margin:1.3rem 0;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+  .paper table{border-collapse:collapse;width:100%;font-size:.95rem;line-height:1.5}
+  .paper th,.paper td{text-align:left;padding:.6rem .85rem;border-bottom:1px solid var(--line);vertical-align:top}
+  .paper thead th{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--accent-ink);background:color-mix(in oklab,var(--accent) 8%,var(--surface2));border-bottom:1px solid var(--line2)}
+  .paper tbody tr:last-child td{border-bottom:none}
+  .paper tbody tr:nth-child(even){background:color-mix(in oklab,var(--ink) 3%,transparent)}
+
+  /* Code */
+  .paper code{font-family:var(--font-mono);font-size:.88em;background:color-mix(in oklab,var(--accent) 10%,var(--surface));
+    border:1px solid var(--line);border-radius:5px;padding:.08em .38em;color:var(--accent-ink)}
+  .paper pre{background:var(--bg2);border:1px solid var(--line2);border-radius:12px;padding:1rem 1.15rem;overflow-x:auto;
+    margin:1.3rem 0;line-height:1.55}
+  .paper pre code{background:none;border:none;padding:0;color:var(--ink2);font-size:.86rem}
+
+  /* Mermaid figures */
+  .diagram-figure{margin:1.6rem 0;background:#f7f8fb;border:1px solid var(--line2);border-radius:14px;padding:1.1rem 1rem .6rem;
+    box-shadow:var(--shadow);overflow-x:auto}
+  html[data-theme="light"] .diagram-figure{background:#fbfaf7}
+  .diagram-figure pre.mermaid{background:none;border:none;box-shadow:none;padding:0;margin:0;text-align:center;
+    color:#1c2530;font-family:var(--font-mono);font-size:.82rem;line-height:1.5;white-space:pre-wrap}
+  .diagram-figure svg{max-width:100%;height:auto;display:block;margin:0 auto}
+  .diagram-figure figcaption{margin-top:.7rem;text-align:center;font-family:var(--font-mono);font-size:.7rem;
+    letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+
+  /* Footnotes */
+  .paper .footnote{margin-top:2.6rem;padding-top:1rem;border-top:1px solid var(--line);font-size:.9rem;color:var(--ink2)}
+  .paper .footnote hr{display:none}
+  .paper .footnote ol{padding-left:1.3rem}
+  .paper .footnote li{margin:.45rem 0}
+  .paper .footnote-backref{border-bottom:none;margin-left:.3rem}
+  .paper sup a.footnote-ref{border-bottom:none;color:var(--accent-ink);font-weight:600;padding:0 .05em}
+
+  /* TOC (if [TOC] used) */
+  .paper .toc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:.9rem 1.2rem;margin:1.4rem 0;font-size:.95rem}
+  .paper .toc > ul{margin:0}
+
+  footer.paperfoot{max-width:var(--measure);margin:3rem auto 0;padding-top:1.3rem;border-top:1px solid var(--line);
+    color:var(--muted);font-size:.82rem;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}
+  footer.paperfoot a{color:var(--ink2)}
+  footer.paperfoot .mono{font-family:var(--font-mono)}
+
+  .pubnav{display:flex;flex-wrap:wrap;gap:2px 16px;align-items:center;padding:9px clamp(18px,4vw,40px);
+    background:color-mix(in oklab,var(--bg2),transparent 20%);border-bottom:1px solid var(--line);
+    font-family:var(--font-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase}
+  .pubnav a{color:var(--ink2);padding:4px 0;border-bottom:2px solid transparent;text-decoration:none}
+  .pubnav a:hover{color:var(--ink)}
+  .pubnav a[aria-current="page"]{color:var(--accent-ink);border-bottom-color:var(--accent)}
+
+  .cfside{display:none}
+  @media(min-width:1080px){
+    body{padding-left:280px}
+    .pubnav{display:none}
+    .cfside{position:fixed;left:0;top:0;bottom:0;width:280px;z-index:30;display:flex;flex-direction:column;gap:18px;
+      padding:22px 18px;background:var(--bg2);border-right:1px solid var(--line);overflow-y:auto}
+  }
+  .cfside .cfbrand{display:flex;align-items:center;gap:11px}
+  .cfside .cfbrand img{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:0 0 auto}
+  .cfside .cfbrand .nm{font-family:var(--font-display);font-weight:700;font-size:15.5px;color:var(--ink);line-height:1.1}
+  .cfside .cfbrand .rl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px;line-height:1.5}
+  .cfside nav{display:flex;flex-direction:column;gap:4px}
+  .cfside nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;color:var(--ink2);font-size:14px;font-weight:500;border:1px solid transparent;text-decoration:none}
+  .cfside nav a svg{width:18px;height:18px;flex:0 0 auto}
+  .cfside nav a:hover{background:var(--surface);color:var(--ink)}
+  .cfside nav a.on{background:var(--surface);border-color:var(--line);color:var(--ink)}
+  .cfside .cffoot{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+  .cfside .cfavail{font-size:12px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+  .cfside .cfdot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 10px var(--good);flex:0 0 auto;margin-top:4px}
+  .cfside .cfbtns{display:flex;gap:8px}
+  .cfside .cfcv{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:12px;font-weight:600;font-size:13px;
+    background:var(--accent);border:1px solid var(--accent);color:#fff;text-decoration:none}
+  .cfside .cfcv:hover{filter:brightness(1.08)}
+  .cfside .cftheme{width:40px;display:inline-flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer}
+  .cfside .cftheme svg{width:16px;height:16px}
+</style>
+</head>
+<body>
+  <aside class="cfside" aria-label="Site navigation">
+    <div class="cfbrand">
+      <img src="../../assets/img/portrait-2026.png" alt="Christopher Farmer">
+      <div><div class="nm">Christopher Farmer</div><div class="rl">Legal, Risk &amp; Technology Transformation</div></div>
+    </div>
+    <nav>
+      <a href="../../index.html#overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg><span>Overview</span></a>
+      <a href="../../index.html#projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Projects</span></a>
+      <a href="../../case-studies/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 5h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h7z"/></svg><span>Case studies</span></a>
+      <a href="../../index.html#experience"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Experience</span></a>
+      <a href="../../index.html#warroom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>War Room</span></a>
+      <a href="../../index.html#expertise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.1L12 17l-5.5 3.3 1-6.1L3 8.9 9 8z"/></svg><span>Expertise</span></a>
+      <a href="../../index.html#credentials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg><span>Credentials</span></a>
+      <a href="../../publications/index.html" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg><span>Publications</span></a>
+      <a href="../../index.html#contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M4 7l8 6 8-6"/></svg><span>Contact</span></a>
+    </nav>
+    <div class="cffoot">
+      <div class="cfavail"><span class="cfdot"></span> Open to legal, risk &amp; transformation roles &mdash; Geneva</div>
+      <div class="cfbtns">
+        <a class="cfcv" href="../../docs/CV-Christopher-Farmer-2026-08.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg> CV</a>
+        <button class="cftheme" onclick="document.getElementById('theme')?document.getElementById('theme').click():(function(){var h=document.documentElement,n=h.getAttribute('data-theme')==='light'?'dark':'light';h.setAttribute('data-theme',n);try{localStorage.setItem('cf-theme',n)}catch(e){}})()" title="Toggle theme" aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="top">
+    <a class="brand" href="../index.html" aria-label="Back to Publications">
+      <div class="crest">CF</div>
+      <div><div class="nm">Christopher Farmer</div><div class="rl">Publications</div></div>
+    </a>
+    <div class="topacts">
+      <a class="btn" href="../index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M15 18l-6-6 6-6"/></svg>
+        Back to Publications
+      </a>
+      <button class="btn icon" id="theme" title="Toggle light / dark" aria-label="Toggle light or dark theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </div>
+  </div>
+<nav class="pubnav" aria-label="Site">
+  <a href="../../index.html#overview">Overview</a>
+  <a href="../../index.html#projects">Projects</a>
+  <a href="../../case-studies/index.html">Case studies</a>
+  <a href="../../index.html#experience">Experience</a>
+  <a href="../../index.html#warroom">War Room</a>
+  <a href="../../index.html#expertise">Expertise</a>
+  <a href="../../index.html#credentials">Credentials</a>
+  <a href="../index.html" aria-current="page">Publications</a>
+  <a href="../../index.html#contact">Contact</a>
+</nav>
+
+  <main class="wrap">
+    <article class="paper">
+<h1 id="geomagnetic-attitude-control-and-slew-dynamics-of-very-large-flexible-space-structures">Geomagnetic Attitude Control and Slew Dynamics of Very Large Flexible Space Structures</h1>
+      <div style="margin:18px 0;padding:12px 16px;border:1px solid var(--line2);border-left:3px solid var(--gold);border-radius:10px;background:var(--surface);color:var(--ink2);font-size:14px"><b style="color:var(--ink)">Revised edition available.</b> A v1.0.0 working draft (July 2026) corrects four overclaims in this version — <a href="../drafts/Geomagnetic_Attitude_Control_v1.0.0.pdf" target="_blank" rel="noopener">read the current draft (PDF)</a>.</div>
+<p><strong>Christopher I. V. Farmer, LL.M. (University of Worcester) · Independent Researcher · civfarmer@gmail.com</strong></p>
+<p><em>Preprint — submitted; pending peer review. Phase II Theory Paper. July 2026.</em></p>
+<blockquote>
+<p><strong>Scope note.</strong> This is a general engineering paper on the attitude dynamics and control of a <em>very large, flexible, high-inertia space structure</em> — the generic class that includes large space-based solar-power platforms, kilometre-scale radio-astronomy apertures and interferometers, and large Earth- or space-observation platforms. It treats one narrow physical question: how such a structure can be reoriented and stabilised propellantlessly by <em>magnetorquers</em> interacting with the geomagnetic field, and why the physics makes this slow. The analysis is deliberately platform-agnostic — the attitude-control physics derived here depends only on the structure's mass distribution, flexibility, and orbit, not on its payload or purpose. The paper contains no weapon, launcher, projectile, munition, firing, or targeting/vectoring content of any kind, describes no such system, and is not a study of any weapons platform. All numerical examples are explicitly labelled <em>illustrative calculations</em>: they use representative parameters to establish orders of magnitude and are not measurements, mission data, or claimed results.</p>
+</blockquote>
+<hr>
+<h2 id="abstract">Abstract</h2>
+<p>Reorienting a multi-kilometre-scale space structure poses a control problem qualitatively different from that of a conventional satellite, because the moment of inertia grows as the fourth power of the structure's linear dimension while the environmental fields that can be exploited for propellantless actuation do not. This paper develops the physics of <em>magnetic</em> attitude control for such structures from first principles: the torque law τ = m × B and its instantaneous rank-two under-actuation; a tilted-dipole and IGRF description of the geomagnetic field and its scaling with altitude and latitude; the rest-to-rest slew problem under a bounded, direction-constrained magnetic torque; secular-versus-cyclic momentum management; the dominance of gravity-gradient torque at kilometre scale; and the coupling of all of these to the low-frequency bending modes of a flexible truss. A clearly-labelled illustrative calculation for a representative 1-km, 10⁵-kg reference platform shows that a 90° eigenaxis slew in ~7 minutes would require a magnetic dipole of order 10¹⁰ A·m² — roughly seven to eight orders of magnitude beyond any flown magnetorquer and thermally impossible for the structure itself — whereas physically achievable dipoles (10⁴–10⁷ A·m²) yield slew times of hours to days. The central conclusion is that magnetic-only control of a very large structure is <em>attitude-stabilising but slow</em>: it is well matched to libration damping, momentum management, and quasi-static repointing within a gravity-gradient-dominated envelope, and its inherently low bandwidth is in fact a virtue, keeping the actuation spectrum well below the structure's first bending mode and thereby avoiding the control–structure interaction that would otherwise wreck a fast slew.</p>
+<p><strong>Keywords:</strong> magnetorquer; magnetic attitude control; geomagnetic field; IGRF; large space structure; flexible spacecraft; gravity-gradient stabilisation; control–structure interaction; slew maneuver; momentum management; under-actuation; solar-power satellite.</p>
+<hr>
+<h2 id="1-introduction">1. Introduction</h2>
+<p>The largest structures humanity has flown — the International Space Station spans about 109 m — are small compared with the platforms that recur in the engineering literature on space-based solar power, kilometre-scale radio apertures, and large observation systems. Glaser's original solar-power-satellite reference design, elaborated by NASA and the U.S. Department of Energy in the 1970s, envisaged an on-orbit structure roughly 10 km by 5 km with a mass of tens of thousands of tonnes.<sup id="fnref:glaser"><a class="footnote-ref" href="#fn:glaser">22</a></sup> Radio-astronomy concepts for very-low-frequency observation from space, and large sparse-aperture imaging platforms, likewise reach into the multi-kilometre regime. Whatever their purpose, all such structures share three attributes that dominate their attitude dynamics and separate them decisively from ordinary spacecraft: an enormous moment of inertia, extreme structural flexibility with very low natural frequencies, and a physical extent over which the environment itself varies appreciably from one end of the body to the other.</p>
+<p>Attitude control of a conventional rigid satellite is, by comparison, a solved and well-textbooked problem.<sup id="fnref:wertz"><a class="footnote-ref" href="#fn:wertz">1</a></sup><sup id="fnref:sidi"><a class="footnote-ref" href="#fn:sidi">2</a></sup><sup id="fnref:markley"><a class="footnote-ref" href="#fn:markley">3</a></sup> Reaction wheels and control-moment gyroscopes store and exchange angular momentum internally; thrusters supply external torque; magnetorquers trim, damp, and desaturate. The difficulty at kilometre scale is not that any one of these mechanisms stops working, but that the <em>ratios</em> change. The moment of inertia of a slender structure of fixed areal density scales as the fourth power of its length (mass ∝ length², lever arm² ∝ length²), so the torque required to move it on a given timescale grows explosively, while the geomagnetic field that a propellantless magnetorquer can push against does not scale at all. Simultaneously, the structure's lowest elastic frequency falls, so that the control system's own actuation increasingly overlaps the frequency band of the bending modes it must not excite. The design problem becomes one of <em>timescales and spectra</em> rather than of raw authority.</p>
+<p>This paper concentrates on the propellantless option — magnetic actuation — because it is the mechanism whose limits are least intuitive at scale and most physically instructive. A magnetorquer consumes only electrical power, carries no propellant to be exhausted, and imposes no plume or contamination on a delicate multi-kilometre structure; these are exactly the properties one wants for a long-lived platform. Its liabilities are equally fundamental: the torque it produces is bounded by the weak geomagnetic field, and at every instant that torque is confined to a plane, because the cross product of the dipole with the field can produce no component along the field. Magnetic control is thus doubly constrained — weak and under-actuated — and the interesting physics lies in how those constraints interact with the mass, flexibility, and orbital motion of a very large body.</p>
+<p>The argument proceeds as follows. Section 2 sets out the magnetic torque law, the realisable dipole of a large structure, the instantaneous rank-two under-actuation and its standard cross-product control law, and the way orbital motion restores full controllability over an orbit. Section 3 describes the geomagnetic environment through the tilted-dipole approximation and the International Geomagnetic Reference Field (IGRF), and tabulates the field's scaling with altitude and latitude. Section 4 is the core slew analysis: it derives the rest-to-rest maneuver time under bounded torque, works the "seven-minute" question in full for a labelled reference platform, and extracts a scaling law showing why larger structures are unavoidably slower. Section 5 treats momentum management and the secular-versus-cyclic distinction that makes magnetic control useful despite its weakness. Section 6 shows that at kilometre scale gravity-gradient torque dominates the magnetic torque by orders of magnitude, converting the problem into one of damping and trimming about a passively stable equilibrium. Section 7 develops the flexible-structure dynamics — low eigenfrequencies, control–structure interaction, and the differential effects across a very long body — and argues that the slowness of magnetic control is, for a flexible structure, a feature rather than a bug. Section 8 synthesises a feasibility envelope, and Section 9 concludes.</p>
+<p>A word on method. Every numerical statement below is an <em>illustrative calculation</em>: it uses transparent, representative parameters, states its assumptions, and is meant to fix an order of magnitude, not to report a result. Where the literature supplies a standard formula or value, it is cited to a primary or authoritative source. No mission data are used and none are implied.</p>
+<h2 id="2-magnetic-actuation-and-its-instantaneous-under-actuation">2. Magnetic Actuation and Its Instantaneous Under-Actuation</h2>
+<h3 id="21-the-torque-law">2.1 The torque law</h3>
+<p>A magnetorquer is, physically, a current loop — a coil, a wound rod, or in principle a conductive path around the structure itself — that carries a controllable current and thereby presents a magnetic dipole moment <strong>m</strong> (units A·m²) to the ambient field. In an external magnetic flux density <strong>B</strong> (units T = Wb·m⁻² = kg·s⁻²·A⁻¹) the dipole experiences a mechanical torque</p>
+<pre><code>τ = m × B.                                                        (1)
+</code></pre>
+<p>The dipole itself, for a coil of N turns each enclosing area A carrying current I, is</p>
+<pre><code>m = N I A n̂,                                                     (2)
+</code></pre>
+<p>with n̂ the unit normal to the coil in the right-hand sense of the current. Equations (1)–(2) are the whole of the actuator physics; everything that follows is a consequence of their structure and of the smallness of |<strong>B</strong>|.</p>
+<p>The magnitude of the available torque is</p>
+<pre><code>|τ| = |m| |B| sin θ,                                             (3)
+</code></pre>
+<p>where θ is the angle between <strong>m</strong> and <strong>B</strong>. Two features are immediate. First, the torque is <em>bounded by the field</em>: for a given dipole, no orientation produces more torque than |m||B|, achieved when <strong>m</strong> ⊥ <strong>B</strong>. Second, the torque <em>vanishes</em> when <strong>m</strong> ∥ <strong>B</strong>: a dipole aligned with the field produces no torque at all. The consequences of that second fact are the subject of §2.3.</p>
+<h3 id="22-the-realizable-dipole-of-a-large-structure">2.2 The realisable dipole of a large structure</h3>
+<p>For a small satellite the dipole is set by hardware limits. Flight magnetorquers on CubeSats typically deliver 0.1–1.5 A·m²; dedicated torque rods on larger platforms reach tens to a few hundred A·m².<sup id="fnref:ovchinnikov"><a class="footnote-ref" href="#fn:ovchinnikov">14</a></sup><sup id="fnref:satsearch"><a class="footnote-ref" href="#fn:satsearch">21</a></sup> A very large structure changes this budget qualitatively, because the achievable dipole scales with <em>enclosed area</em> (Eq. 2), and area scales as the square of the structure's linear dimension. A single conductive loop routed around a kilometre-scale structure encloses an area many orders of magnitude larger than any coil that fits inside a spacecraft bus.</p>
+<blockquote>
+<p><strong>Illustrative calculation 1 — a distributed magnetorquer.</strong> Consider a single-turn conductive loop routed around the perimeter of a 1 km × 1 km region of a large platform, enclosing A = 1.0 × 10⁶ m², with perimeter ℓ = 4.0 × 10³ m. Take an aluminium conductor of cross-section a = 1 cm² = 1.0 × 10⁻⁴ m² (resistivity ρ = 2.82 × 10⁻⁸ Ω·m, density 2.70 × 10³ kg·m⁻³). Its resistance is R = ρℓ/a = 1.13 Ω and its mass is ρ_mass·ℓ·a ≈ 1.08 × 10³ kg. The dipole is m = I·A, and the ohmic power is P = I²R:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Dipole m (A·m²)</th>
+<th>Loop current I (A)</th>
+<th>Power P (W)</th>
+<th>Current density (A·m⁻²)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 × 10⁵</td>
+<td>0.10</td>
+<td>1.1 × 10⁻²</td>
+<td>1 × 10³</td>
+</tr>
+<tr>
+<td>1 × 10⁶</td>
+<td>1.0</td>
+<td>1.1</td>
+<td>1 × 10⁴</td>
+</tr>
+<tr>
+<td>1 × 10⁷</td>
+<td>10</td>
+<td>1.1 × 10²</td>
+<td>1 × 10⁵</td>
+</tr>
+<tr>
+<td>1 × 10¹⁰</td>
+<td>1.0 × 10⁴</td>
+<td>1.1 × 10⁸</td>
+<td>1 × 10⁸</td>
+</tr>
+</tbody>
+</table></div>
+<p>A dipole of 10⁵–10⁷ A·m² is therefore physically plausible for a kilometre-scale structure at modest power (≲ 10² W) and mass (≈ 1 t of conductor) — some four to seven orders of magnitude beyond a CubeSat torquer, purely from the area term. By contrast a dipole of 10¹⁰ A·m² would demand 10⁴ A through the same loop, dissipating ~113 MW and driving a current density of 10⁸ A·m⁻², one to two orders of magnitude beyond the sustained limit of any spaceworthy conductor. It is thermally impossible independent of any other consideration. We will use the <em>feasible band</em> 10⁴–10⁷ A·m² as the reference envelope for a very large structure and treat 10⁵ A·m² as a conservative baseline and 10⁷ A·m² as an aggressive one.</p>
+</blockquote>
+<p>The point is not the specific loop geometry — a real platform would use distributed torque rods or several loops — but the scaling: the useful upper bound on m for a very large structure is set by <em>power, thermal dissipation, and conductor mass</em>, and lands around 10⁷ A·m², not around the value of any component in a catalogue.</p>
+<h3 id="23-instantaneous-rank-two-under-actuation">2.3 Instantaneous rank-two under-actuation</h3>
+<p>Return to Eq. (1). Because the torque is a cross product, it is <em>always perpendicular to</em> <strong>B</strong>. Whatever dipole the control system commands, the resulting torque lies in the two-dimensional plane orthogonal to the instantaneous field direction; the component of any desired torque along <strong>B</strong> is unattainable. The actuator is, at every instant, of rank two, not three: it can produce torque about two independent axes but never about the local field axis.</p>
+<p>Formally, suppose the control law demands a torque τ_d. Decompose it as τ_d = τ_d,⊥ + (τ_d · B̂) B̂, where B̂ = <strong>B</strong>/|B|. Only τ_d,⊥ can be produced. The minimum-norm dipole that produces it is the standard <em>cross-product control law</em>,</p>
+<pre><code>m_cmd = (B × τ_d) / |B|².                                        (4)
+</code></pre>
+<p>Substituting Eq. (4) into Eq. (1) and using the vector triple product (a × b) × c = b(a·c) − a(b·c),</p>
+<pre><code>τ = m_cmd × B = τ_d − B̂ (τ_d · B̂) = τ_d,⊥.                     (5)
+</code></pre>
+<p>Equation (5) makes the loss explicit: the realised torque is the projection of the demand onto the plane perpendicular to the field, and the along-field component is discarded. This is the projection that every practical magnetic controller — from the classical Stickler–Alfriend system<sup id="fnref:stickler"><a class="footnote-ref" href="#fn:stickler">9</a></sup> to modern periodic-LQR and passivity-based designs<sup id="fnref:psiaki"><a class="footnote-ref" href="#fn:psiaki">11</a></sup><sup id="fnref:wisniewski"><a class="footnote-ref" href="#fn:wisniewski">10</a></sup><sup id="fnref:lovera"><a class="footnote-ref" href="#fn:lovera">12</a></sup> — either performs directly or reproduces implicitly. It is the origin of the <em>efficiency penalty</em> that will reappear in the slew analysis: even a favourably oriented maneuver loses, on average, a substantial fraction of its nominal torque to the perpendicularity constraint.</p>
+<h3 id="24-restoration-of-controllability-by-orbital-motion">2.4 Restoration of controllability by orbital motion</h3>
+<p>If the field direction B̂ were fixed, the missing axis would be permanently uncontrollable and the structure could never be reoriented about it magnetically. It is <em>orbital motion</em> that rescues the situation. As the spacecraft traverses its orbit through the spatially varying geomagnetic field, and as the Earth's tilted dipole rotates beneath it, the field direction seen in the body/orbit frame sweeps around over each orbit. The instantaneously forbidden axis is therefore different at different points of the orbit, and a torque unattainable now becomes attainable a quarter-orbit later.</p>
+<p>This is not merely heuristic. Bhat established, by applying nonlinear controllability theory to the time-varying attitude dynamics of a magnetically actuated spacecraft in a Keplerian orbit, that the system is <em>strongly accessible</em> wherever the field and its time-derivative are linearly independent, and <em>controllable</em> when the field is periodic in time along the orbit.<sup id="fnref:bhat"><a class="footnote-ref" href="#fn:bhat">15</a></sup> The geomagnetic field along an inclined orbit is, to good approximation, periodic with the orbital period, and over one period B̂ spans a set of directions that is full-dimensional; the orbit-averaged actuation map is then of rank three even though the instantaneous map is of rank two. The important qualification is geometric: in a near-equatorial orbit the field remains nearly parallel to the orbit normal throughout, so B̂ barely sweeps, and controllability about that axis becomes weak and slow. Controllability improves with inclination and is strongest for polar and high-inclination orbits, where the field direction varies most over an orbit. The surveys of Silani &amp; Lovera and of Ovchinnikov &amp; Roldugin catalogue the control laws that exploit this time-varying controllability.<sup id="fnref:silani"><a class="footnote-ref" href="#fn:silani">13</a></sup><sup id="fnref2:ovchinnikov"><a class="footnote-ref" href="#fn:ovchinnikov">14</a></sup></p>
+<figure class="diagram-figure">
+<pre class="mermaid">flowchart LR
+  subgraph Orbit["Field direction B̂ over one orbit (inclined)"]
+    A["Equator-crossing&lt;br/&gt;B̂ ≈ along-track"] --&gt; B["High latitude&lt;br/&gt;B̂ ≈ radial/steep"]
+    B --&gt; C["Opposite crossing&lt;br/&gt;B̂ reversed"]
+    C --&gt; D["Opposite high latitude&lt;br/&gt;B̂ steep, reversed"]
+    D --&gt; A
+  end
+  Orbit --&gt; R["Instantaneous torque ⟂ B̂ (rank 2)&lt;br/&gt;⟹ different forbidden axis at each point&lt;br/&gt;⟹ rank 3 over the orbit"]</pre>
+<figcaption>Flowchart</figcaption>
+</figure>
+<p><em>Figure 1. Instantaneous rank-two under-actuation and its restoration over an orbit. At any instant the achievable torque is confined to the plane perpendicular to the field; because the field direction sweeps over an inclined orbit, the union of achievable directions over one orbital period is three-dimensional, and the system is controllable in the orbit-averaged sense (Bhat, 2005).</em></p>
+<h2 id="3-the-geomagnetic-environment">3. The Geomagnetic Environment</h2>
+<h3 id="31-the-tilted-dipole-approximation">3.1 The tilted-dipole approximation</h3>
+<p>To lowest order the geomagnetic field is that of a magnetic dipole at the Earth's centre, tilted about 9.5°–11° from the rotation axis. The dipole moment of the Earth is m_E ≈ 7.94 × 10²² A·m².<sup id="fnref2:wertz"><a class="footnote-ref" href="#fn:wertz">1</a></sup><sup id="fnref:dipole"><a class="footnote-ref" href="#fn:dipole">8</a></sup> In the dipole approximation the field magnitude at geocentric radius r and geomagnetic latitude λ_m is</p>
+<pre><code>|B|(r, λ_m) = B₀ (R_E / r)³ √(1 + 3 sin²λ_m),                     (6)
+</code></pre>
+<p>where R_E = 6.371 × 10⁶ m is the mean Earth radius and B₀ = μ₀ m_E / (4π R_E³) is the reduced equatorial surface field. Evaluating,</p>
+<pre><code>B₀ = (1.0 × 10⁻⁷)(7.94 × 10²²) / (2.586 × 10²⁰) ≈ 3.0 × 10⁻⁵ T (30 μT),
+</code></pre>
+<p>with the historically quoted value ≈ 3.12 × 10⁻⁵ T reflecting the slowly weakening dipole of earlier epochs.<sup id="fnref2:dipole"><a class="footnote-ref" href="#fn:dipole">8</a></sup> Equation (6) captures the two scalings that matter for actuation: the field falls as the inverse cube of geocentric distance, and at fixed radius it is twice as strong over the magnetic poles (λ_m = 90°) as over the magnetic equator (λ_m = 0°). At the surface the total field ranges from about 25 μT near the magnetic equator to about 65 μT near the poles, consistent with Eq. (6) once the non-dipole terms and the offset of the dipole are included.</p>
+<h3 id="32-altitude-and-latitude-scaling">3.2 Altitude and latitude scaling</h3>
+<p>Because the actuator torque is linear in |B| (Eq. 3), the inverse-cube altitude dependence directly weakens magnetic control at higher orbits. Illustrative calculation 2 tabulates Eq. (6) for a representative reduced dipole B₀ = 30 μT.</p>
+<blockquote>
+<p><strong>Illustrative calculation 2 — field versus altitude.</strong> Equatorial (λ_m = 0) and polar (λ_m = 90°) dipole-model field magnitudes:</p>
+<p>| Altitude h (km) | r (km) | (R_E/r)³ | |B| equator (μT) | |B| pole (μT) |
+|---|---|---|---|---|
+| 0 | 6371 | 1.000 | 30.0 | 60.0 |
+| 200 | 6571 | 0.911 | 27.3 | 54.7 |
+| 400 | 6771 | 0.833 | 25.0 | 50.0 |
+| 600 | 6971 | 0.763 | 22.9 | 45.8 |
+| 800 | 7171 | 0.701 | 21.0 | 42.1 |
+| 1000 | 7371 | 0.646 | 19.4 | 38.7 |
+| 2000 | 8371 | 0.441 | 13.2 | 26.5 |
+| 35 786 (GEO) | 42 157 | 3.45 × 10⁻³ | 0.10 | 0.21 |</p>
+<p>In low Earth orbit the field is of order 20–50 μT; by geostationary altitude it has fallen to ~0.1 μT, roughly 250 times weaker, which is why magnetic actuation is essentially a low-Earth-orbit technique. For the slew analysis of §4 we adopt a representative LEO value B_rep = 3.0 × 10⁻⁵ T; this is at the upper end of the LEO band and therefore <em>optimistic</em>, so that the infeasibility conclusions are conservative. Slew times scale as B^(−1/2) (Eq. 10), so halving the assumed field lengthens them by only ~41%.</p>
+</blockquote>
+<h3 id="33-the-igrf-and-higher-order-structure">3.3 The IGRF and higher-order structure</h3>
+<p>For any quantitative control design the dipole is insufficient; the field must be represented by the International Geomagnetic Reference Field (IGRF), the standard spherical-harmonic model maintained by the International Association of Geomagnetism and Aeronomy. The IGRF expresses the scalar potential as a truncated spherical-harmonic series (degree and order 13 for the main field), with Gauss coefficients updated every five years and a secular-variation model between epochs. The current generation, IGRF-14, was adopted by the IAGA Division V working group in November 2024; it provides a definitive main-field model for epoch 2020.0, a main-field model for epoch 2025.0, and a predictive secular-variation model for 2025.0–2030.0.<sup id="fnref:igrf14"><a class="footnote-ref" href="#fn:igrf14">6</a></sup><sup id="fnref:igrf13"><a class="footnote-ref" href="#fn:igrf13">7</a></sup> Two features of the real field are practically important and absent from the pure dipole: the field is <em>not</em> symmetric about the geographic axis (hence the ~11° dipole tilt and the substantial quadrupole and octupole terms), and there is a pronounced regional minimum, the South Atlantic Anomaly, where the field over the South Atlantic and South America is depressed by up to ~30% relative to the dipole value. An attitude controller that predicts the available torque from an on-board field model must therefore carry at least a low-degree IGRF, not Eq. (6), and must expect the torque authority to vary around the orbit and to be systematically weak over the anomaly.</p>
+<h3 id="34-the-field-as-seen-by-the-structure">3.4 The field as seen by the structure</h3>
+<p>Two frame effects close the environmental picture. First, the field direction in the orbit frame rotates roughly <em>twice per orbit</em> for an inclined orbit — the geometry that underlies §2.4's controllability argument — so the "forbidden" torque axis precesses continuously. Second, and specific to very large structures, the field is not uniform across the body: over a body of radial extent Δx the fractional variation of the dipole field is of order 3Δx/r, i.e. ~4 × 10⁻⁴ over a 1-km radial span at 400 km, and the field <em>direction</em> rotates slightly from one end of a kilometre-scale body to the other. These differential effects are negligible for the net torque but must be retained in any high-fidelity model of distributed current elements (§7.5).</p>
+<h2 id="4-slew-dynamics-under-bounded-magnetic-torque">4. Slew Dynamics Under Bounded Magnetic Torque</h2>
+<h3 id="41-the-rest-to-rest-eigenaxis-maneuver">4.1 The rest-to-rest eigenaxis maneuver</h3>
+<p>Consider the idealised problem of rotating the structure through an angle Δθ about a fixed principal (eigen-) axis, starting and ending at rest, under a torque of bounded magnitude τ about that axis. The time-optimal profile for a double-integrator with a symmetric torque bound is the classical <em>bang–bang</em> maneuver: accelerate at the maximum angular acceleration α = τ/I for the first half of the maneuver, then decelerate at −α for the second half.<sup id="fnref:wie"><a class="footnote-ref" href="#fn:wie">5</a></sup><sup id="fnref2:sidi"><a class="footnote-ref" href="#fn:sidi">2</a></sup> With I the relevant moment of inertia, the angle accumulated is</p>
+<pre><code>Δθ = ¼ α t²  ⟹  t = 2 √(Δθ / α) = 2 √(I Δθ / τ).                 (7)
+</code></pre>
+<p>Equation (7) is the workhorse of this section. It states the physically crucial fact that the maneuver time grows as the <em>square root</em> of the moment of inertia and falls only as the square root of the torque: to make a body of ten-thousand-fold greater inertia slew in the same time requires a hundred-fold greater torque. For magnetic actuation, where τ is capped by the weak field (Eq. 3), this is a severe constraint.</p>
+<p>For a magnetic maneuver the constant-torque idealisation is optimistic in two ways that we track explicitly. The achievable torque is not τ = mB at all times but τ = mB·sin θ (Eq. 3) with θ the dipole–field angle, and only the perpendicular projection about the desired axis is useful (Eq. 5). We therefore write the <em>effective</em> torque as</p>
+<pre><code>τ_eff = η · m · B,   with 0 &lt; η &lt; 1,                             (8)
+</code></pre>
+<p>an orbit-averaged efficiency η that captures the perpendicularity loss and the finite duty about a fixed slew axis. Favourable high-inclination geometry gives η ≈ 0.5–0.7; unfavourable geometry (including any span of orbit where the desired axis lies near B̂) drives η toward zero. Slew times computed with τ = mB (η = 1) are thus <em>lower bounds</em>; realistic times are longer by roughly 1/√η ≈ 1.2–1.4× at best.</p>
+<h3 id="42-the-reference-platform">4.2 The reference platform</h3>
+<blockquote>
+<p><strong>Illustrative calculation 3 — reference platform R1.</strong> We adopt a slender reference structure:
+- Length L = 1.0 × 10³ m (1 km); total mass M = 1.0 × 10⁵ kg (100 t); linear density m′ = 100 kg·m⁻¹.
+- Modelled as a uniform thin rod, the transverse moment of inertia through the centre of mass is I_T = ML²/12 = 8.33 × 10⁹ kg·m². The moment of inertia about the long (slender) axis, I_L, is smaller by the square of the ratio of cross-sectional radius to length and is negligible: for a 5-m cross-sectional radius, I_L ~ 10⁶ kg·m² ≪ I_T. Hence the inertia difference ΔI ≡ I_T − I_L ≈ I_T.
+- Orbit: circular, altitude 400 km, r = 6.771 × 10⁶ m. Mean motion ω_o = √(μ_E/r³) with μ_E = 3.986 × 10¹⁴ m³·s⁻²: ω_o² = 1.284 × 10⁻⁶ s⁻², ω_o = 1.133 × 10⁻³ rad·s⁻¹, orbital period T_orb = 2π/ω_o = 5.54 × 10³ s ≈ 92.4 min.
+- Representative field B_rep = 3.0 × 10⁻⁵ T.</p>
+<p>R1 is deliberately <em>modest</em> for a "very large" structure — heavier or longer platforms only increase I_T and lengthen every slew below. It is a lower bound on difficulty, not an upper one.</p>
+</blockquote>
+<h3 id="43-slew-time-versus-dipole-and-the-seven-minute-question">4.3 Slew time versus dipole, and the seven-minute question</h3>
+<p>With Δθ = 90° = π/2 = 1.5708 rad and I_T = 8.33 × 10⁹ kg·m², the product I_T·Δθ = 1.31 × 10¹⁰ kg·m²·rad. Using τ = mB_rep (the optimistic η = 1 bound), Eq. (7) gives the following.</p>
+<blockquote>
+<p><strong>Illustrative calculation 4 — 90° slew time versus dipole (R1, η = 1 lower bound).</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Dipole m (A·m²)</th>
+<th>Torque τ = mB (N·m)</th>
+<th>Slew time t (Eq. 7)</th>
+<th>Feasibility (from Illus. Calc. 1)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 × 10²</td>
+<td>3.0 × 10⁻³</td>
+<td>4.18 × 10⁶ s ≈ 48 days</td>
+<td>conventional torque rod</td>
+</tr>
+<tr>
+<td>1 × 10³</td>
+<td>3.0 × 10⁻²</td>
+<td>1.32 × 10⁶ s ≈ 15 days</td>
+<td>large torque rod</td>
+</tr>
+<tr>
+<td>1 × 10⁴</td>
+<td>3.0 × 10⁻¹</td>
+<td>4.18 × 10⁵ s ≈ 4.8 days</td>
+<td>feasible (distributed)</td>
+</tr>
+<tr>
+<td>1 × 10⁵</td>
+<td>3.0</td>
+<td>1.32 × 10⁵ s ≈ 37 h</td>
+<td>feasible (baseline)</td>
+</tr>
+<tr>
+<td>1 × 10⁶</td>
+<td>3.0 × 10¹</td>
+<td>4.18 × 10⁴ s ≈ 11.6 h</td>
+<td>feasible</td>
+</tr>
+<tr>
+<td>1 × 10⁷</td>
+<td>3.0 × 10²</td>
+<td>1.32 × 10⁴ s ≈ 3.7 h</td>
+<td>feasible (aggressive)</td>
+</tr>
+<tr>
+<td>1 × 10⁸</td>
+<td>3.0 × 10³</td>
+<td>4.18 × 10³ s ≈ 70 min</td>
+<td>infeasible dipole</td>
+</tr>
+<tr>
+<td>1 × 10⁹</td>
+<td>3.0 × 10⁴</td>
+<td>1.32 × 10³ s ≈ 22 min</td>
+<td>infeasible dipole</td>
+</tr>
+<tr>
+<td>1 × 10¹⁰</td>
+<td>3.0 × 10⁵</td>
+<td>4.18 × 10² s ≈ 7.0 min</td>
+<td>thermally impossible</td>
+</tr>
+</tbody>
+</table></div>
+<p>Reading the table against the achievable band of §2.2 (m ≲ 10⁷ A·m²), the fastest <em>physically achievable</em> 90° magnetic slew of R1 is of order <strong>a few hours</strong> in the optimistic η = 1 limit, and roughly <strong>half a day or more</strong> once the efficiency penalty (η ≈ 0.5) and the need to avoid exciting structural modes (§7) are included.</p>
+</blockquote>
+<p>Now the seven-minute question directly. Invert Eq. (7) for the torque required to complete Δθ = π/2 in t = 420 s:</p>
+<pre><code>τ_req = 4 I_T Δθ / t² = 4 (8.33 × 10⁹)(1.5708) / (420)² = 2.97 × 10⁵ N·m.                (9)
+</code></pre>
+<p>The dipole that would supply this against B_rep is</p>
+<pre><code>m_req = τ_req / B_rep = 2.97 × 10⁵ / 3.0 × 10⁻⁵ ≈ 9.9 × 10⁹ ≈ 1.0 × 10¹⁰ A·m².            (10)
+</code></pre>
+<p>This is the number that answers the question. A ~7-minute 90° slew of a kilometre-scale, 10⁵-kg structure would require a magnetic dipole of order <strong>10¹⁰ A·m²</strong>. That is:</p>
+<ul>
+<li>about <strong>10⁷–10⁸ times</strong> larger than any flown magnetorquer (10²–10³ A·m²);</li>
+<li>about <strong>10³ times</strong> larger than the aggressive distributed-loop dipole of Illustrative calculation 1 (10⁷ A·m²);</li>
+<li>realised, if one insisted on the km-loop of §2.2, only at ~113 MW of continuous dissipation and a conductor current density of 10⁸ A·m⁻², one to two orders beyond the sustained limit of any spaceworthy conductor — i.e. it melts the loop.</li>
+</ul>
+<p>And this is the <em>best case</em> (η = 1). Including the perpendicularity/duty penalty, the demand rises to m_req/√η ~ 1.4 × 10¹⁰ A·m² and the actuator cannot in any event deliver full torque about a fixed slew axis continuously through the maneuver, because for part of every orbit the desired axis lies too near B̂ (Eqs. 3, 5). The seven-minute magnetic slew is therefore <strong>not physically consistent</strong> — not marginally, but by many orders of magnitude, and for two independent reasons (dipole magnitude and duty cycle) at once. The honest conclusion is that magnetic-only reorientation of a very large structure is intrinsically a process of <strong>hours to days</strong>, not minutes.</p>
+<h3 id="44-duty-cycle-and-the-efficiency-penalty-quantified">4.4 Duty cycle and the efficiency penalty, quantified</h3>
+<p>It is worth being explicit about the "duty cycle" the question invokes. Two distinct factors reduce the effective torque below mB. The first is the <em>instantaneous</em> perpendicularity loss (Eq. 3): averaged over random relative orientations of a fixed desired axis and a sweeping B̂, ⟨sin θ⟩ = π/4 ≈ 0.79, but the <em>useful</em> component about the fixed axis (Eq. 5) averages lower. The second is the <em>deadband</em> over the fraction of the orbit where the desired torque axis lies within a small cone of B̂ and essentially no useful torque is available; over that arc the maneuver stalls and must wait for the geometry to improve. For a favourable high-inclination orbit these combine to η ≈ 0.5–0.7; for an equatorial orbit and a slew about the near-constant field axis, η → 0 and the maneuver is effectively impossible magnetically regardless of dipole. There is, in other words, no duty cycle at which a 10¹⁰-A·m² dipole becomes available, and even if there were, no orbit geometry at which it could be applied continuously about a single axis. Both the required dipole and the required duty are unphysical.</p>
+<h3 id="45-why-larger-is-unavoidably-slower-a-scaling-law">4.5 Why larger is unavoidably slower: a scaling law</h3>
+<p>The reference platform makes one case; a scaling argument makes the general one. Suppose the structure is scaled up self-similarly at fixed <em>areal</em> mass density (mass M ∝ L²) and fixed <em>areal</em> dipole density (the distributed torquer of §2.2 gives m ∝ enclosed area ∝ L²). Then the transverse inertia scales as I ∝ M L² ∝ L⁴, the torque scales as τ = mB ∝ L², and the minimum slew time (Eq. 7) scales as</p>
+<pre><code>t ∝ √(I/τ) ∝ √(L⁴/L²) = L.                                       (11)
+</code></pre>
+<p>Even under the <em>most favourable</em> assumption — that the magnetorquer grows with the structure's whole area — the minimum magnetic slew time grows at least <em>linearly</em> with the structure's linear dimension. If mass instead scales volumetrically (M ∝ L³), t ∝ L^(3/2), worse still. Bigger structures are not merely harder to slew; they are harder in a way no amount of area-scaled magnetorquer can outrun.</p>
+<blockquote>
+<p><strong>Illustrative calculation 5 — slew-time scaling with size.</strong> Anchoring Eq. (11) at R1 (L = 1 km, m = 10⁶ A·m², t ≈ 11.6 h from Illus. Calc. 4), and holding areal mass density (0.1 kg·m⁻²) and areal dipole density (1 A·m²·m⁻²) fixed:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Linear size L (km)</th>
+<th>Inertia I_T ∝ L⁴ (kg·m²)</th>
+<th>Area-scaled dipole m ∝ L² (A·m²)</th>
+<th>Min. 90° slew time ∝ L</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.5</td>
+<td>5.2 × 10⁸</td>
+<td>2.5 × 10⁵</td>
+<td>≈ 5.8 h</td>
+</tr>
+<tr>
+<td>1</td>
+<td>8.3 × 10⁹</td>
+<td>1.0 × 10⁶</td>
+<td>≈ 11.6 h</td>
+</tr>
+<tr>
+<td>2</td>
+<td>1.3 × 10¹¹</td>
+<td>4.0 × 10⁶</td>
+<td>≈ 23 h</td>
+</tr>
+<tr>
+<td>5</td>
+<td>5.2 × 10¹²</td>
+<td>2.5 × 10⁷</td>
+<td>≈ 2.4 days</td>
+</tr>
+<tr>
+<td>10</td>
+<td>8.3 × 10¹³</td>
+<td>1.0 × 10⁸</td>
+<td>≈ 4.8 days</td>
+</tr>
+</tbody>
+</table></div>
+<p>A 10-km platform of the Glaser class, even with a 10⁸-A·m² area-scaled dipole (already at the edge of the thermal envelope), slews 90° in about five days at best.</p>
+</blockquote>
+<h2 id="5-momentum-management-secular-and-cyclic-torque">5. Momentum Management, Secular and Cyclic Torque</h2>
+<h3 id="51-angular-momentum-bookkeeping">5.1 Angular momentum bookkeeping</h3>
+<p>The rotational equation of motion for a structure carrying an internal momentum store (reaction wheels or CMGs of total stored momentum h_w), written in the body frame, is</p>
+<pre><code>I ω̇ + ω × (I ω + h_w) + ḣ_w = τ_gg + τ_mag + τ_env,               (12)
+</code></pre>
+<p>with τ_gg the gravity-gradient torque (§6), τ_mag = m × B the magnetic control torque, and τ_env the residual environmental torques (aerodynamic in LEO, solar-radiation pressure, and higher-order magnetic). The <em>total</em> system angular momentum H = Iω + h_w evolves, in inertial axes, only under <em>external</em> torques:</p>
+<pre><code>dH/dt |_inertial = τ_gg + τ_mag + τ_env.                          (13)
+</code></pre>
+<p>Internal actuators (wheels, CMGs) can redistribute momentum between the structure and the store — they can slew the body by spinning up a wheel — but they cannot change H; only external torques can. This is the division of labour at the heart of large-structure attitude control.</p>
+<h3 id="52-secular-versus-cyclic-disturbance">5.2 Secular versus cyclic disturbance</h3>
+<p>Environmental torques divide into two parts by their behaviour over an orbit. The <em>cyclic</em> part integrates to zero over one orbital period and merely causes the stored momentum to oscillate; the <em>secular</em> part has a non-zero orbit average and causes the stored momentum to grow without bound. A momentum store of finite capacity saturates on the secular component, after which it can absorb no more and the body attitude begins to drift. The purpose of an <em>external</em> trim torque is to remove the secular momentum — "desaturation" or "momentum dumping" — resetting the store.</p>
+<p>For a very large structure the dominant secular source is the gravity-gradient torque evaluated away from its equilibrium (§6): a slender body held at an attitude offset from its gravity-gradient equilibrium experiences a torque whose orbit average need not vanish, and whose <em>magnitude</em> (§6.1) dwarfs the available magnetic torque. This is the crux of §6.</p>
+<h3 id="53-magnetic-momentum-management-and-why-it-is-the-right-job-for-the-actuator">5.3 Magnetic momentum management and why it is the right job for the actuator</h3>
+<p>Magnetorquers are the standard external actuator for momentum management precisely because Eq. (13) requires an <em>external</em> torque and magnetic torque is the only propellantless external torque available in LEO. The orbit-averaged controllability of §2.4 is exactly what is needed: although at any instant the magnetic torque cannot point along B̂, over an inclined orbit the achievable <em>secular</em> (orbit-averaged) torque spans all three axes, so secular momentum accumulated in any direction can be bled off over one or a few orbits.<sup id="fnref2:stickler"><a class="footnote-ref" href="#fn:stickler">9</a></sup><sup id="fnref2:markley"><a class="footnote-ref" href="#fn:markley">3</a></sup><sup id="fnref3:ovchinnikov"><a class="footnote-ref" href="#fn:ovchinnikov">14</a></sup> The desaturation law is a cross-product law (Eq. 4) driven by the momentum error,</p>
+<pre><code>τ_cmd = −k (h_w − h_ref),   m_cmd = (B × τ_cmd)/|B|²,             (14)
+</code></pre>
+<p>for a positive gain k. The rate at which magnetic torque can remove momentum is bounded by mB (of order 3 N·m at m = 10⁵ A·m², 300 N·m at m = 10⁷ A·m² for R1), so desaturation of a large secular momentum is itself a slow, multi-orbit process — again, stabilising but slow.</p>
+<p>This is the architecture flown on the largest structures actually operated. On the International Space Station, four control-moment gyroscopes hold attitude and store momentum while the vehicle is commanded toward the <em>torque-equilibrium attitude</em> — the attitude at which the orbit-averaged sum of gravity-gradient, aerodynamic, and other environmental torques is minimised — precisely to keep the secular momentum small; when the CMGs approach saturation, an external torque source unloads them.<sup id="fnref:wie1989"><a class="footnote-ref" href="#fn:wie1989">20</a></sup> The lesson transfers directly to a kilometre-scale platform, with magnetorquers as the external unloading torque and the gravity-gradient equilibrium as the natural attitude to hold.</p>
+<figure class="diagram-figure">
+<pre class="mermaid">flowchart TD
+  D["Environmental torques&lt;br/&gt;(gravity-gradient, aero, SRP)"] --&gt; S{"Orbit average"}
+  S --&gt;|"cyclic part&lt;br/&gt;(∮ = 0)"| W["Momentum store&lt;br/&gt;oscillates (wheels/CMGs)"]
+  S --&gt;|"secular part&lt;br/&gt;(∮ ≠ 0)"| G["Stored momentum grows&lt;br/&gt;→ saturation risk"]
+  G --&gt; M["Magnetorquer removes&lt;br/&gt;secular momentum&lt;br/&gt;τ = m × B (external)"]
+  M --&gt;|"rate ≤ mB&lt;br/&gt;(slow, multi-orbit)"| G
+  W --&gt; A["Attitude held near&lt;br/&gt;torque-equilibrium /&lt;br/&gt;gravity-gradient attitude"]</pre>
+<figcaption>Flowchart</figcaption>
+</figure>
+<p><em>Figure 2. Momentum management for a large structure. Internal stores (wheels/CMGs) absorb the cyclic disturbance and effect fast internal exchanges; only an external torque can remove the secular momentum, and in LEO the propellantless external option is the magnetorquer, whose bounded torque makes desaturation a slow, multi-orbit process.</em></p>
+<h2 id="6-gravity-gradient-torque-and-passive-stabilisation">6. Gravity-Gradient Torque and Passive Stabilisation</h2>
+<h3 id="61-the-gravity-gradient-torque-and-its-dominance-at-scale">6.1 The gravity-gradient torque and its dominance at scale</h3>
+<p>A rigid body in orbit experiences a torque because the gravitational pull on its near side exceeds that on its far side. For a body with inertia tensor <strong>I</strong> and nadir (local-vertical) unit vector n̂, the gravity-gradient torque is</p>
+<pre><code>τ_gg = 3 (μ_E / r³) (n̂ × I·n̂) = 3 ω_o² (n̂ × I·n̂),                (15)
+</code></pre>
+<p>using ω_o² = μ_E/r³ for a circular orbit.<sup id="fnref:hughes"><a class="footnote-ref" href="#fn:hughes">4</a></sup><sup id="fnref3:wertz"><a class="footnote-ref" href="#fn:wertz">1</a></sup> For a slender body at attitude angle φ from the local vertical, the magnitude is</p>
+<pre><code>|τ_gg| = (3/2) ω_o² |I_T − I_L| sin 2φ ≈ (3/2) ω_o² I_T sin 2φ,     (16)
+</code></pre>
+<p>since I_L ≪ I_T for a slender structure. The peak (sin 2φ = 1) is what makes kilometre scale distinctive.</p>
+<blockquote>
+<p><strong>Illustrative calculation 6 — gravity-gradient torque on R1.</strong> With ω_o² = 1.284 × 10⁻⁶ s⁻² (400 km) and I_T = 8.33 × 10⁹ kg·m²,</p>
+<pre><code>|τ_gg|_max = (3/2)(1.284 × 10⁻⁶)(8.33 × 10⁹) ≈ 1.6 × 10⁴ N·m.
+</code></pre>
+<p>Compare this with the magnetic torque available to R1: 3 N·m at the baseline dipole (10⁵ A·m²), 300 N·m at the aggressive dipole (10⁷ A·m²). The peak gravity-gradient torque exceeds even the aggressive magnetic torque by <strong>a factor of ~50</strong>, and the baseline magnetic torque by a factor of ~5000. A magnetic dipole able merely to <em>balance</em> the peak gravity-gradient torque would need m = |τ_gg|/B ≈ 1.6 × 10⁴ / 3.0 × 10⁻⁵ ≈ 5 × 10⁸ A·m² — again far outside the feasible band.</p>
+</blockquote>
+<p>The consequence is structural to the whole control problem: for a very large elongated body in LEO, <strong>gravity-gradient torque is the dominant attitude torque</strong>, and magnetic actuation is a small perturbation on top of it. Magnetorquers cannot fight the gravity gradient; they can only operate <em>within the envelope it defines</em>, near its equilibrium.</p>
+<h3 id="62-gravity-gradient-stabilisation-and-libration">6.2 Gravity-gradient stabilisation and libration</h3>
+<p>That the gravity gradient dominates is, fortunately, mostly good news, because the gravity-gradient torque is <em>restoring</em>: it possesses stable equilibria that provide passive attitude stabilisation without any actuation at all. A slender body is gravity-gradient stable with its long axis — the axis of <em>minimum</em> moment of inertia — aligned to the local vertical, pointing along the nadir–zenith line. This is the principle of the gravity-gradient boom, used since the earliest days of spaceflight, and it is analysed in full in the standard texts.<sup id="fnref2:hughes"><a class="footnote-ref" href="#fn:hughes">4</a></sup><sup id="fnref3:sidi"><a class="footnote-ref" href="#fn:sidi">2</a></sup><sup id="fnref4:wertz"><a class="footnote-ref" href="#fn:wertz">1</a></sup> The general stability conditions (the Lagrange region) require the maximum-inertia axis along the orbit normal and the minimum-inertia axis along the local vertical; a slender structure with a single long axis satisfies them naturally when that axis hangs vertically.</p>
+<p>The equilibrium is stable but <em>undamped</em>: displaced from it, the structure oscillates — librates — indefinitely, because the gravity-gradient torque is conservative. The libration frequencies are of the order of the orbital rate. For the classical slender ("dumbbell") body the in-plane pitch libration frequency is</p>
+<pre><code>ω_pitch = √3 · ω_o,                                              (17)
+</code></pre>
+<p>so that for R1, ω_pitch = 1.73 × 1.133 × 10⁻³ = 1.96 × 10⁻³ rad·s⁻¹, a libration period of ≈ 53 min, roughly 0.58 of the orbital period.<sup id="fnref3:hughes"><a class="footnote-ref" href="#fn:hughes">4</a></sup> Roll and yaw librations have frequencies of the same order set by the inertia ratios. These are the slow rigid-body modes the controller must manage; note they are far below the <em>elastic</em> modes of §7.</p>
+<h3 id="63-magnetic-libration-damping-the-natural-role-of-the-actuator">6.3 Magnetic libration damping: the natural role of the actuator</h3>
+<p>Since the gravity gradient supplies the stiffness but no damping, the natural and classical role of a weak actuator is to supply the <em>damping</em>: to bleed energy out of the libration so the structure settles to its gravity-gradient equilibrium. This is precisely the regime in which magnetic torque is not merely adequate but ideal. It needs to counter only the slow, small residual libration torques, not the full gravity-gradient stiffness, and it has an entire orbit over which to act. The foundational demonstration is Stickler &amp; Alfriend's elementary magnetic control system for gravity-gradient/momentum-bias spacecraft, which achieves acquisition, libration (nutation) damping, and momentum control with magnetorquers alone;<sup id="fnref3:stickler"><a class="footnote-ref" href="#fn:stickler">9</a></sup> Wisniewski &amp; Blanke proved local asymptotic stabilisability of the gravity-gradient equilibrium under <em>fully magnetic</em> three-axis control by exploiting the periodicity of the field along the orbit and standard passivity arguments;<sup id="fnref2:wisniewski"><a class="footnote-ref" href="#fn:wisniewski">10</a></sup> and Psiaki and Lovera &amp; Astolfi supplied periodic-LQR and almost-global nonlinear designs respectively.<sup id="fnref2:psiaki"><a class="footnote-ref" href="#fn:psiaki">11</a></sup><sup id="fnref2:lovera"><a class="footnote-ref" href="#fn:lovera">12</a></sup> The unifying picture is consistent across this literature and with the physics above: magnetic control damps and trims a gravity-gradient-stabilised structure, on the timescale of many orbits, and cannot and need not do more.</p>
+<h3 id="64-the-operating-envelope">6.4 The operating envelope</h3>
+<p>Sections 4–6 combine into a single statement of what magnetic-only control of a very large structure can do. It cannot slew the structure quickly (§4) or overpower the gravity gradient (§6.1). It <em>can</em> (i) damp libration about the passively stable gravity-gradient attitude (§6.3); (ii) trim that attitude slowly, and slew the structure between gravity-gradient-compatible orientations over hours to days (§4); and (iii) manage and desaturate stored momentum over multiple orbits (§5). All three are stabilising, low-authority, low-bandwidth functions. The structure is held, fundamentally, by gravity; the magnetorquer keeps it quiet.</p>
+<h2 id="7-flexible-structure-dynamics-and-controlstructure-interaction">7. Flexible-Structure Dynamics and Control–Structure Interaction</h2>
+<h3 id="71-low-structural-eigenfrequencies">7.1 Low structural eigenfrequencies</h3>
+<p>A multi-kilometre truss is not rigid; it is a distributed elastic body whose lowest bending modes have very low natural frequencies, and those frequencies are the single most important flexible-body parameter for control design. Modelling the primary structural member as a uniform Euler–Bernoulli beam of flexural rigidity EI_b (N·m²) and mass per length m′ (kg·m⁻¹), the natural frequencies of transverse bending are</p>
+<pre><code>f_n = (β_n L)² / (2π L²) · √(EI_b / m′) = (β_n L)²/(2π) · √(EI_b / (m′ L⁴)),      (18)
+</code></pre>
+<p>where the (β_n L) are the eigenvalues of the boundary-value problem. A free-floating structure has <em>free–free</em> boundary conditions; its two rigid-body modes are at zero frequency (these are the attitude and translation degrees of freedom of §§4–6), and its elastic eigenvalues are (β_n L) = 4.730, 7.853, 10.996, … for n = 1, 2, 3, ….<sup id="fnref:blevins"><a class="footnote-ref" href="#fn:blevins">19</a></sup><sup id="fnref:junkins"><a class="footnote-ref" href="#fn:junkins">18</a></sup></p>
+<blockquote>
+<p><strong>Illustrative calculation 7 — fundamental bending frequency of R1.</strong> For L = 1 km, m′ = 100 kg·m⁻¹, and (β₁L) = 4.730, Eq. (18) gives f₁ = (4.730)²/(2π) · √(EI_b/(m′ L⁴)) = 3.56 × 10⁻⁷ · √(EI_b) Hz (with EI_b in N·m²):</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Flexural rigidity EI_b (N·m²)</th>
+<th>f₁ (Hz)</th>
+<th>ω₁ (rad·s⁻¹)</th>
+<th>Period 1/f₁ (s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 × 10⁸</td>
+<td>3.6 × 10⁻³</td>
+<td>2.2 × 10⁻²</td>
+<td>281</td>
+</tr>
+<tr>
+<td>1 × 10⁹</td>
+<td>1.1 × 10⁻²</td>
+<td>7.1 × 10⁻²</td>
+<td>89</td>
+</tr>
+<tr>
+<td>1 × 10¹⁰</td>
+<td>3.6 × 10⁻²</td>
+<td>2.2 × 10⁻¹</td>
+<td>28</td>
+</tr>
+<tr>
+<td>1 × 10¹¹</td>
+<td>1.1 × 10⁻¹</td>
+<td>7.1 × 10⁻¹</td>
+<td>9</td>
+</tr>
+</tbody>
+</table></div>
+<p>The fundamental bending mode of a kilometre-scale truss falls in the <em>millihertz-to-decihertz</em> band, with ~0.01 Hz (ω₁ ≈ 0.06 rad·s⁻¹) a representative value. Higher structures push it lower still: from Eq. (18), f₁ ∝ 1/L² at fixed cross-section, so a 10-km member of the same design has a fundamental near 10⁻⁴ Hz. These are extraordinarily low frequencies — periods of tens of seconds to hours — and they are dense: the modal spacing (β_n L)² grows only quadratically, so many modes crowd into a narrow low-frequency band.</p>
+</blockquote>
+<h3 id="72-controlstructure-interaction-and-spillover">7.2 Control–structure interaction and spillover</h3>
+<p>The danger a flexible structure poses to its own controller is <em>control–structure interaction</em> (CSI). A controller designed on a rigid-body (or low-order modal) model applies torque that also couples into the neglected elastic modes; if the closed-loop actuation has energy at a structural frequency, it excites that mode. Worse, the same sensors that measure attitude also pick up the elastic deflection, and feeding that back through a controller not designed for it can <em>destabilise</em> the structure — the phenomena Balas named <em>control spillover</em> (control energy leaking into unmodelled modes) and <em>observation spillover</em> (unmodelled modal response corrupting the measurement), which together can drive an otherwise-stable design unstable.<sup id="fnref:balas"><a class="footnote-ref" href="#fn:balas">16</a></sup><sup id="fnref:meirovitch"><a class="footnote-ref" href="#fn:meirovitch">17</a></sup> For a structure with modes as low and as dense as those of Illustrative calculation 7, spillover is not a refinement but a first-order design constraint. The classical mitigations — collocating actuators and sensors so the plant is passive (negative-imaginary) between them, and rolling the controller gain off well below the first structural frequency — are exactly the tools the large-space-structure control literature developed.<sup id="fnref2:balas"><a class="footnote-ref" href="#fn:balas">16</a></sup><sup id="fnref2:meirovitch"><a class="footnote-ref" href="#fn:meirovitch">17</a></sup><sup id="fnref2:junkins"><a class="footnote-ref" href="#fn:junkins">18</a></sup></p>
+<h3 id="73-the-spectral-separation-virtue-of-magnetic-control">7.3 The spectral-separation virtue of magnetic control</h3>
+<p>Here the analysis turns, unexpectedly, in magnetic control's favour. The disqualifying weakness of magnetic actuation for slewing — its low authority and inherently low bandwidth — is exactly the property that makes it <em>safe</em> for a flexible structure. The magnetic control torque varies on the orbital timescale (the field sweeps ~twice per orbit, §3.4), so the actuation spectrum is concentrated near and below the orbital rate ω_o ≈ 1.1 × 10⁻³ rad·s⁻¹. The first bending mode sits at ω₁ ≈ 0.06 rad·s⁻¹ (Illustrative calculation 7). The separation ratio is</p>
+<pre><code>ω₁ / ω_o ≈ 0.06 / 1.1 × 10⁻³ ≈ 55,                                (19)
+</code></pre>
+<p>between one and three orders of magnitude depending on stiffness. A magnetic controller operating with bandwidth at or below ω_o therefore has essentially no spectral overlap with the structure's elastic modes: it acts <em>quasi-statically</em> on the flexible body, deflecting it slowly rather than ringing it. Where a high-bandwidth actuator commanded to slew in minutes would deposit energy squarely in the ω₁ band and excite large bending oscillations, the magnetorquer's slowness keeps its energy far below f₁. For a very large flexible structure, low control bandwidth is a design <em>asset</em>, and magnetic actuation supplies it intrinsically.</p>
+<h3 id="74-avoiding-modal-excitation-during-a-slew">7.4 Avoiding modal excitation during a slew</h3>
+<p>The spectral-separation argument also prescribes how any slew — magnetic or otherwise — of such a structure must be commanded: the maneuver profile must contain no significant energy at or above f₁. A bang–bang profile (§4.1) is, in this respect, the <em>wrong</em> command for a flexible body, because its discontinuous torque switch is spectrally broadband and rings the modes; the flexible-structure literature replaces it with smooth, band-limited, or input-shaped profiles that notch out the structural frequencies.<sup id="fnref3:junkins"><a class="footnote-ref" href="#fn:junkins">18</a></sup><sup id="fnref2:wie"><a class="footnote-ref" href="#fn:wie">5</a></sup> Two facts make this benign for the magnetic case. First, the achievable magnetic slew is so slow (hours, §4.3) that its natural profile already lies far below f₁; deliberate command shaping costs essentially nothing. Second, because the maneuver spans many structural periods, the structure moves through a quasi-static succession of equilibria, its bending deflection tracking the slowly varying distributed load rather than oscillating. The maneuver is best understood not as a rigid-body rotation but as a slow morphing of a gently-bent equilibrium shape.</p>
+<h3 id="75-differential-effects-across-a-very-long-body">7.5 Differential effects across a very long body</h3>
+<p>Finally, the physical extent of a multi-kilometre structure means several environmental fields vary appreciably from one end to the other, producing distributed loads that a point-mass model misses and that couple directly into the low bending modes.</p>
+<ul>
+<li><strong>Tidal (gravity-gradient) gradient.</strong> In the orbiting frame the differential gravitational acceleration across the body along the local vertical is 3ω_o² per unit radial distance (the radial term of the Clohessy–Wiltshire equations). For R1 at 400 km, 3ω_o² = 3.85 × 10⁻⁶ s⁻²; across a 500-m radial half-span this is Δa ≈ 1.9 × 10⁻³ m·s⁻² (~2 × 10⁻⁴ g). Distributed over the mass, this is both the source of the stabilising gravity-gradient torque (§6) and a <em>steady bending and tension load</em> along the structure — the structure hangs, very slightly, like a slack cable in a tidal field.</li>
+<li><strong>Field non-uniformity.</strong> As noted in §3.4, the geomagnetic field varies by ~3Δx/r ≈ 4 × 10⁻⁴ over a kilometre span and rotates slightly in direction along the body. For distributed current-carrying elements this yields small differential magnetic forces and torques that must be retained in a high-fidelity model though they are negligible for the net torque.</li>
+<li><strong>Thermal gradients.</strong> A kilometre-scale structure crossing the day–night terminator experiences a moving sunlight/shadow boundary and large temperature differences between illuminated and shadowed members. The resulting differential thermal expansion produces thermally-induced quasi-static bending and, at the terminator crossing, transient <em>thermal snap</em> that can excite the low bending modes — the same mechanism responsible for the well-known thermally-driven jitter of large deployable appendages. For a structure whose modes lie at millihertz, terminator crossings twice per orbit are a periodic excitation uncomfortably close to the low modal band and must be accounted for in both structure and controller design.</li>
+</ul>
+<figure class="diagram-figure">
+<pre class="mermaid">flowchart TD
+  subgraph Struct["Very large flexible structure"]
+    RB["Rigid-body attitude&lt;br/&gt;(ω_o ~ 10⁻³ rad/s)"]
+    EL["Elastic bending modes&lt;br/&gt;f₁ ~ 10⁻²–10⁻¹ Hz"]
+  end
+  MAG["Magnetorquer&lt;br/&gt;actuation band ≤ ω_o"] --&gt;|"quasi-static:&lt;br/&gt;no overlap with f₁"| RB
+  MAG -. "spectral gap ω₁/ω_o ≈ 50 → little spillover" .-&gt; EL
+  DIST["Distributed disturbances:&lt;br/&gt;tidal gradient, thermal snap,&lt;br/&gt;field non-uniformity"] --&gt; EL
+  FAST["Hypothetical fast actuator&lt;br/&gt;(minutes-scale slew)"] --&gt;|"broadband torque&lt;br/&gt;excites bending"| EL</pre>
+<figcaption>Flowchart</figcaption>
+</figure>
+<p><em>Figure 3. Control–structure interaction. The magnetorquer's actuation band lies far below the first elastic frequency (Eq. 19), so it acts quasi-statically and produces little spillover; a fast (minutes-scale) actuator would deposit energy in the bending band and excite the modes. Distributed environmental disturbances — the tidal gradient, thermal snap at terminator crossings, and field non-uniformity — excite the low modes directly and must be managed structurally.</em></p>
+<h2 id="8-synthesis-a-feasibility-envelope">8. Synthesis: A Feasibility Envelope</h2>
+<p>The pieces assemble into a coherent and, in retrospect, inevitable picture. The relevant torques for the reference platform R1 span an enormous range, and their hierarchy — not the absolute value of any one — determines what is possible.</p>
+<blockquote>
+<p><strong>Illustrative calculation 8 — torque and timescale budget for R1 (400 km).</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th>Value</th>
+<th>Basis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Peak gravity-gradient torque</td>
+<td>~1.6 × 10⁴ N·m</td>
+<td>Eq. (16), Illus. Calc. 6</td>
+</tr>
+<tr>
+<td>Magnetic torque, aggressive dipole (10⁷ A·m²)</td>
+<td>~3 × 10² N·m</td>
+<td>Eq. (3), B = 30 μT</td>
+</tr>
+<tr>
+<td>Magnetic torque, baseline dipole (10⁵ A·m²)</td>
+<td>~3 N·m</td>
+<td>Eq. (3)</td>
+</tr>
+<tr>
+<td>Dipole to balance peak gravity gradient</td>
+<td>~5 × 10⁸ A·m²</td>
+<td>infeasible</td>
+</tr>
+<tr>
+<td>Orbital rate ω_o</td>
+<td>1.13 × 10⁻³ rad·s⁻¹ (T = 92 min)</td>
+<td>Illus. Calc. 3</td>
+</tr>
+<tr>
+<td>Pitch libration frequency</td>
+<td>1.96 × 10⁻³ rad·s⁻¹ (T ≈ 53 min)</td>
+<td>Eq. (17)</td>
+</tr>
+<tr>
+<td>First bending frequency f₁</td>
+<td>~10⁻² Hz (representative)</td>
+<td>Illus. Calc. 7</td>
+</tr>
+<tr>
+<td>Fastest feasible 90° magnetic slew</td>
+<td>hours (η=1) → ~day (η≈0.5)</td>
+<td>Illus. Calc. 4</td>
+</tr>
+<tr>
+<td>90° slew in 7 min would need</td>
+<td>m ≈ 10¹⁰ A·m² / 113 MW</td>
+<td>Eqs. (9)–(10): impossible</td>
+</tr>
+</tbody>
+</table></div>
+<p>Reading down the table: gravity gradient dominates all control torques; magnetic torque is a small trim on top of it; the rigid-body and libration dynamics are slow (tens of minutes to an orbit); the elastic modes are an order of magnitude faster than the librations but still very slow in absolute terms; and the magnetic actuation band sits comfortably below everything elastic. There is a clean ordering of timescales — magnetic actuation ≲ orbital/libration ≪ first bending mode — and it is this ordering that makes the whole system tractable.</p>
+</blockquote>
+<p>The feasibility envelope for <em>magnetic-only</em> attitude control of a very large structure is therefore:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Feasible magnetically?</th>
+<th>Characteristic timescale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Detumble / rate damping after deployment</td>
+<td>Yes</td>
+<td>Many orbits</td>
+</tr>
+<tr>
+<td>Libration damping about GG equilibrium</td>
+<td>Yes (its natural role)</td>
+<td>Tens of orbits</td>
+</tr>
+<tr>
+<td>Momentum management / desaturation</td>
+<td>Yes (standard use)</td>
+<td>One to several orbits per dump</td>
+</tr>
+<tr>
+<td>Slow repointing between GG-compatible attitudes</td>
+<td>Yes</td>
+<td>Hours to days (Illus. Calc. 4–5)</td>
+</tr>
+<tr>
+<td>Fast (minutes-scale) large-angle slew</td>
+<td><strong>No</strong></td>
+<td>Requires ~10¹⁰ A·m²; unphysical</td>
+</tr>
+<tr>
+<td>Holding an attitude far from GG equilibrium</td>
+<td><strong>No</strong></td>
+<td>GG torque exceeds magnetic by ~10²–10³</td>
+</tr>
+</tbody>
+</table></div>
+<p>Where a mission genuinely requires fast slewing or attitudes far from the gravity-gradient equilibrium, the physics of §§4 and 6 says plainly that magnetic actuation cannot supply it and a momentum-exchange system (reaction wheels or CMGs, sized to the enormous inertia) or another external actuator is required — with the magnetorquer retained for what it does uniquely well, propellantless external momentum management. But for the large, passively stabilised, slowly-repointed platform that most very-large-structure concepts actually describe, magnetic control is not just adequate; its weakness and slowness are matched to a gravity-gradient-dominated, structurally-fragile plant almost as if by design.</p>
+<h2 id="9-conclusion">9. Conclusion</h2>
+<p>The attitude dynamics of a very large flexible space structure are governed by a single unforgiving fact of scale: inertia grows as the fourth power of size while the fields available for propellantless actuation do not grow at all. From that fact everything else follows. Magnetorquers can exert only the weak torque τ = m × B, bounded by a geomagnetic field of a few tens of microtesla in LEO and confined at every instant to the plane perpendicular to the field; orbital motion restores full controllability over an orbit but not the authority. A worked, clearly-labelled calculation for a modest kilometre-scale reference platform shows that physically achievable dipoles (10⁴–10⁷ A·m²) reorient the structure only over hours to days, and that a ~7-minute 90° slew would demand a dipole of order 10¹⁰ A·m² — seven to eight orders of magnitude beyond any flown magnetorquer, requiring on the order of 100 MW and a conductor current density that would melt the structure, and unattainable in duty cycle as well as in magnitude. Magnetic-only slewing of a very large structure in minutes is not physically consistent; the honest timescale is hours to days, and it lengthens at least linearly with the structure's size.</p>
+<p>That verdict is not a failure of magnetic control but a correct identification of its role. At kilometre scale the gravity-gradient torque dominates the magnetic torque by two to three orders of magnitude, and it dominates <em>helpfully</em>: it provides a passively stable equilibrium with the long axis hung along the local vertical, about which the structure merely librates. The magnetorquer's proper and classical job is to damp that libration, to trim and slowly repoint the structure within the gravity-gradient envelope, and to manage and desaturate stored momentum — all low-authority, low-bandwidth, multi-orbit functions for which its weakness is no obstacle. And its low bandwidth is, for a structure whose first bending mode lies near 10⁻² Hz, a genuine virtue: the actuation spectrum sits an order of magnitude or more below the elastic modes, so magnetic control acts quasi-statically and largely avoids the control–structure interaction and spillover that would wreck any fast maneuver. Magnetic control of a very large flexible structure is, in one phrase, attitude-stabilising but slow — and for the passively stabilised, slowly-repointed platforms that the very-large-structure concepts actually describe, slow is exactly right. The design imperative that emerges is to embrace the gravity-gradient equilibrium as the operating point, to reserve momentum-exchange actuators for whatever fast or off-equilibrium pointing a mission truly needs, and to let the magnetorquer do quietly and propellantlessly the slow work of keeping a kilometre of structure pointed and calm.</p>
+<hr>
+<h2 id="notes-and-references">Notes and References</h2>
+<div class="footnote">
+<hr>
+<ol>
+<li id="fn:wertz">
+<p>J. R. Wertz (ed.), <em>Spacecraft Attitude Determination and Control</em>, Astrophysics and Space Science Library, vol. 73 (D. Reidel / Kluwer Academic, Dordrecht, 1978). The standard first comprehensive reference on attitude analysis, including magnetic torque, gravity-gradient torque, and environmental modelling. ISBN 90-277-0959-9.&#160;<a class="footnote-backref" href="#fnref:wertz" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:wertz" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:wertz" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref4:wertz" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref5:wertz" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:sidi">
+<p>M. J. Sidi, <em>Spacecraft Dynamics and Control: A Practical Engineering Approach</em>, Cambridge Aerospace Series 7 (Cambridge University Press, 1997), 409 pp. Covers gravity-gradient stabilisation, attitude maneuvers, and structural dynamics. ISBN 9780521787802.&#160;<a class="footnote-backref" href="#fnref:sidi" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:sidi" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:sidi" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+<li id="fn:markley">
+<p>F. L. Markley and J. L. Crassidis, <em>Fundamentals of Spacecraft Attitude Determination and Control</em>, Space Technology Library (Springer, New York, 2014), 486 pp. DOI 10.1007/978-1-4939-0802-8. Rigorous treatment of attitude dynamics, actuators (including magnetic), and control.&#160;<a class="footnote-backref" href="#fnref:markley" title="Jump back to footnote 3 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:markley" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+</li>
+<li id="fn:hughes">
+<p>P. C. Hughes, <em>Spacecraft Attitude Dynamics</em> (John Wiley &amp; Sons, New York, 1986), 564 pp.; reprinted by Dover, 2004. Standard reference for environmental torques, including the gravity-gradient torque law (Eq. 15) and gravity-gradient stability/libration (Eq. 17). ISBN 9780471818427.&#160;<a class="footnote-backref" href="#fnref:hughes" title="Jump back to footnote 4 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:hughes" title="Jump back to footnote 4 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:hughes" title="Jump back to footnote 4 in the text">&#8617;</a></p>
+</li>
+<li id="fn:wie">
+<p>B. Wie, <em>Space Vehicle Dynamics and Control</em>, 2nd ed., AIAA Education Series (American Institute of Aeronautics and Astronautics, Reston, VA, 2008). DOI 10.2514/4.860119. Treats eigenaxis rotations, rest-to-rest maneuvers, momentum-exchange control, and control of flexible spacecraft.&#160;<a class="footnote-backref" href="#fnref:wie" title="Jump back to footnote 5 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:wie" title="Jump back to footnote 5 in the text">&#8617;</a></p>
+</li>
+<li id="fn:igrf14">
+<p>C. D. Beggan, E. Thébault, et al. (IAGA Division V-MOD), "International geomagnetic reference field: the fourteenth generation," <em>Earth, Planets and Space</em> <strong>78</strong>, 127 (2025). DOI 10.1186/s40623-025-02360-0. IGRF-14 was adopted by IAGA in November 2024; it provides a definitive main-field model for epoch 2020.0, a main-field model for 2025.0, and a predictive secular-variation model for 2025.0–2030.0.&#160;<a class="footnote-backref" href="#fnref:igrf14" title="Jump back to footnote 6 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:igrf14" title="Jump back to footnote 6 in the text">&#8617;</a></p>
+</li>
+<li id="fn:igrf13">
+<p>P. Alken, E. Thébault, C. D. Beggan, et al., "International Geomagnetic Reference Field: the thirteenth generation," <em>Earth, Planets and Space</em> <strong>73</strong>, 49 (2021). DOI 10.1186/s40623-020-01288-x. The previous (13th) generation of the model.&#160;<a class="footnote-backref" href="#fnref:igrf13" title="Jump back to footnote 7 in the text">&#8617;</a></p>
+</li>
+<li id="fn:dipole">
+<p>Standard reference value for the Earth's magnetic dipole moment, m_E ≈ 7.94 × 10²² A·m², giving a reduced equatorial surface field B₀ = μ₀ m_E/(4π R_E³) ≈ 3.0 × 10⁻⁵ T (historically ≈ 3.12 × 10⁻⁵ T for earlier, stronger-dipole epochs); see Wertz <sup id="fnref5:wertz"><a class="footnote-ref" href="#fn:wertz">1</a></sup> (geomagnetic field appendix) and the IGRF main-dipole coefficients <sup id="fnref2:igrf14"><a class="footnote-ref" href="#fn:igrf14">6</a></sup>. Surface field magnitude ranges ≈ 25 μT (magnetic equator) to ≈ 65 μT (poles).&#160;<a class="footnote-backref" href="#fnref:dipole" title="Jump back to footnote 8 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:dipole" title="Jump back to footnote 8 in the text">&#8617;</a></p>
+</li>
+<li id="fn:stickler">
+<p>A. C. Stickler and K. T. Alfriend, "Elementary Magnetic Attitude Control System," <em>Journal of Spacecraft and Rockets</em> <strong>13</strong>(5), 282–287 (1976). DOI 10.2514/3.57089. Classic three-axis magnetorquer system for a gravity-gradient/momentum-bias spacecraft, achieving acquisition, libration/nutation damping, and momentum control.&#160;<a class="footnote-backref" href="#fnref:stickler" title="Jump back to footnote 9 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:stickler" title="Jump back to footnote 9 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:stickler" title="Jump back to footnote 9 in the text">&#8617;</a></p>
+</li>
+<li id="fn:wisniewski">
+<p>R. Wisniewski and M. Blanke, "Fully magnetic attitude control for spacecraft subject to gravity gradient," <em>Automatica</em> <strong>35</strong>(7), 1201–1214 (1999). DOI 10.1016/S0005-1098(99)00021-7. Proves local asymptotic stabilisability of the gravity-gradient equilibrium under purely magnetic control by exploiting orbital periodicity and passivity.&#160;<a class="footnote-backref" href="#fnref:wisniewski" title="Jump back to footnote 10 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:wisniewski" title="Jump back to footnote 10 in the text">&#8617;</a></p>
+</li>
+<li id="fn:psiaki">
+<p>M. L. Psiaki, "Magnetic Torquer Attitude Control via Asymptotic Periodic Linear Quadratic Regulation," <em>Journal of Guidance, Control, and Dynamics</em> <strong>24</strong>(2), 386–394 (2001). DOI 10.2514/2.4723. Periodic-LQR magnetic control exploiting the periodic time-varying field.&#160;<a class="footnote-backref" href="#fnref:psiaki" title="Jump back to footnote 11 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:psiaki" title="Jump back to footnote 11 in the text">&#8617;</a></p>
+</li>
+<li id="fn:lovera">
+<p>M. Lovera and A. Astolfi, "Spacecraft attitude control using magnetic actuators," <em>Automatica</em> <strong>40</strong>(8), 1405–1414 (2004). DOI 10.1016/j.automatica.2004.02.022. Almost-global attitude stabilisation with magnetic actuators via static and dynamic feedback.&#160;<a class="footnote-backref" href="#fnref:lovera" title="Jump back to footnote 12 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:lovera" title="Jump back to footnote 12 in the text">&#8617;</a></p>
+</li>
+<li id="fn:silani">
+<p>E. Silani and M. Lovera, "Magnetic spacecraft attitude control: a survey and some new results," <em>Control Engineering Practice</em> <strong>13</strong>(3), 357–371 (2005). DOI 10.1016/j.conengprac.2003.12.017. Survey of magnetic control laws including the projection/cross-product law and periodic-system methods.&#160;<a class="footnote-backref" href="#fnref:silani" title="Jump back to footnote 13 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:silani" title="Jump back to footnote 13 in the text">&#8617;</a></p>
+</li>
+<li id="fn:ovchinnikov">
+<p>M. Yu. Ovchinnikov and D. S. Roldugin, "A survey on active magnetic attitude control algorithms for small satellites," <em>Progress in Aerospace Sciences</em> <strong>109</strong>, 100546 (2019). DOI 10.1016/j.paerosci.2019.05.006. Explicitly notes that the magnetic control torque cannot be produced along the geomagnetic induction vector, and surveys damping, combined-actuator, and passive-plus-magnetic architectures.&#160;<a class="footnote-backref" href="#fnref:ovchinnikov" title="Jump back to footnote 14 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:ovchinnikov" title="Jump back to footnote 14 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:ovchinnikov" title="Jump back to footnote 14 in the text">&#8617;</a><a class="footnote-backref" href="#fnref4:ovchinnikov" title="Jump back to footnote 14 in the text">&#8617;</a></p>
+</li>
+<li id="fn:bhat">
+<p>S. P. Bhat, "Controllability of nonlinear time-varying systems: applications to spacecraft attitude control using magnetic actuation," <em>IEEE Transactions on Automatic Control</em> <strong>50</strong>(11), 1725–1735 (2005). DOI 10.1109/TAC.2005.858686. Establishes strong accessibility and controllability of the magnetically actuated spacecraft using the periodicity of the field along the orbit; see also the controllability analyses surveyed in <sup id="fnref2:silani"><a class="footnote-ref" href="#fn:silani">13</a></sup>.&#160;<a class="footnote-backref" href="#fnref:bhat" title="Jump back to footnote 15 in the text">&#8617;</a></p>
+</li>
+<li id="fn:balas">
+<p>M. J. Balas, "Trends in Large Space Structure Control Theory: Fondest Hopes, Wildest Dreams," <em>IEEE Transactions on Automatic Control</em> <strong>27</strong>(3), 522–535 (1982). DOI 10.1109/TAC.1982.1102953. Foundational treatment of large-space-structure control, including control and observation spillover.&#160;<a class="footnote-backref" href="#fnref:balas" title="Jump back to footnote 16 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:balas" title="Jump back to footnote 16 in the text">&#8617;</a></p>
+</li>
+<li id="fn:meirovitch">
+<p>L. Meirovitch, <em>Dynamics and Control of Structures</em> (John Wiley &amp; Sons, New York, 1990), 425 pp. Integrated treatment of structural dynamics and control, modal analysis, and spillover for flexible structures. ISBN 9780471628583.&#160;<a class="footnote-backref" href="#fnref:meirovitch" title="Jump back to footnote 17 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:meirovitch" title="Jump back to footnote 17 in the text">&#8617;</a></p>
+</li>
+<li id="fn:junkins">
+<p>J. L. Junkins and Y. Kim, <em>Introduction to Dynamics and Control of Flexible Structures</em>, AIAA Education Series (American Institute of Aeronautics and Astronautics, Washington, DC, 1993), 452 pp. DOI 10.2514/4.862076. Modal dynamics, maneuvers of flexible structures, and command shaping. ISBN 9781563470547.&#160;<a class="footnote-backref" href="#fnref:junkins" title="Jump back to footnote 18 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:junkins" title="Jump back to footnote 18 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:junkins" title="Jump back to footnote 18 in the text">&#8617;</a></p>
+</li>
+<li id="fn:blevins">
+<p>R. D. Blevins, <em>Formulas for Natural Frequency and Mode Shape</em> (Van Nostrand Reinhold, New York, 1979). Source of the standard beam eigenvalues (β_nL) = 4.730, 7.853, 10.996, … for free–free (and clamped–clamped) transverse vibration used in Eq. (18).&#160;<a class="footnote-backref" href="#fnref:blevins" title="Jump back to footnote 19 in the text">&#8617;</a></p>
+</li>
+<li id="fn:wie1989">
+<p>B. Wie, K.-W. Byun, V. W. Warren, D. Geller, D. Long, and J. Sunkel, "New approach to attitude/momentum control for the Space Station," <em>Journal of Guidance, Control, and Dynamics</em> <strong>12</strong>(5), 714–722 (1989). DOI 10.2514/3.20466. CMG momentum management using gravity-gradient and gyroscopic torques to seek the torque-equilibrium attitude — the large-structure momentum-management architecture referenced in §5.3.&#160;<a class="footnote-backref" href="#fnref:wie1989" title="Jump back to footnote 20 in the text">&#8617;</a></p>
+</li>
+<li id="fn:satsearch">
+<p>Representative flight-magnetorquer capabilities: CubeSat magnetorquers deliver ~0.1–1.5 A·m²; dedicated torque rods on larger platforms reach tens to a few hundred A·m². Compiled from manufacturer specifications surveyed in the open literature (e.g., satsearch magnetorquer product overview, 2019) and consistent with the survey figures in <sup id="fnref4:ovchinnikov"><a class="footnote-ref" href="#fn:ovchinnikov">14</a></sup>. Used in §2.2 only to establish the scale of flown hardware against which the large-structure distributed dipole is compared.&#160;<a class="footnote-backref" href="#fnref:satsearch" title="Jump back to footnote 21 in the text">&#8617;</a></p>
+</li>
+<li id="fn:glaser">
+<p>P. E. Glaser, "Power from the Sun: Its Future," <em>Science</em> <strong>162</strong>(3856), 857–861 (1968). DOI 10.1126/science.162.3856.857. The original solar-power-satellite proposal; the NASA/DOE reference design (a ~10 km × 5 km on-orbit structure) is the canonical example of the multi-kilometre structure class considered here. Cited solely to fix the physical scale of the generic large structure; no application-specific content is used.&#160;<a class="footnote-backref" href="#fnref:glaser" title="Jump back to footnote 22 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
+<p><em>All references below were verified against primary or authoritative sources during preparation. Numerical values attributed to the literature (Earth's dipole moment; IGRF epoch and structure; beam eigenvalues; standard torque and stability formulae) are cited to those sources; all worked figures are the author's own clearly-labelled illustrative calculations and are not measurements or mission results.</em></p>
+    </article>
+    <footer class="paperfoot">
+      <span>&copy; <span id="yr">2026</span> Christopher I. V. Farmer</span>
+      <span>&middot;</span>
+      <a href="../index.html">Back to Publications</a>
+      <span>&middot;</span>
+      <a href="../../docs/CV-Christopher-Farmer-2026-08.pdf" target="_blank" rel="noopener">CV</a>
+      <span>&middot;</span>
+      <span class="mono">Preprint &mdash; submitted; pending peer review &middot; not legal advice</span>
+    </footer>
+  </main>
+
+<script>
+  (function(){
+    var root=document.documentElement, KEY='cf-theme';
+    try{ var s=localStorage.getItem(KEY); if(s){ root.setAttribute('data-theme', s); } }catch(e){}
+    var btn=document.getElementById('theme');
+    if(btn){ btn.addEventListener('click', function(){
+      var next=root.getAttribute('data-theme')==='dark'?'light':'dark';
+      root.setAttribute('data-theme', next);
+      try{ localStorage.setItem(KEY, next); }catch(e){}
+    }); }
+    var yr=document.getElementById('yr'); if(yr){ yr.textContent=String(new Date().getFullYear()); }
+  })();
+</script>
+<script src="../assets/vendor/mermaid.min.js"></script>
+<script>
+  (function(){
+    if(!window.mermaid) return;
+    try{
+      mermaid.initialize({startOnLoad:false, theme:"neutral", securityLevel:"loose", flowchart:{htmlLabels:true, useMaxWidth:true}});
+      if(mermaid.run){ mermaid.run({querySelector:".mermaid"}); }
+      else { mermaid.init(undefined, document.querySelectorAll(".mermaid")); }
+    }catch(e){ /* leave the diagram source visible as a readable fallback */ }
+  })();
+</script>
+</body>
+</html>

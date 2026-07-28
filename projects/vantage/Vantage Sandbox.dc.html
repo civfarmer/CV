@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./vantage-bundle.js"></script>
+<script src="./dc-nosri.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  a { color: var(--accent); text-decoration: none; }
+  textarea:focus, input:focus { outline: none; box-shadow: 0 0 0 2px var(--accent); }
+</style>
+</helmet>
+
+<div style="{{ wrapperStyle }}">
+  <div style="position: sticky; top: 0; z-index: 50; background: var(--topbar); border-bottom: 2px solid var(--watneys); padding: 0 28px; display: flex; justify-content: space-between; align-items: center; height: 56px;">
+    <a href="Vantage.dc.html" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
+      <img src="vantage-crest.png" style="height: 38px; width: auto;">
+      <div>
+        <div style="font: 700 16px/1 'Zilla Slab', serif; color: var(--topbarText);">Vantage · Sandbox</div>
+        <div style="font: 500 9.5px/1 'IBM Plex Mono', monospace; color: var(--topbarSubtext); letter-spacing: 0.06em; margin-top: 3px;">BRING YOUR OWN DATA</div>
+      </div>
+    </a>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <a href="Vantage.dc.html" style="font: 600 11.5px/1 'IBM Plex Sans', sans-serif; color: var(--pillText); background: var(--pillBg); padding: 7px 12px; border-radius: 6px;">← Home</a>
+      <button onclick="{{ toggleMode }}" style="background: var(--pillBg); border: none; color: var(--pillText); font-size: 16px; width: 32px; height: 32px; border-radius: 6px; cursor: pointer;">{{ modeIcon }}</button>
+    </div>
+  </div>
+
+  <div style="max-width: 1000px; margin: 0 auto; padding: 30px 28px 80px;">
+    <div style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sectionLabel);">Forecasting Sandbox</div>
+    <h1 style="font: 700 27px/1.15 'Zilla Slab', serif; color: var(--textStrong); margin: 8px 0 8px;">Upload a file or paste your figures. Pick your business. Get the right model.</h1>
+    <p style="font: 500 14px/1.6 'IBM Plex Sans', sans-serif; color: var(--textMuted); margin: 0 0 22px; max-width: 730px;">Your business type sets the <em>model policy</em> and the <em>seasonality assumption</em> — so a SaaS series and a brewery series are forecast with genuinely different maths. Vantage back-tests every eligible model on your own numbers and returns the champion, with an ensemble option when no single model clearly wins.</p>
+
+    <!-- step 1: business type -->
+    <div style="font: 600 11px/1 'IBM Plex Sans', sans-serif; color: var(--textStrong); margin-bottom: 8px;">1 · Business type <span style="color: var(--textSubtle); font-weight: 500;">— sets the model policy &amp; seasonality</span></div>
+    <div style="display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 8px;">
+      <sc-for list="{{ typePills }}" as="t" hint-placeholder-count="5"><button onclick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }}</button></sc-for>
+    </div>
+    <div style="font: 500 12px/1.5 'IBM Plex Sans', sans-serif; color: var(--textMuted); margin-bottom: 4px;">Model policy: <strong style="color: var(--accent);">{{ policyHeadline }}</strong> · <span style="font-family: 'IBM Plex Mono', monospace;">{{ seasonNote }}</span></div>
+    <div style="font: 500 12px/1.55 'IBM Plex Sans', sans-serif; color: var(--textSubtle); margin-bottom: 20px; max-width: 730px;">{{ policyWhy }}</div>
+
+    <!-- step 2: data -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 12px; flex-wrap: wrap;">
+      <div style="font: 600 11px/1 'IBM Plex Sans', sans-serif; color: var(--textStrong);">2 · Your data <span style="color: var(--textSubtle); font-weight: 500;">— monthly, oldest first, any separator</span></div>
+      <div style="display: flex; gap: 8px;">
+        <label style="font: 600 10.5px/1 'IBM Plex Sans', sans-serif; color: var(--accent); background: var(--accentBg); border: 1px solid var(--accent); border-radius: 5px; padding: 6px 11px; cursor: pointer;">↑ Upload CSV / accounts export<input type="file" accept=".csv,.tsv,.txt,text/csv" onchange="{{ onFile }}" style="display: none;"></label>
+        <button onclick="{{ loadSample }}" style="font: 600 10.5px/1 'IBM Plex Sans', sans-serif; color: var(--accent); background: var(--accentBg); border: none; border-radius: 5px; padding: 6px 10px; cursor: pointer;">Load {{ typeShort }} sample</button>
+      </div>
+    </div>
+    <textarea value="{{ text }}" oninput="{{ onText }}" style="width: 100%; height: 84px; padding: 12px 14px; border: 1px solid var(--inputBorder); border-radius: 9px; background: var(--inputBg); color: var(--textStrong); font: 500 13px/1.6 'IBM Plex Mono', monospace; resize: vertical;"></textarea>
+    <div style="font: 500 11px/1 'IBM Plex Mono', monospace; color: var(--textSubtle); margin-top: 6px;">{{ nCount }} data points detected · {{ statusNote }}</div>
+    <sc-if value="{{ hasFileNote }}" hint-placeholder-val="{{ false }}"><div style="font: 500 11.5px/1.5 'IBM Plex Sans', sans-serif; color: var(--accent); background: var(--accentBg); border-radius: 7px; padding: 8px 12px; margin-top: 8px;">{{ fileNote }}</div></sc-if>
+    <div style="font: 500 11px/1.5 'IBM Plex Sans', sans-serif; color: var(--textSubtle); margin-top: 8px; display: flex; align-items: center; gap: 7px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 2px; background: var(--textSubtle);"></span>Your numbers stay in your browser — nothing is uploaded or stored. The loaded samples are clearly-labelled <strong style="color: var(--textMuted);">synthetic demonstration data</strong>, not a real company's figures.</div>
+
+    <!-- step 3: strategy -->
+    <div style="font: 600 11px/1 'IBM Plex Sans', sans-serif; color: var(--textStrong); margin: 22px 0 8px;">3 · Model strategy <span style="color: var(--textSubtle); font-weight: 500;">— {{ recoNote }}</span></div>
+    <div style="display: flex; gap: 7px; flex-wrap: wrap;">
+      <sc-for list="{{ blendPills }}" as="b" hint-placeholder-count="2"><button onclick="{{ b.onClick }}" style="{{ b.style }}">{{ b.label }}</button></sc-for>
+    </div>
+
+    <!-- results -->
+    <div style="margin-top: 22px;">{{ results }}</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  POLICIES = {
+    brewery: { label:'Brewery / drinks', season:12, modelKeys:['snaive','hw','reg','holt','croston'], headline:'Holt-Winters · seasonal regression · Croston', why:'Physical demand with strong 12-month seasonality and some intermittent SKUs — seasonal models plus Croston for slow-moving lines. Non-seasonal trend models are kept as an honesty baseline.' },
+    dtc: { label:'DTC / e-commerce', season:12, modelKeys:['snaive','hw','reg','ma','croston'], headline:'Holt-Winters · promo-regression · Croston', why:'Campaign-driven demand with seasonality and spiky promotions — seasonal models plus regression, with a moving-average baseline and Croston for slow movers.' },
+    saas: { label:'SaaS / recurring', season:1, modelKeys:['ma','ses','holt','reg'], headline:'Holt trend · regression · smoothing', why:'Recurring revenue compounds with little calendar seasonality, so seasonality is switched OFF (season = 1). Trend and smoothing models only — no Holt-Winters, no Croston. This is why the SaaS forward path keeps climbing rather than dipping seasonally.' },
+    education: { label:'Education / training', season:12, modelKeys:['snaive','hw','reg','holt'], headline:'Holt-Winters · regression on the academic calendar', why:'Enrolment is dominated by academic-calendar seasonality — seasonal models and regression on intake months. No intermittent-demand model, since courses run on a fixed calendar.' },
+    manufacturing: { label:'Manufacturing / hardware', season:12, modelKeys:['reg','croston','hw','holt','ma'], headline:'Order-driven regression · Croston · Holt-Winters', why:'Order-driven demand with lumpy components and spares — regression on orders leads, with Croston for intermittent parts and seasonal models where demand repeats.' },
+  };
+  SAMPLES = {
+    brewery: '1180 1240 1380 1520 1760 2010 2140 1980 1560 1280 1180 1420 1320 1410 1560 1720 1990 2260 2410 2230 1760 1450 1330 1600 1500 1600 1780 1954 2108 2260',
+    dtc: '820 760 900 1120 980 1340 2600 1180 1040 1420 3100 1560 980 900 1080 1360 1180 1620 3050 1420 1260 1720 3600 1880 1180 1090 1300 1640 1420 1980',
+    saas: '42 46 51 57 63 70 78 86 95 105 116 128 141 155 170 187 205 224 245 268 292 318 346 376 408 442 479 518 560 605',
+    education: '60 40 30 22 20 340 180 90 60 220 120 70 66 50 38 28 30 420 210 110 80 260 150 92 90 60 48 40 42 500',
+    manufacturing: '320 280 410 0 520 480 0 610 540 0 720 260 380 320 0 560 520 0 640 590 0 780 300 420 360 0 610 560 0 690',
+  };
+  state = { mode: 'light', type: 'brewery', text: '', blend: 'champion', fileNote: '', ready: false };
+
+  async componentDidMount() {
+    const s = localStorage.getItem('vantage-mode'); if (s === 'dark' || s === 'light') this.setState({ mode: s });
+    this.E = await window.__dcImport('./forecast-engine.js');
+    this.setState({ ready: true, text: this.SAMPLES[this.state.type] });
+  }
+  toggleMode = () => { const m = this.state.mode === 'light' ? 'dark' : 'light'; localStorage.setItem('vantage-mode', m); this.setState({ mode: m }); };
+  isSample(t) { return Object.values(this.SAMPLES).some(s => s.trim() === (t || '').trim()); }
+  setType = (k) => { const keep = this.state.text && !this.isSample(this.state.text); this.setState({ type: k, text: keep ? this.state.text : this.SAMPLES[k], fileNote: '' }); };
+  onText = (e) => this.setState({ text: e.target.value, fileNote: '' });
+  loadSample = () => this.setState({ text: this.SAMPLES[this.state.type], fileNote: '' });
+  setBlend = (b) => this.setState({ blend: b });
+  nums() { return (this.state.text.match(/-?\d+(\.\d+)?/g) || []).map(Number).filter(x => isFinite(x)); }
+  fmt = (n) => (n == null || isNaN(n)) ? '—' : Math.round(n).toLocaleString('en-GB');
+
+  onFile = (e) => {
+    const f = e.target.files && e.target.files[0]; if (!f) return;
+    const ext = (f.name.split('.').pop() || '').toLowerCase();
+    if (['xlsx','xls','pdf','numbers'].includes(ext)) { this.setState({ fileNote: `${f.name}: ${ext.toUpperCase()} files are parsed on the backend (see the deployment handoff). For this in-browser sandbox, export the sheet as CSV and drop it here, or paste the numbers below.` }); e.target.value = ''; return; }
+    const rd = new FileReader();
+    rd.onload = () => { const p = this.parseCSV(String(rd.result)); if (p.series.length >= 4) this.setState({ text: p.series.join(' '), fileNote: `${f.name}: read ${p.series.length} values from ${p.colNote}. Check they look right, then read the forecast below.` }); else this.setState({ fileNote: `${f.name}: couldn't find a clear numeric column. Paste the figures instead, oldest first.` }); };
+    rd.readAsText(f); e.target.value = '';
+  };
+  parseCSV(txt) {
+    const lines = txt.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    if (!lines.length) return { series: [], colNote: '' };
+    const delim = /\t/.test(lines[0]) ? '\t' : /;/.test(lines[0]) ? ';' : ',';
+    const rows = lines.map(l => l.split(delim).map(c => c.trim()));
+    const clean = (c) => Number((c || '').replace(/[£$€,\s%]/g, ''));
+    if (rows[0].length === 1) { const s = (txt.match(/-?\d[\d,]*(\.\d+)?/g) || []).map(x => Number(x.replace(/,/g, ''))).filter(isFinite); return { series: s, colNote: 'the single column' }; }
+    const firstNumeric = rows[0].every(c => c === '' || isFinite(clean(c)));
+    const header = firstNumeric ? null : rows[0];
+    const body = header ? rows.slice(1) : rows;
+    const ncol = Math.max(...body.map(r => r.length));
+    const KEY = /revenue|sales|amount|mrr|arr|units|qty|quantit|value|total|net|enrol|order|income|turnover/i;
+    let best = -1, bestScore = -1, bestNote = '';
+    for (let c = 0; c < ncol; c++) {
+      const vals = body.map(r => clean(r[c])).filter(isFinite);
+      if (vals.length < body.length * 0.6) continue;
+      const score = vals.length + (header && KEY.test(header[c] || '') ? 1000 : 0) + c * 0.1;
+      if (score > bestScore) { bestScore = score; best = c; bestNote = header ? `column "${header[c] || ('#' + (c + 1))}"` : `column ${c + 1}`; }
+    }
+    if (best < 0) return { series: [], colNote: '' };
+    return { series: body.map(r => clean(r[best])).filter(isFinite), colNote: bestNote };
+  }
+
+  chart(hist, fc, pi95, alt, altLabel, t) {
+    const R = React.createElement, W = 900, H = 260, pL = 52, pR = 16, pT = 16, pB = 26;
+    const n = hist.length + fc.length, vals = [...hist, ...fc, ...pi95.map(p => p.hi), ...pi95.map(p => p.lo)]; if (alt) vals.push(...alt);
+    let ymin = Math.min(...vals), ymax = Math.max(...vals); const pd = (ymax - ymin) * 0.14 || 1; ymin = Math.max(0, ymin - pd); ymax += pd;
+    const X = i => pL + (i / (n - 1)) * (W - pL - pR), Y = v => pT + (1 - (v - ymin) / (ymax - ymin)) * (H - pT - pB), hi = hist.length - 1;
+    const path = pts => pts.map((p, i) => (i ? 'L' : 'M') + X(p[0]).toFixed(1) + ' ' + Y(p[1]).toFixed(1)).join(' ');
+    const band = [[hi, hist[hi]], ...pi95.map((p, k) => [hi + 1 + k, p.hi])].concat([...pi95.map((p, k) => [hi + 1 + k, p.lo]).reverse(), [hi, hist[hi]]]);
+    const c = [];
+    for (let g = 0; g <= 4; g++) { const v = ymin + (ymax - ymin) * g / 4, y = Y(v); c.push(R('line', { key: 'g' + g, x1: pL, x2: W - pR, y1: y, y2: y, stroke: t.grid, strokeWidth: 1 })); c.push(R('text', { key: 't' + g, x: pL - 6, y: y + 3, textAnchor: 'end', fontSize: 9, fill: t.axis, fontFamily: "'IBM Plex Mono',monospace" }, this.fmt(v))); }
+    c.push(R('path', { key: 'bd', d: path(band) + ' Z', fill: t.band }));
+    c.push(R('line', { key: 'now', x1: X(hi), x2: X(hi), y1: pT, y2: H - pB, stroke: t.now, strokeWidth: 1.4, strokeDasharray: '3 3' }));
+    c.push(R('path', { key: 'h', d: path(hist.map((v, i) => [i, v])), fill: 'none', stroke: t.hist, strokeWidth: 2 }));
+    if (alt) c.push(R('path', { key: 'alt', d: path([[hi, hist[hi]], ...alt.map((v, k) => [hi + 1 + k, v])]), fill: 'none', stroke: t.alt, strokeWidth: 1.6, strokeDasharray: '2 3', opacity: 0.85 }));
+    c.push(R('path', { key: 'f', d: path([[hi, hist[hi]], ...fc.map((v, k) => [hi + 1 + k, v])]), fill: 'none', stroke: t.fc, strokeWidth: 2.4, strokeDasharray: '5 4' }));
+    c.push(R('text', { key: 'nl', x: X(hi) - 4, y: pT + 9, textAnchor: 'end', fontSize: 8, fill: t.axis, fontFamily: "'IBM Plex Mono',monospace" }, 'your data'));
+    if (alt) { const ly = pT + 6; c.push(R('line', { key: 'lg1', x1: W - 210, x2: W - 194, y1: ly, y2: ly, stroke: t.fc, strokeWidth: 2.2, strokeDasharray: '5 4' })); c.push(R('text', { key: 'lg1t', x: W - 190, y: ly + 3, fontSize: 9, fill: t.axis, fontFamily: "'IBM Plex Mono',monospace" }, 'shown')); c.push(R('line', { key: 'lg2', x1: W - 140, x2: W - 124, y1: ly, y2: ly, stroke: t.alt, strokeWidth: 1.6, strokeDasharray: '2 3' })); c.push(R('text', { key: 'lg2t', x: W - 120, y: ly + 3, fontSize: 9, fill: t.axis, fontFamily: "'IBM Plex Mono',monospace" }, altLabel)); }
+    return R('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', height: '100%', style: { display: 'block' } }, c);
+  }
+
+  renderVals() {
+    const dark = this.state.mode === 'dark';
+    const vars = dark
+      ? '--bg:#0c1f2a;--card:#132e3c;--cardBorder:#1e4050;--cardShadow:0 4px 18px -8px rgba(0,0,0,0.5);--text:#c8c0b0;--textStrong:#f0e8d8;--textMuted:#8da4ae;--textSubtle:#5f7a86;--accent:#d4a844;--accentBg:rgba(212,168,68,0.14);--watneys:#C4384C;--topbar:#0a1820;--topbarText:#d4c8b4;--topbarSubtext:#6a8a95;--pillBg:rgba(255,255,255,0.08);--pillText:#8da4ae;--border:#1e4050;--inputBg:#0e2530;--inputBorder:#264555;--sectionLabel:#d4a844'
+      : '--bg:#f0ebe2;--card:#faf8f4;--cardBorder:#e2d8c6;--cardShadow:0 4px 18px -8px rgba(40,30,15,0.12);--text:#163544;--textStrong:#0e2530;--textMuted:#5f7a88;--textSubtle:#93a0a8;--accent:#b07d1e;--accentBg:rgba(176,125,30,0.12);--watneys:#8B2332;--topbar:#163544;--topbarText:#e8dcc8;--topbarSubtext:#8da4ae;--pillBg:rgba(255,255,255,0.12);--pillText:#c0b49e;--border:#e2d8c6;--inputBg:#fff;--inputBorder:#d4c8b2;--sectionLabel:#b07d1e';
+    const chartT = dark
+      ? { grid: 'rgba(255,255,255,0.06)', axis: '#6a8490', hist: '#d8d0c0', fc: '#d4a844', alt: '#68a0cc', band: 'rgba(212,168,68,0.12)', now: 'rgba(212,168,68,0.4)' }
+      : { grid: '#e8ddc9', axis: '#8a9ba5', hist: '#163544', fc: '#b07d1e', alt: '#2a6090', band: 'rgba(176,125,30,0.12)', now: '#c9b78f' };
+    const R = React.createElement;
+    const pol = this.POLICIES[this.state.type];
+    const pillBase = 'padding:8px 13px;border-radius:7px;font:600 12px/1 IBM Plex Sans,sans-serif;cursor:pointer;transition:.15s;border:1px solid ';
+    const typePills = Object.keys(this.POLICIES).map(k => ({ label: this.POLICIES[k].label, style: pillBase + (k === this.state.type ? 'var(--accent);background:var(--accentBg);color:var(--accent);' : 'var(--border);background:transparent;color:var(--textMuted);'), onClick: () => this.setType(k) }));
+    const typeShort = pol.label.split(' ')[0];
+    const seasonNote = pol.season === 1 ? 'seasonality OFF (season = 1)' : `season = ${pol.season} periods`;
+
+    const base = { wrapperStyle: vars + ';min-height:100vh;background:var(--bg);color:var(--text);font-family:IBM Plex Sans,sans-serif;transition:background .3s', modeIcon: dark ? '☀' : '☾', toggleMode: this.toggleMode, onText: this.onText, onFile: this.onFile, loadSample: this.loadSample, type: this.state.type, text: this.state.text, typePills, policyHeadline: pol.headline, policyWhy: pol.why, seasonNote, typeShort, fileNote: this.state.fileNote, hasFileNote: !!this.state.fileNote };
+
+    const y = this.nums();
+    const mkBlendPills = (reco) => ['champion', 'blend'].map(b => ({ key: b, label: b === 'champion' ? 'Champion only' : 'Blend top 3 (ensemble)' + (reco === b ? ' · recommended' : ''), style: pillBase + (b === this.state.blend ? 'var(--accent);background:var(--accentBg);color:var(--accent);' : reco === b ? 'var(--accent);background:transparent;color:var(--accent);' : 'var(--border);background:transparent;color:var(--textMuted);'), onClick: () => this.setBlend(b) }));
+
+    if (!this.state.ready || y.length < 8) {
+      return { ...base, blendPills: mkBlendPills('champion'), recoNote: 'blend when models tie, trust the champion when one wins', nCount: String(y.length), statusNote: y.length < 8 ? 'need at least 8 to forecast' : 'loading engine…', results: R('div', { style: { padding: '28px', border: '1px dashed var(--cardBorder)', borderRadius: '12px', color: 'var(--textMuted)', font: "500 13px/1.6 'IBM Plex Sans',sans-serif", textAlign: 'center' } }, 'Paste at least 8 figures, oldest first (24+ periods gives seasonal models a fair chance) and the engine will back-test and forecast.') };
+    }
+
+    const E = this.E, season = pol.season, horizon = 12;
+    const sel = E.autoSelect(y, { season, horizon: 3, folds: 3, models: pol.modelKeys });
+    const champ = sel.champion ? sel.champion.name : 'Seasonal naive';
+    const fc = E.buildForecast(y, champ, { season, horizon });
+    const hist = y.slice(-Math.min(24, y.length));
+    const short = m => (m || '').replace(/\s*\(.*\)/, '');
+
+    // ensemble = mean of top-3 model forward paths
+    const top = sel.ranking.slice(0, 3);
+    const paths = top.map(r => E.buildForecast(y, r.name, { season, horizon }).point);
+    const ens = paths.length ? paths[0].map((_, k) => paths.reduce((t, p) => t + (p[k] || 0), 0) / paths.length) : fc.point;
+    const w0 = sel.ranking[0] ? (sel.ranking[0].metrics.wape ?? sel.ranking[0].metrics.smape) : 0;
+    const w1 = sel.ranking[1] ? (sel.ranking[1].metrics.wape ?? sel.ranking[1].metrics.smape) : w0 + 99;
+    const gap = w1 - w0;
+    const reco = gap < 1.5 ? 'blend' : 'champion';
+    const blendMode = this.state.blend === 'blend';
+    const shownPath = blendMode ? ens : fc.point, altPath = blendMode ? fc.point : ens, altLabel = blendMode ? short(champ) : 'ensemble';
+    const recoNote = reco === 'blend' ? `top models within ${gap.toFixed(1)} pts — ensemble recommended` : `${short(champ)} leads by ${gap.toFixed(1)} pts — champion recommended`;
+    const blendPills = mkBlendPills(reco);
+
+    const el = (children) => R('div', { style: { display: 'flex', flexDirection: 'column', gap: '16px' } }, children);
+    const cardS = { background: 'var(--card)', border: '1px solid var(--cardBorder)', borderRadius: '12px', padding: '18px 20px', boxShadow: 'var(--cardShadow)' };
+
+    const champCard = R('div', { key: 'ch', style: { ...cardS, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: '4px solid var(--accent)' } }, [
+      R('div', { key: 'a' }, [ R('div', { key: '1', style: { font: "600 10px/1 'IBM Plex Mono',monospace", letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--accent)' } }, 'Champion model — chosen by back-test'), R('div', { key: '2', style: { font: "700 22px/1.1 'Zilla Slab',serif", color: 'var(--textStrong)', marginTop: '6px' } }, short(champ)) ]),
+      R('div', { key: 'b', style: { textAlign: 'right' } }, [ R('div', { key: '1', style: { font: "600 10px/1 'IBM Plex Mono',monospace", color: 'var(--textSubtle)' } }, 'BACK-TESTED WAPE'), R('div', { key: '2', style: { font: "700 24px/1 'IBM Plex Mono',monospace", color: 'var(--accent)', marginTop: '4px' } }, sel.champion && sel.champion.metrics.wape != null ? sel.champion.metrics.wape.toFixed(1) + '%' : '—') ]),
+    ]);
+
+    const nextV = shownPath[0];
+    const forecastCard = R('div', { key: 'fc', style: cardS }, [
+      R('div', { key: 't', style: { font: "700 15px/1 'Zilla Slab',serif", color: 'var(--textStrong)', marginBottom: '4px' } }, blendMode ? 'Forecast · ensemble (mean of top 3)' : 'Forecast · champion'),
+      R('div', { key: 's', style: { font: "500 12px/1.4 'IBM Plex Sans',sans-serif", color: 'var(--textMuted)', marginBottom: '12px' } }, `Next period ≈ ${this.fmt(nextV)} (95% interval ${this.fmt(fc.pi95[0].lo)}–${this.fmt(fc.pi95[0].hi)}, from champion residuals). 12-period path below; the faint line is the ${altLabel}.`),
+      R('div', { key: 'c', style: { height: '260px' } }, this.chart(hist, shownPath, fc.pi95, altPath, altLabel, chartT)),
+    ]);
+
+    const recoCard = R('div', { key: 'reco', style: { ...cardS, borderLeft: '4px solid ' + (reco === 'blend' ? 'var(--accent)' : 'var(--textStrong)') } }, [
+      R('div', { key: 't', style: { font: "600 10px/1 'IBM Plex Mono',monospace", letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: '6px' } }, 'Vantage recommends: ' + (reco === 'blend' ? 'blend the top models' : 'trust the champion')),
+      R('div', { key: 'b', style: { font: "500 13px/1.6 'IBM Plex Sans',sans-serif", color: 'var(--text)' } }, reco === 'blend'
+        ? `The top ${top.length} models are within ${gap.toFixed(1)} points of each other on your back-test — no clear winner. Averaging them (${top.map(t => short(t.name)).join(', ')}) cancels out each model's individual mistakes, so the ensemble is the more robust call here. Toggle "Blend top 3" above to use it.`
+        : `${short(champ)} beats the runner-up (${short(sel.ranking[1] ? sel.ranking[1].name : '—')}) by ${gap.toFixed(1)} points on your back-test — a clear lead. Averaging in weaker models would only add error, so trust the champion.`),
+    ]);
+
+    const rankHead = R('div', { key: 'rh', style: { display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '4px 10px', padding: '0 4px 8px', font: "600 9.5px/1 'IBM Plex Mono',monospace", letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--textSubtle)', borderBottom: '1px solid var(--cardBorder)' } }, [R('div',{key:1},'Model'),R('div',{key:2,style:{textAlign:'right'}},'WAPE'),R('div',{key:3,style:{textAlign:'right'}},'RMSE'),R('div',{key:4,style:{textAlign:'center'}},'Status')]);
+    const rankRows = sel.ranking.map((r, i) => R('div', { key: 'r' + i, style: { display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '4px 10px', padding: '9px 4px', alignItems: 'center', borderBottom: '1px solid var(--border)', background: (blendMode && i < 3) ? 'var(--accentBg)' : 'transparent' } }, [
+      R('div', { key: 1, style: { font: "600 12px/1 'IBM Plex Sans',sans-serif", color: 'var(--textStrong)' } }, r.name + (blendMode && i < 3 ? ' · in blend' : '')),
+      R('div', { key: 2, style: { textAlign: 'right', font: "600 12px/1 'IBM Plex Mono',monospace", color: 'var(--textStrong)' } }, r.metrics.wape != null ? r.metrics.wape.toFixed(1) + '%' : '—'),
+      R('div', { key: 3, style: { textAlign: 'right', font: "500 11.5px/1 'IBM Plex Mono',monospace", color: 'var(--textMuted)' } }, this.fmt(r.metrics.rmse)),
+      R('div', { key: 4, style: { textAlign: 'center' } }, R('span', { style: { display: 'inline-block', padding: '3px 8px', borderRadius: '20px', font: "600 10px/1 'IBM Plex Sans',sans-serif", background: r.name === champ ? 'var(--accentBg)' : 'var(--border)', color: r.name === champ ? 'var(--accent)' : 'var(--textSubtle)' } }, r.name === champ ? 'Champion' : 'Challenger')),
+    ]));
+    const rankCard = R('div', { key: 'rk', style: cardS }, [ R('div', { key: 't', style: { font: "700 15px/1 'Zilla Slab',serif", color: 'var(--textStrong)', marginBottom: '4px' } }, 'Model arena — back-tested on your data'), R('div', { key: 'sub', style: { font: "500 11.5px/1.4 'IBM Plex Sans',sans-serif", color: 'var(--textMuted)', marginBottom: '12px' } }, `Only models in the ${pol.label} policy compete; ${seasonNote}.`), rankHead, ...rankRows, R('div', { key: 'why', style: { font: "500 12px/1.55 'IBM Plex Sans',sans-serif", color: 'var(--textMuted)', marginTop: '12px' } }, sel.reason || '') ]);
+
+    return { ...base, blendPills, recoNote, nCount: String(y.length), statusNote: `champion: ${short(champ)} · ${blendMode ? 'showing ensemble' : 'showing champion'}`, results: el([champCard, forecastCard, recoCard, rankCard]) };
+  }
+}
+</script>
+</body>
+</html>

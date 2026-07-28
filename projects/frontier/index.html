@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frontier — Cross-border Data-Transfer & TIA Assessor</title>
+<meta name="description" content="Frontier determines the lawful basis for an international personal-data transfer (EU GDPR Chapter V, Swiss FADP, UK GDPR) — electronic or physical — runs a Schrems-II Transfer Impact Assessment, and produces an audit-ready control record. Decision-support, not legal advice. Built by Christopher Farmer.">
+<meta name="robots" content="noindex">
+<style>
+  :root{
+    --bg:#0b0f17; --bg2:#0e1420; --surface:#131b2a; --surface2:#182133;
+    --ink:#e9eef7; --ink2:#aab7cc; --muted:#7d8ba3; --line:#233145; --line2:#2c3d54;
+    --accent:#43b3a6; --accent-ink:#84d6ca; --gold:#d4b24c; --gold-soft:#e6cf8f;
+    --good:#43c59e; --warn:#e0a13a; --bad:#e0685f; --shadow:0 18px 50px -20px rgba(0,0,0,.7);
+    --radius:16px; --maxw:1180px;
+    --font-display:'Zilla Slab',Georgia,'Times New Roman',serif;
+    --font-body:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --font-mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
+  }
+  html[data-theme="light"]{
+    --bg:#f4f1ec; --bg2:#ebe6dd; --surface:#ffffff; --surface2:#faf7f2;
+    --ink:#221e18; --ink2:#4c473e; --muted:#675f54; --line:#e7e1d6; --line2:#d9d2c5;
+    --accent:#0d5f57; --accent-ink:#0a463f; --gold:#836819; --gold-soft:#6f5714; --good:#0e7a52;
+    --warn:#9a6a12; --bad:#b23b31; --shadow:0 18px 44px -24px rgba(15,30,60,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:radial-gradient(1100px 700px at 82% -10%,rgba(67,179,166,.10),transparent 60%),var(--bg);
+    color:var(--ink);font-family:var(--font-body);line-height:1.55;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,h4{font-family:var(--font-display);font-weight:600;line-height:1.15;margin:0}
+  a{color:var(--accent-ink)}
+  .mono{font-family:var(--font-mono)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,3.4vw,34px)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* Header */
+  header.top{border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--bg2),transparent);position:sticky;top:0;z-index:20;backdrop-filter:blur(8px)}
+  .topin{display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding:13px 0}
+  .crest{width:42px;height:42px;flex:0 0 auto}
+  .brandtxt .nm{font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:.01em}
+  .brandtxt .nm b{color:var(--gold)}
+  .brandtxt .sub{font-size:11.5px;color:var(--muted);letter-spacing:.02em;margin-top:1px}
+  .topsp{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .pill{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);
+    border:1px solid var(--line2);border-radius:999px;padding:5px 11px;white-space:nowrap}
+  .iconbtn{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:10px;border:1px solid var(--line2);
+    background:var(--surface);color:var(--ink);cursor:pointer}
+  .iconbtn:hover{border-color:var(--accent)}
+  .iconbtn svg{width:17px;height:17px}
+
+  /* Intro strip */
+  .intro{padding:20px 0 4px}
+  .eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:9px}
+  .intro h1{font-size:clamp(21px,3vw,30px);letter-spacing:-.01em;max-width:20em}
+  .intro p{color:var(--ink2);font-size:14.5px;max-width:70ch;margin:11px 0 0}
+  .disc{display:flex;gap:11px;align-items:flex-start;background:color-mix(in oklab,var(--gold) 11%,var(--surface));
+    border:1px solid color-mix(in oklab,var(--gold) 34%,var(--line));border-radius:12px;padding:11px 14px;margin:16px 0 0}
+  .disc svg{width:18px;height:18px;color:var(--gold);flex:0 0 auto;margin-top:2px}
+  .disc p{margin:0;font-size:12.8px;color:var(--ink2)}
+  .disc b{color:var(--ink)}
+
+  /* Layout */
+  .grid{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:22px;align-items:start;padding:22px 0 60px}
+  @media(max-width:900px){ .grid{grid-template-columns:1fr} }
+  .panel{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .panel .ph{display:flex;align-items:center;gap:10px;padding:15px 18px;border-bottom:1px solid var(--line)}
+  .panel .ph h2{font-size:15.5px}
+  .panel .ph .step{font-family:var(--font-mono);font-size:10.5px;color:var(--muted);margin-left:auto}
+  .pbody{padding:16px 18px 20px}
+
+  /* Form */
+  .fld{margin-bottom:15px}
+  .fld > label{display:block;font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:7px}
+  .fld .hint{font-weight:400;color:var(--muted);font-size:11.5px}
+  select,input[type=text],textarea{width:100%;background:var(--bg2);border:1px solid var(--line2);color:var(--ink);
+    border-radius:9px;padding:9px 11px;font-family:var(--font-body);font-size:13.5px}
+  textarea{resize:vertical;min-height:52px}
+  select:focus,input:focus,textarea:focus{outline:none;border-color:var(--accent)}
+  .seg{display:flex;gap:6px;flex-wrap:wrap}
+  .seg button{flex:1;min-width:92px;font-size:12.5px;font-weight:600;color:var(--ink2);background:var(--bg2);
+    border:1px solid var(--line2);border-radius:9px;padding:9px 8px;cursor:pointer;transition:.14s}
+  .seg button:hover{border-color:var(--accent)}
+  .seg button.on{background:linear-gradient(145deg,#0e7b6f,#0b655b);border-color:transparent;color:#fff}
+  html[data-theme="light"] .seg button.on{background:linear-gradient(145deg,var(--accent),var(--accent-ink));color:#fff}
+  .checks{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px}
+  .chk{display:flex;align-items:flex-start;gap:8px;font-size:12.6px;color:var(--ink2);cursor:pointer;padding:2px 0}
+  .chk input{margin-top:2px;accent-color:var(--accent);flex:0 0 auto}
+  .chk.sens{color:var(--gold-soft)}
+  .subhead{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:4px 0 8px}
+  .presets{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+  .preset{font-size:11.8px;color:var(--accent-ink);background:transparent;border:1px dashed var(--line2);border-radius:8px;padding:6px 9px;cursor:pointer}
+  .preset:hover{border-color:var(--accent);border-style:solid}
+  .go{width:100%;margin-top:6px;display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:12px;border-radius:11px;
+    font-weight:700;font-size:14.5px;border:none;cursor:pointer;color:#20180a;background:linear-gradient(145deg,var(--gold),var(--gold-soft))}
+  html[data-theme="light"] .go{color:#fff}
+  .go:hover{filter:brightness(1.04)}
+  .go svg{width:17px;height:17px}
+  .cond{display:none} .cond.show{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  /* Result */
+  .placeholder{padding:40px 22px;text-align:center;color:var(--muted)}
+  .placeholder svg{width:46px;height:46px;color:var(--line2);margin-bottom:12px}
+  .route{display:flex;align-items:stretch;gap:0;padding:16px 18px;border-bottom:1px solid var(--line);position:relative;overflow:hidden}
+  .node{flex:1;min-width:0}
+  .node .rl{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .node .jn{font-family:var(--font-display);font-weight:700;font-size:17px;margin-top:3px;line-height:1.1}
+  .node .rg{font-size:11.5px;color:var(--ink2);margin-top:2px}
+  .arrowcell{flex:0 0 96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative}
+  .arrowline{width:100%;height:3px;border-radius:2px;position:relative;background:var(--line2)}
+  .arrowline.lawful{background:linear-gradient(90deg,var(--accent),var(--good))}
+  .arrowline.safeguards{background:linear-gradient(90deg,var(--accent),var(--gold))}
+  .arrowline.unlawful{background:repeating-linear-gradient(90deg,var(--bad),var(--bad) 6px,transparent 6px,transparent 11px)}
+  .arrowline.manual{background:linear-gradient(90deg,var(--muted),var(--line2))}
+  .arrowcell .glyph{width:26px;height:26px}
+  .arrowcell .lbl{font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
+  .verdict{padding:16px 18px;display:flex;gap:14px;align-items:flex-start;border-bottom:1px solid var(--line)}
+  .vbadge{flex:0 0 auto;width:54px;height:54px;border-radius:13px;display:grid;place-items:center}
+  .vbadge svg{width:28px;height:28px}
+  .v-lawful .vbadge{background:rgba(67,197,158,.16);color:var(--good)}
+  .v-safeguards .vbadge{background:rgba(212,178,76,.16);color:var(--gold)}
+  .v-unlawful .vbadge{background:rgba(224,104,95,.16);color:var(--bad)}
+  .v-manual .vbadge{background:rgba(125,139,163,.16);color:var(--muted)}
+  .vtxt .vt{font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:-.01em}
+  .v-lawful .vt{color:var(--good)} .v-safeguards .vt{color:var(--gold)} .v-unlawful .vt{color:var(--bad)}
+  .vtxt .vs{font-size:13.5px;color:var(--ink2);margin-top:3px}
+
+  .sect{padding:15px 18px;border-bottom:1px solid var(--line)}
+  .sect:last-child{border-bottom:none}
+  .sect h3{font-size:13px;font-family:var(--font-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--accent);margin-bottom:11px;font-weight:500}
+  .reason{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;font-size:13.3px;color:var(--ink2)}
+  .reason:last-child{margin-bottom:0}
+  .reason b{color:var(--ink)}
+  .tag{flex:0 0 auto;font-family:var(--font-mono);font-size:9px;letter-spacing:.06em;font-weight:500;padding:3px 6px;border-radius:5px;text-transform:uppercase;margin-top:1px;min-width:74px;text-align:center}
+  .tag.fact{background:rgba(67,179,166,.15);color:var(--accent-ink);border:1px solid color-mix(in oklab,var(--accent) 35%,transparent)}
+  .tag.assess{background:rgba(212,178,76,.14);color:var(--gold-soft);border:1px solid color-mix(in oklab,var(--gold) 34%,transparent)}
+  .tag.verify{background:rgba(224,104,95,.13);color:var(--bad);border:1px solid color-mix(in oklab,var(--bad) 34%,transparent)}
+  .tag.action{background:rgba(125,139,163,.14);color:var(--ink2);border:1px solid var(--line2)}
+  html[data-theme="light"] .tag.assess{color:var(--gold)}
+
+  table.tia{width:100%;border-collapse:collapse;font-size:12.6px}
+  table.tia th,table.tia td{text-align:left;padding:8px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.tia th{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  table.tia td:first-child{color:var(--ink);font-weight:600;white-space:nowrap}
+  table.tia .rr{font-family:var(--font-mono);font-size:11px;font-weight:600;padding:2px 7px;border-radius:5px;display:inline-block}
+  .rr.r0{background:rgba(67,197,158,.16);color:var(--good)} .rr.r1{background:rgba(67,179,166,.16);color:var(--accent-ink)}
+  .rr.r2{background:rgba(224,161,58,.17);color:var(--warn)} .rr.r3{background:rgba(224,104,95,.17);color:var(--bad)}
+  .bandbar{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:12.5px;color:var(--ink2)}
+  .bandpill{font-family:var(--font-mono);font-size:11px;font-weight:600;padding:4px 10px;border-radius:999px}
+  .bp-LOW{background:rgba(67,197,158,.16);color:var(--good)} .bp-MEDIUM{background:rgba(224,161,58,.17);color:var(--warn)}
+  .bp-HIGH{background:rgba(224,104,95,.15);color:var(--bad)} .bp-SEVERE{background:rgba(224,104,95,.24);color:var(--bad)}
+
+  .sg{margin-bottom:14px} .sg:last-child{margin-bottom:0}
+  .sg .sgt{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+  .sg .sgt .c{width:8px;height:8px;border-radius:2px;flex:0 0 auto}
+  .sg ul{margin:0;padding:0;list-style:none}
+  .sg li{display:flex;gap:8px;align-items:flex-start;font-size:12.7px;color:var(--ink2);margin-bottom:6px}
+  .sg li svg{width:14px;height:14px;color:var(--accent);flex:0 0 auto;margin-top:2px}
+
+  .recmeta{display:grid;grid-template-columns:1fr 1fr;gap:7px 16px;font-size:12.3px;margin-bottom:6px}
+  .recmeta .k{color:var(--muted)} .recmeta .v{color:var(--ink);font-family:var(--font-mono);font-size:11.5px}
+  .exports{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+  .xb{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--ink);background:var(--surface);
+    border:1px solid var(--line2);border-radius:9px;padding:8px 12px;cursor:pointer}
+  .xb:hover{border-color:var(--accent)}
+  .xb svg{width:14px;height:14px;color:var(--accent)}
+  .xb.prime{background:linear-gradient(145deg,#0e7b6f,#0b655b);border-color:transparent;color:#fff}
+  html[data-theme="light"] .xb.prime{background:linear-gradient(145deg,var(--accent),var(--accent-ink))}
+  .xb.prime svg{color:#fff}
+
+  .prov{padding:15px 18px;border-top:1px solid var(--line);font-size:11.8px;color:var(--muted)}
+  .prov h4{font-size:11px;font-family:var(--font-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink2);margin-bottom:8px}
+  .prov ul{margin:0;padding-left:16px} .prov li{margin-bottom:4px}
+  .foot{border-top:1px solid var(--line);padding:18px 0 30px;color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between}
+  .foot b{color:var(--ink2)}
+  .note-inline{font-size:11.5px;color:var(--muted);margin-top:8px}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--surface2);border:1px solid var(--line2);
+    color:var(--ink);padding:10px 16px;border-radius:10px;font-size:13px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.25s;z-index:50}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* Scope banner — makes it unmistakable this is personal DATA, not money/goods/property */
+  .scope{display:flex;gap:11px;align-items:flex-start;background:color-mix(in oklab,var(--accent) 12%,var(--surface));
+    border:1px solid color-mix(in oklab,var(--accent) 40%,var(--line));border-radius:12px;padding:12px 15px;margin:0 0 15px}
+  .scope svg{width:20px;height:20px;color:var(--accent);flex:0 0 auto;margin-top:1px}
+  .scope p{margin:0;font-size:12.9px;color:var(--ink2)} .scope b{color:var(--ink)}
+  .scope .lead{display:block;font-weight:700;color:var(--accent-ink);font-size:12.6px;letter-spacing:.01em;margin-bottom:2px}
+  html[data-theme="light"] .scope .lead{color:var(--accent)}
+  /* Hero watermark — faint family emblem behind the intro */
+  .intro{position:relative}
+  .hero-wm{position:absolute;top:-8px;right:0;width:min(360px,44%);aspect-ratio:1050/926;opacity:.08;pointer-events:none;z-index:0;background:url(../../assets/img/frontier-crest.png) top right/contain no-repeat}
+  .hero-wm svg{display:none}
+  .intro .eyebrow,.intro h1,.intro>p,.intro .disc,.intro .scope{position:relative;z-index:1}
+  @media(max-width:640px){ .hero-wm{opacity:.045;width:52%} }
+  /* "What to do now" callout — plain, actionable verdict for a non-lawyer */
+  .todo{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:flex-start}
+  .todo .ti{flex:0 0 auto;width:34px;height:34px;border-radius:9px;display:grid;place-items:center}
+  .todo .ti svg{width:19px;height:19px}
+  .todo .tk{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+  .todo .tt{font-weight:700;font-size:14.5px;color:var(--ink);line-height:1.25}
+  .todo .ts{font-size:12.9px;color:var(--ink2);margin-top:3px}
+  .v-lawful .todo .ti{background:rgba(67,197,158,.16);color:var(--good)} .v-lawful .todo .tt{color:var(--good)}
+  .v-safeguards .todo .ti{background:rgba(212,178,76,.16);color:var(--gold)} .v-safeguards .todo .tt{color:var(--gold)}
+  .v-unlawful .todo .ti{background:rgba(224,104,95,.16);color:var(--bad)} .v-unlawful .todo .tt{color:var(--bad)}
+  .v-manual .todo .ti{background:rgba(125,139,163,.16);color:var(--muted)} .v-manual .todo .tt{color:var(--ink)}
+  /* Physical-transfer section */
+  .ph-alert{background:rgba(224,104,95,.12);border:1px solid color-mix(in oklab,var(--bad) 42%,transparent);border-radius:11px;padding:12px 14px;margin:2px 0 14px}
+  .ph-alert .pah{font-weight:700;color:var(--bad);font-size:13.5px;margin-bottom:5px}
+  .ph-alert .pab{font-size:12.8px;color:var(--ink2);margin-bottom:8px}
+  .ph-alert .pao{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+  .ph-alert ul{margin:0;padding-left:17px} .ph-alert li{font-size:12.7px;color:var(--ink2);margin-bottom:5px}
+  .ph-alert b{color:var(--ink)}
+  .phcol{margin-bottom:13px} .phcol:last-child{margin-bottom:0}
+  .phh{font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+  .phh .c{width:8px;height:8px;border-radius:2px;flex:0 0 auto}
+  .phlist{margin:0;padding:0;list-style:none}
+  .phlist li{display:flex;gap:8px;align-items:flex-start;font-size:12.7px;color:var(--ink2);margin-bottom:7px}
+  .phlist li svg{width:14px;height:14px;color:var(--accent);flex:0 0 auto;margin-top:2px}
+  .phlist b,.phsteps b{color:var(--ink)}
+  .phsteps{margin:0;padding-left:20px;font-size:12.7px;color:var(--ink2)} .phsteps li{margin-bottom:6px;padding-left:2px}
+  .phnote{font-size:11.6px;color:var(--muted);margin-bottom:7px;font-style:italic}
+
+  @media print{
+    header.top,.intro,.panel.form,.foot,.presets,.exports,.toast,.iconbtn{display:none!important}
+    body{background:#fff;color:#000}
+    .grid{display:block;padding:0}
+    .panel{border:none;box-shadow:none}
+    .sect,.verdict,.route,.prov{border-color:#ccc}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap topin">
+    <img class="crest" src="../../assets/img/frontier-crest.png" alt="" onerror="this.style.display='none'">
+    <div class="brandtxt">
+      <div class="nm">Front<b>i</b>er</div>
+      <div class="sub">Cross-border data-transfer &amp; Transfer Impact Assessment</div>
+    </div>
+    <div class="topsp">
+      <span class="pill" id="asofPill">Legal basis as-of 2026-07 · verify</span>
+      <button class="iconbtn" id="theme" title="Toggle theme" aria-label="Toggle theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap intro">
+  <div class="hero-wm" aria-hidden="true">
+    <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="wm-fg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e6cf8f"/><stop offset="1" stop-color="#c79f36"/></linearGradient></defs>
+      <g fill="none" stroke="url(#wm-fg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="60" cy="60" r="54"/><circle cx="60" cy="60" r="50" stroke-width="1"/>
+        <path d="M51 15 L53 8 L57 12 L60 5 L63 12 L67 8 L69 15 Z" stroke-width="1.6"/><path d="M50 17 L70 17" stroke-width="1.6"/>
+        <circle cx="53" cy="7" r="1.1" fill="url(#wm-fg)" stroke="none"/><circle cx="60" cy="4" r="1.2" fill="url(#wm-fg)" stroke="none"/><circle cx="67" cy="7" r="1.1" fill="url(#wm-fg)" stroke="none"/>
+        <g id="wm-stag">
+          <path d="M23 52 C26 49 30 49 33 52 C36 55 39 60 43 64 C44 65 43 67 41 66 C38 65 35 65 32 66 C28 66 24 63 23 58 C22 55 22 54 23 52 Z"/>
+          <path d="M31 50 C30 46 28 44 24 43 C28 44 32 46 33 50"/>
+          <path d="M25 64 C21 72 20 82 25 92 C27 96 31 99 36 100"/><path d="M32 66 C31 74 33 84 39 93"/>
+          <path d="M30 50 C26 42 21 37 16 22"/><path d="M24 40 C22 34 22 31 24 27"/><path d="M19 32 C17 27 17 24 19 20"/><path d="M16 22 C15 19 16 17 19 16"/><path d="M16 22 C14 20 12 20 11 23"/>
+          <path d="M34 50 C35 42 36 36 40 25 C41 22 43 20 46 19"/><path d="M36 37 C34 33 34 30 36 26"/><path d="M39 28 C38 25 38 22 40 19"/>
+          <circle cx="32" cy="58" r="1.4" fill="url(#wm-fg)" stroke="none"/><circle cx="42" cy="64" r="0.9" fill="url(#wm-fg)" stroke="none"/>
+        </g>
+        <use href="#wm-stag" transform="translate(120,0) scale(-1,1)"/>
+        <path d="M45 45 L75 45 L75 64 C75 79 68 89 60 95 C52 89 45 79 45 64 Z"/><path d="M48 48 L72 48 L72 64 C72 77 66 85 60 91 C54 85 48 77 48 64 Z" stroke-width="0.8"/>
+        <line x1="60" y1="50" x2="60" y2="89" stroke="#d4b24c" stroke-width="1.1" stroke-dasharray="3 3"/>
+        <path d="M51 85 V68 a9 9 0 0 1 18 0 V85"/><line x1="51" y1="85" x2="51" y2="70" stroke-width="2.8"/><line x1="69" y1="85" x2="69" y2="70" stroke-width="2.8"/>
+        <line x1="48" y1="75" x2="68" y2="75" stroke-width="2.2"/><path d="M66 71.5 L73 75 L66 78.5 Z" fill="url(#wm-fg)" stroke="none"/>
+        <circle cx="60" cy="75" r="3" fill="#0b0f17" stroke="#d4b24c" stroke-width="1.5"/><circle cx="60" cy="75" r="1" fill="#e6cf8f" stroke="none"/>
+      </g>
+    </svg>
+  </div>
+  <div class="scope">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M7 14h6"/></svg>
+    <p><span class="lead">Personal DATA only — not money, goods or property.</span> Frontier assesses whether moving <b>personal data</b> across a border is lawful under <b>GDPR Chapter&nbsp;V / Swiss FADP / UK GDPR</b>. It does <b>not</b> cover moving money, goods, property or physical assets — but it <b>does</b> cover personal data in <b>any form</b>, including paper files, ID documents and devices physically carried across a border.</p>
+  </div>
+  <div class="eyebrow">Legal-tech · GDPR Chapter V · Swiss FADP · UK GDPR</div>
+  <h1>Is this cross-border data transfer lawful — and can you prove it?</h1>
+  <p>Frontier determines the <b>lawful basis</b> for an international personal-data transfer — <b>electronic or physical</b> — runs a <b>Schrems&nbsp;II-style Transfer Impact Assessment</b> on the destination, lists the <b>supplementary safeguards</b> you need, and produces an <b>audit-ready control record</b> you can export. It reasons across the regimes a Geneva team actually straddles — <b>EU GDPR</b>, the <b>Swiss FADP</b> and the <b>UK GDPR</b>.</p>
+  <div class="disc">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg>
+    <p><b>Decision-support, not legal advice.</b> Adequacy lists, the EU/Swiss/UK-US Data Privacy Framework and CJEU case law change — the encoded position is dated <b>July&nbsp;2026</b> and must be re-checked against the current European Commission, FDPIC and ICO sources before you rely on it. Country risk ratings are <b>reasoned assessment</b>, not legal fact, and are labelled as such.</p>
+  </div>
+</div>
+
+<div class="wrap grid">
+  <!-- INPUT -->
+  <section class="panel form">
+    <div class="ph"><h2>Describe the transfer</h2><span class="step">7 inputs</span></div>
+    <div class="pbody">
+      <div class="presets" id="presets">
+        <span class="subhead" style="width:100%;margin:0 0 2px">Load a worked example</span>
+        <button class="preset" data-preset="uk">EEA &rarr; UK (adequate)</button>
+        <button class="preset" data-preset="ussaas">EEA &rarr; US SaaS support</button>
+        <button class="preset" data-preset="chindia">Switzerland &rarr; India vendor</button>
+        <button class="preset" data-preset="ukchina">UK &rarr; China analytics</button>
+        <button class="preset" data-preset="physid">Courier passports EEA &rarr; US (physical)</button>
+      </div>
+
+      <div class="fld">
+        <label>1 · Exporter jurisdiction <span class="hint">— whose transfer rules govern</span></label>
+        <div class="seg" id="exporter">
+          <button data-v="GDPR" class="on">EU / EEA</button>
+          <button data-v="FADP">Switzerland</button>
+          <button data-v="UKGDPR">United Kingdom</button>
+        </div>
+      </div>
+
+      <div class="fld">
+        <label for="recipient">2 · Recipient / importer country</label>
+        <select id="recipient"></select>
+      </div>
+
+      <div class="fld cond" id="usCert">
+        <label class="chk"><input type="checkbox" id="dpfChk"> Importer is self-certified under the applicable <b>&nbsp;US Data Privacy Framework</b>&nbsp;(EU-US / Swiss-US / UK-US bridge)</label>
+      </div>
+      <div class="fld cond" id="caCert">
+        <label class="chk"><input type="checkbox" id="pipedaChk"> Importer is a <b>&nbsp;commercial organisation</b>&nbsp;subject to Canada&rsquo;s PIPEDA</label>
+      </div>
+
+      <div class="fld">
+        <label>3 · Data categories <span class="hint">— tick all that apply</span></label>
+        <div class="checks" id="dataCats"></div>
+      </div>
+
+      <div class="fld">
+        <div class="subhead">Sensitivity</div>
+        <div class="checks">
+          <label class="chk sens"><input type="checkbox" class="sens" value="special"> Special-category (Art&nbsp;9)</label>
+          <label class="chk sens"><input type="checkbox" class="sens" value="criminal"> Criminal-offence (Art&nbsp;10)</label>
+          <label class="chk sens"><input type="checkbox" class="sens" value="children"> Children&rsquo;s data</label>
+          <label class="chk sens"><input type="checkbox" class="sens" value="largeScale"> Large-scale / systematic</label>
+        </div>
+      </div>
+
+      <div class="fld">
+        <label for="purpose">4 · Transfer purpose</label>
+        <select id="purpose"></select>
+        <input type="text" id="purposeTxt" placeholder="Optional: describe the transfer in your own words" style="margin-top:7px">
+      </div>
+
+      <div class="fld">
+        <label for="mechanism">5 · Transfer mechanism in place</label>
+        <select id="mechanism"></select>
+      </div>
+
+      <div class="fld">
+        <div class="subhead">6 · Context</div>
+        <label class="chk"><input type="checkbox" id="fadpChk"> Data is <b>&nbsp;also subject to the Swiss FADP</b>&nbsp;(Swiss establishment or data subjects)</label>
+        <label class="chk" style="margin-top:5px"><input type="checkbox" id="occChk"> Transfer is genuinely <b>&nbsp;occasional / one-off</b>&nbsp;(not routine)</label>
+      </div>
+
+      <div class="fld">
+        <label>7 · How is the data moved? <span class="hint">— crossing a border on paper or a device is still a transfer</span></label>
+        <div class="seg" id="medium">
+          <button data-v="electronic" class="on">Electronic / network</button>
+          <button data-v="physical">Physical documents / devices</button>
+        </div>
+      </div>
+      <div class="fld cond" id="physWrap">
+        <div class="subhead">Physical carriage — what crosses the border</div>
+        <select id="physForm">
+          <option value="paper">Paper files / printouts / HR records</option>
+          <option value="id">Original ID documents / passports</option>
+          <option value="device">Storage device or media (laptop, drive, USB, disks)</option>
+          <option value="mixed">Mixed / several of these</option>
+        </select>
+        <label class="chk" style="margin-top:8px"><input type="checkbox" id="physOriginals"> These are <b>&nbsp;originals</b>&nbsp;(not certified copies)</label>
+        <label class="chk" style="margin-top:5px"><input type="checkbox" id="physHand"> <b>&nbsp;Hand-carried</b>&nbsp;by a traveller (vs a tracked courier)</label>
+      </div>
+
+      <button class="go" id="assess">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+        Assess the transfer</button>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section class="panel result" id="result">
+    <div class="placeholder" id="placeholder">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 12h13"/><path d="M13 6l6 6-6 6"/><rect x="1" y="4" width="3" height="16" rx="1"/></svg>
+      <div style="font-size:14px;color:var(--ink2);font-weight:600">Your determination will appear here</div>
+      <div style="font-size:12.5px;margin-top:6px;max-width:44ch;margin-left:auto;margin-right:auto">Fill in the transfer on the left (or load a worked example) and press <b style="color:var(--ink)">Assess the transfer</b>. Frontier returns the lawful basis, a TIA, the required safeguards and an exportable record.</div>
+    </div>
+    <div id="out" style="display:none"></div>
+  </section>
+</div>
+
+<div class="wrap foot">
+  <span>Frontier &mdash; built by <b>Christopher Farmer</b> · runs fully offline, no network calls · synthetic decision-support tool.</span>
+  <span class="mono">Project 5 · portfolio</span>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+(function(){
+/* ============================ THEME (portfolio sync) ============================ */
+try{
+  var qp=new URLSearchParams(location.search); var t=qp.get('theme');
+  if(t==='light'||t==='dark') document.documentElement.setAttribute('data-theme',t);
+}catch(e){}
+document.getElementById('theme').addEventListener('click',function(){
+  var cur=document.documentElement.getAttribute('data-theme')==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',cur);
+});
+window.addEventListener('message',function(ev){ try{ if(ev.data&&ev.data.type==='cf-theme'&&(ev.data.theme==='light'||ev.data.theme==='dark')) document.documentElement.setAttribute('data-theme',ev.data.theme);}catch(e){} });
+
+/* ============================ REFERENCE DATA (as-of 2026-07) ============================ */
+/* Adequacy status codes per regime: F=full · S=full-with-scope · Pus=partial (US DPF) · Pca=partial (Canada commercial)
+   · V=verify (may differ on this regime's list) · N=none. Adequacy statuses are LEGAL FACT (with a verify-date caveat);
+   the tia[] ratings (0 good .. 3 poor) are REASONED ASSESSMENT and are labelled as such in every output. */
+var REGIMES={
+  GDPR:{ label:'EU / EEA (GDPR)', chap:'GDPR Chapter V', adqArt:'Art 45 adequacy decision',
+    tool:'Art 46 SCCs (Dec. 2021/914) or BCRs (Art 47)', derog:'Art 49 derogations',
+    homeBloc:'EEA', homeNote:'Transfers within the EEA are not restricted transfers.' },
+  FADP:{ label:'Switzerland (revFADP)', chap:'revFADP Art 16-18', adqArt:'Art 16(1) Federal Council adequacy list (Annex 1, DPO)',
+    tool:'FDPIC-recognised SCCs (with the Swiss amendments) or BCRs', derog:'Art 17 exceptions',
+    homeBloc:'EEA', homeNote:'The EEA is on the Swiss adequacy list.' },
+  UKGDPR:{ label:'United Kingdom (UK GDPR)', chap:'UK GDPR Chapter V', adqArt:'UK adequacy regulations (Art 45 as retained)',
+    tool:'UK IDTA or the UK Addendum to the EU SCCs, or BCRs', derog:'Art 49 derogations (as retained)',
+    homeBloc:'EEA', homeNote:'The EEA is covered by UK adequacy regulations.' }
+};
+var EEA=['at','be','bg','hr','cy','cz','dk','ee','fi','fr','de','gr','hu','ie','it','lv','lt','lu','mt','nl','pl','pt','ro','sk','si','es','se','is','li','no'];
+
+/* country: [iso, name, euStatus, chStatus, ukStatus, [gov,rol,redress,onward], law?, scope?] */
+var C=[
+  ['gb','United Kingdom','F','F','HOME',[1,0,1,1],null,'EU renewed UK adequacy Dec 2025, valid to 27 Dec 2031.'],
+  ['ch','Switzerland','F','HOME','F',[0,0,0,1],null,'Mutually adequate with the EU.'],
+  ['ad','Andorra','F','V','F',[0,1,1,1]],
+  ['ar','Argentina','F','F','F',[1,1,1,1]],
+  ['br','Brazil','F','V','V',[1,1,1,1],null,'EU mutual adequacy adopted 26 Jan 2026 (LGPD). Confirm Swiss/UK positions separately.'],
+  ['ca','Canada','Pca','Pca','Pca',[1,1,1,1],null,'Adequacy covers only commercial organisations under PIPEDA; public-sector and some provincial data are out of scope.'],
+  ['fo','Faroe Islands','F','V','F',[0,1,1,1]],
+  ['gg','Guernsey','F','F','F',[0,1,1,1]],
+  ['im','Isle of Man','F','F','F',[0,1,1,1]],
+  ['il','Israel','F','F','F',[2,1,2,2]],
+  ['jp','Japan','S','V','F',[1,1,1,1],null,'EU adequacy covers private-sector operators under supplementary rules (APPI).'],
+  ['je','Jersey','F','F','F',[0,1,1,1]],
+  ['nz','New Zealand','F','F','F',[1,0,1,1]],
+  ['kr','South Korea','S','V','V',[1,1,1,1],null,'EU adequacy covers controllers under PIPA (Dec 2021). Confirm Swiss/UK positions separately.'],
+  ['uy','Uruguay','F','F','F',[1,1,1,1]],
+  ['us','United States','Pus','Pus','Pus',[3,1,1,1],'FISA §702; Executive Order 12333; EO 14086 redress mechanism (Data Protection Review Court).','Adequacy is available ONLY for importers self-certified under the relevant US Data Privacy Framework. Currently contested: Latombe appeal (C-703/25 P) pending at the CJEU; Trump v Slaughter (US Sup. Ct., 29 Jun 2026) has revived doubts over FTC independence and the redress pillar.'],
+  ['au','Australia','N','N','N',[2,1,1,1],'Telecommunications (Assistance and Access) Act 2018; mandatory metadata retention.'],
+  ['sg','Singapore','N','N','N',[1,1,1,1],'PDPA 2012; access powers under the Criminal Procedure Code / ISA.'],
+  ['hk','Hong Kong','N','N','N',[2,2,2,2],'National Security Law 2020; PDPO oversight is limited.'],
+  ['cn','China','N','N','N',[3,3,3,2],'National Intelligence Law 2017 (Art 7 duty to assist); Data Security Law; PIPL state-access carve-outs.'],
+  ['in','India','N','N','N',[2,2,1,1],'DPDP Act 2023 (broad state exemptions); interception under the Telegraph Act / IT Act.'],
+  ['ru','Russia','N','N','N',[3,3,3,2],'SORM lawful-interception system; data-localisation Law 242-FZ.'],
+  ['ae','United Arab Emirates','N','N','N',[2,2,1,2],'Federal PDPL 2021 (plus DIFC/ADGM regimes); broad state-security access.'],
+  ['sa','Saudi Arabia','N','N','N',[3,2,3,2],'PDPL 2023; extensive state access, limited independent oversight.'],
+  ['qa','Qatar','N','N','N',[2,2,1,2],'PDPPL 2016.'],
+  ['tr','Turkey','N','N','N',[2,2,1,1],'KVKK 2016; broad national-security exemptions.'],
+  ['za','South Africa','N','N','N',[1,1,1,1],'POPIA; Information Regulator oversight; RICA interception.'],
+  ['ng','Nigeria','N','N','N',[2,2,1,1],'NDPA 2023; Nigeria Data Protection Commission.'],
+  ['ke','Kenya','N','N','N',[1,1,2,1],'Data Protection Act 2019; ODPC oversight.'],
+  ['eg','Egypt','N','N','N',[2,2,3,2],'PDPL 2020; wide security-service access.'],
+  ['ma','Morocco','N','N','N',[1,2,2,1],'Law 09-08; CNDP oversight.'],
+  ['gh','Ghana','N','N','N',[1,2,1,1],'Data Protection Act 2012.'],
+  ['id','Indonesia','N','N','N',[2,1,2,1],'PDP Law 2022.'],
+  ['ph','Philippines','N','N','N',[1,2,2,2],'Data Privacy Act 2012; NPC oversight.'],
+  ['vn','Vietnam','N','N','N',[3,2,2,2],'PDPD 2023; Cybersecurity Law data-localisation and access.'],
+  ['th','Thailand','N','N','N',[2,1,1,1],'PDPA 2019 (GDPR-modelled).'],
+  ['my','Malaysia','N','N','N',[2,2,1,1],'PDPA 2010.'],
+  ['pk','Pakistan','N','N','N',[2,2,2,2],'No comprehensive DP law in force; broad state access.'],
+  ['bd','Bangladesh','N','N','N',[2,2,2,2],'No comprehensive DP law in force.'],
+  ['mx','Mexico','N','N','N',[1,2,1,1],'LFPDPPP; INAI oversight (recently restructured).'],
+  ['co','Colombia','N','N','N',[1,2,1,1],'Law 1581/2012; SIC oversight.'],
+  ['cl','Chile','N','N','N',[1,1,1,1],'Law 19.628 (as reformed toward GDPR alignment).'],
+  ['ua','Ukraine','N','N','N',[2,2,1,1],'DP law under EU-alignment reform.'],
+  ['rs','Serbia','N','N','N',[1,2,1,1],'ZZPL 2018 (GDPR-aligned).'],
+  ['kz','Kazakhstan','N','N','N',[2,2,2,2],'Law on Personal Data; state access, localisation.'],
+  ['other','Other / not on this list','X','X','X',[2,2,2,2]]
+];
+
+var DATACATS=[
+  ['contact','Contact &amp; identity'],['financial','Financial / payment'],['hr','HR / employee'],
+  ['health','Health'],['biometric','Biometric'],['location','Location / device'],
+  ['behaviour','Behavioural / analytics'],['comms','Communications content'],
+  ['govid','Government-issued ID'],['auth','Account / credentials']
+];
+var PURPOSES=[
+  ['host','Cloud hosting / storage / backup',false],
+  ['saas','SaaS platform (importer processes on your behalf)',true],
+  ['support','Customer / technical support access',true],
+  ['analytics','Analytics, marketing or profiling',true],
+  ['hr','Intra-group HR administration',true],
+  ['outsource','Outsourced business processing (BPO)',true],
+  ['prof','Professional / legal / advisory services',true],
+  ['oneoff','One-off / ad-hoc disclosure',false]
+];
+var MECHS=[
+  ['none','None yet in place'],
+  ['adequacy','Relying on an adequacy decision'],
+  ['scc','EU Standard Contractual Clauses (2021/914)'],
+  ['idta','UK IDTA / UK Addendum'],
+  ['bcr','Binding Corporate Rules (BCRs)'],
+  ['dpf','US Data Privacy Framework certification'],
+  ['d_consent','Derogation: explicit consent'],
+  ['d_contract','Derogation: performance of a contract'],
+  ['d_claims','Derogation: legal claims'],
+  ['d_public','Derogation: important public interest'],
+  ['d_vital','Derogation: vital interests'],
+  ['d_cli','Derogation: compelling legitimate interests']
+];
+var FACTORLABELS=[
+  ['gov','Government / surveillance access','Public-authority access to imported data (bulk collection, compelled disclosure).'],
+  ['rol','Rule of law &amp; oversight','Independent supervision, judicial control, respect for the essence of EU rights.'],
+  ['redress','Effective redress','Enforceable rights and remedies for the data subject in the destination.'],
+  ['onward','Onward-transfer risk','Risk the importer re-transfers to a third country without equivalent safeguards.']
+];
+var SOURCES=[
+  'European Commission &mdash; Adequacy decisions (ec.europa.eu/info/law/law-topic/data-protection).',
+  'EDPB Recommendations 01/2020 on supplementary measures (v2.0, 18 Jun 2021).',
+  'EDPB Guidelines 2/2018 on Art 49 derogations.',
+  'CJEU C-311/18 Schrems II (16 Jul 2020); Gen. Court T-553/23 Latombe (3 Sep 2025, DPF upheld); appeal C-703/25 P pending.',
+  'US Sup. Ct., Trump v Slaughter (29 Jun 2026) &mdash; FTC removal protections; DPF redress pillar under renewed scrutiny.',
+  'FDPIC (Switzerland) &mdash; transfer guidance; US added to DPO Annex 1 for Swiss-US DPF recipients (eff. 15 Sep 2024).',
+  'ICO (UK) &mdash; IDTA, Addendum and UK-US Data Bridge (eff. 12 Oct 2023); DUAA 2025 updates pending.'
+];
+
+/* ============================ POPULATE FORM ============================ */
+function opt(v,t){ var o=document.createElement('option'); o.value=v; o.innerHTML=t; return o; }
+var recSel=document.getElementById('recipient');
+(function(){
+  var adq=[], assess=[];
+  C.forEach(function(c){ if(c[0]==='other') return; (c[2]==='N'||c[2]==='X'?assess:adq).push(c); });
+  function sortName(a,b){ return a[1].replace(/&[a-z]+;/g,'').localeCompare(b[1].replace(/&[a-z]+;/g,'')); }
+  adq.sort(sortName); assess.sort(sortName);
+  var g1=document.createElement('optgroup'); g1.label='EU-adequate (verify per regime)';
+  adq.forEach(function(c){ g1.appendChild(opt(c[0],c[1])); });
+  var g2=document.createElement('optgroup'); g2.label='Assess (no EU adequacy)';
+  assess.forEach(function(c){ g2.appendChild(opt(c[0],c[1])); });
+  recSel.appendChild(g1); recSel.appendChild(g2); recSel.appendChild(opt('other','Other / not on this list'));
+  recSel.value='us';
+})();
+(function(){
+  var dc=document.getElementById('dataCats');
+  DATACATS.forEach(function(d){ var l=document.createElement('label'); l.className='chk';
+    l.innerHTML='<input type="checkbox" class="dc" value="'+d[0]+'"> '+d[1]; dc.appendChild(l); });
+  var ps=document.getElementById('purpose'); PURPOSES.forEach(function(p){ ps.appendChild(opt(p[0],p[1])); }); ps.value='saas';
+  var ms=document.getElementById('mechanism'); MECHS.forEach(function(m){ ms.appendChild(opt(m[0],m[1])); }); ms.value='scc';
+})();
+var expVal='GDPR';
+document.getElementById('exporter').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-v]'); if(!b) return;
+  expVal=b.getAttribute('data-v');
+  this.querySelectorAll('button').forEach(function(x){ x.classList.toggle('on',x===b); });
+});
+var mediumVal='electronic';
+function setMedium(v){ mediumVal=v; document.querySelectorAll('#medium button').forEach(function(b){ b.classList.toggle('on',b.getAttribute('data-v')===v); }); document.getElementById('physWrap').classList.toggle('show',v==='physical'); }
+document.getElementById('medium').addEventListener('click',function(e){ var b=e.target.closest('button[data-v]'); if(!b) return; setMedium(b.getAttribute('data-v')); });
+function syncConds(){
+  var iso=recSel.value;
+  document.getElementById('usCert').classList.toggle('show',iso==='us');
+  document.getElementById('caCert').classList.toggle('show',iso==='ca');
+}
+recSel.addEventListener('change',syncConds); syncConds();
+
+/* ============================ ENGINE ============================ */
+function getCountry(iso){ for(var i=0;i<C.length;i++){ if(C[i][0]===iso) return C[i]; } return null; }
+function statusFor(c,regime){ return regime==='GDPR'?c[2]:regime==='FADP'?c[3]:c[4]; }
+function TAG(t){ return t; } /* fact | assess | verify | action */
+function reason(tag,text){ return {tag:tag,text:text}; }
+
+function assess(input){
+  var c=getCountry(input.recipient), R=REGIMES[input.regime];
+  var out={ ref:input.ref, asOf:'2026-07', input:input, regime:R, country:c,
+    verdict:'', headline:'', sub:'', reasons:[], tia:null, safeguards:null,
+    fadp:[], caveats:[], sources:SOURCES };
+  var sens=input.sens, sensActive=sens.special||sens.criminal||sens.children||sens.largeScale;
+  var purposeObj=null; PURPOSES.forEach(function(p){ if(p[0]===input.purpose) purposeObj=p; });
+  var needsCleartext=purposeObj?purposeObj[2]:true;
+  var status=c?statusFor(c,input.regime):'X';
+
+  /* 0 — home bloc / not a restricted transfer */
+  if(input.recipient!=='other' && EEA.indexOf(input.recipient)>=0){
+    out.verdict='lawful'; out.headline='Not a restricted transfer';
+    out.sub='The destination is within the EEA, so '+R.chap+' does not restrict it.';
+    out.reasons.push(reason('fact','The recipient is an <b>EEA state</b>. '+R.homeNote+' No Chapter V transfer tool is required.'));
+    out.reasons.push(reason('action','Standard GDPR/FADP obligations (lawful basis for processing, transparency, security) still apply.'));
+    return finalize(out,input,false,null);
+  }
+  if(input.recipient==='gb' && input.regime==='UKGDPR'){ out.verdict='lawful'; out.headline='Domestic — no transfer'; out.sub='Exporter and recipient are both the UK.'; out.reasons.push(reason('fact','This is a domestic UK transfer; UK GDPR Chapter V does not apply.')); return finalize(out,input,false,null); }
+  if(input.recipient==='ch' && input.regime==='FADP'){ out.verdict='lawful'; out.headline='Domestic — no transfer'; out.sub='Exporter and recipient are both Switzerland.'; out.reasons.push(reason('fact','This is a domestic Swiss transfer; revFADP Art 16-18 does not apply.')); return finalize(out,input,false,null); }
+
+  /* Other / not listed → cannot auto-assess */
+  if(input.recipient==='other' || status==='X'){
+    out.verdict='manual'; out.headline='Manual assessment required';
+    out.sub='This destination is not in Frontier’s curated dataset.';
+    out.reasons.push(reason('action','Frontier covers a curated set of jurisdictions. For anywhere else, confirm the destination’s adequacy status on the '+R.adqArt+' and run a full TIA using the EDPB six-step method.'));
+    out.reasons.push(reason('verify','Treat as <b>no adequacy</b> unless you confirm otherwise: put an '+R.tool+' in place and assess government-access, rule of law, redress and onward-transfer risk on current country evidence.'));
+    return finalize(out,input,false,null);
+  }
+
+  /* 1 — ADEQUACY */
+  var mech=input.mechanism;
+  if(status==='F' || status==='S'){
+    out.verdict='lawful'; out.headline='Lawful — adequacy decision';
+    out.sub='The transfer is covered by '+R.adqArt+'.';
+    out.reasons.push(reason('fact','<b>'+plain(c[1])+'</b> benefits from an adequacy decision under '+R.adqArt+'. A transfer tool under '+R.tool.split(' or ')[0]+' is <b>not required</b>.'));
+    if(status==='S' && c[8]) out.reasons.push(reason('fact','Scope note: '+c[8]));
+    if(c[8] && status==='F') out.reasons.push(reason('fact',c[8]));
+    if(input.regime!=='GDPR' && (c[3]==='V'||c[4]==='V')) out.reasons.push(reason('verify','Adequacy for this destination is well-established under EU law but should be <b>separately confirmed</b> on the '+(input.regime==='FADP'?'Swiss Federal Council (FDPIC)':'UK ICO')+' list — the regimes’ lists are not identical.'));
+    out.reasons.push(reason('verify','Adequacy decisions can be amended, suspended or struck down. Confirm the decision is <b>still in force</b> as of your transfer date.'));
+    if(sensActive) out.reasons.push(reason('action','You flagged sensitive data. Adequacy removes the <i>transfer-tool</i> requirement, but Art 9/10 conditions and your processing lawful basis still apply.'));
+    return finalize(out,input,false,null);
+  }
+  if(status==='Pca'){
+    var caOk=input.pipeda;
+    if(caOk){ out.verdict='lawful'; out.headline='Lawful — adequacy (PIPEDA scope)';
+      out.sub='Canada is adequate for commercial organisations under PIPEDA.';
+      out.reasons.push(reason('fact','The importer is a <b>commercial organisation under PIPEDA</b>, which is within the scope of Canada’s adequacy decision. No transfer tool is required for that data.'));
+      out.reasons.push(reason('verify','If any recipient falls outside PIPEDA (public sector, some provincial bodies), that stream needs an '+R.tool+' and a TIA.'));
+      return finalize(out,input,false,null);
+    } else {
+      out.reasons.push(reason('verify','Canada’s adequacy covers <b>only commercial organisations under PIPEDA</b>. You have not confirmed the importer is in scope, so this is assessed as a <b>non-adequate</b> transfer.'));
+      return art46Path(out,input,c,R,needsCleartext,sens,sensActive);
+    }
+  }
+  if(status==='Pus'){
+    var dpf=input.dpf;
+    if(dpf){
+      out.verdict='safeguards'; out.headline='Lawful today — but on a contested basis';
+      out.sub='DPF adequacy applies, yet it is under active legal challenge.';
+      out.reasons.push(reason('fact','The importer is self-certified under the applicable <b>US Data Privacy Framework</b>, which is a partial adequacy decision. On its face the transfer is <b>lawful without an Art 46 tool</b>.'));
+      out.reasons.push(reason('verify','The DPF is <b>contested</b>: the General Court upheld it in <i>Latombe</i> (T-553/23, 3 Sep 2025) but an appeal (C-703/25 P) is pending, and <i>Trump v Slaughter</i> (29 Jun 2026) has cast doubt on FTC independence and the redress pillar. Treat the basis as <b>fragile</b>.'));
+      out.reasons.push(reason('action','Recommended: keep <b>fallback '+R.tool.split(' or ')[0]+' + a TIA</b> ready so the transfer survives if the DPF is suspended. Confirm the importer’s certification is <b>active and covers this data type</b> on the DPF list.'));
+      /* still run a TIA for the fallback */
+      out.tia=buildTIA(c,sens);
+      out.safeguards=buildSafeguards(out.tia,needsCleartext,sensActive,'contingency');
+      return finalize(out,input,true,out.tia);
+    } else {
+      out.reasons.push(reason('fact','The US has <b>no general adequacy</b>. Adequacy is available only for importers self-certified under the US Data Privacy Framework, which you have not confirmed.'));
+      return art46Path(out,input,c,R,needsCleartext,sens,sensActive);
+    }
+  }
+  /* status === 'N' */
+  return art46Path(out,input,c,R,needsCleartext,sens,sensActive);
+}
+
+function art46Path(out,input,c,R,needsCleartext,sens,sensActive){
+  var mech=input.mechanism;
+  var isArt46 = (mech==='scc'||mech==='bcr'||mech==='idta'||(mech==='adequacy'));
+  var isDerog = mech.indexOf('d_')===0;
+  var tia=buildTIA(c,sens); out.tia=tia;
+
+  if(mech==='adequacy'){
+    out.reasons.push(reason('verify','You indicated reliance on an <b>adequacy decision</b>, but no adequacy decision covers <b>'+plain(c[1])+'</b> under '+R.chap+'. That basis is <b>not available</b> here.'));
+  }
+  if(mech==='dpf' && input.recipient!=='us'){
+    out.reasons.push(reason('verify','A <b>DPF certification</b> only supports transfers to the United States. It does not apply to <b>'+plain(c[1])+'</b>.'));
+  }
+
+  if(isDerog){ return derogationPath(out,input,c,R,sensActive); }
+
+  if(!isArt46 || mech==='none' || mech==='dpf' || (mech==='adequacy')){
+    /* no valid transfer tool in place */
+    out.verdict='unlawful'; out.headline='Unlawful as configured — no valid transfer tool';
+    out.sub=plain(c[1])+' is not adequate and no Art 46 mechanism is in place.';
+    out.reasons.push(reason('fact','With no adequacy decision, '+R.chap+' permits the transfer only under an <b>Art 46 mechanism</b> ('+R.tool+') or, exceptionally, an '+R.derog+'.'));
+    out.reasons.push(reason('action','Put an '+R.tool+' in place, then complete the TIA below and adopt the listed supplementary measures.'));
+    out.safeguards=buildSafeguards(tia,needsCleartext,sensActive,'required');
+    appendTiaReasons(out,tia,needsCleartext,sensActive,R,true);
+    return finalize(out,input,true,tia);
+  }
+
+  /* Art 46 tool in place → run the TIA verdict */
+  var toolName = mech==='scc'?'EU SCCs (2021/914)':mech==='idta'?'the UK IDTA / Addendum':mech==='bcr'?'BCRs':'an Art 46 tool';
+  out.reasons.push(reason('fact','An Art 46 tool is in place ('+toolName+'). Under <i>Schrems II</i> that tool must be backed by a <b>Transfer Impact Assessment</b> confirming the destination does not undermine it.'));
+  appendTiaReasons(out,tia,needsCleartext,sensActive,R,false);
+
+  var band=tia.band;
+  if(band==='LOW'){
+    out.verdict='safeguards'; out.headline='Lawful with safeguards';
+    out.sub=toolName+' + a documented TIA; baseline measures.';
+    out.safeguards=buildSafeguards(tia,needsCleartext,sensActive,'baseline');
+  } else if(band==='MEDIUM'){
+    out.verdict='safeguards'; out.headline='Lawful with supplementary safeguards';
+    out.sub='Proceed only with the technical, contractual and organisational measures below.';
+    if(tia.factors[0].rating>=3 && needsCleartext){
+      out.reasons.push(reason('assess','Residual <b>government-access risk is high</b> and the purpose needs data in the clear. Defensible only if you <b>document the residual-risk justification</b> and keep the DPF / relocation options under review &mdash; some supervisory authorities would still object.'));
+    }
+    out.safeguards=buildSafeguards(tia,needsCleartext,sensActive,'supplementary');
+  } else { /* HIGH or SEVERE */
+    if(needsCleartext){
+      out.verdict='unlawful'; out.headline='Unlawful as configured';
+      out.sub='High-risk destination and the importer needs identifiable data in the clear.';
+      out.reasons.push(reason('assess','Because the purpose (<b>'+plainPurpose(input.purpose)+'</b>) requires the importer to access data <b>in the clear</b>, the decisive technical measure (encryption/pseudonymisation that denies the importer and public authorities access) <b>cannot be applied</b>. Contractual and organisational measures alone do not cure a high government-access risk.'));
+      out.reasons.push(reason('action','Options: (a) re-architect so the importer only handles <b>encrypted/pseudonymised</b> data with keys held in the '+R.homeBloc+'; (b) relocate processing to an adequate country; (c) if genuinely occasional, consider an '+R.derog+'; or (d) do not transfer.'));
+      out.safeguards=buildSafeguards(tia,needsCleartext,sensActive,'insufficient');
+    } else {
+      out.verdict='safeguards'; out.headline='Lawful only with strong technical measures';
+      out.sub='High risk, but the purpose allows the importer to hold data encrypted.';
+      out.reasons.push(reason('assess','The government-access risk is high, but the purpose (<b>'+plainPurpose(input.purpose)+'</b>) does <b>not</b> require the importer to read identifiable data. Strong encryption/pseudonymisation with keys retained in the '+R.homeBloc+' can render the transfer effective.'));
+      out.safeguards=buildSafeguards(tia,needsCleartext,sensActive,'strong');
+    }
+  }
+  return finalize(out,input,true,tia);
+}
+
+function derogationPath(out,input,c,R,sensActive){
+  var m=input.mechanism, occ=input.occ, large=input.sens.largeScale;
+  var names={ d_consent:'explicit consent', d_contract:'performance of a contract', d_claims:'establishment/exercise/defence of legal claims',
+    d_public:'important reasons of public interest', d_vital:'vital interests', d_cli:'compelling legitimate interests' };
+  var art = R.derog;
+  out.reasons.push(reason('fact','You are relying on an '+art+' ('+names[m]+') rather than an Art 46 tool. Derogations are <b>exceptions</b>: they must be interpreted narrowly and, for most, be <b>occasional and non-repetitive</b> (EDPB Guidelines 2/2018).'));
+  var occasionalReq = (m==='d_consent'||m==='d_contract'||m==='d_claims'||m==='d_cli');
+  var fatal=false;
+  if(occasionalReq && (!occ || large)){
+    out.verdict='unlawful'; out.headline='Derogation not sustainable as a routine basis';
+    out.sub='This derogation cannot carry a systematic or large-scale transfer.';
+    out.reasons.push(reason('assess','You have '+(!occ?'not confirmed the transfer is occasional':'flagged it as large-scale/systematic')+'. A '+names[m]+' derogation cannot be the <b>routine</b> legal basis for an ongoing data flow — that requires an '+R.tool+'.'));
+    fatal=true;
+  }
+  if(m==='d_consent'){
+    out.reasons.push(reason('action','Consent must be <b>explicit, specific, informed and freely given</b>, revocable, and preceded by a warning about the <b>absence of adequacy and safeguards</b> in '+plain(c[1])+'.'+(input.sens.special?' Special-category data requires Art 9(2)(a) explicit consent.':'')));
+  }
+  if(m==='d_cli'){
+    out.reasons.push(reason('verify','“Compelling legitimate interests” is a <b>last-resort</b> derogation: one-off, limited data subjects, no other basis available, exporter has assessed and <b>documented</b> the transfer, and has <b>informed the supervisory authority and the data subjects</b>. Rarely defensible — confirm carefully.'));
+  }
+  if(sensActive && m!=='d_consent') out.reasons.push(reason('assess','You flagged sensitive data; most derogations are hard to justify for Art 9/10 data. Prefer explicit consent or an Art 46 tool.'));
+  if(!fatal){
+    out.verdict='safeguards'; out.headline='Potentially lawful via derogation';
+    out.sub='Defensible only if genuinely exceptional and fully documented.';
+    out.reasons.push(reason('action','Document the derogation analysis in the record below and keep evidence it is occasional. If the flow becomes routine, migrate to an '+R.tool+'.'));
+  }
+  return finalize(out,input,false,null);
+}
+
+function buildTIA(c,sens){
+  var f=c[5], labels=FACTORLABELS;
+  var factors=labels.map(function(l,i){ return {k:l[0],label:l[1],desc:l[2],rating:f[i]}; });
+  var base=f[0]*1.3 + f[1]*1.0 + f[2]*1.1 + f[3]*0.6;
+  var uplift=(sens.special?1.5:0)+(sens.criminal?1.5:0)+(sens.children?0.8:0)+(sens.largeScale?0.8:0);
+  var score=base+uplift;
+  var band = score<4.2?'LOW':score<7.2?'MEDIUM':score<10?'HIGH':'SEVERE';
+  return { factors:factors, score:Math.round(score*10)/10, base:Math.round(base*10)/10, uplift:Math.round(uplift*10)/10, band:band, law:c[6]||null };
+}
+function appendTiaReasons(out,tia,needsCleartext,sensActive,R,noTool){
+  if(tia.law) out.reasons.push(reason('assess','Key destination law relevant to the TIA: '+tia.law));
+  var gov=tia.factors[0].rating, red=tia.factors[2].rating;
+  if(gov>=3) out.reasons.push(reason('assess','<b>Government-access risk is high.</b> Contractual promises cannot bind the destination’s intelligence services — the effective control here is <b>technical</b> (encryption/pseudonymisation that denies access).'));
+  if(red>=3) out.reasons.push(reason('assess','<b>Redress is weak.</b> Data subjects may have no enforceable remedy in the destination, which counts heavily against the transfer under <i>Schrems II</i>.'));
+  if(sensActive) out.reasons.push(reason('assess','Sensitive data raises the required level of protection: the TIA risk band is uplifted and the safeguards below are set to the higher end.'));
+}
+
+function buildSafeguards(tia,needsCleartext,sensActive,mode){
+  var T=[],Ct=[],O=[];
+  var gov=tia.factors[0].rating, red=tia.factors[2].rating, onward=tia.factors[3].rating, band=tia.band;
+  /* Technical */
+  T.push('Encrypt data in transit (TLS 1.2+/1.3) and at rest.');
+  if(gov>=2 || band==='HIGH' || band==='SEVERE' || mode==='strong'){
+    T.push('Strong encryption at rest with keys <b>held only by the exporter / in the '+ 'EEA' +'</b> — the importer never holds decryption keys.');
+    T.push('Pseudonymise so the importer cannot attribute data to a person without information kept separately in the EEA.');
+  }
+  if(band==='SEVERE' || mode==='strong'||mode==='insufficient'){
+    T.push('Consider split or multi-party processing so no single importer holds re-identifiable data.');
+  }
+  if(sensActive) T.push('Apply the highest encryption / minimisation tier to Art 9/10 data; transfer only the minimum fields required.');
+  /* Contractual */
+  Ct.push('Use the correct SCC module (C2C / C2P / P2P / P2C) and complete Annexes I–III (parties, data, technical &amp; organisational measures).');
+  Ct.push('Warranty that the importer has no reason to believe local law prevents compliance; obligation to notify if that changes.');
+  if(gov>=2){ Ct.push('Government-access clause: importer must review the legality of any access request, challenge over-broad requests, and — where lawful — notify the exporter (transparency / warrant-canary).'); }
+  if(onward>=2) Ct.push('Prohibit onward transfers unless equivalent safeguards and a fresh TIA are in place.');
+  Ct.push('Audit and inspection rights; documented sub-processor flow-down.');
+  /* Organisational */
+  O.push('Document this TIA and re-assess at defined intervals and on any change of law (EDPB step 6).');
+  O.push('Maintain a government-access request log and an internal handling procedure.');
+  O.push('Apply least-privilege access, data minimisation and defined retention.');
+  if(red>=2) O.push('Give data subjects a clear route to raise complaints with the exporter and the lead supervisory authority.');
+  var head = mode==='baseline'?'Baseline measures (low-risk destination):'
+    : mode==='supplementary'?'Supplementary measures required to make the tool effective:'
+    : mode==='strong'?'Strong technical measures are decisive here:'
+    : mode==='insufficient'?'Even the full measure set is unlikely to cure the risk for this purpose:'
+    : mode==='contingency'?'Contingency safeguards to hold ready behind the DPF:'
+    : 'Measures to adopt once the transfer tool is in place:';
+  return { head:head, technical:T, contractual:Ct, organisational:O };
+}
+
+/* Physical carriage of personal data across a border — still a restricted transfer under Chapter V,
+   plus physical-security duties. Layered on top of the (medium-agnostic) verdict. */
+function buildPhysical(out,input){
+  var v=out.verdict, form=input.physForm, originals=input.physOriginals, hand=input.physHand;
+  var tia=out.tia, band=tia?tia.band:null;
+  var special=input.sens.special||input.sens.criminal||input.sens.children;
+  var highRisk=(band==='HIGH'||band==='SEVERE'||special);
+  var isDevice=(form==='device'||form==='mixed');
+  var isPaper=(form==='paper'||form==='id'||form==='mixed');
+  var isID=(form==='id'||form==='mixed');
+  var lawful=(v==='lawful'||v==='safeguards');
+
+  var lead='Under the GDPR (and the Swiss FADP / UK GDPR) a “transfer” is <b>not limited to electronic means</b>. Physically carrying or shipping personal data across a border — paper files, original ID documents, a laptop, a USB stick or a hard drive — is <b>still a restricted international transfer</b>. The Chapter&nbsp;V analysis above applies in full, and physical-security duties are added on top.';
+
+  var inPlace=[];
+  inPlace.push(lawful
+    ? 'A <b>valid Chapter&nbsp;V basis</b> — the same one an electronic transfer needs. Here your verdict is <b>'+VLABEL[v]+'</b> via <b>'+plain(mechLabel(input.mechanism))+'</b>. Put it (and any safeguards above) in place <b>before anything leaves the building</b>.'
+    : 'A <b>valid Chapter&nbsp;V basis</b> — which, as configured, you do <b>NOT</b> have (verdict: <b>'+VLABEL[v]+'</b>). Carrying the data would be no more lawful than sending it electronically without a basis. See “if this is unlawful” below.');
+  inPlace.push('A <b>sealed, tamper-evident, tracked chain of custody</b>: a signed manifest of exactly what is being moved, who holds it at each hand-off, and a seal so any interference shows on arrival.');
+  if(isDevice) inPlace.push('<b>Strong encryption of every device / medium</b> (full-disk or hardware encryption, strong passphrase). The key must travel <b>separately</b> from the device and stay at origin — an encrypted drive with the password in the same bag is not protected.');
+  if(isPaper) inPlace.push('Recognition that <b>paper and original ID documents cannot be encrypted</b> — sealed custody, minimisation and insurance are their only protection. Anyone who opens the packet can read everything, so a high-risk destination weighs heavily against carrying paper originals at all.');
+  inPlace.push('<b>Data minimisation</b>: send <b>certified copies, not originals</b>, wherever possible; redact every field the recipient does not strictly need; carry the minimum set of records.'+(originals?' You flagged these as <b>originals</b> — prefer certified copies; the loss or seizure of originals is far more damaging.':''));
+  inPlace.push('<b>Insurance / liability cover</b> for loss, theft or destruction in transit.');
+  inPlace.push('<b>Awareness of border &amp; customs risk</b>: customs and border officers may lawfully inspect, image, copy or seize documents and devices, and carriers lose shipments. Treat interception as realistic and feed it into the TIA — border inspection is itself a form of government access.');
+  if(highRisk) inPlace.push('<b>A DPIA</b> (data-protection impact assessment) before you proceed — this movement is high-risk'+(special?' and involves special-category / sensitive data':'')+'.');
+
+  var toDo=[];
+  toDo.push('Confirm the Chapter&nbsp;V basis above is actually in place'+(lawful?'':' — as configured it is not, so stop here and fix that first')+'.');
+  toDo.push('Minimise first: replace originals with <b>certified copies</b>, redact unneeded fields, and take only the records you can justify.');
+  if(isDevice) toDo.push('Encrypt each device / medium; keep the passphrase or key with a different person, or send it by a separate secure channel.');
+  toDo.push('Seal the items in tamper-evident packaging and record a manifest plus a chain-of-custody log (who, what, when, where).');
+  toDo.push(hand
+    ? 'Hand-carry: brief the traveller not to volunteer the contents, to keep the items in their control at all times, and to log any inspection.'
+    : 'Use a <b>tracked</b> courier or freight service and keep the tracking record and proof of delivery.');
+  toDo.push('Insure the shipment against loss and interception.');
+  toDo.push('If the packet or device is inspected, copied, seized or lost, treat it as a likely <b>personal-data breach</b>: record it and assess notification (72&nbsp;hours to the supervisory authority, and the data subjects, where it qualifies).');
+  toDo.push('Save the record below as your evidence the movement was assessed and controlled.');
+
+  var ifUnlawful=null;
+  if(!lawful){
+    ifUnlawful={
+      headline:(v==='unlawful'?'As configured, carrying this data across the border would be UNLAWFUL.':'You cannot yet show this border crossing is lawful.'),
+      body:'A physical crossing needs the <b>same valid Chapter&nbsp;V basis</b> as an electronic one, and you do not have one here. <b>Do not put the documents or devices in a bag and cross the border.</b>',
+      options:[
+        'Do <b>not</b> carry them — being on paper or a device does not make an unlawful transfer lawful.',
+        'Put a valid mechanism in place first (adequacy / a US DPF certification where it applies, or SCCs · UK IDTA + a TIA and the safeguards above), then transfer — usually <b>electronically under that mechanism is safer</b> than a border crossing.',
+        'Process the data <b>locally</b> in the origin country and carry only anonymous or non-personal outputs across the border.',
+        'Rely on an Art&nbsp;49 / Art&nbsp;17 <b>derogation</b> only if one genuinely applies (e.g. explicit informed consent, or necessity for a contract). These are narrow, occasional and must be documented — not a routine workaround.'
+      ]
+    };
+  }
+  return { lead:lead, inPlace:inPlace, toDo:toDo, ifUnlawful:ifUnlawful, dpia:highRisk, lawful:lawful };
+}
+
+function finalize(out,input,tiaShown,tia){
+  /* FADP interplay */
+  if(input.regime==='FADP' || input.fadp){
+    out.fadp.push('The EU SCCs are recognised by the FDPIC only <b>with the Swiss amendments</b>: reference the revFADP and the FDPIC as supervisory authority, name the Swiss courts, and — during the transition — address data on legal persons.');
+    out.fadp.push('Use the Swiss Federal Council adequacy list (DPO Annex 1), which is <b>not identical</b> to the EU list. For the US, rely on the <b>Swiss-US DPF</b> (Annex 1 since 15 Sep 2024), separate from the EU-US DPF.');
+    if(input.regime!=='FADP') out.fadp.push('Because the data is also subject to the FADP, run the Swiss track in parallel with the EU track — a transfer lawful under the GDPR is not automatically lawful under the FADP.');
+  }
+  if(input.regime==='UKGDPR'){
+    out.fadp.push('UK note: use the <b>UK IDTA</b> or the <b>UK Addendum</b> to the EU SCCs; for the US the <b>UK-US Data Bridge</b> requires the importer to have opted into the UK extension of the DPF. The ICO’s instruments are being updated for the DUAA 2025.');
+  }
+  if(input.medium==='physical') out.physical=buildPhysical(out,input);
+  return out;
+}
+
+/* ============================ RENDER ============================ */
+function plain(s){ return String(s).replace(/&amp;/g,'&'); }
+function plainPurpose(id){ var r=id; PURPOSES.forEach(function(p){ if(p[0]===id) r=plain(p[1]); }); return r; }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function collectInput(){
+  var dc=[]; document.querySelectorAll('.dc:checked').forEach(function(x){ dc.push(x.value); });
+  var sens={}; document.querySelectorAll('.sens:checked').forEach(function(x){ sens[x.value]=true; });
+  var now=new Date();
+  function pad(n){ return (n<10?'0':'')+n; }
+  var ref='FRNT-'+now.getFullYear()+pad(now.getMonth()+1)+pad(now.getDate())+'-'+pad(now.getHours())+pad(now.getMinutes())+pad(now.getSeconds());
+  return { ref:ref, ts:now.toISOString(), regime:expVal, recipient:recSel.value,
+    dpf:document.getElementById('dpfChk').checked, pipeda:document.getElementById('pipedaChk').checked,
+    dataCats:dc, sens:sens, purpose:document.getElementById('purpose').value,
+    purposeTxt:document.getElementById('purposeTxt').value.trim(),
+    mechanism:document.getElementById('mechanism').value,
+    medium:mediumVal, physForm:document.getElementById('physForm').value,
+    physOriginals:document.getElementById('physOriginals').checked, physHand:document.getElementById('physHand').checked,
+    fadp:document.getElementById('fadpChk').checked, occ:document.getElementById('occChk').checked };
+}
+
+var GLYPH={
+  lawful:'<svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>',
+  safeguards:'<svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.9"><path d="M12 3l8 4v5c0 5-3.5 8-8 10-4.5-2-8-5-8-10V7z"/><path d="M9 12l2 2 4-4"/></svg>',
+  unlawful:'<svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="var(--bad)" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/></svg>',
+  manual:'<svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg>'
+};
+var VICON={
+  lawful:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>',
+  safeguards:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 3l8 4v5c0 5-3.5 8-8 10-4.5-2-8-5-8-10V7z"/><path d="M9 12l2 2 4-4"/></svg>',
+  unlawful:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/></svg>',
+  manual:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg>'
+};
+var VLABEL={ lawful:'Lawful', safeguards:'Lawful with safeguards', unlawful:'Unlawful as configured', manual:'Manual assessment' };
+var TODO_NOW={
+  lawful:{ t:'You can proceed.', s:'Keep the record below as your evidence, and re-confirm the adequacy decision is still in force on your transfer date.' },
+  safeguards:{ t:'Proceed only after the safeguards are in place.', s:'Put the technical, contractual and organisational measures below in place first, document them, then transfer. Do not send data until they are live.' },
+  unlawful:{ t:'Do not transfer as configured.', s:'There is no valid basis yet. Fix it using the options in the reasons above (and, for a physical crossing, the alternatives below) before any data moves.' },
+  manual:{ t:'Do not transfer yet — get certainty first.', s:'This destination is outside the curated dataset. Confirm its adequacy status and run a full TIA before you decide.' }
+};
+
+function render(res){
+  var i=res.input, R=res.regime, v=res.verdict;
+  var recName=res.country?plain(res.country[1]):'Recipient';
+  var expName=R.label;
+  var h='';
+  h+='<div class="v-'+v+'">';
+  /* route visual */
+  h+='<div class="route">'
+    +'<div class="node"><div class="rl">Exporter</div><div class="jn">'+esc(expName.split(' (')[0])+'</div><div class="rg">'+esc(R.chap)+'</div></div>'
+    +'<div class="arrowcell"><div class="lbl">'+(i.medium==='physical'?'physical':'data')+'</div><div class="arrowline '+v+'"></div>'+GLYPH[v]+'</div>'
+    +'<div class="node" style="text-align:right"><div class="rl">Recipient</div><div class="jn">'+esc(recName)+'</div><div class="rg">'+(res.country&&res.country[6]?'surveillance-law flag':'destination')+'</div></div>'
+    +'</div>';
+  /* verdict */
+  h+='<div class="verdict"><div class="vbadge">'+VICON[v]+'</div><div class="vtxt"><div class="vt">'+esc(res.headline)+'</div><div class="vs">'+res.sub+'</div></div></div>';
+  /* what to do now — plain-English, actionable */
+  h+='<div class="todo"><div class="ti">'+VICON[v]+'</div><div><div class="tk">What to do now</div><div class="tt">'+esc(TODO_NOW[v].t)+'</div><div class="ts">'+TODO_NOW[v].s+'</div></div></div>';
+  /* reasons */
+  h+='<div class="sect"><h3>Determination &amp; reasons</h3>';
+  res.reasons.forEach(function(r){ h+='<div class="reason"><span class="tag '+r.tag+'">'+tagText(r.tag)+'</span><div>'+r.text+'</div></div>'; });
+  h+='</div>';
+  /* TIA */
+  if(res.tia){
+    var t=res.tia;
+    h+='<div class="sect"><h3>Transfer Impact Assessment <span style="color:var(--muted);text-transform:none;letter-spacing:0;font-family:var(--font-body)">&mdash; Schrems II, EDPB step 3</span></h3>';
+    h+='<table class="tia"><thead><tr><th>Factor</th><th>Rating</th><th>Basis</th></tr></thead><tbody>';
+    t.factors.forEach(function(f){ h+='<tr><td>'+f.label+'</td><td><span class="rr r'+f.rating+'">'+RATING[f.rating]+'</span></td><td>'+f.desc+'</td></tr>'; });
+    h+='</tbody></table>';
+    h+='<div class="bandbar"><span class="bandpill bp-'+t.band+'">TIA risk: '+t.band+'</span><span>Composite '+t.score+' (destination '+t.base+' + sensitivity '+t.uplift+'). <b style="color:var(--gold-soft)">Ratings are reasoned assessment</b>, not legal fact &mdash; verify against current country evidence.</span></div>';
+    h+='</div>';
+  }
+  /* safeguards */
+  if(res.safeguards){
+    var s=res.safeguards;
+    h+='<div class="sect"><h3>Required supplementary safeguards</h3>';
+    h+='<div style="font-size:12.6px;color:var(--ink2);margin-bottom:11px">'+s.head+'</div>';
+    h+=sgBlock('Technical','#43b3a6',s.technical);
+    h+=sgBlock('Contractual','#d4b24c',s.contractual);
+    h+=sgBlock('Organisational','#84d6ca',s.organisational);
+    h+='</div>';
+  }
+  /* FADP interplay */
+  if(res.fadp && res.fadp.length){
+    h+='<div class="sect"><h3>Swiss FADP / UK interplay</h3>';
+    res.fadp.forEach(function(x){ h+='<div class="reason"><span class="tag fact">REGIME</span><div>'+x+'</div></div>'; });
+    h+='</div>';
+  }
+  /* physical carriage of personal data */
+  if(res.physical){
+    var P=res.physical;
+    h+='<div class="sect phys"><h3>Carrying personal data across the border <span style="color:var(--muted);text-transform:none;letter-spacing:0;font-family:var(--font-body)">&mdash; physical transfer</span></h3>';
+    h+='<div class="reason"><span class="tag fact">LEGAL BASIS</span><div>'+P.lead+'</div></div>';
+    if(P.ifUnlawful){
+      h+='<div class="ph-alert"><div class="pah">'+esc(P.ifUnlawful.headline)+'</div><div class="pab">'+P.ifUnlawful.body+'</div><div class="pao">Instead — your real options</div><ul>';
+      P.ifUnlawful.options.forEach(function(o){ h+='<li>'+o+'</li>'; });
+      h+='</ul></div>';
+    }
+    h+='<div class="phcol"><div class="phh"><span class="c" style="background:var(--accent)"></span>What you need in place</div><ul class="phlist">';
+    P.inPlace.forEach(function(x){ h+='<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><div>'+x+'</div></li>'; });
+    h+='</ul></div>';
+    h+='<div class="phcol"><div class="phh"><span class="c" style="background:var(--gold)"></span>What you need to do</div>';
+    if(P.ifUnlawful) h+='<div class="phnote">These steps only apply once you have a valid basis (see above) — otherwise the answer is simply “don’t carry it”.</div>';
+    h+='<ol class="phsteps">';
+    P.toDo.forEach(function(x){ h+='<li>'+x+'</li>'; });
+    h+='</ol></div>';
+    h+='</div>';
+  }
+  /* record + export */
+  h+='<div class="sect"><h3>Audit-ready control record</h3>';
+  h+='<div class="recmeta">'
+    +row('Reference',i.ref)+row('As-of',res.asOf+' (verify lists)')
+    +row('Exporter regime',esc(R.label))+row('Recipient',esc(recName))
+    +row('Verdict',VLABEL[v])+row('Mechanism',esc(mechLabel(i.mechanism)))
+    +row('Medium',mediumLabel(i))+row('Data categories',i.dataCats.length?i.dataCats.map(dcLabel).join(', '):'—')
+    +row('Sensitivity',sensLabel(i.sens))+'</div>';
+  h+='<div class="exports">'
+    +'<button class="xb prime" data-x="html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>Download record (HTML)</button>'
+    +'<button class="xb" data-x="json"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6z"/></svg>JSON</button>'
+    +'<button class="xb" data-x="copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>Copy summary</button>'
+    +'<button class="xb" data-x="print"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9V3h12v6"/><rect x="6" y="13" width="12" height="8"/><path d="M6 17H3v-5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5h-3"/></svg>Print / PDF</button>'
+    +'</div>';
+  h+='</div>';
+  /* provenance */
+  h+='<div class="prov"><h4>Provenance &amp; sources</h4>'
+    +'<p style="margin:0 0 8px"><span class="tag fact" style="min-width:0;display:inline-block">LEGAL BASIS</span> = adequacy status / statutory rule (fact, dated). '
+    +'<span class="tag assess" style="min-width:0;display:inline-block">ASSESSMENT</span> = reasoned inference (e.g. country risk). '
+    +'<span class="tag verify" style="min-width:0;display:inline-block">VERIFY</span> = confirm before relying.</p>'
+    +'<ul>';
+  res.sources.forEach(function(s){ h+='<li>'+s+'</li>'; });
+  h+='</ul><p style="margin-top:9px;color:var(--muted)">Frontier is decision-support, not legal advice. Confirm the current European Commission / FDPIC / ICO position and take qualified advice before transferring.</p></div>';
+  h+='</div>';
+
+  document.getElementById('placeholder').style.display='none';
+  var o=document.getElementById('out'); o.style.display='block'; o.innerHTML=h;
+  o.querySelectorAll('.xb').forEach(function(b){ b.addEventListener('click',function(){ doExport(b.getAttribute('data-x'),res); }); });
+  document.getElementById('result').scrollIntoView({behavior:'smooth',block:'start'});
+}
+var RATING=['Low','Guarded','Elevated','High'];
+function tagText(t){ return t==='fact'?'LEGAL BASIS':t==='assess'?'ASSESSMENT':t==='verify'?'VERIFY':'ACTION'; }
+function sgBlock(name,color,items){ if(!items||!items.length) return '';
+  var h='<div class="sg"><div class="sgt"><span class="c" style="background:'+color+'"></span>'+name+'</div><ul>';
+  items.forEach(function(x){ h+='<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><div>'+x+'</div></li>'; });
+  return h+'</ul></div>';
+}
+function row(k,v){ return '<div class="k">'+k+'</div><div class="v">'+v+'</div>'; }
+function dcLabel(id){ var r=id; DATACATS.forEach(function(d){ if(d[0]===id) r=plain(d[1]); }); return r; }
+function mechLabel(id){ var r=id; MECHS.forEach(function(m){ if(m[0]===id) r=plain(m[1]); }); return r; }
+function physFormLabel(id){ return ({paper:'paper files / records',id:'original ID documents / passports',device:'storage device or media',mixed:'mixed documents & devices'})[id]||id; }
+function mediumLabel(i){ return i.medium==='physical' ? ('Physical — '+physFormLabel(i.physForm)+(i.physOriginals?' (originals)':'')+(i.physHand?', hand-carried':'')) : 'Electronic / network'; }
+function sensLabel(s){ var a=[]; if(s.special)a.push('special-category'); if(s.criminal)a.push('criminal-offence'); if(s.children)a.push('children'); if(s.largeScale)a.push('large-scale'); return a.length?a.join(', '):'none flagged'; }
+
+/* ============================ EXPORT ============================ */
+function toast(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('on'); setTimeout(function(){ t.classList.remove('on'); },1900); }
+function download(name,mime,content){ try{ var b=new Blob([content],{type:mime}); var u=URL.createObjectURL(b); var a=document.createElement('a'); a.href=u; a.download=name; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(function(){ URL.revokeObjectURL(u); },1500); }catch(e){ toast('Export blocked by the browser.'); } }
+function summaryText(res){
+  var i=res.input,R=res.regime,L=[];
+  L.push('FRONTIER — cross-border data-transfer determination');
+  L.push('Reference: '+i.ref+'   As-of: '+res.asOf+' (verify current lists)');
+  L.push('');
+  L.push('Exporter regime : '+plain(R.label));
+  L.push('Recipient       : '+(res.country?plain(res.country[1]):'-'));
+  L.push('Data categories : '+(i.dataCats.length?i.dataCats.map(dcLabel).join(', '):'-'));
+  L.push('Sensitivity     : '+sensLabel(i.sens));
+  L.push('Purpose         : '+plainPurpose(i.purpose)+(i.purposeTxt?' — '+i.purposeTxt:''));
+  L.push('Mechanism       : '+plain(mechLabel(i.mechanism)));
+  L.push('Medium          : '+mediumLabel(i));
+  L.push('');
+  L.push('VERDICT: '+VLABEL[res.verdict].toUpperCase()+' — '+plain(res.headline));
+  L.push(strip(res.sub));
+  L.push('WHAT TO DO NOW: '+TODO_NOW[res.verdict].t+' '+strip(TODO_NOW[res.verdict].s));
+  L.push('');
+  L.push('Reasons:');
+  res.reasons.forEach(function(r){ L.push(' ['+tagText(r.tag)+'] '+strip(r.text)); });
+  if(res.tia){ L.push(''); L.push('TIA (assessment, verify) — risk band '+res.tia.band+' (composite '+res.tia.score+'):');
+    res.tia.factors.forEach(function(f){ L.push('  - '+plain(f.label)+': '+RATING[f.rating]); });
+    if(res.tia.law) L.push('  Destination law: '+strip(res.tia.law)); }
+  if(res.safeguards){ L.push(''); L.push('Safeguards — '+strip(res.safeguards.head));
+    [['Technical',res.safeguards.technical],['Contractual',res.safeguards.contractual],['Organisational',res.safeguards.organisational]].forEach(function(g){
+      L.push(' '+g[0]+':'); g[1].forEach(function(x){ L.push('   - '+strip(x)); }); }); }
+  if(res.fadp&&res.fadp.length){ L.push(''); L.push('Swiss FADP / UK interplay:'); res.fadp.forEach(function(x){ L.push('   - '+strip(x)); }); }
+  if(res.physical){ var P=res.physical; L.push(''); L.push('CARRYING PERSONAL DATA ACROSS THE BORDER (physical transfer):'); L.push('  '+strip(P.lead));
+    if(P.ifUnlawful){ L.push('  IF UNLAWFUL: '+strip(P.ifUnlawful.headline)); L.push('    '+strip(P.ifUnlawful.body)); L.push('    Instead:'); P.ifUnlawful.options.forEach(function(o){ L.push('      - '+strip(o)); }); }
+    L.push('  What you need in place:'); P.inPlace.forEach(function(x){ L.push('    - '+strip(x)); });
+    L.push('  What you need to do:'); P.toDo.forEach(function(x,idx){ L.push('    '+(idx+1)+'. '+strip(x)); }); }
+  L.push(''); L.push('Provenance: LEGAL BASIS = fact (dated); ASSESSMENT = reasoned inference; VERIFY = confirm before relying.');
+  L.push('Decision-support, not legal advice. Confirm current EC/FDPIC/ICO positions.');
+  L.push('Generated by Frontier (offline) — built by Christopher Farmer.');
+  return L.join('\n');
+}
+function strip(s){ return plain(String(s).replace(/<[^>]+>/g,'')); }
+function recordHTML(res){
+  var css='body{font-family:Georgia,serif;max-width:820px;margin:32px auto;padding:0 22px;color:#111;line-height:1.5}'
+    +'h1{font-size:22px;margin:0 0 2px}h2{font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:#0b655b;border-bottom:1px solid #ccc;padding-bottom:4px;margin:26px 0 10px}'
+    +'.meta{font-family:monospace;font-size:12px;color:#444}.badge{display:inline-block;padding:4px 12px;border-radius:6px;font-weight:bold;font-size:13px}'
+    +'table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}td,th{border:1px solid #ccc;padding:6px 8px;text-align:left}'
+    +'ul{margin:6px 0 6px 18px;padding:0;font-size:13px}li{margin:4px 0}.tag{font-family:monospace;font-size:10px;padding:1px 5px;border:1px solid #999;border-radius:4px;margin-right:6px}'
+    +'.small{font-size:11.5px;color:#555}.dr{font-size:13px;margin:8px 0}';
+  var i=res.input,R=res.regime,v=res.verdict;
+  var vc={lawful:'#0e7a52',safeguards:'#9a6a12',unlawful:'#b23b31',manual:'#555'}[v];
+  var h='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Frontier record '+i.ref+'</title><style>'+css+'</style></head><body>';
+  h+='<h1>Frontier — cross-border data-transfer determination</h1>';
+  h+='<div class="meta">Reference '+i.ref+' &nbsp;·&nbsp; As-of '+res.asOf+' (verify current lists) &nbsp;·&nbsp; Generated '+new Date().toISOString()+'</div>';
+  h+='<h2>Transfer</h2><table>'
+    +tr('Exporter regime',plain(R.label))+tr('Recipient',res.country?plain(res.country[1]):'-')
+    +tr('Data categories',i.dataCats.length?i.dataCats.map(dcLabel).join(', '):'-')
+    +tr('Sensitivity',sensLabel(i.sens))
+    +tr('Purpose',plainPurpose(i.purpose)+(i.purposeTxt?' — '+esc(i.purposeTxt):''))
+    +tr('Mechanism in place',plain(mechLabel(i.mechanism)))+tr('Medium',mediumLabel(i))+'</table>';
+  h+='<h2>Determination</h2><p><span class="badge" style="background:'+vc+'22;color:'+vc+'">'+VLABEL[v].toUpperCase()+'</span> &nbsp; <b>'+strip(res.headline)+'</b><br><span class="small">'+strip(res.sub)+'</span></p>';
+  h+='<p class="dr"><b>What to do now:</b> '+strip(TODO_NOW[v].t)+' '+strip(TODO_NOW[v].s)+'</p>';
+  res.reasons.forEach(function(r){ h+='<div class="dr"><span class="tag">'+tagText(r.tag)+'</span>'+r.text+'</div>'; });
+  if(res.tia){ h+='<h2>Transfer Impact Assessment (assessment — verify)</h2><table><tr><th>Factor</th><th>Rating</th><th>Basis</th></tr>';
+    res.tia.factors.forEach(function(f){ h+='<tr><td>'+plain(f.label)+'</td><td>'+RATING[f.rating]+'</td><td>'+f.desc+'</td></tr>'; });
+    h+='</table><p class="small">Risk band <b>'+res.tia.band+'</b> — composite '+res.tia.score+' (destination '+res.tia.base+' + sensitivity '+res.tia.uplift+'). Ratings are reasoned assessment, not legal fact.'+(res.tia.law?' Destination law: '+res.tia.law:'')+'</p>'; }
+  if(res.safeguards){ h+='<h2>Required supplementary safeguards</h2><p class="small">'+strip(res.safeguards.head)+'</p>';
+    [['Technical',res.safeguards.technical],['Contractual',res.safeguards.contractual],['Organisational',res.safeguards.organisational]].forEach(function(g){
+      h+='<b style="font-size:13px">'+g[0]+'</b><ul>'; g[1].forEach(function(x){ h+='<li>'+x+'</li>'; }); h+='</ul>'; }); }
+  if(res.fadp&&res.fadp.length){ h+='<h2>Swiss FADP / UK interplay</h2><ul>'; res.fadp.forEach(function(x){ h+='<li>'+x+'</li>'; }); h+='</ul>'; }
+  if(res.physical){ var P=res.physical; h+='<h2>Carrying personal data across the border (physical transfer)</h2>';
+    h+='<p class="dr">'+P.lead+'</p>';
+    if(P.ifUnlawful){ h+='<p class="dr" style="color:#b23b31"><b>'+strip(P.ifUnlawful.headline)+'</b><br>'+P.ifUnlawful.body+'</p><p class="small"><b>Instead — your real options:</b></p><ul>'; P.ifUnlawful.options.forEach(function(o){ h+='<li>'+o+'</li>'; }); h+='</ul>'; }
+    h+='<b style="font-size:13px">What you need in place</b><ul>'; P.inPlace.forEach(function(x){ h+='<li>'+x+'</li>'; }); h+='</ul>';
+    h+='<b style="font-size:13px">What you need to do</b><ol>'; P.toDo.forEach(function(x){ h+='<li>'+x+'</li>'; }); h+='</ol>'; }
+  h+='<h2>Provenance &amp; sources</h2><ul>'; res.sources.forEach(function(s){ h+='<li>'+s+'</li>'; }); h+='</ul>';
+  h+='<p class="small"><b>Decision-support, not legal advice.</b> Adequacy lists, the Data Privacy Framework and CJEU case law change; confirm the current European Commission, FDPIC and ICO positions and take qualified advice before transferring. Generated offline by Frontier — built by Christopher Farmer.</p>';
+  h+='</body></html>'; return h;
+}
+function tr(k,v){ return '<tr><td style="width:170px;color:#555">'+k+'</td><td>'+v+'</td></tr>'; }
+function doExport(kind,res){
+  var i=res.input;
+  if(kind==='html'){ download('frontier-'+i.ref+'.html','text/html;charset=utf-8',recordHTML(res)); toast('Record downloaded.'); }
+  else if(kind==='json'){ var clean={reference:i.ref,asOf:res.asOf,generated:i.ts,exporterRegime:res.regime.label,recipient:res.country?plain(res.country[1]):null,dataCategories:i.dataCats,sensitivity:i.sens,purpose:plainPurpose(i.purpose),mechanism:plain(mechLabel(i.mechanism)),medium:mediumLabel(i),verdict:res.verdict,headline:strip(res.headline),whatToDoNow:strip(TODO_NOW[res.verdict].t)+' '+strip(TODO_NOW[res.verdict].s),reasons:res.reasons.map(function(r){return {type:tagText(r.tag),text:strip(r.text)};}),tia:res.tia?{band:res.tia.band,composite:res.tia.score,factors:res.tia.factors.map(function(f){return {factor:plain(f.label),rating:RATING[f.rating]};}),note:'assessment — verify'}:null,safeguards:res.safeguards?{note:strip(res.safeguards.head),technical:res.safeguards.technical.map(strip),contractual:res.safeguards.contractual.map(strip),organisational:res.safeguards.organisational.map(strip)}:null,interplay:res.fadp.map(strip),physical:res.physical?{lead:strip(res.physical.lead),ifUnlawful:res.physical.ifUnlawful?{headline:strip(res.physical.ifUnlawful.headline),body:strip(res.physical.ifUnlawful.body),alternatives:res.physical.ifUnlawful.options.map(strip)}:null,whatYouNeedInPlace:res.physical.inPlace.map(strip),whatYouNeedToDo:res.physical.toDo.map(strip)}:null,disclaimer:'Decision-support, not legal advice. Verify current EC/FDPIC/ICO lists.'};
+    download('frontier-'+i.ref+'.json','application/json',JSON.stringify(clean,null,2)); toast('JSON downloaded.'); }
+  else if(kind==='copy'){ var txt=summaryText(res); if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){toast('Summary copied.');},function(){ fallbackCopy(txt); }); } else fallbackCopy(txt); }
+  else if(kind==='print'){ window.print(); }
+}
+function fallbackCopy(txt){ try{ var ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); toast('Summary copied.'); }catch(e){ toast('Copy not available.'); } }
+
+/* ============================ PRESETS + RUN ============================ */
+function setChecks(sel,vals){ document.querySelectorAll(sel).forEach(function(x){ x.checked=vals.indexOf(x.value)>=0; }); }
+function setExporter(v){ expVal=v; document.querySelectorAll('#exporter button').forEach(function(b){ b.classList.toggle('on',b.getAttribute('data-v')===v); }); }
+var PRESETS={
+  uk:{ exp:'GDPR', rec:'gb', dc:['contact','hr'], sens:[], purpose:'hr', mech:'adequacy', dpf:false, occ:false, fadp:false },
+  ussaas:{ exp:'GDPR', rec:'us', dc:['contact','financial','behaviour'], sens:['special'], purpose:'support', mech:'scc', dpf:false, occ:false, fadp:false },
+  chindia:{ exp:'FADP', rec:'in', dc:['contact','financial'], sens:[], purpose:'outsource', mech:'scc', dpf:false, occ:false, fadp:true },
+  ukchina:{ exp:'UKGDPR', rec:'cn', dc:['contact','behaviour','location'], sens:[], purpose:'analytics', mech:'idta', dpf:false, occ:false, fadp:false },
+  physid:{ exp:'GDPR', rec:'us', dc:['govid','contact'], sens:[], purpose:'oneoff', mech:'none', dpf:false, occ:true, fadp:false, medium:'physical', physForm:'id', physOriginals:true, physHand:true }
+};
+document.getElementById('presets').addEventListener('click',function(e){
+  var b=e.target.closest('.preset'); if(!b) return; var p=PRESETS[b.getAttribute('data-preset')]; if(!p) return;
+  setExporter(p.exp); recSel.value=p.rec; syncConds();
+  setChecks('.dc',p.dc); setChecks('.sens',p.sens);
+  document.getElementById('purpose').value=p.purpose; document.getElementById('purposeTxt').value='';
+  document.getElementById('mechanism').value=p.mech;
+  document.getElementById('dpfChk').checked=!!p.dpf; document.getElementById('pipedaChk').checked=false;
+  document.getElementById('occChk').checked=!!p.occ; document.getElementById('fadpChk').checked=!!p.fadp;
+  setMedium(p.medium||'electronic');
+  document.getElementById('physForm').value=p.physForm||'paper';
+  document.getElementById('physOriginals').checked=!!p.physOriginals; document.getElementById('physHand').checked=!!p.physHand;
+  run();
+});
+function run(){ var input=collectInput(); var res=assess(input); render(res); }
+document.getElementById('assess').addEventListener('click',run);
+})();
+</script>
+</body>
+</html>

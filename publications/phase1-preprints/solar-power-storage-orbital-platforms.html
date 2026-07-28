@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f17'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='27' font-weight='700' fill='%23d4b24c' text-anchor='middle'%3ECF%3C/text%3E%3C/svg%3E">
+<title>Solar Generation and High-Density Energy Storage for Large Self-Powered Orbital Platforms</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{
+    --bg:#0b0f17; --bg2:#0e1420; --surface:#131b2a; --surface2:#182133;
+    --ink:#e9eef7; --ink2:#aab7cc; --muted:#7d8ba3; --line:#233145; --line2:#2c3d54;
+    --accent:#43b3a6; --accent-ink:#84d6ca; --gold:#d4b24c; --gold-soft:#e6cf8f;
+    --good:#43c59e; --warn:#e0a13a; --shadow:0 18px 50px -20px rgba(0,0,0,.7);
+    --radius:14px; --measure:70ch;
+    --font-display:'Zilla Slab',Georgia,'Times New Roman',serif;
+    --font-body:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --font-mono:'IBM Plex Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
+  }
+  html[data-theme="light"]{
+    --bg:#f4f1ec; --bg2:#ebe6dd; --surface:#ffffff; --surface2:#faf7f2;
+    --ink:#221e18; --ink2:#4c473e; --muted:#675f54; --line:#e7e1d6; --line2:#d9d2c5;
+    --accent:#0d5f57; --accent-ink:#0a463f; --gold:#836819; --gold-soft:#6f5714; --good:#0e7a52;
+    --shadow:0 18px 44px -24px rgba(15,30,60,.35);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:radial-gradient(1100px 700px at 82% -8%,rgba(67,179,166,.10),transparent 60%),var(--bg);
+    color:var(--ink);font-family:var(--font-body);line-height:1.72;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  a{color:var(--accent-ink);text-decoration:none}
+  a:hover{text-decoration:underline}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+  ::selection{background:color-mix(in oklab,var(--accent) 32%,transparent)}
+
+  /* Top bar */
+  .top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    padding:11px clamp(16px,4vw,34px);background:color-mix(in oklab,var(--bg),transparent 8%);
+    backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:11px;color:var(--ink);min-width:0}
+  .crest{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;flex:0 0 auto;
+    background:linear-gradient(145deg,#0e7b6f,#0b655b);color:#fff;font-family:var(--font-display);font-weight:700;font-size:14px;box-shadow:var(--shadow)}
+  .brand .nm{font-family:var(--font-display);font-weight:700;font-size:14.5px;line-height:1.05}
+  .brand .rl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+  .topacts{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:8px 13px;border-radius:10px;font-weight:600;font-size:13px;
+    border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer;transition:.16s;white-space:nowrap;font-family:var(--font-body)}
+  .btn:hover{border-color:var(--accent);transform:translateY(-1px);text-decoration:none}
+  .btn svg{width:16px;height:16px}
+  .btn.icon{padding:8px;width:36px}
+
+  /* Article */
+  main.wrap{max-width:calc(var(--measure) + 8rem);margin:0 auto;padding:clamp(26px,5vw,52px) clamp(18px,5vw,40px) 40px}
+  article.paper{max-width:var(--measure);margin:0 auto;font-size:1.05rem}
+  article.paper > *{max-width:var(--measure)}
+  .paper h1,.paper h2,.paper h3,.paper h4,.paper h5{font-family:var(--font-display);font-weight:600;line-height:1.18;color:var(--ink);letter-spacing:-.005em}
+  .paper h1{font-size:clamp(27px,4.4vw,40px);line-height:1.1;margin:0 0 .5rem;letter-spacing:-.015em}
+  .paper h2{font-size:clamp(20px,2.9vw,27px);margin:2.4rem 0 .9rem;padding-bottom:.35rem;border-bottom:1px solid var(--line)}
+  .paper h3{font-size:clamp(17px,2.2vw,21px);margin:1.9rem 0 .7rem}
+  .paper h4{font-size:16px;margin:1.5rem 0 .5rem;color:var(--ink2)}
+  .paper p{margin:0 0 1.05rem;overflow-wrap:anywhere;word-break:break-word}
+  .paper li{overflow-wrap:anywhere;word-break:break-word}
+  .paper strong{color:var(--ink);font-weight:700}
+  .paper em{color:inherit}
+  /* Byline: first bold paragraph right after the title */
+  .paper h1 + p{font-size:1.06rem;color:var(--ink);margin-bottom:.4rem}
+  .paper h1 + p + p em{color:var(--muted);font-size:.92rem}
+  .paper ul,.paper ol{margin:0 0 1.1rem;padding-left:1.5rem}
+  .paper li{margin:.3rem 0}
+  .paper li::marker{color:var(--accent)}
+  .paper a{color:var(--accent-ink);border-bottom:1px solid color-mix(in oklab,var(--accent) 35%,transparent)}
+  .paper a:hover{border-bottom-color:var(--accent);text-decoration:none}
+  .paper hr{border:none;border-top:1px solid var(--line);margin:2rem 0}
+
+  /* Blockquote (scope notes) */
+  .paper blockquote{margin:1.4rem 0;padding:1rem 1.2rem;border:1px solid var(--line2);border-left:3px solid var(--gold);
+    border-radius:12px;background:color-mix(in oklab,var(--gold) 7%,var(--surface));color:var(--ink2)}
+  .paper blockquote p{margin:0 0 .6rem}
+  .paper blockquote p:last-child{margin-bottom:0}
+  .paper blockquote strong{color:var(--ink)}
+
+  /* Tables */
+  .paper .tablewrap{overflow-x:auto;margin:1.3rem 0;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+  .paper table{border-collapse:collapse;width:100%;font-size:.95rem;line-height:1.5}
+  .paper th,.paper td{text-align:left;padding:.6rem .85rem;border-bottom:1px solid var(--line);vertical-align:top}
+  .paper thead th{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--accent-ink);background:color-mix(in oklab,var(--accent) 8%,var(--surface2));border-bottom:1px solid var(--line2)}
+  .paper tbody tr:last-child td{border-bottom:none}
+  .paper tbody tr:nth-child(even){background:color-mix(in oklab,var(--ink) 3%,transparent)}
+
+  /* Code */
+  .paper code{font-family:var(--font-mono);font-size:.88em;background:color-mix(in oklab,var(--accent) 10%,var(--surface));
+    border:1px solid var(--line);border-radius:5px;padding:.08em .38em;color:var(--accent-ink)}
+  .paper pre{background:var(--bg2);border:1px solid var(--line2);border-radius:12px;padding:1rem 1.15rem;overflow-x:auto;
+    margin:1.3rem 0;line-height:1.55}
+  .paper pre code{background:none;border:none;padding:0;color:var(--ink2);font-size:.86rem}
+
+  /* Mermaid figures */
+  .diagram-figure{margin:1.6rem 0;background:#f7f8fb;border:1px solid var(--line2);border-radius:14px;padding:1.1rem 1rem .6rem;
+    box-shadow:var(--shadow);overflow-x:auto}
+  html[data-theme="light"] .diagram-figure{background:#fbfaf7}
+  .diagram-figure pre.mermaid{background:none;border:none;box-shadow:none;padding:0;margin:0;text-align:center;
+    color:#1c2530;font-family:var(--font-mono);font-size:.82rem;line-height:1.5;white-space:pre-wrap}
+  .diagram-figure svg{max-width:100%;height:auto;display:block;margin:0 auto}
+  .diagram-figure figcaption{margin-top:.7rem;text-align:center;font-family:var(--font-mono);font-size:.7rem;
+    letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+
+  /* Footnotes */
+  .paper .footnote{margin-top:2.6rem;padding-top:1rem;border-top:1px solid var(--line);font-size:.9rem;color:var(--ink2)}
+  .paper .footnote hr{display:none}
+  .paper .footnote ol{padding-left:1.3rem}
+  .paper .footnote li{margin:.45rem 0}
+  .paper .footnote-backref{border-bottom:none;margin-left:.3rem}
+  .paper sup a.footnote-ref{border-bottom:none;color:var(--accent-ink);font-weight:600;padding:0 .05em}
+
+  /* TOC (if [TOC] used) */
+  .paper .toc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:.9rem 1.2rem;margin:1.4rem 0;font-size:.95rem}
+  .paper .toc > ul{margin:0}
+
+  footer.paperfoot{max-width:var(--measure);margin:3rem auto 0;padding-top:1.3rem;border-top:1px solid var(--line);
+    color:var(--muted);font-size:.82rem;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}
+  footer.paperfoot a{color:var(--ink2)}
+  footer.paperfoot .mono{font-family:var(--font-mono)}
+
+  .pubnav{display:flex;flex-wrap:wrap;gap:2px 16px;align-items:center;padding:9px clamp(18px,4vw,40px);
+    background:color-mix(in oklab,var(--bg2),transparent 20%);border-bottom:1px solid var(--line);
+    font-family:var(--font-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase}
+  .pubnav a{color:var(--ink2);padding:4px 0;border-bottom:2px solid transparent;text-decoration:none}
+  .pubnav a:hover{color:var(--ink)}
+  .pubnav a[aria-current="page"]{color:var(--accent-ink);border-bottom-color:var(--accent)}
+
+  .cfside{display:none}
+  @media(min-width:1080px){
+    body{padding-left:280px}
+    .pubnav{display:none}
+    .cfside{position:fixed;left:0;top:0;bottom:0;width:280px;z-index:30;display:flex;flex-direction:column;gap:18px;
+      padding:22px 18px;background:var(--bg2);border-right:1px solid var(--line);overflow-y:auto}
+  }
+  .cfside .cfbrand{display:flex;align-items:center;gap:11px}
+  .cfside .cfbrand img{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:0 0 auto}
+  .cfside .cfbrand .nm{font-family:var(--font-display);font-weight:700;font-size:15.5px;color:var(--ink);line-height:1.1}
+  .cfside .cfbrand .rl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px;line-height:1.5}
+  .cfside nav{display:flex;flex-direction:column;gap:4px}
+  .cfside nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;color:var(--ink2);font-size:14px;font-weight:500;border:1px solid transparent;text-decoration:none}
+  .cfside nav a svg{width:18px;height:18px;flex:0 0 auto}
+  .cfside nav a:hover{background:var(--surface);color:var(--ink)}
+  .cfside nav a.on{background:var(--surface);border-color:var(--line);color:var(--ink)}
+  .cfside .cffoot{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+  .cfside .cfavail{font-size:12px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+  .cfside .cfdot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 10px var(--good);flex:0 0 auto;margin-top:4px}
+  .cfside .cfbtns{display:flex;gap:8px}
+  .cfside .cfcv{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:12px;font-weight:600;font-size:13px;
+    background:var(--accent);border:1px solid var(--accent);color:#fff;text-decoration:none}
+  .cfside .cfcv:hover{filter:brightness(1.08)}
+  .cfside .cftheme{width:40px;display:inline-flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer}
+  .cfside .cftheme svg{width:16px;height:16px}
+</style>
+</head>
+<body>
+  <aside class="cfside" aria-label="Site navigation">
+    <div class="cfbrand">
+      <img src="../../assets/img/portrait-2026.png" alt="Christopher Farmer">
+      <div><div class="nm">Christopher Farmer</div><div class="rl">Legal, Risk &amp; Technology Transformation</div></div>
+    </div>
+    <nav>
+      <a href="../../index.html#overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg><span>Overview</span></a>
+      <a href="../../index.html#projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Projects</span></a>
+      <a href="../../case-studies/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 5h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h7z"/></svg><span>Case studies</span></a>
+      <a href="../../index.html#experience"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Experience</span></a>
+      <a href="../../index.html#warroom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>War Room</span></a>
+      <a href="../../index.html#expertise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.1L12 17l-5.5 3.3 1-6.1L3 8.9 9 8z"/></svg><span>Expertise</span></a>
+      <a href="../../index.html#credentials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg><span>Credentials</span></a>
+      <a href="../../publications/index.html" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg><span>Publications</span></a>
+      <a href="../../index.html#contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M4 7l8 6 8-6"/></svg><span>Contact</span></a>
+    </nav>
+    <div class="cffoot">
+      <div class="cfavail"><span class="cfdot"></span> Open to legal, risk &amp; transformation roles &mdash; Geneva</div>
+      <div class="cfbtns">
+        <a class="cfcv" href="../../docs/CV-Christopher-Farmer-2026-08.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg> CV</a>
+        <button class="cftheme" onclick="document.getElementById('theme')?document.getElementById('theme').click():(function(){var h=document.documentElement,n=h.getAttribute('data-theme')==='light'?'dark':'light';h.setAttribute('data-theme',n);try{localStorage.setItem('cf-theme',n)}catch(e){}})()" title="Toggle theme" aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="top">
+    <a class="brand" href="../index.html" aria-label="Back to Publications">
+      <div class="crest">CF</div>
+      <div><div class="nm">Christopher Farmer</div><div class="rl">Publications</div></div>
+    </a>
+    <div class="topacts">
+      <a class="btn" href="../index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M15 18l-6-6 6-6"/></svg>
+        Back to Publications
+      </a>
+      <button class="btn icon" id="theme" title="Toggle light / dark" aria-label="Toggle light or dark theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </div>
+  </div>
+<nav class="pubnav" aria-label="Site">
+  <a href="../../index.html#overview">Overview</a>
+  <a href="../../index.html#projects">Projects</a>
+  <a href="../../case-studies/index.html">Case studies</a>
+  <a href="../../index.html#experience">Experience</a>
+  <a href="../../index.html#warroom">War Room</a>
+  <a href="../../index.html#expertise">Expertise</a>
+  <a href="../../index.html#credentials">Credentials</a>
+  <a href="../index.html" aria-current="page">Publications</a>
+  <a href="../../index.html#contact">Contact</a>
+</nav>
+
+  <main class="wrap">
+    <article class="paper">
+<h1 id="solar-generation-and-high-density-energy-storage-for-large-self-powered-orbital-platforms">Solar Generation and High-Density Energy Storage for Large Self-Powered Orbital Platforms</h1>
+<p><strong>Christopher I. V. Farmer, LL.M. (University of Worcester) · Independent Researcher · civfarmer@gmail.com</strong></p>
+<p><em>Preprint — submitted; pending peer review. Version 1.0, July 2026.</em></p>
+<hr>
+<h2 id="abstract">Abstract</h2>
+<p>A large orbital platform that draws all of its energy from sunlight is constrained not by the abundance of the solar resource but by three coupled inefficiencies: the fraction of the incident 1361 W m⁻² that a photovoltaic converter can turn into bus power, the round-trip penalty paid whenever energy must be banked across an eclipse and released as an intermittent load, and the mass of the radiators required to reject the heat that those inefficiencies generate. This paper develops the physics and first-order engineering of such a platform in the hundreds-of-kilowatt to megawatt generation class, treating generation, storage, load-levelling and thermal rejection as a single closed system rather than as independent subsystems. Using the AM0 solar constant, current multijunction cell efficiencies, and a transparent generation cascade, we show that a realistic end-of-life areal power density is of order 250 W m⁻², so that megawatt-class generation demands arrays of several thousand square metres. We derive the eclipse-fraction and beta-angle geometry that fixes the generation–storage duty cycle, and we compare flywheel, superconducting-magnetic (SMES) and supercapacitor/electrochemical storage rigorously on specific energy, specific power, round-trip efficiency, self-discharge and cycle life. A central and non-obvious conclusion is that no single storage technology is simultaneously a good bulk energy store and a good high-power buffer, motivating a hybrid architecture in which an electrochemical or composite-flywheel store banks the bulk orbital energy while a magnetic or capacitive buffer absorbs the high-power transients of a large intermittent generic load (scientific instrument, electric-propulsion, or communications-transmitter classes). Every physical constant and efficiency is cited to a current primary source; all system-level numbers are explicitly labelled as illustrative calculations built on those cited inputs. The analysis is deliberately confined to general large-platform power engineering and contains no weapon, launcher, or projectile content of any kind.</p>
+<p><strong>Keywords:</strong> space solar power; photovoltaics; multijunction solar cells; energy storage; flywheel; superconducting magnetic energy storage; supercapacitor; lithium-ion; eclipse fraction; beta angle; round-trip efficiency; spacecraft thermal control; radiator sizing; orbital platform</p>
+<hr>
+<h2 id="nomenclature">Nomenclature</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Symbol</th>
+<th>Meaning</th>
+<th>Units</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S</td>
+<td>Total solar irradiance (solar constant) at 1 au</td>
+<td>W m⁻²</td>
+</tr>
+<tr>
+<td>σ</td>
+<td>Stefan–Boltzmann constant</td>
+<td>W m⁻² K⁻⁴</td>
+</tr>
+<tr>
+<td>η_cell</td>
+<td>Photovoltaic cell conversion efficiency (AM0)</td>
+<td>–</td>
+</tr>
+<tr>
+<td>F_pack</td>
+<td>Cell-to-array packing factor</td>
+<td>–</td>
+</tr>
+<tr>
+<td>F_temp</td>
+<td>Operating-temperature derate</td>
+<td>–</td>
+</tr>
+<tr>
+<td>F_asm</td>
+<td>Assembly/optical/wiring derate</td>
+<td>–</td>
+</tr>
+<tr>
+<td>L_d</td>
+<td>Lifetime (degradation) factor, EOL/BOL</td>
+<td>–</td>
+</tr>
+<tr>
+<td>p_A</td>
+<td>Areal electrical power density of the array</td>
+<td>W m⁻²</td>
+</tr>
+<tr>
+<td>A_sa</td>
+<td>Array area</td>
+<td>m²</td>
+</tr>
+<tr>
+<td>α_sa</td>
+<td>Array specific power (system level)</td>
+<td>W kg⁻¹</td>
+</tr>
+<tr>
+<td>P_sa</td>
+<td>Required array output power (daylight average)</td>
+<td>W</td>
+</tr>
+<tr>
+<td>T, T_d, T_e</td>
+<td>Orbit period, sunlit (day) and eclipse durations</td>
+<td>s</td>
+</tr>
+<tr>
+<td>f_E</td>
+<td>Eclipse fraction of the orbit</td>
+<td>–</td>
+</tr>
+<tr>
+<td>β, β*</td>
+<td>Orbit beta angle and critical (no-eclipse) beta angle</td>
+<td>deg</td>
+</tr>
+<tr>
+<td>h, R_E</td>
+<td>Orbit altitude, Earth mean radius</td>
+<td>km</td>
+</tr>
+<tr>
+<td>μ</td>
+<td>Earth gravitational parameter</td>
+<td>km³ s⁻²</td>
+</tr>
+<tr>
+<td>X_d, X_e</td>
+<td>Direct-path and stored-path (battery) transfer efficiencies</td>
+<td>–</td>
+</tr>
+<tr>
+<td>η_rt</td>
+<td>Storage round-trip efficiency</td>
+<td>–</td>
+</tr>
+<tr>
+<td>e_s, p_s</td>
+<td>Storage specific energy, specific power</td>
+<td>Wh kg⁻¹, W kg⁻¹</td>
+</tr>
+<tr>
+<td>u</td>
+<td>Usable fraction of rated storage energy</td>
+<td>–</td>
+</tr>
+<tr>
+<td>ε</td>
+<td>Radiator emissivity</td>
+<td>–</td>
+</tr>
+<tr>
+<td>T_r, T_sink</td>
+<td>Radiator and effective environmental sink temperature</td>
+<td>K</td>
+</tr>
+<tr>
+<td>φ_r</td>
+<td>Radiator net heat-rejection flux</td>
+<td>W m⁻²</td>
+</tr>
+<tr>
+<td>Q</td>
+<td>Waste-heat load to be rejected</td>
+<td>W</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h2 id="1-introduction">1. Introduction</h2>
+<p>The idea of an orbital platform powered entirely by sunlight is old and, at the level of energy availability, uncontroversial: above the atmosphere the Sun delivers a nearly constant 1361 W m⁻² [1,2], unattenuated by weather or diurnal loss except for the periodic shadow of the Earth. What makes the <em>large</em> self-powered platform a genuine engineering problem is not the supply of photons but the compounding of inefficiencies between the photon and the delivered load, and the mass those inefficiencies exact. Every watt that a converter fails to capture, every joule lost in banking energy across an eclipse, and every watt of heat that must be radiated away in vacuum translates directly into collector area, storage mass, or radiator area — and mass, in orbit, is the currency in which all architectures are ultimately priced.</p>
+<p>This paper treats the powering of a large orbital platform as a single closed thermodynamic and mass-budget problem rather than as four loosely-coupled subsystems. We focus on platforms in the hundreds-of-kilowatt to megawatt generation class — roughly five to ten times the ~240 kW peak generation of the assembled International Space Station (ISS) [3,4] — because it is at this scale that storage mass, round-trip efficiency and heat rejection stop being second-order corrections and begin to dominate the design. The emphasis throughout is on <strong>energy efficiency</strong> (how much of the intercepted sunlight actually reaches a useful load, and where the losses go) and on <strong>high-density storage</strong> (how the platform banks solar energy over an orbit and delivers it, when required, as a large intermittent load).</p>
+<p>We are careful about scope. The "large intermittent load" that motivates high-density storage is treated entirely generically: it stands for any on-platform utilisation that draws far more power for short intervals than the orbit-average generation — high-power scientific instrumentation (radar, lidar, particle accelerators for materials science), electric-propulsion manoeuvres, high-rate data processing, or high-power communications transmitters. Nothing in this analysis concerns, implies, or is specialised to any weapon, launcher, or projectile system; the storage and load-levelling mathematics below is the same mathematics used to size a battery for a science payload, and it is presented as such.</p>
+<p>The contributions are: (i) a transparent, fully-cited <em>generation cascade</em> that reduces the solar constant and current cell efficiencies to a defensible end-of-life areal power density (§2); (ii) an explicit treatment of the eclipse-fraction and beta-angle geometry that sets the generation–storage duty cycle, with worked numbers for a reference low-Earth orbit (§3); (iii) a rigorous, side-by-side comparison of flywheel, SMES and supercapacitor/electrochemical storage on the figures of merit that actually matter for a banked-energy platform, leading to the bulk-versus-buffer dichotomy (§4); (iv) a charge/discharge and load-levelling analysis that carries the round-trip and thermal penalties explicitly (§5); (v) a Stefan–Boltzmann radiator-sizing treatment that closes the loop by showing how storage and conversion inefficiency drive the thermal budget (§6); and (vi) an illustrative end-to-end mass budget for a reference megawatt-class platform, with sensitivity analysis (§7). All numbers derived from these inputs are explicitly labelled illustrative; all physical constants and component efficiencies are cited to primary or authoritative sources.</p>
+<hr>
+<h2 id="2-the-orbital-solar-resource-and-photovoltaic-generation">2. The orbital solar resource and photovoltaic generation</h2>
+<h3 id="21-the-solar-constant-and-the-am0-spectrum">2.1 The solar constant and the AM0 spectrum</h3>
+<p>The reference input is the total solar irradiance (TSI), the total electromagnetic power per unit area incident at 1 astronomical unit on a surface normal to the Sun. The modern SI-traceable value, established by the Total Irradiance Monitor on NASA's SORCE mission together with ground radiometric calibration, is <strong>1360.8 ± 0.5 W m⁻²</strong> at the 2008 solar minimum [1] — materially lower than the 1365.4 W m⁻² "canonical" value carried in older texts, the discrepancy being traced to scattered-light errors in the earlier generation of radiometers. The International Astronomical Union subsequently adopted a <strong>nominal TSI of 1361 W m⁻²</strong> as an exact conversion constant for astronomy (IAU 2015 Resolution B3) [5], and we use S = 1361 W m⁻² throughout, treating it as a fixed design input.</p>
+<p>Two second-order facts matter for a long-lived platform. First, TSI varies over the ~11-year solar cycle by roughly ±0.9 W m⁻² (of order ±0.05–0.1 %) [1,2], negligible for sizing. Second, careful reconstruction across the satellite era shows a small secular trend of about −0.15 W m⁻² per decade [6]; over a fifteen-year platform life this is ~0.2 W m⁻², again negligible against the derates below. The design driver is therefore not TSI variability but the <em>spectrum</em>: outside the atmosphere the platform sees the Air Mass Zero (AM0) spectrum, not the terrestrial AM1.5, so all cell efficiencies must be quoted at AM0 [7]. AM0 carries relatively more ultraviolet and, being unfiltered, a slightly different useful-photon distribution than the spectra under which terrestrial record cells are certified — a point that separates laboratory records from flight hardware in §2.2.</p>
+<h3 id="22-photovoltaic-conversion-what-a-cell-actually-delivers">2.2 Photovoltaic conversion: what a cell actually delivers</h3>
+<p>Single-junction cells are limited by the Shockley–Queisser detailed-balance argument to roughly a third of the incident power; the route past that limit, and the one universally used in space, is the <strong>multijunction III–V cell</strong>, which stacks sub-cells of decreasing bandgap so that each converts a different slice of the spectrum near its own thermodynamic optimum. The efficiency ladder must be read carefully, because record cells and flight cells are different animals:</p>
+<ul>
+<li><strong>Laboratory concentrator records.</strong> The Fraunhofer Institute for Solar Energy Systems holds the highest measured cell efficiency, <strong>47.6 %</strong> for a four-junction III–V cell at 665× concentration [8]. These are certified under a concentrated terrestrial spectrum and are not directly transferable to unconcentrated AM0 operation.</li>
+<li><strong>Laboratory one-sun records.</strong> The US National Renewable Energy Laboratory (NREL) reached <strong>39.5 %</strong> under the standard one-sun spectrum with an inverted-metamorphic triple-junction employing quantum wells, and earlier demonstrated a <strong>six-junction</strong> device at 39.2 % one-sun (47.1 % at 143×) [9]. NREL maintains the community reference "Best Research-Cell Efficiency" chart, updated in 2024 to separate tandem categories cleanly [10].</li>
+<li><strong>Flight-qualified production cells.</strong> The cells actually flown are more conservative. AZUR SPACE's 3G30 GaInP/GaAs/Ge triple-junction provides <strong>30 % class beginning-of-life (BOL) efficiency at AM0</strong>, on a 30.18 cm² cell only 150 µm thick [11]; Spectrolab's Ultra Triple Junction delivers a <strong>28.3 % minimum average</strong> AM0 efficiency [12]. A broad review of III–V space cells confirms ~30 % AM0 BOL as the mature production plateau, with next-generation four- and five-junction and metamorphic devices pushing toward the mid-30s [7].</li>
+</ul>
+<p>For a platform being designed now, the defensible input is <strong>η_cell = 0.30 (AM0, BOL)</strong>, the flight-qualified figure [11], not the 47.6 % laboratory record. Using the record number would overstate generated power by roughly 60 % and is the single most common way space-power estimates are inflated.</p>
+<h3 id="23-the-generation-cascade-from-solar-constant-to-bus-power">2.3 The generation cascade: from solar constant to bus power</h3>
+<p>The areal electrical power density delivered by the array to the bus is the solar constant multiplied by a cascade of independent, sub-unity factors:</p>
+<blockquote>
+<p>p_A = S · η_cell · F_pack · F_temp · F_asm · L_d      (1)</p>
+</blockquote>
+<p>where F_pack is the fraction of array area actually covered by active cell (gaps, interconnects, coverglass margins), F_temp is the derate for operating hot, F_asm lumps optical, wiring, mismatch and pointing/cosine losses, and L_d is the lifetime degradation factor discussed in §2.5. Multijunction cells run at 60–80 °C in sunlit LEO and lose of order 0.05–0.1 %/°C above 25 °C in the current-limiting sub-cell [13], giving F_temp ≈ 0.90 as a representative value; F_pack ≈ 0.85 and F_asm ≈ 0.95 are conventional [14]. Table 1 assembles the cascade at BOL and EOL.</p>
+<p><strong>Table 1. Illustrative generation cascade from solar constant to array bus power.</strong> Inputs cited; product is an illustrative calculation.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Factor</th>
+<th>Running value (W m⁻²)</th>
+<th>Source of factor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Incident AM0 irradiance</td>
+<td>S = 1361</td>
+<td>1361</td>
+<td>[1,5]</td>
+</tr>
+<tr>
+<td>Cell conversion (AM0, BOL)</td>
+<td>η_cell = 0.30</td>
+<td>408.3</td>
+<td>[7,11]</td>
+</tr>
+<tr>
+<td>Cell-to-array packing</td>
+<td>F_pack = 0.85</td>
+<td>347.1</td>
+<td>[14]</td>
+</tr>
+<tr>
+<td>Operating-temperature derate</td>
+<td>F_temp = 0.90</td>
+<td>312.4</td>
+<td>[13]</td>
+</tr>
+<tr>
+<td>Assembly / optical / wiring</td>
+<td>F_asm = 0.95</td>
+<td><strong>296.8 (BOL)</strong></td>
+<td>[14]</td>
+</tr>
+<tr>
+<td>Lifetime degradation (10 yr)</td>
+<td>L_d = 0.85</td>
+<td><strong>252.3 (EOL)</strong></td>
+<td>[7,15]</td>
+</tr>
+</tbody>
+</table></div>
+<p>The cascade yields <strong>p_A ≈ 297 W m⁻² at BOL and ≈ 252 W m⁻² at EOL</strong> for a modern rigid or tensioned-blanket array of 30 %-class cells. These figures are consistent with real hardware: the roll-out solar array (ROSA/iROSA) blankets that now augment the ISS reach ~218 W kg⁻¹ at blanket level with triple-junction cells, and each 25 kW-class iROSA wing (≈6 m × 19.2 m ≈ 115 m²) delivers ~20 kW, i.e. of order 170–220 W m⁻² at the array including deployment structure and derates [16,17]. The older rigid ISS wings, built with silicon cells, achieve only ~65 W m⁻² [3,4]; the factor-of-four improvement to ~250 W m⁻² is exactly the multijunction dividend.</p>
+<h3 id="24-array-area-packing-and-mass-for-the-hundreds-of-kw-to-mw-class">2.4 Array area, packing and mass for the hundreds-of-kW to MW class</h3>
+<p>Given p_A, the required array <em>area</em> for a target array output power P_sa is simply A_sa = P_sa / p_A, and the <em>mass</em> follows from the system-level specific power α_sa. Modern deployable arrays span roughly α_sa = 75 W kg⁻¹ (iROSA unit including boom and mechanism [16,17]) to 218 W kg⁻¹ (blanket only [16]); we adopt 150 W kg⁻¹ as an illustrative mid-range system value and quote the range. Table 2 tabulates area and mass across the class of interest.</p>
+<p><strong>Table 2. Illustrative array area and mass versus required array output power</strong> (EOL areal density p_A = 252 W m⁻²; BOL peak = area × 297 W m⁻²; mass at α_sa = 150 W kg⁻¹ of BOL peak). All values illustrative, built on cited inputs.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>P_sa, EOL (kW)</th>
+<th>Array area (m²)</th>
+<th>Equivalent square (m)</th>
+<th>BOL peak (kW)</th>
+<th>Array mass (t) at 150 W kg⁻¹</th>
+<th>Array mass (t) at 75 W kg⁻¹</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>100</td>
+<td>397</td>
+<td>20 × 20</td>
+<td>118</td>
+<td>0.79</td>
+<td>1.57</td>
+</tr>
+<tr>
+<td>250</td>
+<td>992</td>
+<td>31 × 31</td>
+<td>295</td>
+<td>1.96</td>
+<td>3.93</td>
+</tr>
+<tr>
+<td>500</td>
+<td>1 984</td>
+<td>45 × 45</td>
+<td>589</td>
+<td>3.93</td>
+<td>7.85</td>
+</tr>
+<tr>
+<td>1 000</td>
+<td>3 968</td>
+<td>63 × 63</td>
+<td>1 178</td>
+<td>7.85</td>
+<td>15.7</td>
+</tr>
+<tr>
+<td>2 000</td>
+<td>7 937</td>
+<td>89 × 89</td>
+<td>2 357</td>
+<td>15.7</td>
+<td>31.4</td>
+</tr>
+</tbody>
+</table></div>
+<p>The headline is geometric: <strong>megawatt-class generation requires arrays of order 4 000 m²</strong> — a square roughly 63 m on a side, or a small number of ISS-scale wings — and <strong>several tonnes to well over ten tonnes of array</strong>, depending entirely on the maturity of the deployable structure. Area scales linearly with power and inversely with p_A, so the 30 %-versus-15 % cell choice is worth a factor of two in deployed area and therefore in packaged launch volume, which is frequently the binding constraint rather than mass.</p>
+<h3 id="25-on-orbit-degradation-and-the-eol-factor">2.5 On-orbit degradation and the EOL factor</h3>
+<p>The lifetime factor L_d in (1) is dominated, for III–V cells, by displacement damage from energetic protons and electrons, with secondary contributions from coverglass/adhesive darkening (ultraviolet and contamination), micrometeoroid erosion, and thermal cycling of interconnects [7,15]. The radiation dose is orbit-dependent: a geosynchronous platform accumulates of order 5×10¹⁴ to 1×10¹⁵ 1-MeV-equivalent electrons cm⁻² over fifteen years, and a 1×10¹⁵ e cm⁻² fluence degrades a triple-junction cell's output by roughly 13–15 % [7]. Measured on-orbit degradation of GaInP/GaAs/Ge cells spans <strong>~0.2 %/yr in benign conditions to ~2 %/yr</strong> in harsher shaded/high-dose cases [15]. Over ten years these bracket L_d ≈ 0.98 to ≈ 0.82; the conventional design value <strong>L_d ≈ 0.85</strong> used in Table 1 is squarely within this range and is the value carried in standard sizing practice [14]. Two design consequences follow. First, the array must be sized so that its <em>EOL</em> output meets demand, which means it is over-sized (and over-massed) at BOL by 1/L_d ≈ 18 %. Second, because the platform generates surplus early in life, the storage and thermal systems must tolerate the BOL surplus, not merely the EOL deficit — a point returned to in §6.</p>
+<hr>
+<h2 id="3-orbital-geometry-eclipse-beta-angle-and-the-duty-cycle">3. Orbital geometry: eclipse, beta angle and the duty cycle</h2>
+<h3 id="31-orbit-period-and-the-eclipse-fraction">3.1 Orbit period and the eclipse fraction</h3>
+<p>A self-powered platform in low Earth orbit lives on a strict clock. For a circular orbit of altitude h, the period is</p>
+<blockquote>
+<p>T = 2π · √[ (R_E + h)³ / μ ]      (2)</p>
+</blockquote>
+<p>with R_E = 6378 km and μ = 3.986×10⁵ km³ s⁻². At h = 500 km, (2) gives T = 5677 s = 94.6 min — the familiar ~95-minute LEO period.</p>
+<p>The platform is in the Earth's shadow for a fraction f_E of each orbit. For a cylindrical-shadow model the eclipse fraction is</p>
+<blockquote>
+<p>f_E = (1/π) · arccos[ √(h² + 2 R_E h) / ((R_E + h) · cos β) ]      (3)</p>
+</blockquote>
+<p>valid when the bracketed argument does not exceed unity; otherwise f_E = 0 (no eclipse) [18]. Here β is the <strong>beta angle</strong>, the minimum angle between the orbital plane and the Sun–platform line, ranging from −90° to +90° and bounded by the sum of the orbit inclination and the Earth's ~23.4° obliquity [18].</p>
+<h3 id="32-the-beta-angle-and-the-critical-full-sun-geometry">3.2 The beta angle and the critical, full-sun geometry</h3>
+<p>Equation (3) contains the whole duty-cycle story. At β = 0 (Sun in the orbit plane) the eclipse is longest; as |β| increases the shadow chord shortens, until at a <strong>critical beta angle β</strong>* the orbit grazes the shadow and eclipse vanishes:</p>
+<blockquote>
+<p>cos β* = √(h² + 2 R_E h) / (R_E + h)      (4)</p>
+</blockquote>
+<p>For h = 500 km, (4) gives β<em> = 68.0°; for the ISS altitude (~420 km), β</em> ≈ 69.7° ≈ 70° [18]. Whenever |β| &gt; β<em> the platform is in </em><em>continuous sunlight</em>* and needs no storage for the base load at all — an enormously favourable regime that a dawn–dusk sun-synchronous orbit (β ≈ 90°) can hold almost permanently. Conversely, near β = 0 the eclipse reaches its maximum. Table 3 evaluates (2)–(3) at h = 500 km.</p>
+<p><strong>Table 3. Duty-cycle geometry at h = 500 km (T = 94.6 min).</strong> Computed from equations (2)–(3); illustrative.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Beta angle β (deg)</th>
+<th>Eclipse fraction f_E</th>
+<th>Eclipse T_e (min)</th>
+<th>Daylight T_d (min)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>0.378</td>
+<td>35.8</td>
+<td>58.8</td>
+</tr>
+<tr>
+<td>30</td>
+<td>0.358</td>
+<td>33.8</td>
+<td>60.8</td>
+</tr>
+<tr>
+<td>50</td>
+<td>0.302</td>
+<td>28.6</td>
+<td>66.0</td>
+</tr>
+<tr>
+<td>60</td>
+<td>0.231</td>
+<td>21.8</td>
+<td>72.8</td>
+</tr>
+<tr>
+<td>68 (= β*)</td>
+<td>~0.00</td>
+<td>~0</td>
+<td>94.6</td>
+</tr>
+<tr>
+<td>70–90</td>
+<td>0 (full sun)</td>
+<td>0</td>
+<td>94.6</td>
+</tr>
+</tbody>
+</table></div>
+<p>The <strong>worst case f_E ≈ 0.38</strong> (β = 0) is the sizing case: the platform is dark for ~36 minutes of every 95-minute orbit. Because the true beta angle of a real orbit drifts over the year (as the orbit plane and the Sun–Earth line reorient), a platform in a low-inclination or ISS-like orbit oscillates between long-eclipse (β ≈ 0) and full-sun (|β| &gt; β*) seasons, and both extremes must be designed for: the storage system is sized by the long-eclipse case, while the thermal system must additionally survive the full-sun case in which the array generates its BOL surplus continuously.</p>
+<h3 id="33-the-generationstorage-duty-cycle">3.3 The generation–storage duty cycle</h3>
+<p>The consequence of §3.2 is a strict energy-banking requirement. Over one orbit the platform must generate, during the sunlit interval T_d only, enough energy to (a) carry the load directly while illuminated, (b) recharge the store to carry the base load through the eclipse T_e, and (c) bank any additional energy that a large intermittent load will later draw. Writing the daylight and eclipse loads as P_d and P_e and the two power-path efficiencies as X_d (array → regulation → load, direct) and X_e (array → charger → store → discharge → load), the array output power required during daylight is the standard spacecraft-power sizing relation [14,19,20]:</p>
+<blockquote>
+<p>P_sa = [ (P_e · T_e / X_e) + (P_d · T_d / X_d) ] / T_d      (5)</p>
+</blockquote>
+<p>Equation (5) makes the duty-cycle penalty explicit: every joule delivered through the store is inflated by 1/X_e, and X_e already contains the storage round-trip efficiency η_rt. The next section is therefore devoted to what sets η_rt, and to the specific energy that fixes how heavy the store must be to hold (a) and (c).</p>
+<hr>
+<h2 id="4-energy-storage-architectures">4. Energy-storage architectures</h2>
+<h3 id="41-the-figures-of-merit-that-actually-matter">4.1 The figures of merit that actually matter</h3>
+<p>For a banked-energy platform, five figures of merit govern the storage choice:</p>
+<ol>
+<li><strong>Specific energy</strong> e_s (Wh kg⁻¹) — sets the <em>mass</em> of the bulk store, because the store must hold the eclipse-plus-intermittent energy.</li>
+<li><strong>Specific power</strong> p_s (W kg⁻¹) — sets the <em>mass</em> of whatever must absorb or deliver the high-power transients of the intermittent load.</li>
+<li><strong>Round-trip efficiency</strong> η_rt — appears directly in X_e in (5), and its complement (1 − η_rt) becomes waste heat (§6).</li>
+<li><strong>Self-discharge</strong> — determines how much of the banked energy survives from charge to use, critical when energy is held for one or more orbits.</li>
+<li><strong>Cycle life</strong> — a LEO platform executes ~5 500 charge/discharge cycles per year (one per orbit), so a fifteen-year life demands of order 80 000 cycles [21]; anything with a cycle life below ~10⁴ is disqualified for the bulk-cycling role.</li>
+</ol>
+<p>No storage technology maximises all five. The remainder of this section treats the three candidate families on their own physics, and §4.5 assembles the comparison.</p>
+<h3 id="42-flywheel-energy-storage">4.2 Flywheel energy storage</h3>
+<p>A flywheel stores kinetic energy E = ½ I ω². Its specific energy is set by material strength, not by the machine size: for a rotor of density ρ and working tensile strength σ_w the maximum specific energy is</p>
+<blockquote>
+<p>e_max = K · σ_w / ρ      (6)</p>
+</blockquote>
+<p>where K is a dimensionless shape factor (≈0.5 for a thin rim, approaching 1 for an optimally-tapered disc). A carbon-fibre rim with σ_w ≈ 2.5 GPa and ρ ≈ 1800 kg m⁻³ gives e_max ≈ 0.5 × 2.5×10⁹/1800 ≈ 6.9×10⁵ J kg⁻¹ ≈ <strong>190 Wh kg⁻¹ at the rim material limit</strong> — but the <em>system</em> value, after the metallic hub, shaft, magnetic bearings, motor/generator, containment and vacuum housing are included, falls to <strong>~5–100 Wh kg⁻¹</strong>, with well-characterised composite systems around 30–50 Wh kg⁻¹ and one cited composite prototype at 11.7 Wh kg⁻¹ once the hub is counted [22,23]. Because E ∝ ω², a flywheel operated over a 2:1 speed range delivers only 1 − (½)² = <strong>75 % of its rated energy as usable swing</strong> (u ≈ 0.75), which is nonetheless far better than the shallow depth-of-discharge electrochemical cells tolerate.</p>
+<p>Flywheels have three decisive advantages in orbit and one decisive drawback. Advantages: <strong>very long cycle life</strong> (10⁵–10⁷ cycles, essentially unlimited for a once-per-orbit duty [23]); <strong>high round-trip efficiency</strong>, with magnetic-bearing rotors in high vacuum maintaining ~97 % <em>mechanical</em> efficiency [24]; and the possibility of combining energy storage with <strong>attitude control</strong> via an integrated power-and-attitude (IPACS) architecture, since a counter-rotating flywheel pair can bank energy and manage angular momentum simultaneously [24,25]. NASA's G2 development flywheel — a 60 000 rpm, 525 Wh, 1 kW carbon-fibre/titanium unit on magnetic bearings — was built precisely to demonstrate this for the ISS, where a two-flywheel module was designed to replace a nickel-hydrogen battery string [24,25]. Terrestrially, Beacon Power's carbon-fibre "Smart Energy 25" stores 25 kWh at 16 000 rpm in a sealed vacuum housing [26]. The drawback is <strong>self-discharge</strong>: bearing and windage losses spin the rotor down over hours unless actively maintained, so a flywheel is a poor multi-orbit store but an excellent single-orbit one.</p>
+<h3 id="43-superconducting-magnetic-energy-storage-smes">4.3 Superconducting magnetic energy storage (SMES)</h3>
+<p>SMES stores energy directly in the magnetic field of a persistent-current superconducting coil, E = ½ L I². The energy density is set by the field: u_B = B²/2μ₀, so at B = 10 T, u_B = 100/(2 × 4π×10⁻⁷) ≈ 4.0×10⁷ J m⁻³ ≈ 11 kWh m⁻³. That is a respectable <em>volumetric</em> density, but the <em>specific</em> energy is poor because the coil must be reacted against enormous hoop stresses by structure and surrounded by a cryostat: SMES delivers only <strong>~0.5–10 Wh kg⁻¹</strong> [27,28]. Against that, SMES is superb on the other four axes: <strong>round-trip efficiency of 95–99 %</strong> because the persistent current flows with essentially zero resistance [27,28]; <strong>essentially zero magnetic self-discharge</strong> (a persistent-mode coil holds its current almost indefinitely [27]); <strong>extremely high specific power</strong> (the energy can be injected or extracted in milliseconds, limited only by the converter [28]); and a cycle life set by the power electronics, effectively unlimited for this duty.</p>
+<p>In orbit SMES carries one large caveat that is easy to miss: the "zero self-discharge" refers to the magnetic energy, but the <strong>cryogenic system imposes a continuous parasitic power draw</strong> to hold the coil below its critical temperature, and that refrigeration load is itself a standing heat leak the thermal system must handle. SMES is therefore best understood not as a bulk store but as a <strong>near-lossless, ultra-high-power buffer</strong> — precisely the complement of the flywheel's and battery's weakness.</p>
+<h3 id="44-supercapacitor-and-electrochemical-banks">4.4 Supercapacitor and electrochemical banks</h3>
+<p><strong>Supercapacitors</strong> (double-layer capacitors) store energy electrostatically, E = ½ C V². They occupy the same niche as SMES from the opposite direction: <strong>specific energy of only ~5–10 Wh kg⁻¹</strong> (occasionally to ~30 for advanced chemistries) but <strong>specific power of order 10⁴ W kg⁻¹</strong>, <strong>round-trip efficiency 95–98 %</strong> (no chemical conversion), and a <strong>cycle life of ~10⁶</strong> [29]. Their weakness is comparatively rapid self-discharge (hours to days), again disqualifying them as a multi-orbit store but making them an ideal high-power, high-cycle buffer.</p>
+<p><strong>Lithium-ion cells</strong> are the workhorse bulk store. Modern space-grade cells reach <strong>150–265 Wh kg⁻¹</strong> (≈250 Wh kg⁻¹ for the best 18650 cells), with a conventional pack-level value of ~150 Wh kg⁻¹ after structure, balancing and thermal integration [14,30,31]. Round-trip efficiency is <strong>90–96 %</strong>, and self-discharge is low (~2–3 % per month) — the only candidate that comfortably holds energy across many orbits. The catch is <strong>cycle life versus depth-of-discharge (DoD)</strong>: LEO service demands tens of thousands of cycles, and space cells achieve this only at shallow DoD — a best-in-class 250 Wh kg⁻¹ cell is limited to ~10 % DoD to reach ~50 000 LEO cycles, and cells rated for ~4 000 cycles at 60 % DoD would be exhausted in under a year of once-per-orbit cycling [30,31]. The shallow-DoD requirement means the <em>installed</em> electrochemical capacity is 3–10× the usable capacity, which — as §4.5 shows — inflates the effective specific energy back down toward the flywheel's. For completeness, the <strong>nickel-hydrogen</strong> cells that flew on the ISS and most GEO satellites offer only ~45–60 Wh kg⁻¹ but tolerate deep DoD and &gt;30 000 LEO cycles [30]; they are the heritage baseline that Li-ion and flywheels are displacing.</p>
+<h3 id="45-comparison-and-the-bulk-versus-buffer-dichotomy">4.5 Comparison and the bulk-versus-buffer dichotomy</h3>
+<p><strong>Table 4. Comparative figures of merit for candidate storage technologies.</strong> Ranges are cited literature/manufacturer values; suitability judgements are the author's synthesis.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Technology</th>
+<th>Specific energy e_s (Wh kg⁻¹)</th>
+<th>Specific power p_s (W kg⁻¹)</th>
+<th>Round-trip η_rt</th>
+<th>Self-discharge</th>
+<th>Cycle life</th>
+<th>Usable fraction u</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Li-ion (space, pack)</td>
+<td>150–265 (cell); ~150 (pack)</td>
+<td>300–1 500</td>
+<td>0.90–0.96</td>
+<td>~2–3 %/month</td>
+<td>4k (60 % DoD) – 50k (10 % DoD)</td>
+<td>0.10–0.40</td>
+<td>[14,30,31]</td>
+</tr>
+<tr>
+<td>Ni-H₂ (heritage)</td>
+<td>45–60</td>
+<td>~200</td>
+<td>0.70–0.85</td>
+<td>high</td>
+<td>&gt;30 000</td>
+<td>0.4–0.8</td>
+<td>[30]</td>
+</tr>
+<tr>
+<td>Composite flywheel</td>
+<td>5–100 (sys); ~30–50 typical</td>
+<td>up to ~10⁴</td>
+<td>0.85–0.93</td>
+<td>high (hours)</td>
+<td>10⁵–10⁷</td>
+<td>~0.75</td>
+<td>[22,23,24,26]</td>
+</tr>
+<tr>
+<td>SMES</td>
+<td>0.5–10</td>
+<td>very high (&gt;10⁴)</td>
+<td>0.95–0.99</td>
+<td>~0 (magnetic)*</td>
+<td>~10⁶⁺</td>
+<td>~0.9</td>
+<td>[27,28]</td>
+</tr>
+<tr>
+<td>Supercapacitor</td>
+<td>5–10 (to ~30)</td>
+<td>~10⁴</td>
+<td>0.95–0.98</td>
+<td>high (hours–days)</td>
+<td>~10⁶</td>
+<td>~0.9</td>
+<td>[29]</td>
+</tr>
+</tbody>
+</table></div>
+<p>*SMES magnetic self-discharge is negligible, but the cryogenic system imposes a continuous parasitic refrigeration load.</p>
+<p>Table 4 exposes the central design fact of this paper: <strong>specific energy and specific power are anti-correlated across the technologies</strong>, and no single family is good at both. Li-ion and composite flywheels are the only viable <strong>bulk</strong> stores (they can hold hundreds of kWh at tolerable mass), but they are mediocre at very high transient power. SMES and supercapacitors are superb <strong>buffers</strong> (near-lossless, million-cycle, ~10⁴ W kg⁻¹) but hold negligible bulk energy. A platform whose defining requirement is to <em>bank bulk solar energy over an orbit</em> <strong>and</strong> <em>deliver it as a large, fast intermittent load</em> therefore cannot be well served by any one of them. This motivates the hybrid architecture developed in §5.</p>
+<hr>
+<h2 id="5-chargedischarge-load-levelling-and-round-trip-penalties">5. Charge/discharge, load-levelling and round-trip penalties</h2>
+<h3 id="51-banking-energy-over-an-orbit-the-state-of-charge-trajectory">5.1 Banking energy over an orbit: the state-of-charge trajectory</h3>
+<p>Consider the reference platform in the worst-case β = 0 orbit of §3 (T_d = 58.8 min, T_e = 35.8 min). Two loads are present: a <strong>continuous base load</strong> P_base (housekeeping, thermal control, avionics, low-rate comms) that runs day and night, and a <strong>large intermittent utilisation load</strong> that draws energy E_burst banked over the orbit and released in a short high-power window. The store's state of charge (SoC) executes a fixed sawtooth each orbit: it rises while the array carries the base load <em>and</em> charges the store during daylight, then falls when the eclipse base load and (whenever scheduled) the burst are drawn. The array must, during T_d alone, generate everything consumed over the full orbit T through the appropriate paths, which is exactly equation (5) generalised to include the burst term:</p>
+<blockquote>
+<p>P_sa = [ P_base·T_e/X_e + P_base·T_d/X_d + E_burst/X_e ] / T_d      (7)</p>
+</blockquote>
+<p>The first term is the eclipse base load banked and returned through the store; the second is the daylight base load carried directly; the third is the intermittent energy banked through the store. Figure 1 shows the power architecture that realises (7).</p>
+<p><strong>Figure 1. End-to-end power architecture of a self-powered orbital platform.</strong> Solar flux is converted by the array, conditioned by power management and distribution (PMAD), and split between a direct daylight path and a storage path; all conversion and storage losses, plus the dissipative fraction of the loads, appear as waste heat that only the radiators can remove.</p>
+<figure class="diagram-figure">
+<pre class="mermaid">flowchart LR
+  Sun["Solar flux&lt;br/&gt;1361 W/m2 (AM0)"] --&gt; PV["PV array&lt;br/&gt;30% MJ cells"]
+  PV --&gt; PMAD["PMAD&lt;br/&gt;regulation &amp; distribution"]
+  PMAD --&gt;|direct path X_d| Direct["Daylight base load"]
+  PMAD --&gt;|charge| Charge["Charge controller"]
+  Charge --&gt; Store[("High-density store&lt;br/&gt;bulk + buffer")]
+  Store --&gt;|discharge| Disc["Discharge / conversion"]
+  Disc --&gt; Base["Eclipse base load"]
+  Disc --&gt; Burst["Large intermittent load&lt;br/&gt;(instrument / propulsion / transmitter)"]
+  Direct --&gt; Base
+  Base --&gt; Heat["Waste heat"]
+  Burst --&gt; Heat
+  PMAD --&gt; Heat
+  Store --&gt; Heat
+  Heat --&gt; Rad["Radiators"]
+  Rad --&gt; Env(["Deep space + Earth IR"])</pre>
+<figcaption>Flowchart</figcaption>
+</figure>
+<h3 id="52-worked-sizing-of-the-reference-platform">5.2 Worked sizing of the reference platform</h3>
+<p>Let the illustrative reference platform have P_base = 300 kW and E_burst = 250 kWh banked per orbit, with a baseline round-trip η_rt = 0.90 (composite flywheel or good Li-ion), giving X_e = η_rt × 0.95 = 0.855 (0.95 for distribution) and X_d = 0.90. Evaluating (7) with T_e = 0.596 h and T_d = 0.981 h:</p>
+<ul>
+<li>Eclipse base term: 300 × 0.596 / 0.855 = 209.2 kWh</li>
+<li>Daylight base term: 300 × 0.981 / 0.90 = 326.9 kWh</li>
+<li>Burst term: 250 / 0.855 = 292.4 kWh</li>
+<li>Sum = 828.5 kWh, delivered over T_d = 0.981 h</li>
+</ul>
+<p>so <strong>P_sa ≈ 845 kW</strong> at EOL without margin, or <strong>≈ 1.06 MW with a 25 % design margin</strong> [14]. At the EOL areal density of Table 1 (252 W m⁻²) the required array is <strong>A_sa ≈ 4 190 m²</strong> (with margin), whose BOL peak generation is ~1.24 MW — squarely megawatt-class. This closes the generation side.</p>
+<p>The <strong>storage capacity</strong> must hold the peak SoC swing, which is the eclipse base energy plus the burst: E_store = P_base·T_e + E_burst = 300 × 0.596 + 250 = <strong>428.8 kWh of usable, delivered energy per orbit</strong>. The installed capacity depends on the usable fraction u of Table 4:</p>
+<p><strong>Table 5. Illustrative bulk-store mass to bank 428.8 kWh usable per orbit</strong>, by technology and usable fraction. Installed capacity = 428.8 / u; mass = capacity / e_s. Illustrative, using cited e_s and u.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Technology</th>
+<th>Usable fraction u</th>
+<th>Installed capacity (kWh)</th>
+<th>Assumed e_s (Wh kg⁻¹)</th>
+<th>Bulk-store mass (t)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Li-ion, shallow DoD (long life)</td>
+<td>0.20</td>
+<td>2 144</td>
+<td>150 (pack)</td>
+<td>14.3</td>
+</tr>
+<tr>
+<td>Li-ion, moderate DoD</td>
+<td>0.40</td>
+<td>1 072</td>
+<td>150 (pack)</td>
+<td>7.1</td>
+</tr>
+<tr>
+<td>Composite flywheel</td>
+<td>0.75</td>
+<td>572</td>
+<td>30 (sys)</td>
+<td>19.1</td>
+</tr>
+<tr>
+<td>Composite flywheel (advanced)</td>
+<td>0.75</td>
+<td>572</td>
+<td>50 (sys)</td>
+<td>11.4</td>
+</tr>
+<tr>
+<td>SMES (for reference only)</td>
+<td>0.90</td>
+<td>476</td>
+<td>5</td>
+<td>95.3</td>
+</tr>
+<tr>
+<td>Supercapacitor (for reference only)</td>
+<td>0.90</td>
+<td>476</td>
+<td>10</td>
+<td>47.6</td>
+</tr>
+</tbody>
+</table></div>
+<p>Table 5 quantifies the bulk-versus-buffer dichotomy in mass. Bulk storage of a few hundred kWh costs <strong>7–19 tonnes</strong> with the viable technologies (Li-ion or composite flywheel), <em>comparable to or heavier than the entire array</em>. Using SMES or supercapacitors for this bulk role would cost 48–95 tonnes and is clearly absurd — confirming that they must be reserved for the buffer role, where the energy they hold is small.</p>
+<h3 id="53-the-hybrid-bulk-plus-buffer-architecture">5.3 The hybrid bulk-plus-buffer architecture</h3>
+<p>The resolution is to split the store by function. A <strong>bulk store</strong> (Li-ion or composite flywheel) banks the hundreds of kWh of orbital energy at the best available specific energy. A <strong>buffer store</strong> (SMES or supercapacitor) — sized for <em>energy</em> by only the few seconds to minutes of the highest-power transient, but for <em>power</em> by the full peak of the intermittent load — absorbs and delivers the fast, high-current spikes that would otherwise degrade Li-ion cycle life or exceed a flywheel's converter rating. Because the buffer's energy requirement is small (a burst of, say, 1.2 MW for 30 s is only 10 kWh), even at 10 Wh kg⁻¹ it masses only ~1 tonne, and its near-lossless, million-cycle character protects the bulk store from the most damaging duty. Figure 2 shows the topology.</p>
+<p><strong>Figure 2. Hybrid bulk-plus-buffer storage topology.</strong> The bulk store carries orbital energy; the buffer carries transient power; a supervisory controller routes energy by timescale.</p>
+<figure class="diagram-figure">
+<pre class="mermaid">flowchart TB
+  Array["PV array + PMAD"] --&gt; DCbus["Regulated DC bus"]
+  DCbus &lt;--&gt; Bulk["Bulk store&lt;br/&gt;Li-ion or composite flywheel&lt;br/&gt;hundreds of kWh, e_s-limited"]
+  DCbus &lt;--&gt; Buffer["Buffer store&lt;br/&gt;SMES or supercapacitor&lt;br/&gt;single-digit kWh, p_s-limited"]
+  DCbus --&gt; Loads["Platform loads"]
+  Loads --&gt; BaseL["Continuous base load"]
+  Loads --&gt; BurstL["Large intermittent load&lt;br/&gt;(high peak power, short duration)"]
+  Ctrl["Supervisory power controller&lt;br/&gt;routes by timescale"] -.-&gt; Bulk
+  Ctrl -.-&gt; Buffer
+  Ctrl -.-&gt; DCbus</pre>
+<figcaption>Flowchart</figcaption>
+</figure>
+<h3 id="54-the-end-to-end-efficiency-cascade-and-the-mass-penalty-of-inefficiency">5.4 The end-to-end efficiency cascade and the mass penalty of inefficiency</h3>
+<p>The "energy efficiency" of the whole platform is the fraction of intercepted sunlight that reaches a useful load. Chaining the generation cascade of Table 1 with the power paths gives, for energy delivered through the store at EOL:</p>
+<blockquote>
+<p>η_sun→load = η_cell · F_pack · F_temp · F_asm · L_d · X_e
+= 0.30 × 0.85 × 0.90 × 0.95 × 0.85 × 0.855 ≈ <strong>0.158</strong></p>
+</blockquote>
+<p>Only about <strong>16 % of the sunlight intercepted by the array reaches a stored-path load at end of life</strong> (about 17 % via the direct path, before storage). This is the number that most compactly expresses why the self-powered platform is hard: the collector must be sized for roughly six times the delivered energy, and every one of the intervening loss stages becomes heat. The round-trip efficiency deserves particular emphasis because it enters twice — once as extra array (through X_e in (7)) and once as extra radiator (through the waste heat it generates, §6). Improving η_rt from 0.85 to 0.95 shrinks <em>both</em> the array term and the thermal load simultaneously, which is why round-trip efficiency, not specific energy, is often the highest-leverage storage parameter for a large platform.</p>
+<hr>
+<h2 id="6-thermal-management-in-vacuum">6. Thermal management in vacuum</h2>
+<h3 id="61-radiation-is-the-only-exit">6.1 Radiation is the only exit</h3>
+<p>In vacuum there is no convection or conduction to an environment; the sole heat-rejection mechanism is thermal radiation from a surface [32,33]. A radiator of area A_r, emissivity ε and temperature T_r facing an effective environmental sink at T_sink rejects a net power given by the Stefan–Boltzmann law:</p>
+<blockquote>
+<p>Q = ε σ A_r (T_r⁴ − T_sink⁴)      (8)</p>
+</blockquote>
+<p>with σ = 5.670374419×10⁻⁸ W m⁻² K⁻⁴ (CODATA) [34]. The net rejection <em>flux</em> is φ_r = ε σ (T_r⁴ − T_sink⁴). Two features of (8) dominate radiator design. First, the <strong>fourth-power dependence on T_r</strong> makes radiator temperature the most powerful design lever: raising T_r from 300 K to 350 K more than doubles φ_r. Second, radiators can only reject heat at the temperature of the heat <em>source</em>, so a store or converter that must stay cool (Li-ion below ~40 °C, SMES cryogenic) forces a low T_r and therefore a large area — a thermodynamic coupling between storage choice and radiator mass.</p>
+<h3 id="62-the-effective-sink-temperature-in-low-earth-orbit">6.2 The effective sink temperature in low Earth orbit</h3>
+<p>The idealised sink is deep space at ~3 K, which makes T_sink⁴ negligible in (8) and gives the most optimistic flux. But a real Earth-facing radiator in LEO also absorbs Earth-emitted infrared (~240 W m⁻²) and reflected albedo, raising the <em>effective</em> sink it radiates against to of order 250 K over the Earth-facing hemisphere [32,33]. The honest sizing therefore brackets the two cases. Table 6 evaluates φ_r for ε = 0.85 (a representative optical-solar-reflector or white-paint value [32]) across radiator temperatures, for both an ideal deep-space sink and a 250 K near-Earth sink.</p>
+<p><strong>Table 6. Illustrative net radiator heat-rejection flux φ_r (W m⁻²)</strong> from equation (8), ε = 0.85. Computed values.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Radiator T_r (K)</th>
+<th>φ_r at T_sink = 3 K (W m⁻²)</th>
+<th>φ_r at T_sink = 250 K (W m⁻²)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>273 (0 °C)</td>
+<td>268</td>
+<td>79</td>
+</tr>
+<tr>
+<td>300 (27 °C)</td>
+<td>390</td>
+<td>202</td>
+</tr>
+<tr>
+<td>320 (47 °C)</td>
+<td>505</td>
+<td>317</td>
+</tr>
+<tr>
+<td>350 (77 °C)</td>
+<td>723</td>
+<td>535</td>
+</tr>
+</tbody>
+</table></div>
+<p>The near-Earth sink roughly halves the achievable flux at 300 K (202 vs 390 W m⁻²), a penalty that grows as T_r falls toward the sink — which is exactly why cryogenic SMES cannot reject heat cheaply in LEO and why a low-temperature bulk battery is thermally expensive. State-of-practice matches these numbers: the ISS External Active Thermal Control System rejects <strong>70 kW total (35 kW per loop)</strong> through ammonia-fed radiators [35], consistent with a few hundred W m⁻² over its radiator area.</p>
+<h3 id="63-radiators-sized-by-storage-and-conversion-inefficiency">6.3 Radiators sized by storage and conversion inefficiency</h3>
+<p>The waste heat the platform must reject is dominated by the very inefficiencies quantified in §5. The round-trip loss alone, for the reference platform, is the energy banked minus the energy returned each orbit:</p>
+<blockquote>
+<p>Q_store,avg = E_store · (1/η_rt − 1) / T</p>
+</blockquote>
+<p>With E_store = 428.8 kWh delivered, η_rt = 0.90 and T = 5677 s, the stored energy input is 428.8/0.90 = 476.4 kWh, the loss is 47.6 kWh per orbit, and the orbit-average waste-heat power from the store alone is <strong>Q_store,avg ≈ 30.2 kW</strong>. Adding PMAD and direct-path regulation losses (of order 20 kW at X_d = 0.90 over the daylight base energy) gives an <strong>inefficiency-driven thermal load of ~50 kW</strong> that exists purely because generation, storage and conversion are imperfect — before any of the base load's own dissipation is counted. Table 7 sizes the radiator for this and for larger totals.</p>
+<p><strong>Table 7. Illustrative radiator area A_r = Q / φ_r</strong> for representative waste-heat loads (ε = 0.85). Computed values.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Waste heat Q (kW)</th>
+<th>A_r at 300 K / 250 K sink (202 W m⁻²)</th>
+<th>A_r at 350 K / 250 K sink (535 W m⁻²)</th>
+<th>A_r at 300 K / deep space (390 W m⁻²)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10</td>
+<td>50 m²</td>
+<td>19 m²</td>
+<td>26 m²</td>
+</tr>
+<tr>
+<td>30 (store round-trip)</td>
+<td>149 m²</td>
+<td>56 m²</td>
+<td>77 m²</td>
+</tr>
+<tr>
+<td>50 (store + conversion)</td>
+<td>248 m²</td>
+<td>93 m²</td>
+<td>128 m²</td>
+</tr>
+<tr>
+<td>100</td>
+<td>495 m²</td>
+<td>187 m²</td>
+<td>256 m²</td>
+</tr>
+<tr>
+<td>300 (dissipative base load)</td>
+<td>1 485 m²</td>
+<td>561 m²</td>
+<td>769 m²</td>
+</tr>
+</tbody>
+</table></div>
+<p>The <strong>~50 kW inefficiency load alone needs ~90–250 m² of radiator</strong> depending on how hot the radiator can run; if a large fraction of the 300 kW base load is dissipative (most electrical loads ultimately become heat unless the energy leaves as radio-frequency emission or as kinetic energy of propellant), the radiator swells past 1 000 m² — a structure comparable in area to the array itself. This is the sense in which, on a large self-powered platform, <strong>the thermal system is the hidden twin of the power system</strong>: it is sized by the same inefficiencies, and it competes for the same mass and deployed-area budget.</p>
+<h3 id="64-closing-the-loop-inefficiency-drives-mass-twice">6.4 Closing the loop: inefficiency drives mass twice</h3>
+<p>Figure 3 makes the coupling explicit. A drop in any efficiency — cell, path, or round-trip — increases required array area (more collected power for the same delivered load) <em>and</em> increases waste heat (the lost fraction becomes thermal load) <em>and</em> therefore increases radiator area. Efficiency is thus doubly leveraged, and the platform designer who improves η_rt or η_cell is paid twice: in a smaller collector and a smaller radiator.</p>
+<p><strong>Figure 3. Thermal management loop and its coupling to power.</strong> Inefficiencies at every conversion stage feed the waste-heat load; the radiator area they demand competes with the array for mass and deployed area.</p>
+<figure class="diagram-figure">
+<pre class="mermaid">flowchart LR
+  In["Delivered load demand"] --&gt; Ineff{"Efficiency chain&lt;br/&gt;cell, path, round-trip"}
+  Ineff --&gt;|"1 / eta"| Gen["Required generation&lt;br/&gt;(array area, mass)"]
+  Ineff --&gt;|"(1 - eta)"| Waste["Waste heat Q"]
+  Waste --&gt; SB["Stefan-Boltzmann&lt;br/&gt;Q = eps*sigma*A*(Tr^4 - Tsink^4)"]
+  SB --&gt; Radm["Radiator area &amp; mass"]
+  Gen --&gt; Mass["Total platform mass"]
+  Radm --&gt; Mass</pre>
+<figcaption>Flowchart</figcaption>
+</figure>
+<hr>
+<h2 id="7-system-synthesis-the-reference-platform-mass-budget">7. System synthesis: the reference-platform mass budget</h2>
+<h3 id="71-assembling-array-storage-and-radiator">7.1 Assembling array, storage and radiator</h3>
+<p>Table 8 collects the illustrative reference platform (P_base = 300 kW, E_burst = 250 kWh per orbit, β = 0 worst case, η_rt = 0.90, 25 % margin) into a single power-system mass budget. The array is from §5.2 (BOL peak 1.24 MW at 150 W kg⁻¹); the bulk store is the advanced-flywheel/moderate-DoD-Li-ion mid-point of Table 5 (~11 t); the buffer is a ~1 t SMES/supercapacitor sized for transient power; the radiator is sized for the ~50 kW inefficiency load at 300 K against a 250 K sink (Table 7), at an illustrative radiator areal mass of ~10 kg m⁻² [32,36].</p>
+<p><strong>Table 8. Illustrative power-system mass budget, reference MW-class platform.</strong> Built entirely on cited component figures; system totals are illustrative.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Subsystem</th>
+<th>Sizing basis</th>
+<th>Illustrative mass (t)</th>
+<th>Illustrative deployed area (m²)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PV array</td>
+<td>1.24 MW BOL peak, 150 W kg⁻¹</td>
+<td>8.3</td>
+<td>4 190</td>
+</tr>
+<tr>
+<td>Bulk store</td>
+<td>~1 100 kWh installed, 50 Wh kg⁻¹ (or Li-ion 40 % DoD)</td>
+<td>11.4</td>
+<td>–</td>
+</tr>
+<tr>
+<td>Buffer store</td>
+<td>~10 kWh, 10 Wh kg⁻¹, high p_s</td>
+<td>~1.0</td>
+<td>–</td>
+</tr>
+<tr>
+<td>Radiator</td>
+<td>50 kW at 202 W m⁻², ~10 kg m⁻²</td>
+<td>~2.5</td>
+<td>~250</td>
+</tr>
+<tr>
+<td>PMAD, harness, structure (≈25 %)</td>
+<td>fraction of above</td>
+<td>~5.8</td>
+<td>–</td>
+</tr>
+<tr>
+<td><strong>Total power system</strong></td>
+<td></td>
+<td><strong>≈ 29 t</strong></td>
+<td><strong>≈ 4 440</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="72-what-the-budget-reveals">7.2 What the budget reveals</h3>
+<p>Three conclusions survive any reasonable variation of the illustrative inputs:</p>
+<ol>
+<li><strong>Storage, not generation, is the mass driver for banked-energy platforms.</strong> The bulk store (~11 t) rivals or exceeds the array (~8 t), and the gap widens if long cycle life forces shallow DoD (Table 5, up to ~14 t). The instinct that "the solar panels are the hard part" is wrong at this scale; the hard part is holding the energy across the dark.</li>
+<li><strong>The radiator is a first-class subsystem, not an afterthought.</strong> Even the pure-inefficiency thermal load demands hundreds of square metres; a dissipative utilisation load can make the radiator the largest single deployed structure.</li>
+<li><strong>Round-trip efficiency is the highest-leverage single parameter.</strong> It reduces array size, storage input energy, and waste heat simultaneously (§5.4), and is therefore worth more per point than specific energy for a fixed delivered-energy requirement.</li>
+</ol>
+<h3 id="73-sensitivity">7.3 Sensitivity</h3>
+<p><strong>Table 9. Illustrative sensitivity of the reference platform to key parameters</strong> (one-at-a-time from the Table 8 baseline). Directional and approximate.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Change</th>
+<th>Array area</th>
+<th>Bulk-store mass</th>
+<th>Radiator area</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Round-trip η_rt: 0.90 → 0.95</td>
+<td>+5 pts</td>
+<td>−5 % (P_sa via X_e)</td>
+<td>unchanged (energy)</td>
+<td>−45 % (loss halved)</td>
+</tr>
+<tr>
+<td>Round-trip η_rt: 0.90 → 0.80</td>
+<td>−10 pts</td>
+<td>+11 %</td>
+<td>unchanged</td>
+<td>+100 %</td>
+</tr>
+<tr>
+<td>Cell η_cell: 0.30 → 0.35</td>
+<td>+5 pts</td>
+<td>−14 % area</td>
+<td>unchanged</td>
+<td>slightly lower</td>
+</tr>
+<tr>
+<td>Usable fraction u: 0.40 → 0.20</td>
+<td>halve DoD</td>
+<td>unchanged</td>
+<td>+100 % (Table 5)</td>
+<td>unchanged</td>
+</tr>
+<tr>
+<td>Beta season: β = 0 →</td>
+<td>β</td>
+<td>&gt; β*</td>
+<td>full sun</td>
+<td>−0 to −27 % (no eclipse recharge)</td>
+</tr>
+<tr>
+<td>Radiator T_r: 300 → 350 K</td>
+<td>+50 K</td>
+<td>unchanged</td>
+<td>unchanged</td>
+<td>−62 % (φ_r ×2.6)</td>
+</tr>
+</tbody>
+</table></div>
+<p>The sensitivity table reiterates the leverage points: round-trip efficiency and radiator temperature dominate the thermal side; cell efficiency and beta season dominate the collector side; and the usable-fraction (DoD/cycle-life) trade dominates the storage mass. A platform that can bias its orbit toward high beta seasons, run its radiators hot, and hold a 95 %-round-trip store is dramatically lighter than one that cannot — even at identical delivered energy.</p>
+<hr>
+<h2 id="8-discussion-and-limitations">8. Discussion and limitations</h2>
+<p>The analysis above is a first-order, physics-anchored sizing, and its limitations should be stated plainly. (i) All system-level numbers are <strong>illustrative calculations</strong> built on cited component inputs; they are intended to expose scaling and leverage, not to specify a particular flight design, and a real design would iterate the array/storage/radiator loop to convergence with detailed loss models. (ii) The <strong>generation cascade</strong> uses representative derates; the true F_temp depends on the array's own thermal design, and F_asm hides pointing accuracy, string mismatch and radiation-darkening of coverglass that a detailed model would separate. (iii) The <strong>eclipse model</strong> is the cylindrical-shadow approximation of equation (3); a penumbral and oblate-Earth treatment shifts f_E by a fraction of a percent, immaterial at this level but not at mission-planning fidelity. (iv) The <strong>storage figures of merit</strong> are literature/manufacturer ranges; real cells and rotors must be qualified for the radiation, vacuum and thermal-cycling environment, and the shallow-DoD penalty for Li-ion cycle life is a strong function of chemistry and temperature that a design must pin down. (v) The <strong>radiator areal mass</strong> (~10 kg m⁻²) is an order-of-magnitude engineering value; deployable and two-phase-loop radiators vary widely, and the standard treatment (Gilmore, <em>Spacecraft Thermal Control Handbook</em> [36]) should be used for any real budget. (vi) We have not modelled the <strong>micrometeoroid/debris</strong>, <strong>plasma-charging</strong>, or <strong>structural-dynamics</strong> environments, all of which bear on large deployed areas and on high-speed rotors.</p>
+<p>Two broader points frame the result. First, the field context is real and current: modular megawatt-to-gigawatt space-solar concepts such as SPS-ALPHA [37] envisage exactly the arbitrarily-large, self-powered platforms whose <em>internal</em> power engineering this paper addresses, and the ROSA/iROSA flight hardware [16,17] demonstrates the deployable-array specific powers assumed here. Second, the emphasis on <em>energy efficiency</em> is not aesthetic but economic: because only ~16 % of intercepted sunlight reaches a stored-path load (§5.4), and because both the collector and the radiator scale inversely with efficiency, the single most valuable engineering activity for such a platform is the systematic elimination of loss — higher-bandgap cells, higher-round-trip stores, and hotter radiators — rather than the brute-force enlargement of the array.</p>
+<hr>
+<h2 id="9-conclusion">9. Conclusion</h2>
+<p>Powering a large orbital platform entirely from sunlight is an exercise in managing three coupled inefficiencies within a mass budget. The solar resource itself is generous and nearly constant at 1361 W m⁻² [1,5], but current flight-qualified multijunction cells deliver only ~30 % of it at AM0 [7,11], and after packing, temperature, assembly and lifetime derates the defensible end-of-life areal density is ~250 W m⁻² (Table 1) — so megawatt-class generation demands arrays of several thousand square metres and several to many tonnes (Table 2). The eclipse-fraction and beta-angle geometry (equations 2–4) fixes a strict once-per-orbit banking duty with a worst-case ~38 % dark fraction in LEO (Table 3), and no single storage technology serves both the bulk-energy and high-power roles that duty implies: Li-ion and composite flywheels are the viable bulk stores at 7–19 t for a few hundred kWh (Table 5), while SMES and supercapacitors, near-lossless and million-cycle but energy-poor, belong in a high-power buffer — motivating the hybrid architecture of Figure 2. Every conversion and storage loss re-emerges as heat that only radiators can remove, and the Stefan–Boltzmann law (equation 8) ties that heat to hundreds of square metres of radiator (Tables 6–7), making the thermal system the hidden twin of the power system. The end-to-end lesson is that <strong>round-trip efficiency and radiator temperature are the highest-leverage parameters</strong>, because efficiency is paid twice — in collector area and in radiator area — and that for a banked-energy platform the storage subsystem, not the array, is the true mass driver. These conclusions are technology-general and load-agnostic; the "large intermittent load" is treated throughout as generic utilisation (instruments, propulsion, or transmitters), and the engineering presented is the ordinary engineering of banking and levelling solar power in orbit.</p>
+<hr>
+<h2 id="references">References</h2>
+<p>[1] Kopp, G., &amp; Lean, J. L. (2011). A new, lower value of total solar irradiance: Evidence and climate significance. <em>Geophysical Research Letters</em>, 38, L01706. https://doi.org/10.1029/2010GL045777</p>
+<p>[2] Kopp, G. Total Solar Irradiance (TSI) data and instrument page, Laboratory for Atmospheric and Space Physics, University of Colorado. https://spot.colorado.edu/~koppg/TSI/</p>
+<p>[3] NASA. Overview of the International Space Station Electrical Power System, NASA Technical Reports Server, 20160014034. https://ntrs.nasa.gov/api/citations/20160014034/downloads/20160014034.pdf</p>
+<p>[4] Electrical system of the International Space Station. Wikipedia (compiled from NASA sources; ~240 kW peak, 84–120 kW average). https://en.wikipedia.org/wiki/Electrical_system_of_the_International_Space_Station</p>
+<p>[5] Prša, A., et al. (2016). Nominal values for selected solar and planetary quantities: IAU 2015 Resolution B3. <em>The Astronomical Journal</em>, 152, 41 (nominal TSI = 1361 W m⁻²). https://iopscience.iop.org/article/10.3847/0004-6256/152/2/41</p>
+<p>[6] Reconciled proxy/satellite total solar irradiance and its secular trend (−0.15 W m⁻² per decade). <em>Proceedings of the National Academy of Sciences</em> (2024/2025). https://www.pnas.org/doi/10.1073/pnas.2417155122</p>
+<p>[7] A brief review of high-efficiency III–V solar cells for space application. <em>Frontiers in Physics</em>, 8:631925 (2020). https://www.frontiersin.org/journals/physics/articles/10.3389/fphy.2020.631925/full</p>
+<p>[8] Fraunhofer ISE (2022). World-record 47.6 % efficiency four-junction III–V concentrator solar cell (665 suns). https://www.ise.fraunhofer.de/en/press-media/press-releases/2022/fraunhofer-ise-develops-the-worlds-most-efficient-solar-cell-with-47-comma-6-percent-efficiency.html</p>
+<p>[9] NREL (2020). Six-junction solar cell sets two world records for efficiency (39.2 % one-sun; 47.1 % at concentration); and (2022) 39.5 % one-sun quantum-well triple junction. https://www.nrel.gov/news/press/2020/nrel-six-junction-solar-cell-sets-two-world-records-for-efficiency.html</p>
+<p>[10] NREL (2024). Best Research-Cell Efficiency Chart update (tandem categories). https://www.nrel.gov/grid/news/program/2024/popular-nrel-cell-efficiency-chart-now-better-presents-tandem-photovoltaics</p>
+<p>[11] AZUR SPACE. 30 % Triple-Junction GaInP/GaAs/Ge (3G30) space solar cell datasheet (30 % class AM0 BOL; 150 µm; 30.18 cm²). https://www.azurspace.com/media/uploads/file_links/file/bdb_00010891-01-00_tj3g30-advanced_4x8.pdf</p>
+<p>[12] Spectrolab. 28.3 % Ultra Triple Junction (UTJ) solar cell datasheet (AM0). https://www.spectrolab.com/DataSheets/TNJCell/utj3.pdf</p>
+<p>[13] Flexible GaInP/Ga(In)As/Ge triple-junction space solar cells: power-to-mass ratio of 1.3 kW/kg and thermal behaviour. <em>Solar Energy Materials and Solar Cells</em> (2025). https://www.sciencedirect.com/science/article/pii/S0927024825004180</p>
+<p>[14] Wertz, J. R., Everett, D. F., &amp; Puckett, J. J. (Eds.) (2011). <em>Space Mission Engineering: The New SMAD</em>. Microcosm Press. (Power-subsystem sizing constants: rigid-panel mass ~2.8 kg m⁻², packing ~0.85, BOL/EOL degradation ~0.85, pack ~150 Wh kg⁻¹.) Reference summarised at https://www.valispace.com/wp-content/uploads/2018/12/EPS-sizing-tutorial-1.pdf</p>
+<p>[15] Degradation model of the orbiting current for GaInP/GaAs/Ge triple-junction solar cells on satellites (annual degradation ~0.18–1.97 %/yr). ResearchGate (2015). https://www.researchgate.net/publication/283195242</p>
+<p>[16] Roll Out Solar Array (ROSA) / ISS Roll-Out Solar Array (iROSA): specific power and deployment. Wikipedia and NASA STMD impact story. https://en.wikipedia.org/wiki/Roll_Out_Solar_Array ; https://www.nasa.gov/directorates/stmd/impact-story-roll-out-solar-arrays/</p>
+<p>[17] Redwire Corporation. Roll-Out Solar Array (ROSA/iROSA) product data (25 kW-class wings; ~160 kW total for ISS). https://rdw.com/product-archive/power/rosa/</p>
+<p>[18] Computation of eclipse time for low-Earth-orbiting small satellites (beta angle, eclipse fraction, critical beta). <em>International Journal of Aviation, Aeronautics, and Aerospace</em>, Embry-Riddle. https://commons.erau.edu/ijaaa/vol6/iss5/15/</p>
+<p>[19] Patel, M. R. (2005). <em>Spacecraft Power Systems</em>. CRC Press. (Solar-array/battery sizing and duty-cycle equations.)</p>
+<p>[20] Spacecraft Lithium-Ion Battery Power Systems — sizing chapter. Wiley Online Library. https://onlinelibrary.wiley.com/doi/abs/10.1002/9781119772170.ch4</p>
+<p>[21] Testing and evaluation of lithium-ion batteries for LEO cycling (LEO cycle counts ~5 500/yr; tens of thousands over life). OSTI/USU SmallSat. https://digitalcommons.usu.edu/cgi/viewcontent.cgi?article=2689&amp;context=smallsat</p>
+<p>[22] Design of flywheel energy storage devices with high specific energy (composite rotors; system-level Wh/kg). AIMS Energy (2025). https://www.aimspress.com/aimspress-data/aimse/2025/3/PDF/energy-13-03-028.pdf</p>
+<p>[23] A review of flywheel energy storage systems: state of the art and opportunities (specific energy 5–100 Wh/kg; cycle life 10⁵–10⁷). arXiv:2103.05224. https://arxiv.org/pdf/2103.05224</p>
+<p>[24] Energy Storage Flywheels on Spacecraft (NASA G2: 60 000 rpm, 525 Wh, 1 kW; magnetic bearings; ~97 % mechanical efficiency; IPACS). NASA NTRS 20020060506. https://ntrs.nasa.gov/api/citations/20020060506/downloads/20020060506.pdf</p>
+<p>[25] Feasibility of flywheel energy storage systems for applications in future space missions. NASA NTRS 19950019973. https://ntrs.nasa.gov/citations/19950019973</p>
+<p>[26] Beacon Power. Carbon-fibre flywheels (Smart Energy 25: 25 kWh at 16 000 rpm; sealed vacuum housing). https://beaconpower.com/carbon-fiber-flywheels/</p>
+<p>[27] Superconducting magnetic energy storage (specific energy ~0.5–10 Wh/kg; η &gt; 95 %; ~zero magnetic self-discharge). Wikipedia (compiled). https://en.wikipedia.org/wiki/Superconducting_magnetic_energy_storage</p>
+<p>[28] Characteristics and applications of superconducting magnetic energy storage. <em>Journal of Physics: Conference Series</em>, 2108, 012038. https://iopscience.iop.org/article/10.1088/1742-6596/2108/1/012038/pdf</p>
+<p>[29] Battery University, BU-209: How does a supercapacitor work? (5–10 Wh/kg; ~10⁴ W/kg; 95–98 % round-trip; ~10⁶ cycles). https://www.batteryuniversity.com/article/bu-209-how-does-a-supercapacitor-work/</p>
+<p>[30] NASA. Guidelines on lithium-ion battery use in space applications (specific energy, DoD, cycle life; Ni-H₂ heritage). NASA NTRS 20090023862. https://ntrs.nasa.gov/api/citations/20090023862/downloads/20090023862.pdf</p>
+<p>[31] Performance of commercial Li-ion cells for future NASA missions and aerospace applications (≈250 Wh/kg; shallow-DoD LEO cycle life). <em>Journal of The Electrochemical Society</em>, 168, 040516 (2021). https://iopscience.iop.org/article/10.1149/1945-7111/abf05f</p>
+<p>[32] Thermal management in space — radiative rejection, emissivity, optical solar reflectors. National Space Society. https://nss.org/settlement/nasa/spaceresvol2/thermalmanagement.html</p>
+<p>[33] Stefan–Boltzmann law for spacecraft radiators (T⁴ rejection; effective sink). Engineering reference. https://snubber.ai/engineering-interview-questions/thermodynamics-spacecraft-radiator-heat-transfer</p>
+<p>[34] National Institute of Standards and Technology (NIST/CODATA). Stefan–Boltzmann constant σ = 5.670374419×10⁻⁸ W m⁻² K⁻⁴. https://physics.nist.gov/cgi-bin/cuu/Value?sigma</p>
+<p>[35] NASA. International Space Station Active Thermal Control System overview (EATCS 70 kW total; 35 kW per loop; ammonia). https://www.nasa.gov/wp-content/uploads/2021/02/473486main_iss_atcs_overview.pdf</p>
+<p>[36] Gilmore, D. G. (Ed.) (2002). <em>Spacecraft Thermal Control Handbook, Vol. 1: Fundamental Technologies</em> (radiators chapter). The Aerospace Press. http://matthewwturner.com/uah/IPT2008_summer/baselines/LOW%20Files/Thermal/Spacecraft%20Thermal%20Control%20Handbook/06.pdf</p>
+<p>[37] Mankins, J. C. (2012). SPS-ALPHA: The first practical solar power satellite via arbitrarily large phased array (NASA NIAC Phase 1). NASA. https://www.nasa.gov/general/sps-alpha-the-first-practical-solar-power-satellite-via-arbitrarily-large-phased-array/</p>
+<hr>
+<p><em>Preprint — submitted; pending peer review. © 2026 Christopher I. V. Farmer. This manuscript is a drafting-stage scientific preprint; all system-level figures are explicitly labelled illustrative calculations built upon cited primary inputs, and no proprietary or classified data are used. Scope statement: this document concerns general large-platform power engineering only and contains no weapon, launcher, railgun/coilgun, projectile, or "firing" content; the large intermittent load is treated exclusively as generic utilisation (scientific instruments, electric propulsion, or communications transmitters).</em></p>
+    </article>
+    <footer class="paperfoot">
+      <span>&copy; <span id="yr">2026</span> Christopher I. V. Farmer</span>
+      <span>&middot;</span>
+      <a href="../index.html">Back to Publications</a>
+      <span>&middot;</span>
+      <a href="../../docs/CV-Christopher-Farmer-2026-08.pdf" target="_blank" rel="noopener">CV</a>
+      <span>&middot;</span>
+      <span class="mono">Preprint &mdash; submitted; pending peer review &middot; not legal advice</span>
+    </footer>
+  </main>
+
+<script>
+  (function(){
+    var root=document.documentElement, KEY='cf-theme';
+    try{ var s=localStorage.getItem(KEY); if(s){ root.setAttribute('data-theme', s); } }catch(e){}
+    var btn=document.getElementById('theme');
+    if(btn){ btn.addEventListener('click', function(){
+      var next=root.getAttribute('data-theme')==='dark'?'light':'dark';
+      root.setAttribute('data-theme', next);
+      try{ localStorage.setItem(KEY, next); }catch(e){}
+    }); }
+    var yr=document.getElementById('yr'); if(yr){ yr.textContent=String(new Date().getFullYear()); }
+  })();
+</script>
+<script src="../assets/vendor/mermaid.min.js"></script>
+<script>
+  (function(){
+    if(!window.mermaid) return;
+    try{
+      mermaid.initialize({startOnLoad:false, theme:"neutral", securityLevel:"loose", flowchart:{htmlLabels:true, useMaxWidth:true}});
+      if(mermaid.run){ mermaid.run({querySelector:".mermaid"}); }
+      else { mermaid.init(undefined, document.querySelectorAll(".mermaid")); }
+    }catch(e){ /* leave the diagram source visible as a readable fallback */ }
+  })();
+</script>
+</body>
+</html>

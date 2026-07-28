@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f17'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='27' font-weight='700' fill='%23d4b24c' text-anchor='middle'%3ECF%3C/text%3E%3C/svg%3E">
+<title>Mapping Real-Time Regulatory Impacts to Asset Vulnerability Under Strict API Budgets</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{
+    --bg:#0b0f17; --bg2:#0e1420; --surface:#131b2a; --surface2:#182133;
+    --ink:#e9eef7; --ink2:#aab7cc; --muted:#7d8ba3; --line:#233145; --line2:#2c3d54;
+    --accent:#43b3a6; --accent-ink:#84d6ca; --gold:#d4b24c; --gold-soft:#e6cf8f;
+    --good:#43c59e; --warn:#e0a13a; --shadow:0 18px 50px -20px rgba(0,0,0,.7);
+    --radius:14px; --measure:70ch;
+    --font-display:'Zilla Slab',Georgia,'Times New Roman',serif;
+    --font-body:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --font-mono:'IBM Plex Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
+  }
+  html[data-theme="light"]{
+    --bg:#f4f1ec; --bg2:#ebe6dd; --surface:#ffffff; --surface2:#faf7f2;
+    --ink:#221e18; --ink2:#4c473e; --muted:#675f54; --line:#e7e1d6; --line2:#d9d2c5;
+    --accent:#0d5f57; --accent-ink:#0a463f; --gold:#836819; --gold-soft:#6f5714; --good:#0e7a52;
+    --shadow:0 18px 44px -24px rgba(15,30,60,.35);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:radial-gradient(1100px 700px at 82% -8%,rgba(67,179,166,.10),transparent 60%),var(--bg);
+    color:var(--ink);font-family:var(--font-body);line-height:1.72;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  a{color:var(--accent-ink);text-decoration:none}
+  a:hover{text-decoration:underline}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+  ::selection{background:color-mix(in oklab,var(--accent) 32%,transparent)}
+
+  /* Top bar */
+  .top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    padding:11px clamp(16px,4vw,34px);background:color-mix(in oklab,var(--bg),transparent 8%);
+    backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:11px;color:var(--ink);min-width:0}
+  .crest{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;flex:0 0 auto;
+    background:linear-gradient(145deg,#0e7b6f,#0b655b);color:#fff;font-family:var(--font-display);font-weight:700;font-size:14px;box-shadow:var(--shadow)}
+  .brand .nm{font-family:var(--font-display);font-weight:700;font-size:14.5px;line-height:1.05}
+  .brand .rl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+  .topacts{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:8px 13px;border-radius:10px;font-weight:600;font-size:13px;
+    border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer;transition:.16s;white-space:nowrap;font-family:var(--font-body)}
+  .btn:hover{border-color:var(--accent);transform:translateY(-1px);text-decoration:none}
+  .btn svg{width:16px;height:16px}
+  .btn.icon{padding:8px;width:36px}
+
+  /* Article */
+  main.wrap{max-width:calc(var(--measure) + 8rem);margin:0 auto;padding:clamp(26px,5vw,52px) clamp(18px,5vw,40px) 40px}
+  article.paper{max-width:var(--measure);margin:0 auto;font-size:1.05rem}
+  article.paper > *{max-width:var(--measure)}
+  .paper h1,.paper h2,.paper h3,.paper h4,.paper h5{font-family:var(--font-display);font-weight:600;line-height:1.18;color:var(--ink);letter-spacing:-.005em}
+  .paper h1{font-size:clamp(27px,4.4vw,40px);line-height:1.1;margin:0 0 .5rem;letter-spacing:-.015em}
+  .paper h2{font-size:clamp(20px,2.9vw,27px);margin:2.4rem 0 .9rem;padding-bottom:.35rem;border-bottom:1px solid var(--line)}
+  .paper h3{font-size:clamp(17px,2.2vw,21px);margin:1.9rem 0 .7rem}
+  .paper h4{font-size:16px;margin:1.5rem 0 .5rem;color:var(--ink2)}
+  .paper p{margin:0 0 1.05rem;overflow-wrap:anywhere;word-break:break-word}
+  .paper li{overflow-wrap:anywhere;word-break:break-word}
+  .paper strong{color:var(--ink);font-weight:700}
+  .paper em{color:inherit}
+  /* Byline: first bold paragraph right after the title */
+  .paper h1 + p{font-size:1.06rem;color:var(--ink);margin-bottom:.4rem}
+  .paper h1 + p + p em{color:var(--muted);font-size:.92rem}
+  .paper ul,.paper ol{margin:0 0 1.1rem;padding-left:1.5rem}
+  .paper li{margin:.3rem 0}
+  .paper li::marker{color:var(--accent)}
+  .paper a{color:var(--accent-ink);border-bottom:1px solid color-mix(in oklab,var(--accent) 35%,transparent)}
+  .paper a:hover{border-bottom-color:var(--accent);text-decoration:none}
+  .paper hr{border:none;border-top:1px solid var(--line);margin:2rem 0}
+
+  /* Blockquote (scope notes) */
+  .paper blockquote{margin:1.4rem 0;padding:1rem 1.2rem;border:1px solid var(--line2);border-left:3px solid var(--gold);
+    border-radius:12px;background:color-mix(in oklab,var(--gold) 7%,var(--surface));color:var(--ink2)}
+  .paper blockquote p{margin:0 0 .6rem}
+  .paper blockquote p:last-child{margin-bottom:0}
+  .paper blockquote strong{color:var(--ink)}
+
+  /* Tables */
+  .paper .tablewrap{overflow-x:auto;margin:1.3rem 0;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+  .paper table{border-collapse:collapse;width:100%;font-size:.95rem;line-height:1.5}
+  .paper th,.paper td{text-align:left;padding:.6rem .85rem;border-bottom:1px solid var(--line);vertical-align:top}
+  .paper thead th{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--accent-ink);background:color-mix(in oklab,var(--accent) 8%,var(--surface2));border-bottom:1px solid var(--line2)}
+  .paper tbody tr:last-child td{border-bottom:none}
+  .paper tbody tr:nth-child(even){background:color-mix(in oklab,var(--ink) 3%,transparent)}
+
+  /* Code */
+  .paper code{font-family:var(--font-mono);font-size:.88em;background:color-mix(in oklab,var(--accent) 10%,var(--surface));
+    border:1px solid var(--line);border-radius:5px;padding:.08em .38em;color:var(--accent-ink)}
+  .paper pre{background:var(--bg2);border:1px solid var(--line2);border-radius:12px;padding:1rem 1.15rem;overflow-x:auto;
+    margin:1.3rem 0;line-height:1.55}
+  .paper pre code{background:none;border:none;padding:0;color:var(--ink2);font-size:.86rem}
+
+  /* Mermaid figures */
+  .diagram-figure{margin:1.6rem 0;background:#f7f8fb;border:1px solid var(--line2);border-radius:14px;padding:1.1rem 1rem .6rem;
+    box-shadow:var(--shadow);overflow-x:auto}
+  html[data-theme="light"] .diagram-figure{background:#fbfaf7}
+  .diagram-figure pre.mermaid{background:none;border:none;box-shadow:none;padding:0;margin:0;text-align:center;
+    color:#1c2530;font-family:var(--font-mono);font-size:.82rem;line-height:1.5;white-space:pre-wrap}
+  .diagram-figure svg{max-width:100%;height:auto;display:block;margin:0 auto}
+  .diagram-figure figcaption{margin-top:.7rem;text-align:center;font-family:var(--font-mono);font-size:.7rem;
+    letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+
+  /* Footnotes */
+  .paper .footnote{margin-top:2.6rem;padding-top:1rem;border-top:1px solid var(--line);font-size:.9rem;color:var(--ink2)}
+  .paper .footnote hr{display:none}
+  .paper .footnote ol{padding-left:1.3rem}
+  .paper .footnote li{margin:.45rem 0}
+  .paper .footnote-backref{border-bottom:none;margin-left:.3rem}
+  .paper sup a.footnote-ref{border-bottom:none;color:var(--accent-ink);font-weight:600;padding:0 .05em}
+
+  /* TOC (if [TOC] used) */
+  .paper .toc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:.9rem 1.2rem;margin:1.4rem 0;font-size:.95rem}
+  .paper .toc > ul{margin:0}
+
+  footer.paperfoot{max-width:var(--measure);margin:3rem auto 0;padding-top:1.3rem;border-top:1px solid var(--line);
+    color:var(--muted);font-size:.82rem;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}
+  footer.paperfoot a{color:var(--ink2)}
+  footer.paperfoot .mono{font-family:var(--font-mono)}
+
+  .pubnav{display:flex;flex-wrap:wrap;gap:2px 16px;align-items:center;padding:9px clamp(18px,4vw,40px);
+    background:color-mix(in oklab,var(--bg2),transparent 20%);border-bottom:1px solid var(--line);
+    font-family:var(--font-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase}
+  .pubnav a{color:var(--ink2);padding:4px 0;border-bottom:2px solid transparent;text-decoration:none}
+  .pubnav a:hover{color:var(--ink)}
+  .pubnav a[aria-current="page"]{color:var(--accent-ink);border-bottom-color:var(--accent)}
+
+  .cfside{display:none}
+  @media(min-width:1080px){
+    body{padding-left:280px}
+    .pubnav{display:none}
+    .cfside{position:fixed;left:0;top:0;bottom:0;width:280px;z-index:30;display:flex;flex-direction:column;gap:18px;
+      padding:22px 18px;background:var(--bg2);border-right:1px solid var(--line);overflow-y:auto}
+  }
+  .cfside .cfbrand{display:flex;align-items:center;gap:11px}
+  .cfside .cfbrand img{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:0 0 auto}
+  .cfside .cfbrand .nm{font-family:var(--font-display);font-weight:700;font-size:15.5px;color:var(--ink);line-height:1.1}
+  .cfside .cfbrand .rl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px;line-height:1.5}
+  .cfside nav{display:flex;flex-direction:column;gap:4px}
+  .cfside nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;color:var(--ink2);font-size:14px;font-weight:500;border:1px solid transparent;text-decoration:none}
+  .cfside nav a svg{width:18px;height:18px;flex:0 0 auto}
+  .cfside nav a:hover{background:var(--surface);color:var(--ink)}
+  .cfside nav a.on{background:var(--surface);border-color:var(--line);color:var(--ink)}
+  .cfside .cffoot{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+  .cfside .cfavail{font-size:12px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+  .cfside .cfdot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 10px var(--good);flex:0 0 auto;margin-top:4px}
+  .cfside .cfbtns{display:flex;gap:8px}
+  .cfside .cfcv{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:12px;font-weight:600;font-size:13px;
+    background:var(--accent);border:1px solid var(--accent);color:#fff;text-decoration:none}
+  .cfside .cfcv:hover{filter:brightness(1.08)}
+  .cfside .cftheme{width:40px;display:inline-flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer}
+  .cfside .cftheme svg{width:16px;height:16px}
+</style>
+</head>
+<body>
+  <aside class="cfside" aria-label="Site navigation">
+    <div class="cfbrand">
+      <img src="../../assets/img/portrait-2026.png" alt="Christopher Farmer">
+      <div><div class="nm">Christopher Farmer</div><div class="rl">Legal, Risk &amp; Technology Transformation</div></div>
+    </div>
+    <nav>
+      <a href="../../index.html#overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg><span>Overview</span></a>
+      <a href="../../index.html#projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Projects</span></a>
+      <a href="../../case-studies/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 5h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h7z"/></svg><span>Case studies</span></a>
+      <a href="../../index.html#experience"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Experience</span></a>
+      <a href="../../index.html#warroom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>War Room</span></a>
+      <a href="../../index.html#expertise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.1L12 17l-5.5 3.3 1-6.1L3 8.9 9 8z"/></svg><span>Expertise</span></a>
+      <a href="../../index.html#credentials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg><span>Credentials</span></a>
+      <a href="../../publications/index.html" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg><span>Publications</span></a>
+      <a href="../../index.html#contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M4 7l8 6 8-6"/></svg><span>Contact</span></a>
+    </nav>
+    <div class="cffoot">
+      <div class="cfavail"><span class="cfdot"></span> Open to legal, risk &amp; transformation roles &mdash; Geneva</div>
+      <div class="cfbtns">
+        <a class="cfcv" href="../../docs/CV-Christopher-Farmer-2026-08.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg> CV</a>
+        <button class="cftheme" onclick="document.getElementById('theme')?document.getElementById('theme').click():(function(){var h=document.documentElement,n=h.getAttribute('data-theme')==='light'?'dark':'light';h.setAttribute('data-theme',n);try{localStorage.setItem('cf-theme',n)}catch(e){}})()" title="Toggle theme" aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="top">
+    <a class="brand" href="../index.html" aria-label="Back to Publications">
+      <div class="crest">CF</div>
+      <div><div class="nm">Christopher Farmer</div><div class="rl">Publications</div></div>
+    </a>
+    <div class="topacts">
+      <a class="btn" href="../index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M15 18l-6-6 6-6"/></svg>
+        Back to Publications
+      </a>
+      <button class="btn icon" id="theme" title="Toggle light / dark" aria-label="Toggle light or dark theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </div>
+  </div>
+<nav class="pubnav" aria-label="Site">
+  <a href="../../index.html#overview">Overview</a>
+  <a href="../../index.html#projects">Projects</a>
+  <a href="../../case-studies/index.html">Case studies</a>
+  <a href="../../index.html#experience">Experience</a>
+  <a href="../../index.html#warroom">War Room</a>
+  <a href="../../index.html#expertise">Expertise</a>
+  <a href="../../index.html#credentials">Credentials</a>
+  <a href="../index.html" aria-current="page">Publications</a>
+  <a href="../../index.html#contact">Contact</a>
+</nav>
+
+  <main class="wrap">
+    <article class="paper">
+<h1 id="mapping-real-time-regulatory-impacts-to-asset-vulnerability-under-strict-api-budgets">Mapping Real-Time Regulatory Impacts to Asset Vulnerability Under Strict API Budgets</h1>
+<p><strong>Christopher I. V. Farmer, LL.M. (University of Worcester) · Independent Researcher · civfarmer@gmail.com</strong></p>
+<p><em>Preprint — submitted; pending peer review. Data and methodology report. Submitted to arXiv (cs.CY) / TechRxiv. This version: 21 July 2026.</em></p>
+<p><em>Subject classes: cs.CY (Computers and Society); cs.DB (Databases); q-fin.GN (General Finance).</em></p>
+<hr>
+<h2 id="abstract">Abstract</h2>
+<p>Systems that connect regulatory change to the companies it touches are usually built on silently smoothed data: gaps are imputed, single-source values are presented as settled facts, and the boundary between a disclosed number, a calculated number, and an inferred number is invisible to the reader. This report describes the methodology of <em>Meridian</em>, a working provenance-first research system that maps real-time regulatory instruments and changes (supervisory rules, sanctions and trade-control lists, official filings) onto a universe of roughly 1,300 issuers and infers <em>potential</em> — not measured — impact on the affected assets. Three commitments organise the work. First, a provenance-first data model in which every value carries its own source key, retrieval and publication timestamps, an immutable hashed raw artifact, a parser version, and an explicit verification class (source fact, company disclosure, official regulatory fact, calculated metric, evidence-based inference, or unverified); missing values are shown as missing, with a reason, and are never estimated. Second, an evidence-first linkage engine that connects an instrument to a company only through a disclosed, quotable business fact (a listing venue, a supervisory classification, a disclosed sector, a disclosed geographic revenue split), records supporting <em>and</em> counter-evidence, and keeps source fact, calculation, and labelled inference distinct at every step. Third, an operating discipline for strict API budgets: a per-provider daily-cap governor that refuses to exceed advertised free-tier limits, a need-driven rotation that spends breadth-first before cross-provider confirmation, and an "outage is not absence" rule that prevents a provider's rate-limit ban from being mistaken for a data gap. We describe the data model, the linkage method, the budget governor, the epistemic-honesty design, and a weighted coverage-tiering and completeness-gating scheme, and we discuss the limitations that follow from choosing honesty over coverage. We report no empirical impact findings; all worked examples are illustrative of mechanism, not results.</p>
+<p><strong>Keywords:</strong> data provenance; regulatory technology (RegTech); event studies; regulatory impact; entity resolution; data quality; rate-limited data engineering; epistemic honesty; sanctions screening; API rate limiting; coverage measurement; financial data systems.</p>
+<hr>
+<h2 id="1-introduction">1. Introduction</h2>
+<p>The premise that public information moves asset prices is old and empirically robust: under the efficient-markets hypothesis, new, value-relevant information is impounded into prices as it arrives [Fama 1970], and the event-study apparatus that dominates empirical finance exists precisely to measure the price effect of a discrete event by observing security prices around it [MacKinlay 1997]. Regulatory events — a new supervisory rule, an amended sanctions designation, a tariff schedule, a filing that changes a company's disclosed risk — are a canonical class of such events. A natural engineering goal follows: build a system that watches regulatory sources in near-real time, connects each change to the specific companies it plausibly touches, and surfaces the resulting vulnerability so that a human analyst can triage it.</p>
+<p>The goal is natural; the honest execution is not. Three failure modes recur in systems of this kind.</p>
+<p><strong>Silent imputation.</strong> When a value is missing — a market capitalisation the provider did not publish, an analyst target no broker covers, a domicile the registry did not disclose — the path of least resistance is to fill it with a sector median, a peer average, or a zero. The filled value propagates into downstream scores, and the reader cannot tell a measured quantity from a manufactured one. The statistical literature has warned for half a century that the <em>mechanism</em> by which data goes missing must be modelled explicitly, and that ignoring it is defensible only under conditions that rarely hold in observational pipelines [Rubin 1976].</p>
+<p><strong>Collapsed epistemic categories.</strong> A number a company disclosed in a filing, a number a vendor published, a number the system calculated from two disclosed inputs, and a number the system <em>inferred</em> from indirect evidence are radically different kinds of claim with radically different reliability — yet most systems render them identically. Data-quality research has long argued that "quality" is not reducible to accuracy: consumers need the provenance and contextual fitness of a value, not merely whether it is correct in the abstract [Wang &amp; Strong 1996].</p>
+<p><strong>Invisible operating constraints.</strong> A system that aggregates dozens of public and free-tier commercial sources operates under hard, heterogeneous rate limits. When a provider returns a 429 (rate-limited) or an authentication error, a naive pipeline records the affected fields as <em>absent</em> — indistinguishable from fields that are genuinely unavailable — and may then penalise, demote, or "recover" companies on the basis of what is actually a transient outage on the collector's side.</p>
+<p>Meridian is a working personal research instrument that treats these three failure modes as first-order design constraints. It maintains a universe of listed and registered issuers — 1,316 companies in the 21 July 2026 snapshot, referred to throughout as "roughly 1,300" — assembled from official registers, exchange directories, regulatory publishers, sanctions authorities, and free-tier market-data vendors, and over it runs a linkage engine that connects instruments to companies through quotable disclosed facts and an impact layer that produces <em>labelled, evidence-backed</em> triage signals rather than point predictions of price change.</p>
+<p>This report documents methodology, not results, and is written so the design can be scrutinised and reused. Its contributions are: (1) a <strong>provenance-first data model</strong> whose unit of storage is a value-plus-provenance envelope carrying an explicit verification class on every sourced row (§3); (2) an <strong>evidence-first linkage method</strong> that refuses to assert a relationship without a quotable disclosed fact, records counter-evidence symmetrically, and keeps inference, source fact, and calculation distinct (§4); (3) an <strong>API-budget governor</strong> — per-provider daily caps, a need-driven rotation, and an "outage is not absence" rule — that runs continuously against strict free-tier limits without exceeding them or confusing an outage with a gap (§5); and (4) an <strong>epistemic-honesty design</strong> (§6) and a <strong>weighted coverage-tiering and completeness-gating scheme</strong> (§7) that make the system's own ignorance measurable and visible. We close with a long limitations section (§8), because a system whose central claim is honesty owes the reader an honest account of what it cannot do.</p>
+<hr>
+<h2 id="2-related-work">2. Related work</h2>
+<p><strong>Regulatory impact and event studies.</strong> Measuring an event's effect on firm value through abnormal returns around the event date is the methodological backbone of empirical finance [MacKinlay 1997], resting on the informational efficiency of markets [Fama 1970]. Meridian deliberately occupies the <em>pre-measurement</em> stage: rather than estimating an abnormal return (which requires a clean event date, an estimation window, and a market model), it identifies <em>which</em> companies a regulatory event plausibly touches and <em>why</em>, and characterises the exposure qualitatively — a complement to, not a substitute for, event-study estimation (§8).</p>
+<p><strong>RegTech.</strong> The use of information technology for regulatory monitoring, reporting, and compliance was reconceptualised after the 2008 crisis as a structural shift rather than a tooling upgrade [Arner, Barberis &amp; Buckley 2017]; for a recent survey of the field's applications in anti-money-laundering compliance, see [El Harras &amp; Salahddine 2025]. Most RegTech practice is oriented toward the <em>regulated entity's</em> compliance burden; Meridian inverts the vantage point to an <em>observer's</em> instrument for mapping the external regulatory environment onto a universe of issuers, using the same public instruments (supervisory rules, sanctions lists, filings) as inputs.</p>
+<p><strong>Provenance in data systems.</strong> The database community formalised <em>why-</em> and <em>where-</em>provenance — the source tuples that justify a result and the locations a value was copied from [Buneman, Khanna &amp; Tan 2001] — and surveyed provenance capture and dissemination in scientific data systems [Simmhan, Plale &amp; Gannon 2005]; the W3C PROV data model standardised a vocabulary for interchanging provenance metadata [Moreau et al. 2013]. Meridian's per-row provenance envelope is a pragmatic, tabular specialisation of these ideas for a single-store analytical system, and its immutable raw-artifact layer implements the "keep the source" discipline that provenance research presupposes.</p>
+<p><strong>Data quality and documentation.</strong> Data quality is multi-dimensional and consumer-relative, not reducible to accuracy [Wang &amp; Strong 1996]. Recent work argues artifacts should ship with structured accounts of their composition and recommended uses — datasheets for datasets [Gebru et al. 2021] and model cards for models [Mitchell et al. 2019] — and the FAIR principles add findability, accessibility, interoperability, and reusability as targets [Wilkinson et al. 2016]. Meridian's methodology page, value-class taxonomy, and per-assessment score breakdowns apply this documentation ethic at the granularity of the individual value.</p>
+<p><strong>Entity resolution / record linkage.</strong> Connecting an instrument or a quote to the right company is a record-linkage problem. Fellegi–Sunter formalised the decision among <em>link</em>, <em>non-link</em>, and <em>possible link</em> via a likelihood ratio over compared fields [Fellegi &amp; Sunter 1969], and the modern literature systematises blocking, comparison, and classification for entity resolution [Christen 2012]. Meridian privileges <em>deterministic</em> identifiers (ISIN within a known batch, LEI, Swiss UID, CIK) and confines approximate name matching to narrow, logged scopes with an explicit "possible link" (needs-review) state — a direct application of the three-way decision.</p>
+<p><strong>Missing data.</strong> Rubin's framework [Rubin 1976] gives the theoretical reason Meridian declines to impute: silently filling a value asserts a missingness mechanism the system has no basis to assume. Showing the gap, with its reason, is the honest default.</p>
+<p><strong>Rate-limited data engineering.</strong> Operating against provider rate limits is a flow-control problem; the token-bucket abstraction (burst capacity plus a sustained refill rate) is the standard mechanism for shaping outbound rate, and reliability engineering adds backpressure, graceful degradation, and the circuit breaker [Kleppmann 2017; Nygard 2018]. Meridian's governor is a daily-quota specialisation: a persistent per-provider, per-day counter with a minimum inter-call interval, coupled to an application-level "stop gracefully and record an honest exhausted state" behaviour rather than a retry storm.</p>
+<p>The gap this work addresses is the <em>conjunction</em> of these threads. Provenance systems rarely reason about live acquisition budgets; RegTech systems rarely expose per-value epistemic status; rate-limiting work rarely worries about whether an outage will be misread as a fact. Meridian's contribution is an integrated methodology in which provenance, honest missingness, evidence-first linkage, and budget-aware acquisition are the <em>same</em> design.</p>
+<hr>
+<h2 id="3-system-overview-and-data-model">3. System overview and data model</h2>
+<h3 id="31-shape-of-the-system">3.1 Shape of the system</h3>
+<p>Meridian is a Python application over a single SQLite database (schema written to be PostgreSQL-portable: integer primary keys, <code>TEXT</code>/<code>REAL</code> columns, ISO-8601 dates, JSON stored as text). It comprises <strong>source adapters</strong> (one per external source); an <strong>ingestion runner</strong> that turns a fetch into stored records with full provenance and source-health accounting; a <strong>linkage engine</strong>; an <strong>impact-scoring</strong> module; a <strong>coverage auditor</strong>; and a <strong>web layer</strong> rendering read-models. A separate exporter produces a static, point-in-time HTML snapshot for offline review; the snapshot referenced here was generated 2026-07-21 17:47Z and covers 1,316 companies.</p>
+<h3 id="32-the-provenance-envelope">3.2 The provenance envelope</h3>
+<p>The unit of storage is not a value but a value carrying its provenance. Every sourced table includes a common block of columns: <code>source_key</code> (the source that produced the row), <code>source_url</code> (the item's canonical URL), <code>retrieved_at</code> (when the collector fetched it, UTC), <code>published_at</code> (when the source published it, where disclosed), <code>raw_artifact_id</code> (a foreign key to the immutable raw payload the value was parsed from), <code>content_hash</code> (a SHA-256 over the normalised record, for amendment detection), <code>parser_version</code>, and <code>verification_status</code> (the value's epistemic class, §3.4). Because provenance is columnar and mandatory, no code path writes a value without also writing where it came from and how confident the system is in it; a value that cannot be given provenance is not stored.</p>
+<h3 id="33-immutable-raw-artifacts">3.3 Immutable raw artifacts</h3>
+<p>Before any parsing occurs, the runner writes the exact bytes of every external payload to an immutable artifact store, keyed by source and day, named by a prefix of its SHA-256 digest, and recorded in a <code>raw_artifact</code> row. <strong>Parsers only ever read stored artifacts</strong>, never the network directly. This yields three properties: every derived value is traceable to the precise bytes it came from; re-parsing under a new parser version is possible without re-fetching, which matters acutely under strict budgets (§5); and amendments are detectable by hash comparison rather than by trust. Recorded-capture fixtures used for offline replay must carry a <code>.meta.json</code> sidecar; a fixture without one is refused as unverifiable, and truncated or discovery-probe captures are excluded by name.</p>
+<h3 id="34-the-value-class-taxonomy">3.4 The value-class taxonomy</h3>
+<p><code>verification_status</code> takes one of six values, surfaced in the UI as compact labels:</p>
+<ul>
+<li><strong>Source Fact (SF)</strong> — a primary datum as published by an authoritative non-issuer source (e.g. an exchange issuer-directory field, an LEI reference record).</li>
+<li><strong>Company Disclosure (CD)</strong> — a datum the issuer itself disclosed (e.g. a filing, a disclosed segment revenue split).</li>
+<li><strong>Official Regulatory Fact (ORF)</strong> — a datum from an official regulatory publisher or sanctions authority (e.g. an instrument's canonical identifier and publication date, a sanctions-list entry).</li>
+<li><strong>Calculated Metric (CM)</strong> — a value the system computed from other stored values, carrying a formula version and its inputs (e.g. a market capitalisation computed from disclosed shares outstanding times a verified quote; an upside computed from a target and a price).</li>
+<li><strong>Evidence-Based Inference (EBI)</strong> — a value or relationship the system <em>inferred</em> from indirect but recorded evidence, never asserted as a disclosed fact (e.g. an index-membership-derived region; a benchmark-constituent company created from a tertiary source pending independent corroboration).</li>
+<li><strong>Unverified (UNV)</strong> — recorded but not yet corroborated to the standard of the classes above.</li>
+</ul>
+<p>The taxonomy is load-bearing: it is the mechanism by which the system keeps "the company disclosed X", "a vendor published X", "we calculated X", and "we infer X" from ever being rendered as the same kind of claim. An inference is never presented as a disclosed fact.</p>
+<h3 id="35-core-entities">3.5 Core entities</h3>
+<p>The relational core is deliberately conventional so that the provenance discipline, not the schema, is the novelty. <strong><code>company</code></strong> and <strong><code>security</code></strong> rows link to <strong><code>identifier</code></strong> rows (LEI, Swiss UID, CIK, ISIN, index membership, registry numbers, aliases). <strong><code>regulatory_instrument</code></strong> carries a canonical identifier, jurisdiction, authority, legal stage, instrument type, and (once enriched) title and topics; <strong><code>sanction_entry</code></strong> holds consolidated sanctions/trade-control list entries. The linkage graph and its explanations live in <strong><code>company_regulation_match</code></strong>, <strong><code>match_evidence</code></strong>, <strong><code>impact_assessment</code></strong>, and <strong><code>score_contribution</code></strong> (§4). Market and disclosure facts are <strong><code>quote</code></strong>, <strong><code>price_bar</code></strong>, <strong><code>analyst_target_snapshot</code></strong>, <strong><code>filing</code></strong>, <strong><code>fx_rate</code></strong>, and <strong><code>segment_fact</code></strong> (disclosed segment/geographic revenue). Operational and honesty tables include <strong><code>raw_artifact</code></strong>, <strong><code>data_source</code></strong>, <strong><code>ingestion_run</code></strong>, <strong><code>api_budget</code></strong> (§5), <strong><code>coverage_incident</code></strong>, <strong><code>data_quality_issue</code></strong> (§6), <strong><code>company_coverage</code></strong> (§7), and <strong><code>identity_match</code></strong> (the audit log of resolution decisions).</p>
+<h3 id="36-identity-resolution">3.6 Identity resolution</h3>
+<p>Attaching a security, quote, filing, or registry record to the correct company is where fabrication most easily creeps in, so resolution is deterministic-first and always logged. The order of preference is: (1) deterministic identifiers — ISIN within a <em>known query batch scope</em>, then LEI, Swiss UID, CIK; (2) constrained name normalisation <strong>only within</strong> a known ISIN batch scope. Normalisation strips accents, punctuation, and legal-form tokens (AG, SA, Ltd, PLC, …) and compares with a sequence-similarity ratio; an exact normalised match or a ratio ≥ 0.85 is accepted, ≥ 0.95 automatically, and anything below is left for review. Every acceptance is written as an <code>identity_match</code> row recording method, score, compared fields, and review status — the Fellegi–Sunter <em>link / possible-link / non-link</em> decision made explicit and auditable [Fellegi &amp; Sunter 1969]. Companies are <strong>never</strong> merged on name similarity across unrelated scopes; a same-name collision across sources is a <em>needs-review candidate</em>, not a merge. Bare-ticker resolution is additionally venue-verified: a candidate whose recorded venue (MIC, exchange name, or listing country) contradicts the symbol's implied venue is <em>excluded</em> rather than used as a fallback, and with no positive candidate the record is skipped as a visible miss rather than mis-attached. Securities that cannot be resolved remain visibly unresolved and surface as a data-quality item (§6).</p>
+<h3 id="37-gaps-are-shown-never-estimated">3.7 Gaps are shown, never estimated</h3>
+<p>The system's default response to a missing value is to display an explicit unavailable state and the reason. Three concrete mechanisms enforce this:</p>
+<ul>
+<li><strong>No question marks in derived displays.</strong> The domicile shown for a company follows a fallback chain — disclosed domicile, else a security's listing country, else the country implied by a listing venue's MIC (each basis named), else an em-dash titled "domicile not disclosed by source." A non-ISO placeholder code from a source (observed for certain depositary-receipt rows) is treated as undisclosed rather than rendered literally, and the venue fallback is suppressed where it would imply a false domicile.</li>
+<li><strong>Calculations refuse invalid inputs.</strong> An upside metric returns <em>unavailable</em> — never zero — when either the target or the price is missing or the price is non-positive, because an invented zero would masquerade as a real value.</li>
+<li><strong>Absence is recorded, not back-filled.</strong> A market capitalisation not published by any configured provider and not yet calculable from a resolved shares-outstanding fact plus a recent verified quote is stored as absent, with the specific reason, rather than approximated.</li>
+</ul>
+<p>This is the operational reading of Rubin's warning [Rubin 1976]: the system does not assume a missingness mechanism it cannot justify.</p>
+<hr>
+<h2 id="4-regulatory-to-company-linkage">4. Regulatory-to-company linkage</h2>
+<h3 id="41-problem-and-stance">4.1 Problem and stance</h3>
+<p>Given a stream of regulatory instruments and changes, the task is to determine, for each, which of the ~1,300 issuers it plausibly affects and through what channel, and to characterise the potential impact. The stance is <em>evidence-first</em>: no match is created without at least one quotable disclosed fact tying the company to the instrument, and every match carries its evidence so a human can see the "why". A match with no attached evidence is not merely discouraged; it is flagged as a hard data-quality error (§6).</p>
+<h3 id="42-linkage-layers">4.2 Linkage layers</h3>
+<p>Matches are typed by a five-layer scheme that encodes <em>how direct</em> the relationship is:</p>
+<ul>
+<li><strong>L1 — direct legal applicability</strong> (the instrument's text applies to the company by its regulated status);</li>
+<li><strong>L2 — direct business exposure</strong> (a disclosed business fact places the company in the instrument's scope);</li>
+<li><strong>L3 — indirect exposure</strong> (jurisdiction or supply-chain context);</li>
+<li><strong>L4 — semantic / taxonomy candidates</strong> (a disclosed sector maps to an instrument's topic family);</li>
+<li><strong>L5 — contradictory / negative evidence</strong> (facts that <em>weaken</em> a relationship).</li>
+</ul>
+<p>Semantic similarity alone never establishes a material relationship; every match is a review-gated candidate.</p>
+<h3 id="43-rules-and-evidence">4.3 Rules and evidence</h3>
+<p>Each rule emits a structured <code>RuleHit</code>: a rule key, layer, relationship type, direction, a list of scoring <strong>factors</strong>, a list of typed <strong>evidences</strong> (<code>kind</code>, a verbatim <code>quote</code>, the <code>field_name</code>, a note, an <code>is_counter_evidence</code> flag), and a list of <strong>missing</strong> information the rule itself flags as absent — so supporting and contradicting evidence are stored symmetrically. The active rule families are:</p>
+<ul>
+<li><strong>Sanctions name-screen (L2).</strong> Company legal and alias names are token-set screened against sanctions-list entries, with guards requiring at least two distinctive tokens per side (generic tokens such as legal forms, "bank", "group" excluded) and at least 80% overlap of the smaller set. Every candidate records the compared names and score and <strong>requires human review</strong>; for most listed issuers the correct output is <em>no match</em>, and a correct empty result is honest, not a coverage failure.</li>
+<li><strong>FINMA prudential supervision (L1).</strong> A company whose exchange issuer-directory record discloses the accounting standard "Bank law" is, as a Source Fact, a supervised bank; a supervisory instrument matching banking-supervision terms is linked to it, quoting both the exchange field and the matched term. A non-Swiss disclosed domicile attaches a counter-evidence row noting the Swiss instrument applies at most indirectly.</li>
+<li><strong>Investment-company topic (L4).</strong> The listing segment "Standard for Investment Companies" (a Source Fact) is linked to collective-investment instruments as a candidate.</li>
+<li><strong>Sector–topic candidates (L4).</strong> A company's disclosed sector is mapped to topic families and matched against instruments carrying those topics.</li>
+</ul>
+<h3 id="44-from-disclosed-sector-to-topic">4.4 From disclosed sector to topic</h3>
+<p>Because sector strings arrive in many vocabularies, the sector–topic mapping has two stages. Canonical labels resolve directly through a curated map (e.g. <em>financials</em> to banking-supervision and market-conduct topics; <em>health care</em> to a pharma/health topic; <em>energy</em> to energy-environment and trade-control topics). Free-text labels are normalised by keyword: the topic set is the union over every keyword substring found, and the matched keyword(s) are surfaced as evidence, so the normalisation is always auditable. A keyword-normalised sector is treated as a slightly weaker signal than an exact canonical label, and its applicability factor is scored accordingly. This mapping is <em>configuration applied to a disclosed Source Fact</em>, never invented exposure: the disclosed sector is real, and the rule that maps it is versioned and quoted.</p>
+<p><em>Illustrative example (mechanism, not a result):</em> an issuer whose disclosed sector text is "automotive industry" normalises, by the keyword "automotive", to the trade-remedies and sanctions/trade-control topic families; a live tariff instrument carrying a trade-remedies topic then produces an L4 candidate match, with the disclosed sector and the matched term both quoted as evidence and the match left needs-review. No price effect is asserted.</p>
+<h3 id="45-topic-detection-precision">4.5 Topic detection precision</h3>
+<p>Instrument topics are detected from title and summary text against a topic taxonomy. A precision refinement distinguishes <em>generic</em> from <em>context</em> terms: a generic term (e.g. "disclosure" under a market-conduct topic) fires only when a context term (e.g. a securities-law term) co-occurs, and the matched term then names both parts. This prevents a generic word in an unrelated instrument (the documented failure case involved nuclear-cask inventories and education-grant rules) from burying the genuine topic signal.</p>
+<h3 id="46-candidate-hygiene-under-rule-evolution">4.6 Candidate hygiene under rule evolution</h3>
+<p>Because rules and taxonomies evolve, the engine runs a <em>retire pass</em>: a sector–topic candidate whose (instrument-topic ∧ company-sector-topic) no longer reproduces under the current rules is marked <code>retired_rule_change</code> — <strong>never deleted</strong> — with its original evidence retained for audit and its state excluded from default views and counts. If a later rule change makes the topic reproduce again, the candidate is reinstated. This keeps the match set faithful to the <em>current</em> rules without erasing the history of how it changed.</p>
+<h3 id="47-impact-assessment-inference-source-fact-and-calculation-kept-distinct">4.7 Impact assessment: inference, source fact, and calculation kept distinct</h3>
+<p>Each match carries an <code>impact_assessment</code> computed by a versioned scoring module (shipped formula <code>impact-1.2</code>). Each score is a weighted average of named factors — score = Σ(weight × value) / Σ(weight), with each value in [0,1] — and every factor's weight, value, contribution, and a plain-language explanation is stored as a <code>score_contribution</code> row and shown on the match page. The scored dimensions are applicability, exposure, materiality, urgency, market sensitivity, and confidence.</p>
+<p>The design rule that makes this honest is: <strong>a score with no evidence is <code>None</code> ("insufficient evidence to calculate"), never a guessed midpoint.</strong> Applicability and confidence are computed from the rule's factors and evidence counts, with confidence explicitly penalised for missing fields and counter-evidence. Urgency is computed only from real publication/deadline dates. <strong>Exposure</strong> is quantified only where the company has disclosed a geographic revenue split (a Company Disclosure) <em>and</em> the instrument names a jurisdiction: it is the jurisdiction-attributable disclosed revenue over the total disclosed geographic split of the same period, with numerator, denominator, period, and formula version shown. Regional aggregates and ambiguous labels ("EMEA", "International", "Other") are deliberately <em>not</em> attributed, which makes the computed share a <strong>stated lower bound</strong> rather than a false precision. Materiality, market surprise, adaptability, and market sensitivity remain <code>None</code> with explicit missing-input notes until their real inputs (disclosed financial magnitudes, consensus/pre-announcement pricing, company-response disclosures, price-reaction history) exist.</p>
+<p>On top of this core sits a <strong>policy score set</strong> — <code>source_reliability</code> from the source category, <code>legal_certainty</code> from the instrument's legal stage, <code>persistence</code> from a documented type-and-stage heuristic — combined into a <strong>triage composite</strong>, the geometric mean of the <em>available</em> components, so one weak leg drags the composite down and a missing leg neither helps nor hurts. The composite is a policy-attention <em>ranking aid, never a return forecast</em>.</p>
+<p>Crucially, the "potential price/impact" attached to a match is a <strong>labelled inference about direction and channel</strong>, grounded in the regulation's nature (type, jurisdiction, topic family), the match's layer and direction (e.g. "potentially adverse", "uncertain"), and the applicability/confidence scores. It is never a fabricated magnitude of price change: the company view renders a labelled price-impact inference, but no invented number.</p>
+<h3 id="48-amendment-and-change-detection">4.8 Amendment and change detection</h3>
+<p>Because raw artifacts are hashed (§3.3), a re-fetch of an already-known instrument whose content hash has changed and whose title has changed raises a <code>regulatory_amendment</code> alert; a newly-seen instrument raises a <code>new_regulation</code> (or <code>sanctions_update</code>) alert. These <em>material</em> regulatory events are surfaced in the user-facing feed, while pipeline and source-health events are recorded but kept out of that feed (§6). This is how "real-time regulatory change" enters the linkage graph: as a hash-detected, timestamped, provenance-carrying event, not as a trusted overwrite.</p>
+<hr>
+<h2 id="5-the-api-budget-governor">5. The API-budget governor</h2>
+<h3 id="51-the-constraint">5.1 The constraint</h3>
+<p>A system that aggregates dozens of public and free-tier commercial sources lives or dies by its treatment of rate limits. Several providers impose hard daily caps (one free tier is 250 calls/day; another free key is 50 requests/<em>month</em>), others meter per minute, and some unofficial public interfaces publish no quota at all. Exceeding a limit risks a ban that removes a source entirely — which, if misread, becomes a data gap. The governing directive is therefore absolute: <strong>never exceed a provider's request limits</strong>, and treat the sparest providers most sparingly.</p>
+<h3 id="52-mechanism-a-per-provider-daily-counter">5.2 Mechanism: a per-provider daily counter</h3>
+<p>The governor is standard-library-only and centres on one counter row per <code>(provider, day)</code> in an <code>api_budget</code> table. The core operation, <code>try_spend(provider, n)</code>, atomically increments today's counter <em>if and only if</em> the result stays within the daily cap and returns success; otherwise it returns failure <strong>without counting</strong>, and the adapter stops gracefully by raising <code>BudgetExhausted</code>. Atomicity is delegated to the database: the increment is a single conditional <code>UPDATE ... WHERE calls + n &lt;= cap</code> whose row-count tells the caller whether the spend was granted, so concurrent callers cannot jointly overshoot.</p>
+<p>Two design choices make this trustworthy:</p>
+<ul>
+<li><strong>Caps sit deliberately below advertised limits</strong>, leaving headroom for retries, clock skew, and out-of-band manual calls. Each cap is captured conservatively at build time, annotated in the source with the vendor evidence and verification date, and must be re-verified on the provider's own page before being raised. <em>Illustrative</em> configured caps (shipped configuration, not results): a 250/day free tier capped at 230; a per-minute-metered vendor capped well under its daily number with an 8-second interval that also keeps a run inside the per-minute meter; a 50/month free key capped at 1/day; a provider with a hard two-calls-per-second limit paced at roughly 0.55s.</li>
+<li><strong>Unknown providers are never blocked but are always counted</strong>, so a new adapter's consumption is visible from its first day rather than discovered after a ban.</li>
+</ul>
+<h3 id="53-pacing">5.3 Pacing</h3>
+<p>Beyond the daily cap, each provider carries a minimum inter-call interval, enforced by sleeping <em>before</em> a granted call returns and by reserving the next slot under a lock so that concurrent callers pace correctly. This shapes burst behaviour in the manner of a token bucket [Kleppmann 2017] while keeping the daily ceiling as a hard invariant.</p>
+<h3 id="54-transactional-correctness">5.4 Transactional correctness</h3>
+<p>Under SQLite's single-writer model, a second connection cannot write the counter while the runner holds its write transaction, so the runner <strong>binds its own connection</strong> to the governor for the duration of a run and budget spends ride the run's transaction, becoming durable when it commits (outside a bound run the governor opens a short-lived connection). The honesty note is explicit: a process killed mid-run can <em>under-count</em> calls already made, and the sub-limit buffer absorbs that — the system errs toward under-spending, never over-spending.</p>
+<h3 id="55-need-driven-rotation">5.5 Need-driven rotation</h3>
+<p>Budget is spent where it is <em>needed</em>, not uniformly. The rotation logic (illustrated by the weekly rotation of one statement-endpoint family per weekday) applies three ordered principles: <strong>breadth before repetition</strong> — the day's budget first serves companies with an actual coverage gap in the targeted field; <strong>need-driven skip</strong> — companies whose targeted field is already fresh within the freshness window are skipped, so budget is never spent re-confirming what is current; and <strong>confirmation only on genuine surplus</strong> — only once the day's family has no remaining breadth work does spare budget go to <em>cross-provider confirmation</em>, deliberately re-fetching a single-provider value from a second provider so the two can be compared (§6.4), with a budget refusal during confirmation simply ending the pass. Confirmation passes are annotated in the ingestion-run detail, so in the audit trail cross-provider repetition is always distinguishable from breadth work.</p>
+<h3 id="56-honest-exhaustion-and-outage-is-not-absence">5.6 Honest exhaustion and "outage is not absence"</h3>
+<p>When the governor refuses a call, the adapter raises <code>BudgetExhausted</code> and the runner records a truthful, self-clearing state: coverage status becomes <code>quota_exhausted</code> ("daily call budget reached (resumes tomorrow)"), records already loaded are kept (a <em>partial</em> outcome), an incident opens, and the state clears the next day. No over-cap call is ever made. Credential-gated sources lacking configuration are recorded as <code>authentication_required</code>, never as a fabricated result, and a run whose per-item refusals produce <em>zero</em> payloads is treated as a <code>source_failure</code> with the evidence recorded, so a silent "success with nothing" cannot occur.</p>
+<p>The most consequential rule is <strong>"outage is not absence."</strong> During coverage recovery (§7), a critical field counts as <em>attempted</em> only when at least one adapter <em>capable of serving it</em> completed a genuine run in that round; a provider-level outage — a rate-limit ban, credential gap, or network refusal — must not consume a company's recovery budget or demote it, because the field was never actually tested, and the round is recorded as <em>void due to outage</em>. The design note documents the concrete failure this fixed: a multi-day rate-limit ban on the sole provider of one field had demoted roughly 180 fully-verified companies to an exception tier purely because that provider was returning 429s every cycle — a collector-side outage misread as a universe-wide data gap. Distinguishing "we could not ask" from "there is nothing to find" is a first-order correctness property.</p>
+<h3 id="57-source-health-as-data">5.7 Source health as data</h3>
+<p>Every adapter run writes an <code>ingestion_run</code> record (mode, timings, status, records upserted, and a detail blob with per-item miss counts and confirmation annotations) and updates a <code>data_source</code> row whose coverage status is drawn from a controlled vocabulary of about fourteen states (confirmed-current, current-within-declared-delay, polling-delayed, coverage-unverified, authentication-required, quota-exhausted, source-failure, parser-failure, and so on). Failures open <code>coverage_incident</code> rows and alerts, and operator-facing strings are scrubbed of credential-bearing query parameters at the write choke points. Source health is thus itself provenance-carrying data, not log noise.</p>
+<hr>
+<h2 id="6-provenance-and-epistemic-honesty-design">6. Provenance and epistemic-honesty design</h2>
+<p>Sections 3–5 describe the mechanisms; this section states the principles they jointly enforce and the checks that police them.</p>
+<h3 id="61-every-value-is-sourced-calculated-or-inferred-and-says-which">6.1 Every value is sourced, calculated, or inferred — and says which</h3>
+<p>The value-class taxonomy (§3.4) is the spine of the design. Because <code>verification_status</code> is mandatory and columnar, the system cannot render a value without carrying its class, and the compact labels (SF, CD, ORF, CM, EBI, UNV) make the class visible at the point of use: an inference is never presented as a disclosed fact, and a calculation always names its formula version and inputs. Correspondingly, a missing value is a state with a <em>reason</em>, not a blank — the domicile fallback chain, the upside metric's refusal of invalid inputs, and the market-capitalisation absence note (§3.7) are instances of one rule: display the unavailable state and why. This is the user-visible face of the Rubin discipline [Rubin 1976] and of the fitness-for-use principle [Wang &amp; Strong 1996].</p>
+<h3 id="62-evidence-is-mandatory-and-symmetric">6.2 Evidence is mandatory and symmetric</h3>
+<p>Every match carries typed evidence, and counter-evidence is stored in the same structure with an <code>is_counter_evidence</code> flag (§4.3). Negative evidence — a domicile that contradicts an instrument's jurisdiction, a listing that weakens an applicability claim — is not discarded; it lowers confidence and is shown. The system records reasons a relationship might <em>not</em> hold alongside reasons it might.</p>
+<h3 id="63-data-quality-checks-that-never-fix-by-inventing">6.3 Data-quality checks that never "fix" by inventing</h3>
+<p>A quality pass records issues and surfaces them; it never silently repairs data by inventing values. The checks include: duplicate companies sharing an LEI or Swiss UID (error); securities with no resolved company (an honest identity gap); internally inconsistent registry records; stale quotes (older than a freshness threshold) and impossible quotes (non-positive prices); invalid analyst ranges (low above high) and consensus values outside their own disclosed range; instruments whose title is still a canonical identifier pending retrieval; and — as a hard error — any match lacking attached evidence, since that violates the provenance rules the whole system rests on.</p>
+<h3 id="64-reconciliation-surfaces-disagreement-rather-than-averaging-it-away">6.4 Reconciliation surfaces disagreement rather than averaging it away</h3>
+<p>Where the need-driven rotation (§5.5) has obtained the same quantity from two providers, a reconciliation check compares them: quotes for the same security on the same calendar day whose relative spread exceeds a threshold, and consensus analyst targets from different providers within a short window whose means diverge beyond a (larger) threshold, are each recorded as a data-quality issue carrying the conflicting providers, values, and timestamps as evidence. The disagreement is <em>shown</em>, never averaged into a false consensus; redundancy exposes conflict rather than manufacturing agreement.</p>
+<h3 id="65-material-versus-system-events-and-documentation">6.5 Material versus system events, and documentation</h3>
+<p>Alerts are partitioned so pipeline noise never dilutes the signal a human is meant to read: <em>material</em> regulatory and market events (new instruments, amendments, sanctions updates, material filings, analyst-target changes) populate the user-facing feed, while <em>system</em> events (coverage gaps, source outages, bulk linkage summaries) are recorded and surfaced on source-health and incident views but kept out of it. At the documentation layer, the system ships a methodology page stating the truthfulness rules, value classes, identity-resolution policy, scoring formula, linkage layers, and provider attribution; per-assessment score breakdowns function as value-level "model cards" [Mitchell et al. 2019] and the methodology page as a dataset-level datasheet [Gebru et al. 2021], for FAIR-aligned reusability [Wilkinson et al. 2016] at the granularity of the individual claim.</p>
+<hr>
+<h2 id="7-coverage-evaluation-and-completeness-gating">7. Coverage evaluation and completeness gating</h2>
+<p>A system that refuses to fabricate must be able to <em>measure and display its own ignorance</em>. Meridian does this with a weighted coverage auditor that scores each company's completeness, classifies it into an honest tier, and drives a targeted, budget-respectful recovery loop. Nothing here fabricates a value: a field that stays missing stays visibly missing, with the recovery attempts recorded per company.</p>
+<h3 id="71-weighted-completeness">7.1 Weighted completeness</h3>
+<p>For each company, six blocks are scored on [0,1] from recorded facts and combined with fixed weights that sum to 100:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Block</th>
+<th style="text-align: right;">Weight</th>
+<th>What it measures (from recorded facts only)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Identity</td>
+<td style="text-align: right;">10</td>
+<td>Legal name; an external identifier (LEI/UID/CIK/ISIN); a resolvable domicile via the labelled fallback chain</td>
+</tr>
+<tr>
+<td>Market</td>
+<td style="text-align: right;">20</td>
+<td>A verified latest quote price; freshness within the window; a published (or validly calculated) market cap; a 52-week range computable from recorded bars</td>
+</tr>
+<tr>
+<td>Analyst</td>
+<td style="text-align: right;">15</td>
+<td>A latest snapshot that either discloses targets or is an explicit <em>verified no-coverage</em> state</td>
+</tr>
+<tr>
+<td>Financials</td>
+<td style="text-align: right;">15</td>
+<td>A fundamentals payload; a reported currency; a consensus-recommendation state (an honest proxy set until revenue/EPS facts are ingested)</td>
+</tr>
+<tr>
+<td>Exposure</td>
+<td style="text-align: right;">20</td>
+<td>A sourced business description; a disclosed sector; geographic evidence; and the disclosed segment/geographic revenue split where present</td>
+</tr>
+<tr>
+<td>Regulatory</td>
+<td style="text-align: right;">20</td>
+<td>At least one evidence-backed match (or a fact-derived supervision context); and filings present (or an identified filing channel via CIK/venue)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Each block's sub-components carry their own weights and a plain-language note, so a company's score is fully explained, not just asserted. Every note is derived from data; company names are never referenced in the scoring logic.</p>
+<h3 id="72-critical-fields-and-honest-tiers">7.2 Critical fields and honest tiers</h3>
+<p>Six fields are designated <em>critical</em> — a verified quote price, a market cap, an analyst state, a business description, a regulatory linkage (a match or fact-derived supervision context), and a filings channel — and all must be present for "core complete". Companies fall into five tiers:</p>
+<ul>
+<li><strong>core complete</strong> — score ≥ 90 and no missing critical field;</li>
+<li><strong>core usable</strong> — score ≥ 75;</li>
+<li><strong>partial</strong> — score ≥ 40;</li>
+<li><strong>discovery only</strong> — score &lt; 40;</li>
+<li><strong>coverage exception</strong> — every recovery pass has failed on a still-missing critical field.</li>
+</ul>
+<p>A coverage-exception company is <em>excluded from the principal ranked home list but retained</em> in the full universe view with a backlog note and a tier filter; the exception <strong>lifts automatically</strong> as soon as a later audit finds the missing fields. <strong>Companies are never deleted.</strong> The exception tier is history-dependent: it can only be reached through <em>persisted</em> recovery history, so a fresh in-memory audit can never manufacture one.</p>
+<h3 id="73-targeted-budget-respectful-recovery">7.3 Targeted, budget-respectful recovery</h3>
+<p>The auditor does not merely score; it drives recovery. Each cycle it audits the whole universe, selects the highest-scoring companies that still have missing critical fields (bounded to a batch limit per cycle so recovery stays rate-limit-respectful), and enqueues <strong>exactly</strong> the adapters needed for the specific missing fields — a quote provider and its redundant pair for a missing price, a fundamentals provider for a missing description or cap, an independent <em>calculated</em> market-cap path that touches only companies whose cap is still null (so a provider-published value always wins), a filings-channel resolver, and so on — then re-links and re-audits.</p>
+<p>A company's <code>recovery_passes</code> counter increments <strong>only</strong> on a <em>full failed pass</em> (a round after which every targeted critical field is still missing), and a round is <em>void</em> (no strike) when the fields were never genuinely attempted because the responsible provider was in outage (§5.6). After a fixed number of genuinely-failed passes the company tiers to coverage-exception. This ties honest missingness (§6.1), the budget governor (§5), and "outage is not absence" together: only "we asked and there is nothing" counts against a company, never "we could not ask".</p>
+<h3 id="74-completeness-gating-of-prominent-surfaces">7.4 Completeness gating of prominent surfaces</h3>
+<p>Prominent, low-density surfaces are <em>gated on completeness</em> so the system never leads with a thin record. The home page's featured selection admits only core-tier companies that additionally have at least one evidence-backed match, a published market cap, and a verified latest quote, and enforces diversity across policy-risk channels (falling back to sector diversity); when fewer than the intended number qualify, it renders an honest placeholder rather than padding with weaker records. Completeness is thus not only measured and displayed but is an <em>admission criterion</em> for the system's most visible claims.</p>
+<hr>
+<h2 id="8-limitations">8. Limitations</h2>
+<p>A system whose central claim is honesty owes a candid account of its limits.</p>
+<p><strong>Potential impact, not measured effect.</strong> Meridian identifies <em>which</em> companies a regulatory event plausibly touches and <em>why</em> and characterises exposure qualitatively; it does not estimate an abnormal return. The market-sensitivity dimension is deliberately <code>None</code> because the system does not yet ingest per-event price-reaction history, and extending toward a genuine event study [MacKinlay 1997] would require clean event dates, estimation windows, and a market model that the current pipeline does not compute. The "impact" here is a labelled, evidence-backed triage direction, not a quantified price effect.</p>
+<p><strong>Candidate signals, not confirmed exposure.</strong> Sector–topic matches (L4) are review-gated candidates derived from a disclosed sector mapped by a versioned rule — hypotheses about relevance, not confirmations of material exposure. Exposure is quantified only for the subset of companies with a disclosed geographic revenue split, and even then it is a <em>stated lower bound</em> when disclosed labels are regional aggregates that cannot be unambiguously attributed. The honesty does not remove the underlying sparsity.</p>
+<p><strong>Provider dependence and free-tier fragility.</strong> Coverage rests substantially on free and unofficial provider interfaces whose limits are undocumented or unstable and whose availability is not guaranteed. A provider can change limits, restrict endpoints, or ban a key without notice; the "outage is not absence" rule protects data <em>integrity</em> under such events but cannot restore the missing <em>coverage</em>. Several caps are self-imposed budgets against interfaces that publish no official quota and must be re-verified against provider terms before reuse.</p>
+<p><strong>Cadence over immediacy.</strong> Because budgets are finite, prices refresh on a once-daily reference-close cadence rather than intraday. This is defensible for a comparability-oriented reference instrument, but it means the system is <em>near</em>-real-time for regulatory change and <em>daily</em> for market state; it is not a live trading feed.</p>
+<p><strong>Entity-resolution residue.</strong> Deterministic-first resolution with venue verification reduces mis-joins, but unresolved securities remain (shown honestly as gaps) and approximate name matches above threshold can still be wrong; every decision is logged for review, but review is a human bottleneck. Sanctions name-screening is intentionally high-recall and low-precision, and every hit requires identifier-level confirmation the system does not itself possess.</p>
+<p><strong>Single-store and scope limits.</strong> The single-writer SQLite core simplifies transactional provenance but constrains write concurrency, and the governor's under-counting-on-kill behaviour is safe (never over-spends) but makes the counter a floor, not a perfect ledger. The universe is roughly 1,300 mostly-listed issuers with a Swiss/European weighting, and several rules (the exchange-directory "Bank law" and investment-company classifications, the Swiss-supervisory linkages) are tuned to sources available for that universe. The <em>methodology</em> — provenance envelope, value classes, evidence-first linkage, budget governor, coverage tiering — is transferable, but the specific rules and mappings are not claimed to generalise unchanged.</p>
+<p><strong>Not advice; no empirical evaluation reported here.</strong> The triage composite is a policy-attention ranking aid, explicitly not a return forecast, and nothing in the system is investment advice. This report documents methodology only: it reports no accuracy, precision/recall, coverage-distribution, or impact figures, and all worked examples are illustrative of mechanism. A companion empirical evaluation — linkage precision against a human-labelled sample, coverage-tier distributions over time, and reconciliation-conflict rates — is future work.</p>
+<hr>
+<h2 id="9-conclusion">9. Conclusion</h2>
+<p>Meridian is an existence proof that a real-time regulatory-impact mapping system can be built without the usual dishonesty. Its three commitments reinforce one another: a provenance-first data model makes every value's origin and epistemic class explicit; an evidence-first linkage engine connects regulation to companies only through quotable disclosed facts and keeps inference, source fact, and calculation distinct; and a strict-budget acquisition discipline runs continuously against real rate limits while refusing to confuse a collector-side outage with a data gap. The connecting idea is that <em>ignorance is data</em>: a missing value, a failed provider, an unattributable revenue label, and an untested field are all recorded, typed, and shown rather than smoothed away. The cost is coverage and immediacy (§8); the benefit is that a reader can always tell what the system knows, what it computed, what it merely infers, and what it does not know at all — the property that matters most for informing decisions about regulatory exposure.</p>
+<hr>
+<h2 id="references">References</h2>
+<p>Arner, D. W., Barberis, J., &amp; Buckley, R. P. (2017). FinTech, RegTech, and the Reconceptualization of Financial Regulation. <em>Northwestern Journal of International Law &amp; Business</em>, 37(3), 371–414.</p>
+<p>Buneman, P., Khanna, S., &amp; Tan, W. C. (2001). Why and Where: A Characterization of Data Provenance. In <em>Proceedings of the 8th International Conference on Database Theory (ICDT 2001)</em>, LNCS 1973, 316–330. Springer.</p>
+<p>Christen, P. (2012). <em>Data Matching: Concepts and Techniques for Record Linkage, Entity Resolution, and Duplicate Detection.</em> Springer.</p>
+<p>El Harras, M., &amp; Salahddine, M. A. (2025). Tracking Financial Crime Through Code and Law: A Review of RegTech Applications in Anti-Money Laundering and Terrorism Financing. <em>arXiv:2511.15764</em>.</p>
+<p>Fama, E. F. (1970). Efficient Capital Markets: A Review of Theory and Empirical Work. <em>Journal of Finance</em>, 25(2), 383–417.</p>
+<p>Fellegi, I. P., &amp; Sunter, A. B. (1969). A Theory for Record Linkage. <em>Journal of the American Statistical Association</em>, 64(328), 1183–1210.</p>
+<p>Gebru, T., Morgenstern, J., Vecchione, B., Vaughan, J. W., Wallach, H., Daumé III, H., &amp; Crawford, K. (2021). Datasheets for Datasets. <em>Communications of the ACM</em>, 64(12), 86–92.</p>
+<p>Kleppmann, M. (2017). <em>Designing Data-Intensive Applications.</em> O'Reilly Media.</p>
+<p>MacKinlay, A. C. (1997). Event Studies in Economics and Finance. <em>Journal of Economic Literature</em>, 35(1), 13–39.</p>
+<p>Mitchell, M., Wu, S., Zaldivar, A., Barnes, P., Vasserman, L., Hutchinson, B., Spitzer, E., Raji, I. D., &amp; Gebru, T. (2019). Model Cards for Model Reporting. In <em>Proceedings of the ACM Conference on Fairness, Accountability, and Transparency (FAT* 2019)</em>, 220–229.</p>
+<p>Moreau, L., Missier, P., et al. (W3C Provenance Working Group) (2013). <em>PROV-DM: The PROV Data Model.</em> W3C Recommendation, 30 April 2013.</p>
+<p>Nygard, M. T. (2018). <em>Release It! Design and Deploy Production-Ready Software</em> (2nd ed.). Pragmatic Bookshelf.</p>
+<p>Rubin, D. B. (1976). Inference and Missing Data. <em>Biometrika</em>, 63(3), 581–592.</p>
+<p>Simmhan, Y. L., Plale, B., &amp; Gannon, D. (2005). A Survey of Data Provenance in e-Science. <em>ACM SIGMOD Record</em>, 34(3), 31–36.</p>
+<p>Wang, R. Y., &amp; Strong, D. M. (1996). Beyond Accuracy: What Data Quality Means to Data Consumers. <em>Journal of Management Information Systems</em>, 12(4), 5–33.</p>
+<p>Wilkinson, M. D., Dumontier, M., Aalbersberg, I. J., et al. (2016). The FAIR Guiding Principles for Scientific Data Management and Stewardship. <em>Scientific Data</em>, 3, 160018.</p>
+<hr>
+<h2 id="appendix-a-value-class-taxonomy-verification_status">Appendix A — Value-class taxonomy (verification_status)</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Label</th>
+<th>Class</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SF</td>
+<td>Source Fact</td>
+<td>Primary datum from an authoritative non-issuer source</td>
+</tr>
+<tr>
+<td>CD</td>
+<td>Company Disclosure</td>
+<td>Datum disclosed by the issuer itself</td>
+</tr>
+<tr>
+<td>ORF</td>
+<td>Official Regulatory Fact</td>
+<td>Datum from an official regulatory publisher or sanctions authority</td>
+</tr>
+<tr>
+<td>CM</td>
+<td>Calculated Metric</td>
+<td>Value computed from stored inputs, carrying formula version + inputs</td>
+</tr>
+<tr>
+<td>EBI</td>
+<td>Evidence-Based Inference</td>
+<td>Value/relationship inferred from indirect recorded evidence; never asserted as disclosed fact</td>
+</tr>
+<tr>
+<td>UNV</td>
+<td>Unverified</td>
+<td>Recorded but not yet corroborated</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="appendix-b-provenance-envelope-columns-on-every-sourced-row">Appendix B — Provenance envelope (columns on every sourced row)</h2>
+<p><code>source_key</code> · <code>source_url</code> · <code>retrieved_at</code> · <code>published_at</code> · <code>raw_artifact_id</code> (FK to immutable SHA-256-hashed payload) · <code>content_hash</code> · <code>parser_version</code> · <code>verification_status</code>.</p>
+<h2 id="appendix-c-linkage-layers">Appendix C — Linkage layers</h2>
+<p>L1 direct legal applicability · L2 direct business exposure · L3 indirect exposure · L4 semantic/taxonomy candidate · L5 contradictory/negative evidence. All matches are review-gated candidates; semantic similarity alone never establishes a material relationship.</p>
+<h2 id="appendix-d-coverage-tiers">Appendix D — Coverage tiers</h2>
+<p>core complete (≥90, no missing critical) · core usable (≥75) · partial (≥40) · discovery only (&lt;40) · coverage exception (all genuine recovery passes failed on a critical field; excluded from the principal ranked list, retained in the full universe, lifts automatically; companies are never deleted).</p>
+<hr>
+<p><em>Data acknowledgements (as carried in the system's provenance chips and attribution notice): official and public sources including exchange issuer directories, the Global LEI Foundation, national and EU regulatory publishers and sanctions authorities, official filing registers and central-bank statistical services; and free/personal-tier commercial and community providers. Each stored value names its own provider in its provenance record. Meridian is a private, non-commercial research instrument; provider data remains subject to each provider's terms.</em></p>
+    </article>
+    <footer class="paperfoot">
+      <span>&copy; <span id="yr">2026</span> Christopher I. V. Farmer</span>
+      <span>&middot;</span>
+      <a href="../index.html">Back to Publications</a>
+      <span>&middot;</span>
+      <a href="../../docs/CV-Christopher-Farmer-2026-08.pdf" target="_blank" rel="noopener">CV</a>
+      <span>&middot;</span>
+      <span class="mono">Preprint &mdash; submitted; pending peer review &middot; not legal advice</span>
+    </footer>
+  </main>
+
+<script>
+  (function(){
+    var root=document.documentElement, KEY='cf-theme';
+    try{ var s=localStorage.getItem(KEY); if(s){ root.setAttribute('data-theme', s); } }catch(e){}
+    var btn=document.getElementById('theme');
+    if(btn){ btn.addEventListener('click', function(){
+      var next=root.getAttribute('data-theme')==='dark'?'light':'dark';
+      root.setAttribute('data-theme', next);
+      try{ localStorage.setItem(KEY, next); }catch(e){}
+    }); }
+    var yr=document.getElementById('yr'); if(yr){ yr.textContent=String(new Date().getFullYear()); }
+  })();
+</script>
+
+</body>
+</html>

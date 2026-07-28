@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f17'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='27' font-weight='700' fill='%23d4b24c' text-anchor='middle'%3ECF%3C/text%3E%3C/svg%3E">
+<title>The Magnitsky Model for AI — Policy Simulator · Christopher I. V. Farmer</title>
+<meta name="description" content="An illustrative, offline policy simulator for the Magnitsky Model for AI: pick an AI-driven circumvention scenario, watch the double veil defeat attribution, enact targeted designations across jurisdictions, tune the cascade, and read a verdict. Not a prediction, not legal advice.">
+<meta name="robots" content="noindex">
+<style>
+  /* Offline-first: names Zilla Slab / Inter / IBM Plex Mono, falls back to system fonts.
+     No network, no CDN, no external assets. */
+  :root{
+    --bg:#0b0f17; --bg2:#0e1420; --surface:#131b2a; --surface2:#182133;
+    --ink:#e9eef7; --ink2:#aab7cc; --muted:#7d8ba3; --line:#233145; --line2:#2c3d54;
+    --accent:#43b3a6; --accent-ink:#84d6ca; --gold:#d4b24c; --gold-soft:#e6cf8f;
+    --good:#43c59e; --warn:#e0a13a; --bad:#e0685f; --shadow:0 18px 50px -20px rgba(0,0,0,.7);
+    --radius:16px; --maxw:1180px;
+    --font-display:'Zilla Slab',Georgia,'Times New Roman',serif;
+    --font-body:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --font-mono:'IBM Plex Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
+  }
+  html[data-theme="light"]{
+    --bg:#f4f1ec; --bg2:#ebe6dd; --surface:#ffffff; --surface2:#faf7f2;
+    --ink:#221e18; --ink2:#4c473e; --muted:#675f54; --line:#e7e1d6; --line2:#d9d2c5;
+    --accent:#0d5f57; --accent-ink:#0a463f; --gold:#836819; --gold-soft:#6f5714; --good:#0e7a52; --bad:#b23a30;
+    --shadow:0 18px 44px -24px rgba(15,30,60,.35);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:radial-gradient(1100px 720px at 82% -10%,rgba(67,179,166,.10),transparent 60%),var(--bg);
+    color:var(--ink);font-family:var(--font-body);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  a{color:var(--accent-ink);text-decoration:none}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:5px}
+  ::selection{background:color-mix(in oklab,var(--accent) 32%,transparent)}
+  h1,h2,h3,h4{font-family:var(--font-display);font-weight:600;line-height:1.14;margin:0}
+  .mono{font-family:var(--font-mono)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,40px)}
+  .eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+
+  /* Top bar */
+  .top{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+    padding:11px clamp(16px,4vw,40px);background:color-mix(in oklab,var(--bg),transparent 8%);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:11px;color:var(--ink);min-width:0}
+  .crest{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex:0 0 auto;
+    background:linear-gradient(145deg,#0e7b6f,#0b655b);color:#fff;font-family:var(--font-display);font-weight:700;font-size:15px;box-shadow:var(--shadow)}
+  .brand .nm{font-family:var(--font-display);font-weight:700;font-size:14.5px;line-height:1.05}
+  .brand .rl{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+  .topacts{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:9px 13px;border-radius:10px;font-weight:600;font-size:12.5px;
+    border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer;transition:.16s;white-space:nowrap;font-family:var(--font-body)}
+  .btn:hover{border-color:var(--accent);transform:translateY(-1px)}
+  .btn svg{width:15px;height:15px}
+  .btn.icon{padding:9px;width:38px}
+  .btn.primary{background:linear-gradient(145deg,#0e7b6f,#0b655b);border-color:transparent;color:#fff}
+  .btn.gold{background:linear-gradient(145deg,var(--gold),var(--gold-soft));border-color:transparent;color:#20180a}
+
+  /* Hero */
+  .hero{padding:clamp(26px,5vw,50px) 0 6px}
+  .badges{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:16px}
+  .badge{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+    border:1px solid var(--line2);border-radius:999px;padding:5px 11px;color:var(--ink2);background:var(--surface)}
+  .badge.warnb{color:var(--gold);border-color:color-mix(in oklab,var(--gold) 40%,transparent)}
+  .badge .d{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+  .hero h1{font-size:clamp(27px,4.4vw,44px);letter-spacing:-.016em;line-height:1.07;max-width:20ch}
+  .hero .lead{color:var(--ink2);font-size:clamp(14.5px,1.55vw,17px);max-width:72ch;margin:15px 0 0}
+  .disc{display:flex;gap:12px;align-items:flex-start;margin:20px 0 4px;padding:13px 16px;border:1px solid var(--line2);border-left:3px solid var(--gold);
+    border-radius:12px;background:color-mix(in oklab,var(--gold) 7%,var(--surface));font-size:13px;color:var(--ink2)}
+  .disc svg{width:18px;height:18px;color:var(--gold);flex:0 0 auto;margin-top:2px}
+  .disc b{color:var(--ink)}
+
+  /* Panels */
+  .panel{margin-top:clamp(20px,3.2vw,34px);background:linear-gradient(180deg,var(--surface),var(--surface2));
+    border:1px solid var(--line);border-radius:var(--radius);padding:clamp(18px,2.6vw,26px);box-shadow:var(--shadow)}
+  .step{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .step .num{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;flex:0 0 auto;font-family:var(--font-mono);font-weight:600;font-size:13px;
+    background:color-mix(in oklab,var(--accent) 18%,var(--surface));color:var(--accent-ink);border:1px solid color-mix(in oklab,var(--accent) 30%,transparent)}
+  .step h2{font-size:clamp(17px,2.1vw,21px)}
+  .panel .sub{color:var(--ink2);font-size:13.5px;margin:2px 0 18px;max-width:78ch}
+
+  /* Scenario cards */
+  .scn{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:820px){ .scn{grid-template-columns:1fr} }
+  .scard{position:relative;text-align:left;background:var(--bg2);border:1px solid var(--line2);border-radius:13px;padding:16px 16px 15px;cursor:pointer;transition:.16s;color:var(--ink);font-family:inherit}
+  .scard:hover{transform:translateY(-2px);border-color:var(--accent)}
+  .scard[aria-checked="true"]{border-color:var(--accent);background:color-mix(in oklab,var(--accent) 12%,var(--bg2));box-shadow:inset 0 0 0 1px var(--accent)}
+  .scard .reg{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+  .scard h3{font-size:15.5px;margin:8px 0 0;line-height:1.22}
+  .scard p{font-size:12.4px;color:var(--ink2);margin:9px 0 0;line-height:1.5}
+  .scard .tick{position:absolute;top:13px;right:13px;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line2);display:grid;place-items:center;transition:.16s}
+  .scard[aria-checked="true"] .tick{background:var(--accent);border-color:var(--accent)}
+  .scard .tick svg{width:12px;height:12px;color:#fff;opacity:0}
+  .scard[aria-checked="true"] .tick svg{opacity:1}
+
+  .rowlabel{font-size:12px;font-weight:600;color:var(--ink2);margin:20px 0 9px;letter-spacing:.01em}
+  .rowlabel .hint{font-weight:400;color:var(--muted)}
+  /* Segmented control */
+  .seg{display:inline-flex;flex-wrap:wrap;gap:6px;background:var(--bg2);border:1px solid var(--line2);border-radius:11px;padding:5px}
+  .seg button{font-family:inherit;font-size:12.5px;font-weight:600;color:var(--ink2);background:transparent;border:0;border-radius:8px;padding:8px 13px;cursor:pointer;transition:.14s}
+  .seg button:hover{color:var(--ink)}
+  .seg button[aria-checked="true"]{background:linear-gradient(145deg,#0e7b6f,#0b655b);color:#fff}
+  html[data-theme="light"] .seg button[aria-checked="true"]{background:var(--accent);color:#fff}
+  .charnote{font-size:12.3px;color:var(--muted);margin-top:8px}
+  .predicate{margin-top:16px;padding:12px 14px;border:1px dashed var(--line2);border-radius:11px;background:color-mix(in oklab,var(--accent) 5%,transparent);font-size:13px;color:var(--ink2)}
+  .predicate b{color:var(--accent-ink);font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:5px}
+
+  /* Double veil visual */
+  .veilwrap{display:grid;grid-template-columns:1.35fr 1fr;gap:22px;align-items:center}
+  @media(max-width:900px){ .veilwrap{grid-template-columns:1fr} }
+  .veilsvg{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:13px;background:radial-gradient(120% 120% at 15% 10%,rgba(67,179,166,.07),transparent 55%),var(--bg2)}
+  .veilsvg .boxfill{fill:var(--surface);stroke:var(--line2)}
+  .veilsvg .boxink{fill:var(--ink)}
+  .veilsvg .boxink2{fill:var(--ink2)}
+  .veilsvg .veilband{fill:color-mix(in oklab,var(--gold) 20%,transparent);stroke:color-mix(in oklab,var(--gold) 55%,transparent);stroke-dasharray:4 4}
+  .veilsvg .veillab{fill:var(--gold-soft);font-family:var(--font-mono)}
+  .veilsvg .attrib{stroke:var(--bad);stroke-width:2.4;fill:none;stroke-dasharray:7 6}
+  .veilsvg .attriblab{fill:var(--bad);font-family:var(--font-mono);font-weight:600}
+  .veilsvg .bypass{stroke:var(--accent);stroke-width:2.6;fill:none}
+  .veilsvg .bypasslab{fill:var(--accent-ink);font-family:var(--font-mono)}
+  .veilsvg .lab{font-family:var(--font-body);font-weight:600}
+  .veilsvg .lab.sm{font-size:10.5px}
+  .anim .attrib{stroke-dashoffset:0;animation:dashmove 1.1s linear infinite}
+  .anim .attribtry{animation:tryreach 2.4s ease-in-out infinite}
+  .anim .bypass{stroke-dasharray:640;stroke-dashoffset:640;animation:draw 2.2s ease-out .5s forwards}
+  .anim .stamp{animation:stampin .5s ease-out .9s both}
+  @keyframes dashmove{to{stroke-dashoffset:-26}}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  @keyframes tryreach{0%,100%{opacity:.35;transform:translateX(-8px)}45%{opacity:1;transform:translateX(0)}60%{opacity:1;transform:translateX(0)}}
+  @keyframes stampin{from{opacity:0;transform:scale(1.5) rotate(-8deg)}to{opacity:1;transform:scale(1) rotate(-8deg)}}
+  .veilside h3{font-size:16px;margin-bottom:8px}
+  .veilside p{font-size:13px;color:var(--ink2);margin:0 0 12px}
+  .attrline{display:flex;align-items:center;gap:10px;padding:11px 13px;border:1px solid color-mix(in oklab,var(--bad) 40%,transparent);border-radius:11px;background:color-mix(in oklab,var(--bad) 10%,transparent);font-size:13px}
+  .attrline .x{width:22px;height:22px;border-radius:50%;background:var(--bad);color:#fff;display:grid;place-items:center;flex:0 0 auto;font-weight:700}
+  .attrline b{color:var(--ink)}
+
+  /* Console: jurisdictions + levers */
+  .console{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  @media(max-width:900px){ .console{grid-template-columns:1fr} }
+  .jchips{display:flex;flex-wrap:wrap;gap:9px}
+  .jchip{position:relative;text-align:left;font-family:inherit;background:var(--bg2);border:1px solid var(--line2);border-radius:11px;padding:11px 13px;cursor:pointer;transition:.15s;color:var(--ink);min-width:150px;flex:1 1 150px}
+  .jchip:hover{border-color:var(--accent);transform:translateY(-1px)}
+  .jchip[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in oklab,var(--accent) 13%,var(--bg2))}
+  .jchip .jn{font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:8px}
+  .jchip .jn .b{width:9px;height:9px;border-radius:3px;border:1.5px solid var(--line2);flex:0 0 auto}
+  .jchip[aria-pressed="true"] .jn .b{background:var(--accent);border-color:var(--accent)}
+  .jchip .js{font-size:11px;color:var(--muted);margin-top:3px}
+  .jchip .jm{display:flex;gap:8px;margin-top:8px}
+  .jchip .jm span{font-family:var(--font-mono);font-size:9.5px;color:var(--ink2);letter-spacing:.03em}
+  .jchip .jm b{color:var(--accent-ink)}
+
+  .lever{margin-bottom:16px}
+  .lever .lh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px}
+  .lever .lh label{font-size:13px;font-weight:600;color:var(--ink)}
+  .lever .lh .v{font-family:var(--font-mono);font-size:12px;color:var(--accent-ink);font-weight:600}
+  .lever .ld{font-size:11.5px;color:var(--muted);margin-top:5px;line-height:1.4}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:99px;background:var(--line);outline-offset:4px;cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:linear-gradient(145deg,var(--accent),var(--accent-ink));border:2px solid var(--surface);box-shadow:0 2px 6px rgba(0,0,0,.4)}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border:2px solid var(--surface);border-radius:50%;background:var(--accent);box-shadow:0 2px 6px rgba(0,0,0,.4)}
+  .runrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px}
+  .runrow .spacer{flex:1}
+  .coread{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+  .costat{flex:1 1 90px;background:var(--bg2);border:1px solid var(--line2);border-radius:10px;padding:9px 11px}
+  .costat .k{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .costat .n{font-family:var(--font-display);font-weight:700;font-size:18px;color:var(--ink);margin-top:2px}
+  .costat .n b{color:var(--gold)}
+
+  /* Cascade rail */
+  .rail{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px;margin-top:6px}
+  .stage{flex:1 1 150px;min-width:140px;background:var(--bg2);border:1px solid var(--line2);border-radius:13px;padding:14px 13px;transition:.25s;position:relative}
+  .stage.fired{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 10px 30px -16px rgba(67,179,166,.6)}
+  .stage .si{display:flex;align-items:center;gap:8px}
+  .stage .si .ci{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;font-family:var(--font-mono);font-size:11px;color:var(--muted);border:1px solid var(--line2);flex:0 0 auto}
+  .stage.fired .si .ci{color:var(--accent-ink);border-color:var(--accent)}
+  .stage h3{font-size:12.8px;line-height:1.2;margin-top:9px;min-height:2.4em}
+  .stage .cap{font-size:10.8px;color:var(--muted);margin-top:5px;line-height:1.35;min-height:2.6em}
+  .stage .track{height:8px;border-radius:99px;background:var(--line);margin-top:11px;overflow:hidden}
+  .stage .fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent-ink));transition:width .7s cubic-bezier(.4,0,.2,1)}
+  .stage.out .fill{background:linear-gradient(90deg,var(--gold),var(--gold-soft))}
+  .stage .pct{font-family:var(--font-mono);font-size:11px;color:var(--ink2);margin-top:7px;font-weight:600}
+  .stage.out{flex:1 1 170px;background:linear-gradient(180deg,color-mix(in oklab,var(--gold) 8%,var(--bg2)),var(--bg2))}
+  .arrow{flex:0 0 auto;align-self:center;color:var(--line2);display:grid;place-items:center}
+  .arrow svg{width:18px;height:18px}
+  @media(max-width:760px){ .arrow{transform:rotate(90deg)} .stage{flex:1 1 100%} }
+
+  /* Verdict */
+  .verdict{margin-top:6px;border-radius:14px;border:1px solid var(--line2);overflow:hidden}
+  .verdict .vhead{display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding:20px clamp(16px,2.4vw,24px)}
+  .verdict .vk{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .verdict .vbig{font-family:var(--font-display);font-weight:700;font-size:clamp(24px,4vw,38px);letter-spacing:-.01em;line-height:1}
+  .verdict .vsum{flex:1 1 320px;font-size:13.5px;color:var(--ink2);min-width:220px}
+  .verdict .vscore{text-align:right;font-family:var(--font-mono)}
+  .verdict .vscore .n{font-size:28px;font-weight:600;color:var(--ink)}
+  .verdict .vscore .l{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .verdict.v-contained{border-color:color-mix(in oklab,var(--accent) 55%,transparent);background:color-mix(in oklab,var(--accent) 10%,var(--surface))}
+  .verdict.v-contained .vbig{color:var(--accent-ink)}
+  .verdict.v-cascaded{border-color:color-mix(in oklab,var(--gold) 55%,transparent);background:color-mix(in oklab,var(--gold) 11%,var(--surface))}
+  .verdict.v-cascaded .vbig{color:var(--gold)}
+  .verdict.v-circumvented{border-color:color-mix(in oklab,var(--bad) 50%,transparent);background:color-mix(in oklab,var(--bad) 9%,var(--surface))}
+  .verdict.v-circumvented .vbig{color:var(--bad)}
+  .reasons{list-style:none;margin:0;padding:18px clamp(16px,2.4vw,24px);display:grid;gap:11px;border-top:1px solid var(--line)}
+  .reasons li{display:flex;gap:11px;align-items:flex-start;font-size:13.4px;color:var(--ink2);line-height:1.5}
+  .reasons li .ic{width:20px;height:20px;border-radius:6px;flex:0 0 auto;display:grid;place-items:center;margin-top:1px}
+  .reasons li.pro .ic{background:color-mix(in oklab,var(--good) 22%,transparent);color:var(--good)}
+  .reasons li.con .ic{background:color-mix(in oklab,var(--bad) 20%,transparent);color:var(--bad)}
+  .reasons li.note .ic{background:color-mix(in oklab,var(--gold) 20%,transparent);color:var(--gold)}
+  .reasons li .ic svg{width:12px;height:12px}
+  .reasons li b{color:var(--ink)}
+
+  footer{margin:clamp(34px,5vw,60px) 0 40px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
+  footer a{color:var(--ink2)} footer a:hover{color:var(--accent-ink)}
+  footer .row{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  }
+
+  .pubnav{display:flex;flex-wrap:wrap;gap:2px 16px;align-items:center;padding:9px clamp(18px,4vw,40px);
+    background:color-mix(in oklab,var(--bg2),transparent 20%);border-bottom:1px solid var(--line);
+    font-family:var(--font-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase}
+  .pubnav a{color:var(--ink2);padding:4px 0;border-bottom:2px solid transparent;text-decoration:none}
+  .pubnav a:hover{color:var(--ink)}
+  .pubnav a[aria-current="page"]{color:var(--accent-ink);border-bottom-color:var(--accent)}
+
+  .cfside{display:none}
+  @media(min-width:1080px){
+    body{padding-left:280px}
+    .pubnav{display:none}
+    .cfside{position:fixed;left:0;top:0;bottom:0;width:280px;z-index:30;display:flex;flex-direction:column;gap:18px;
+      padding:22px 18px;background:var(--bg2);border-right:1px solid var(--line);overflow-y:auto}
+  }
+  .cfside .cfbrand{display:flex;align-items:center;gap:11px}
+  .cfside .cfbrand img{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:0 0 auto}
+  .cfside .cfbrand .nm{font-family:var(--font-display);font-weight:700;font-size:15.5px;color:var(--ink);line-height:1.1}
+  .cfside .cfbrand .rl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px;line-height:1.5}
+  .cfside nav{display:flex;flex-direction:column;gap:4px}
+  .cfside nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;color:var(--ink2);font-size:14px;font-weight:500;border:1px solid transparent;text-decoration:none}
+  .cfside nav a svg{width:18px;height:18px;flex:0 0 auto}
+  .cfside nav a:hover{background:var(--surface);color:var(--ink)}
+  .cfside nav a.on{background:var(--surface);border-color:var(--line);color:var(--ink)}
+  .cfside .cffoot{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+  .cfside .cfavail{font-size:12px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+  .cfside .cfdot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 10px var(--good);flex:0 0 auto;margin-top:4px}
+  .cfside .cfbtns{display:flex;gap:8px}
+  .cfside .cfcv{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:12px;font-weight:600;font-size:13px;
+    background:var(--accent);border:1px solid var(--accent);color:#fff;text-decoration:none}
+  .cfside .cfcv:hover{filter:brightness(1.08)}
+  .cfside .cftheme{width:40px;display:inline-flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer}
+  .cfside .cftheme svg{width:16px;height:16px}
+</style>
+</head>
+<body>
+  <aside class="cfside" aria-label="Site navigation">
+    <div class="cfbrand">
+      <img src="../../assets/img/portrait-2026.png" alt="Christopher Farmer">
+      <div><div class="nm">Christopher Farmer</div><div class="rl">Legal, Risk &amp; Technology Transformation</div></div>
+    </div>
+    <nav>
+      <a href="../../index.html#overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg><span>Overview</span></a>
+      <a href="../../index.html#projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Projects</span></a>
+      <a href="../../case-studies/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 5h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h7z"/></svg><span>Case studies</span></a>
+      <a href="../../index.html#experience"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Experience</span></a>
+      <a href="../../index.html#warroom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>War Room</span></a>
+      <a href="../../index.html#expertise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.1L12 17l-5.5 3.3 1-6.1L3 8.9 9 8z"/></svg><span>Expertise</span></a>
+      <a href="../../index.html#credentials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg><span>Credentials</span></a>
+      <a href="../../publications/index.html" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg><span>Publications</span></a>
+      <a href="../../index.html#contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M4 7l8 6 8-6"/></svg><span>Contact</span></a>
+    </nav>
+    <div class="cffoot">
+      <div class="cfavail"><span class="cfdot"></span> Open to legal, risk &amp; transformation roles &mdash; Geneva</div>
+      <div class="cfbtns">
+        <a class="cfcv" href="../../docs/CV-Christopher-Farmer-2026-08.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg> CV</a>
+        <button class="cftheme" onclick="document.getElementById('theme')?document.getElementById('theme').click():(function(){var h=document.documentElement,n=h.getAttribute('data-theme')==='light'?'dark':'light';h.setAttribute('data-theme',n);try{localStorage.setItem('cf-theme',n)}catch(e){}})()" title="Toggle theme" aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="top">
+    <a class="brand" href="../index.html" aria-label="Back to Publications">
+      <div class="crest">CF</div>
+      <div><div class="nm">Christopher Farmer</div><div class="rl">Magnitsky Simulator</div></div>
+    </a>
+    <div class="topacts">
+      <a class="btn" href="../index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M15 18l-6-6 6-6"/></svg>
+        Publications
+      </a>
+      <a class="btn" href="../phase2-theory/magnitsky-model-for-ai.md">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/></svg>
+        The paper
+      </a>
+      <button class="btn icon" id="theme" title="Toggle light / dark" aria-label="Toggle light or dark theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </div>
+  </div>
+<nav class="pubnav" aria-label="Site">
+  <a href="../../index.html#overview">Overview</a>
+  <a href="../../index.html#projects">Projects</a>
+  <a href="../../case-studies/index.html">Case studies</a>
+  <a href="../../index.html#experience">Experience</a>
+  <a href="../../index.html#warroom">War Room</a>
+  <a href="../../index.html#expertise">Expertise</a>
+  <a href="../../index.html#credentials">Credentials</a>
+  <a href="../index.html" aria-current="page">Publications</a>
+  <a href="../../index.html#contact">Contact</a>
+</nav>
+
+  <main class="wrap">
+    <section class="hero">
+      <div class="badges">
+        <span class="badge"><span class="d"></span> Interactive policy model</span>
+        <span class="badge warnb">Illustrative · not a prediction</span>
+        <span class="badge">Runs fully offline</span>
+      </div>
+      <h1>The Magnitsky Model for AI — Policy Simulator</h1>
+      <p class="lead">A hands-on companion to the Phase II theory paper. Choose how an AI system is used to circumvent international law, watch the <b style="color:var(--ink)">double veil</b> defeat attribution, then enact Magnitsky-style targeted designations and tune the market and financial levers. The model scores the cascade and returns a verdict — <b style="color:var(--ink)">Contained</b>, <b style="color:var(--ink)">Circumvented</b>, or <b style="color:var(--ink)">Cascaded-to-compliance</b> — with plain reasons.</p>
+      <div class="disc" role="note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9L2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+        <div><b>This is an illustrative model, not a forecast.</b> The scores are a deliberately simple, transparent representation of the paper's argument about how targeted designations cascade through the global financial and market network. It is a teaching and reasoning aid — <b>not a prediction, not legal advice</b>, and not a claim about any real person, entity, or state.</div>
+      </div>
+    </section>
+
+    <!-- STEP 1 -->
+    <section class="panel">
+      <div class="step"><span class="num">1</span><h2>Choose a circumvention scenario</h2></div>
+      <p class="sub">Each scenario spans a different register of the “double veil” — a corporate form stacked on an algorithmic one. Pick one, then choose who is behind the veil.</p>
+      <div class="scn" id="scn" role="radiogroup" aria-label="Circumvention scenario"></div>
+
+      <div class="rowlabel">Who is behind the veil? <span class="hint">— this sets how much the target depends on market and financial access</span></div>
+      <div class="seg" id="charseg" role="radiogroup" aria-label="Target character"></div>
+      <div class="charnote" id="charnote"></div>
+
+      <div class="predicate" id="predicate"><b>Enumerated predicate norm</b><span id="predtext"></span></div>
+    </section>
+
+    <!-- STEP 2 -->
+    <section class="panel">
+      <div class="step"><span class="num">2</span><h2>The double veil defeats attribution</h2></div>
+      <p class="sub">Before any designation, the ordinary route fails. The corporate veil hides the principal; the algorithmic responsibility gap means no human authored the specific act. Attribution to a person or state cannot be made — so the model routes <em>around</em> the veil rather than trying to pierce it.</p>
+      <div class="veilwrap">
+        <svg class="veilsvg" id="veilsvg" viewBox="0 0 780 320" role="img" aria-label="Diagram: an attribution arrow from the AI-executed outcome is blocked by the corporate veil and the responsibility gap, while a targeted-designation path routes around them.">
+          <!-- outcome box -->
+          <rect class="boxfill" x="18" y="128" width="176" height="64" rx="10"/>
+          <text class="boxink lab sm" x="106" y="153" text-anchor="middle">AI-executed outcome</text>
+          <text class="boxink2 lab sm" x="106" y="172" text-anchor="middle" font-size="9.5">the proscribed act</text>
+          <!-- principal box -->
+          <rect class="boxfill" x="590" y="118" width="176" height="84" rx="10"/>
+          <text class="boxink lab sm" x="678" y="146" text-anchor="middle">Human principal</text>
+          <text class="boxink2 lab sm" x="678" y="164" text-anchor="middle" font-size="9.5">/ sponsoring state</text>
+          <text class="boxink2 lab sm" x="678" y="184" text-anchor="middle" font-size="9.5">named person &amp; entity</text>
+          <!-- veils -->
+          <rect class="veilband" x="300" y="44" width="34" height="232" rx="6"/>
+          <rect class="veilband" x="372" y="44" width="34" height="232" rx="6"/>
+          <text class="veillab" x="317" y="34" text-anchor="middle" font-size="10" id="veilCorpLab">Corporate veil</text>
+          <text class="veillab" x="389" y="300" text-anchor="middle" font-size="10" id="veilAlgoLab">Responsibility gap</text>
+          <!-- attribution attempt (top) -->
+          <g class="attribtry">
+            <line class="attrib" x1="196" y1="150" x2="292" y2="150"/>
+            <polygon class="attrib" points="292,150 282,145 282,155" fill="var(--bad)" stroke="none" style="fill:var(--bad)"/>
+          </g>
+          <g class="stamp" transform="translate(353,150) rotate(-8)">
+            <rect x="-70" y="-16" width="140" height="32" rx="6" fill="none" stroke="var(--bad)" stroke-width="2"/>
+            <text class="attriblab" x="0" y="5" text-anchor="middle" font-size="13">ATTRIBUTION FAILS</text>
+          </g>
+          <!-- bypass path (bottom) -->
+          <path class="bypass" d="M106 192 L106 250 Q106 262 118 262 L560 262 Q574 262 574 250 L574 206"/>
+          <polygon points="574,206 569,216 579,216" style="fill:var(--accent)"/>
+          <text class="bypasslab" x="300" y="255" text-anchor="middle" font-size="10.5">targeted designation — no attribution required</text>
+        </svg>
+        <div class="veilside">
+          <h3>Why the ordinary route fails</h3>
+          <p id="veilexplain"></p>
+          <div class="attrline">
+            <span class="x">✕</span>
+            <div>Attribution to a human principal or state: <b id="attribval">fails</b>. The designation route ignores this — it attaches to the person and entity by their <b>failure of control</b>, not by a proven outcome.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 3 -->
+    <section class="panel">
+      <div class="step"><span class="num">3</span><h2>Enact targeted designations &amp; tune the cascade</h2></div>
+      <p class="sub">Select which jurisdictions enact a Magnitsky-style designation. Their combined market size, banking centrality (dollar-clearing / correspondent access) and emulation propensity drive the cascade. Then tune the four levers.</p>
+      <div class="console">
+        <div>
+          <div class="rowlabel">Enacting jurisdiction(s)</div>
+          <div class="jchips" id="jchips"></div>
+          <div class="coread" id="coread" aria-live="off"></div>
+        </div>
+        <div>
+          <div class="rowlabel">Cascade levers</div>
+          <div id="levers"></div>
+          <div class="runrow">
+            <button class="btn primary" id="run">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l14 9-14 9V3z"/></svg>
+              Run the cascade
+            </button>
+            <button class="btn" id="reset">Reset</button>
+            <span class="spacer"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 4 -->
+    <section class="panel">
+      <div class="step"><span class="num">4</span><h2>The cascade</h2></div>
+      <p class="sub">A designation in a central jurisdiction does not stay there. It propagates through market exclusion, the dollar-clearing chokepoint, over-compliant de-risking, and — if the norm is shared — legislative emulation by peer states.</p>
+      <div class="rail" id="rail"></div>
+    </section>
+
+    <!-- VERDICT -->
+    <section class="panel" style="padding:0;overflow:hidden">
+      <div class="verdict v-contained" id="verdict" aria-live="polite">
+        <div class="vhead">
+          <div>
+            <div class="vk">Verdict</div>
+            <div class="vbig" id="vbig">—</div>
+          </div>
+          <div class="vsum" id="vsum"></div>
+          <div class="vscore"><div class="n" id="vscoren">0</div><div class="l">Global exclusion</div></div>
+        </div>
+        <ul class="reasons" id="reasons"></ul>
+      </div>
+    </section>
+
+    <footer>
+      <div class="row">
+        <span>© <span id="yr">2026</span> Christopher I. V. Farmer</span><span>·</span>
+        <a href="../index.html">Publications</a><span>·</span>
+        <a href="../../docs/CV-Christopher-Farmer-2026-08.pdf" target="_blank" rel="noopener">CV</a><span>·</span>
+        <a href="../phase2-theory/magnitsky-model-for-ai.md">Read the paper</a><span>·</span>
+        <span class="mono" style="color:var(--muted)">Illustrative model — not a prediction, not legal advice</span>
+      </div>
+    </footer>
+  </main>
+
+<script id="mag-engine">
+/* ============================================================================
+   MAGNITSKY MODEL — ENGINE  (pure, DOM-free, deterministic)
+   Exposed on globalThis.MagModel so both the page UI and an offline Node
+   harness can call runModel(). This block references no document/window.
+   ========================================================================== */
+(function(){
+  "use strict";
+
+  var JURIS = {
+    US:{key:"US",name:"United States",sub:"Dollar-clearing hub · OFAC / SDN list",market:0.92,banking:0.98,emulation:0.85},
+    EU:{key:"EU",name:"European Union",sub:"Largest single market · Brussels effect",market:0.95,banking:0.60,emulation:0.80},
+    UK:{key:"UK",name:"United Kingdom",sub:"Global financial centre · GHRSR 2020",market:0.55,banking:0.82,emulation:0.78},
+    CH:{key:"CH",name:"Switzerland",sub:"Wealth & commodities-trading hub",market:0.30,banking:0.55,emulation:0.45},
+    SG:{key:"SG",name:"Singapore",sub:"Asian trade & clearing node",market:0.42,banking:0.60,emulation:0.42},
+    CA:{key:"CA",name:"Canada",sub:"Early Magnitsky emulator (2017)",market:0.40,banking:0.45,emulation:0.68},
+    AU:{key:"AU",name:"Australia",sub:"Magnitsky-style regime (2021)",market:0.38,banking:0.40,emulation:0.62}
+  };
+  var JURIS_ORDER = ["US","EU","UK","CH","SG","CA","AU"];
+
+  var SCENARIOS = {
+    evasion:{
+      key:"evasion", label:"Algorithmic sanctions-evasion engine", register:"Economic",
+      veilCorp:"Offshore trading company", veilAlgo:"Autonomous re-invoicing & shipment re-routing",
+      predicate:"Systematic evasion of a lawfully imposed sanctions regime.",
+      marketDependence:0.85, financialExposure:0.95,
+      blurb:"A trading company licenses a proprietary AI that continuously restructures ownership chains, re-invoices and re-routes shipments to move dual-use goods for a sanctioned entity. No employee decides any single transaction — the system does, thousands of times a day.",
+      veilExplain:"An offshore company (corporate veil) owns an AI that autonomously routes the evasive transactions (algorithmic veil). Reach for the human and the company answers; reach for the company and the system answers. No state instruction exists to attribute."
+    },
+    influence:{
+      key:"influence", label:"Autonomous influence operation", register:"Informational",
+      veilCorp:"Marketing / data firm selling “audience services”", veilAlgo:"Generative model mass-producing micro-targeted content",
+      predicate:"Automated manipulation of an electoral or a securities-market process (not “disinformation” at large).",
+      marketDependence:0.65, financialExposure:0.60,
+      blurb:"A firm sells, as a service, an AI system that generates and micro-targets synthetic political content at scale to destabilise an election or manipulate a securities market. The sponsoring state, if any, sits undetectable behind the attribution threshold.",
+      veilExplain:"A commercial vendor (corporate veil) operates a generative system (algorithmic veil) for a client. The content may be lawful speech at home, and no human authored any single targeted message — so the wrong cannot be pinned on a person or a state."
+    },
+    targeting:{
+      key:"targeting", label:"Deniable autonomous-targeting service", register:"Kinetic",
+      veilCorp:"Defence-tech company structured through subsidiaries", veilAlgo:"AI targeting system with minimal human review",
+      predicate:"Material facilitation of conduct that would breach international humanitarian law.",
+      marketDependence:0.70, financialExposure:0.65,
+      blurb:"A defence-technology company licenses an AI targeting system to a party to an armed conflict; the system selects and prioritises objectives with minimal human review. The vendor says it merely supplied software; the operator says the system, not any commander, chose the target.",
+      veilExplain:"A subsidiary chain (corporate veil) supplies a targeting system that selects objectives autonomously (algorithmic veil). The vendor blames the operator, the operator blames the system, and nothing attaches to the sponsoring state. This is the double veil in its gravest form."
+    }
+  };
+  var SCENARIO_ORDER = ["evasion","influence","targeting"];
+
+  var CHARACTER = {
+    commercial:{key:"commercial", label:"Commercial operator", market:1.00, financial:1.00,
+      note:"Depends on market and financial access it cannot forgo — the cascade has maximum purchase."},
+    ideological:{key:"ideological", label:"Ideological actor", market:0.25, financial:0.30,
+      note:"Largely indifferent to market access; funds itself through informal or crypto rails. The paper concedes the cascade is weak here."},
+    state:{key:"state", label:"State-backed", market:0.35, financial:0.30,
+      note:"Shelters behind a captive domestic market with little need of the dollar system. Against such an actor the cascade weakens."}
+  };
+  var CHARACTER_ORDER = ["commercial","ideological","state"];
+
+  var LEVER_DEFS = [
+    {key:"marketWeight",       label:"Market size / access",     desc:"How much exclusion from the enacting markets hurts (Brussels-effect logic)."},
+    {key:"bankingWeight",      label:"Banking centrality",       desc:"Strength of the dollar-clearing & correspondent-banking chokepoint."},
+    {key:"deRisking",          label:"De-risking propensity",    desc:"How readily correspondent banks over-comply and drop the client."},
+    {key:"emulationLikelihood",label:"Emulation likelihood",     desc:"How readily peer legislatures copy a designation that visibly works."}
+  ];
+  var DEFAULT_LEVERS = {marketWeight:0.75, bankingWeight:0.85, deRisking:0.70, emulationLikelihood:0.60};
+
+  var THRESH = {contain:0.42, cascade:0.48};
+
+  function clamp(x){ if(x!==x) return 0; return x<0?0:(x>1?1:x); }
+  function noisyOR(arr){ var p=1; for(var i=0;i<arr.length;i++){ p*=(1-clamp(arr[i])); } return 1-p; }
+  function pct(x){ return Math.round(clamp(x)*100); }
+
+  function runModel(input){
+    input = input || {};
+    var S = SCENARIOS[input.scenario] || SCENARIOS.evasion;
+    var C = CHARACTER[input.character] || CHARACTER.commercial;
+    var L = input.levers || DEFAULT_LEVERS;
+    var keys = (input.jurisdictions || []).filter(function(k){ return !!JURIS[k]; });
+    var jur = keys.map(function(k){ return JURIS[k]; });
+    var size = jur.length;
+
+    // Target exposure after character
+    var marketDependence = clamp(S.marketDependence * C.market);
+    var financialExposure = clamp(S.financialExposure * C.financial);
+
+    // Double veil (illustrative attribution defeat). The designation route does NOT rely on this.
+    var corporateVeil = 0.90, responsibilityGap = 0.86;
+    var attribution = clamp(1 - noisyOR([corporateVeil, responsibilityGap])); // ~0.014
+
+    // Coalition structural power (probabilistic OR — diminishing returns as nodes stack)
+    var M = noisyOR(jur.map(function(j){ return j.market; }));
+    var B = noisyOR(jur.map(function(j){ return j.banking; }));
+    var Ebase = noisyOR(jur.map(function(j){ return j.emulation; }));
+    var designationReach = noisyOR([M, B]); // "is a central designation in place"
+
+    // Channels (0..1)
+    var chMarket = clamp(M * marketDependence * L.marketWeight);
+    var chBanking = clamp(B * financialExposure * L.bankingWeight);
+    var chDerisk = clamp(chBanking * (0.55 + 0.45 * L.deRisking));   // de-risking amplifies the chokepoint
+    var effFinancial = noisyOR([chBanking, chDerisk]);               // effective financial exclusion
+    var initialExclusion = noisyOR([chMarket, effFinancial]);        // in-coalition bite on the target
+
+    // Legislative emulation — peers copy a *visibly working*, *broadly shared* designation
+    var breadth = Math.min(1, 0.45 + 0.275 * (size - 1));           // 1->.45, 2->.725, 3->1
+    var chEmulation = clamp(Ebase * L.emulationLikelihood * (0.40 + 0.60 * initialExclusion) * breadth);
+
+    // Global exclusion once emulation converts de facto -> de jure
+    var globalExclusion = noisyOR([initialExclusion, chEmulation * initialExclusion]);
+
+    // Verdict
+    var verdict;
+    if (size === 0 || initialExclusion < THRESH.contain) verdict = "circumvented";
+    else if (chEmulation < THRESH.cascade) verdict = "contained";
+    else verdict = "cascaded";
+
+    var result = {
+      verdict: verdict,
+      attribution: attribution,
+      coalition: {market:M, banking:B, emulation:Ebase, size:size, reach:designationReach, keys:keys},
+      inputs: {marketDependence:marketDependence, financialExposure:financialExposure, scenario:S.key, character:C.key},
+      channels: {market:chMarket, banking:chBanking, derisk:chDerisk, effFinancial:effFinancial, emulation:chEmulation},
+      scores: {initialExclusion:initialExclusion, globalExclusion:globalExclusion},
+      stages: [
+        {key:"designation", name:"Designation issued", val:designationReach,
+         cap: size===0 ? "No enacting jurisdiction" : (size+" jurisdiction"+(size>1?"s":"")+" · reach "+pct(designationReach)+"%")},
+        {key:"market", name:"Market access", val:chMarket, cap:"Brussels-effect exclusion from indispensable markets"},
+        {key:"banking", name:"Dollar clearing & correspondent banking", val:chBanking, cap:"Secondary-sanctions pressure at the chokepoint"},
+        {key:"derisk", name:"Compliance de-risking", val:effFinancial, cap:"Over-compliant banks drop the client; others follow"},
+        {key:"emulation", name:"Legislative emulation", val:chEmulation, cap:"Peer legislatures copy a working model"}
+      ]
+    };
+    result.summary = summaryFor(verdict);
+    result.reasons = reasonsFor(verdict, result, S, C, size);
+    return result;
+  }
+
+  function summaryFor(v){
+    if (v === "contained") return "The designation strips this actor of the market and financial access it depends on — the norm is enforced against it without waiting for an attribution that will never come. The effect stays largely within the enacting coalition.";
+    if (v === "cascaded") return "A designation in central jurisdictions propagates through market exclusion, over-compliant de-risking and legislative emulation into a de facto global exclusion — the treaty's work, done by cascade and without anyone's consent.";
+    return "The double veil holds and the cascade fails to bite: the target is indifferent to the access being denied, or no sufficiently central jurisdiction has acted. The conduct routes around the measure.";
+  }
+
+  function reasonsFor(v, r, S, C, size){
+    var out = [];
+    var ch = r.channels, sc = r.scores;
+    // Attribution note (always)
+    out.push({tone:"note", text:"<b>Attribution fails by design.</b> The corporate veil and the algorithmic responsibility gap defeat any attempt to pin the outcome on a human or a state — which is exactly why the model routes around attribution and attaches to a <b>failure of responsible control</b>."});
+
+    if (size === 0){
+      out.push({tone:"con", text:"<b>No designation is in force.</b> With nothing to trigger, the veil stands and the conduct continues unaddressed."});
+      out.push({tone:"note", text:"Select one or more enacting jurisdictions to set the cascade in motion."});
+      return out;
+    }
+
+    // Market channel
+    if (ch.market >= 0.5) out.push({tone:"pro", text:"<b>Market exclusion bites.</b> The target depends on access to the enacting markets it cannot forgo, so exclusion is a commercial catastrophe (the Brussels-effect logic)."});
+    else if (r.inputs.marketDependence < 0.5) out.push({tone:"con", text:"<b>Market exclusion barely registers.</b> This actor is largely indifferent to the markets being denied, so the access lever has little purchase."});
+    else out.push({tone:"con", text:"<b>Weak market reach.</b> The enacting jurisdictions are not central enough for market exclusion to hurt."});
+
+    // Financial channel
+    if (ch.effFinancial >= 0.5) out.push({tone:"pro", text:"<b>The dollar-clearing chokepoint is decisive.</b> Secondary-sanctions exposure makes correspondent banks over-comply and de-risk, starving the target of the financial rails it exists to exploit."});
+    else out.push({tone:"con", text:"<b>Low financial exposure.</b> The target runs on informal, crypto or captive rails, so the correspondent-banking chokepoint has little grip."});
+
+    // Emulation channel
+    if (ch.emulation >= THRESH.cascade) out.push({tone:"pro", text:"<b>Peer legislatures emulate.</b> A visibly working designation, resting on a shared norm across several central enactors, converts a de facto exclusion into de jure convergence."});
+    else if (r.scores.initialExclusion >= THRESH.contain) out.push({tone:"note", text:"<b>Contained, not yet cascaded.</b> With few enactors (or a low emulation setting) the measure isolates this actor but has not tipped into broad legislative copying. Add central jurisdictions or raise the emulation lever to push toward a global cascade."});
+
+    // Honest limits per character
+    if (C.key === "ideological") out.push({tone:"note", text:"<b>Honest limit.</b> Against an ideologically-motivated actor indifferent to market access, the paper concedes the cascade is weak and must be supplemented by other tools."});
+    if (C.key === "state") out.push({tone:"note", text:"<b>Honest limit.</b> Against a state actor with a captive domestic market and no need of the dollar system, the cascade weakens — an acknowledged boundary of the mechanism."});
+
+    // Verdict-specific closer
+    if (v === "cascaded") out.push({tone:"pro", text:"A cascade in service of an <b>enumerated, defensible predicate</b> — with published reasons, independent review and a delisting pathway — is the mechanism operating as intended, not the abuse the safeguards exist to prevent."});
+    if (v === "circumvented" && size > 0) out.push({tone:"con", text:"The designation is <b>in force but ineffective</b> here: exclusion sits below the threshold at which the market and banking network actually starve the target."});
+
+    return out;
+  }
+
+  var API = {
+    runModel: runModel, clamp: clamp, noisyOR: noisyOR, pct: pct,
+    JURIS: JURIS, JURIS_ORDER: JURIS_ORDER,
+    SCENARIOS: SCENARIOS, SCENARIO_ORDER: SCENARIO_ORDER,
+    CHARACTER: CHARACTER, CHARACTER_ORDER: CHARACTER_ORDER,
+    LEVER_DEFS: LEVER_DEFS, DEFAULT_LEVERS: DEFAULT_LEVERS, THRESH: THRESH
+  };
+  if (typeof globalThis !== "undefined") globalThis.MagModel = API;
+  if (typeof module !== "undefined" && module.exports) module.exports = API;
+})();
+</script>
+
+<script id="mag-ui">
+/* ============================================================================
+   MAGNITSKY MODEL — UI  (all DOM wiring; consumes globalThis.MagModel)
+   ========================================================================== */
+(function(){
+  "use strict";
+  var M = (typeof globalThis !== "undefined") ? globalThis.MagModel : null;
+  if (!M) return;
+
+  var reduce = false;
+  try { reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch(e){}
+
+  // ---- State ----
+  var state = {
+    scenario: "evasion",
+    character: "commercial",
+    jurisdictions: ["US","EU"],
+    levers: {
+      marketWeight: M.DEFAULT_LEVERS.marketWeight,
+      bankingWeight: M.DEFAULT_LEVERS.bankingWeight,
+      deRisking: M.DEFAULT_LEVERS.deRisking,
+      emulationLikelihood: M.DEFAULT_LEVERS.emulationLikelihood
+    }
+  };
+
+  var $ = function(id){ return document.getElementById(id); };
+  function el(tag, cls, html){ var n=document.createElement(tag); if(cls) n.className=cls; if(html!=null) n.innerHTML=html; return n; }
+
+  // ---- Build scenario cards ----
+  function buildScenarios(){
+    var host = $("scn"); host.innerHTML="";
+    M.SCENARIO_ORDER.forEach(function(k){
+      var s = M.SCENARIOS[k];
+      var b = el("button","scard");
+      b.type="button"; b.setAttribute("role","radio");
+      b.setAttribute("aria-checked", String(k===state.scenario));
+      b.dataset.k = k;
+      b.innerHTML =
+        '<span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></span>'+
+        '<div class="reg">'+s.register+' register</div>'+
+        '<h3>'+s.label+'</h3>'+
+        '<p>'+s.blurb+'</p>';
+      b.addEventListener("click", function(){ state.scenario=k; syncScenarioUI(); update(true); });
+      host.appendChild(b);
+    });
+  }
+  function syncScenarioUI(){
+    var host=$("scn");
+    Array.prototype.forEach.call(host.children, function(c){ c.setAttribute("aria-checked", String(c.dataset.k===state.scenario)); });
+    var s=M.SCENARIOS[state.scenario];
+    $("predtext").textContent=" "+s.predicate;
+    $("veilexplain").textContent=s.veilExplain;
+  }
+
+  // ---- Character segmented control ----
+  function buildCharacter(){
+    var host=$("charseg"); host.innerHTML="";
+    M.CHARACTER_ORDER.forEach(function(k){
+      var c=M.CHARACTER[k];
+      var b=el("button",null,c.label);
+      b.type="button"; b.setAttribute("role","radio"); b.dataset.k=k;
+      b.setAttribute("aria-checked", String(k===state.character));
+      b.addEventListener("click", function(){ state.character=k; syncCharacterUI(); update(true); });
+      host.appendChild(b);
+    });
+  }
+  function syncCharacterUI(){
+    var host=$("charseg");
+    Array.prototype.forEach.call(host.children, function(c){ c.setAttribute("aria-checked", String(c.dataset.k===state.character)); });
+    $("charnote").textContent = M.CHARACTER[state.character].note;
+  }
+
+  // ---- Jurisdiction chips ----
+  function buildJurisdictions(){
+    var host=$("jchips"); host.innerHTML="";
+    M.JURIS_ORDER.forEach(function(k){
+      var j=M.JURIS[k];
+      var b=el("button","jchip"); b.type="button"; b.dataset.k=k;
+      var on = state.jurisdictions.indexOf(k)>=0;
+      b.setAttribute("aria-pressed", String(on));
+      b.innerHTML =
+        '<div class="jn"><span class="b"></span>'+j.name+'</div>'+
+        '<div class="js">'+j.sub+'</div>'+
+        '<div class="jm"><span>Mkt <b>'+M.pct(j.market)+'</b></span><span>Bank <b>'+M.pct(j.banking)+'</b></span><span>Emu <b>'+M.pct(j.emulation)+'</b></span></div>';
+      b.addEventListener("click", function(){
+        var i=state.jurisdictions.indexOf(k);
+        if(i>=0) state.jurisdictions.splice(i,1); else state.jurisdictions.push(k);
+        b.setAttribute("aria-pressed", String(state.jurisdictions.indexOf(k)>=0));
+        update(true);
+      });
+      host.appendChild(b);
+    });
+  }
+
+  // ---- Levers ----
+  function buildLevers(){
+    var host=$("levers"); host.innerHTML="";
+    M.LEVER_DEFS.forEach(function(d){
+      var wrap=el("div","lever");
+      var val=state.levers[d.key];
+      wrap.innerHTML =
+        '<div class="lh"><label for="lv-'+d.key+'">'+d.label+'</label><span class="v" id="lvv-'+d.key+'">'+M.pct(val)+'</span></div>'+
+        '<input type="range" min="0" max="100" value="'+M.pct(val)+'" id="lv-'+d.key+'" aria-describedby="lvd-'+d.key+'">'+
+        '<div class="ld" id="lvd-'+d.key+'">'+d.desc+'</div>';
+      host.appendChild(wrap);
+      var input=wrap.querySelector("input");
+      input.addEventListener("input", function(){
+        state.levers[d.key] = (+input.value)/100;
+        $("lvv-"+d.key).textContent = input.value;
+        update(false); // live bar update, no re-stagger
+      });
+    });
+  }
+
+  // ---- Cascade rail ----
+  var STAGE_META = [
+    {ci:"D"},{ci:"1"},{ci:"2"},{ci:"3"},{ci:"4"}
+  ];
+  function buildRail(){
+    var host=$("rail"); host.innerHTML="";
+    var res=M.runModel(state);
+    res.stages.forEach(function(st, idx){
+      if(idx>0) host.appendChild(arrowNode());
+      var s=el("div","stage"); s.dataset.k=st.key;
+      s.innerHTML =
+        '<div class="si"><span class="ci">'+STAGE_META[idx].ci+'</span></div>'+
+        '<h3>'+st.name+'</h3>'+
+        '<div class="cap" data-cap>'+st.cap+'</div>'+
+        '<div class="track"><div class="fill" data-fill></div></div>'+
+        '<div class="pct" data-pct>0%</div>';
+      host.appendChild(s);
+    });
+    // outcome node
+    host.appendChild(arrowNode());
+    var o=el("div","stage out"); o.dataset.k="outcome";
+    o.innerHTML =
+      '<div class="si"><span class="ci">★</span></div>'+
+      '<h3>Outcome</h3>'+
+      '<div class="cap" data-cap>Global exclusion achieved</div>'+
+      '<div class="track"><div class="fill" data-fill></div></div>'+
+      '<div class="pct" data-pct>0%</div>';
+    host.appendChild(o);
+  }
+  function arrowNode(){
+    var a=el("div","arrow");
+    a.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>';
+    return a;
+  }
+
+  // ---- Render ----
+  var runToken=0;
+  function update(restage){
+    var res=M.runModel(state);
+    renderCoalition(res);
+    renderVerdict(res);
+    // attribution readout
+    $("attribval").textContent = "fails (≈"+M.pct(res.attribution)+"%)";
+
+    var stageEls = Array.prototype.filter.call($("rail").children, function(c){ return c.classList.contains("stage"); });
+    var vals = res.stages.map(function(s){ return s.val; });
+    vals.push(res.scores.globalExclusion); // outcome
+    var caps = res.stages.map(function(s){ return s.cap; });
+    caps.push(outcomeCap(res));
+
+    runToken++;
+    var myToken=runToken;
+    if(restage && !reduce){
+      // sequential reveal
+      stageEls.forEach(function(sEl,i){
+        sEl.classList.remove("fired");
+        setFill(sEl, 0);
+      });
+      stageEls.forEach(function(sEl,i){
+        setTimeout(function(){
+          if(myToken!==runToken) return;
+          applyStage(sEl, vals[i], caps[i]);
+        }, 130*i);
+      });
+    } else {
+      stageEls.forEach(function(sEl,i){ applyStage(sEl, vals[i], caps[i]); });
+    }
+  }
+  function applyStage(sEl, v, cap){
+    setFill(sEl, v);
+    var capN=sEl.querySelector("[data-cap]"); if(capN && cap!=null) capN.textContent=cap;
+    sEl.querySelector("[data-pct]").textContent = M.pct(v)+"%";
+    sEl.classList.toggle("fired", v>=0.4);
+  }
+  function setFill(sEl, v){
+    sEl.querySelector("[data-fill]").style.width = M.pct(v)+"%";
+    sEl.querySelector("[data-pct]").textContent = M.pct(v)+"%";
+  }
+  function outcomeCap(res){
+    if(res.verdict==="cascaded") return "De facto global exclusion via emulation";
+    if(res.verdict==="contained") return "Actor excluded within the coalition";
+    return "Exclusion below the effective threshold";
+  }
+
+  function renderCoalition(res){
+    var c=res.coalition;
+    $("coread").innerHTML =
+      costat("Market", M.pct(c.market)) +
+      costat("Banking", M.pct(c.banking)) +
+      costat("Emulation", M.pct(c.emulation)) +
+      costat("Enactors", c.size, true);
+  }
+  function costat(k,n,plain){
+    return '<div class="costat"><div class="k">'+k+'</div><div class="n">'+(plain?n:('<b>'+n+'</b>'))+(plain?'':'%')+'</div></div>';
+  }
+
+  function renderVerdict(res){
+    var v=res.verdict;
+    var box=$("verdict");
+    box.className="verdict v-"+v;
+    var label = v==="cascaded" ? "Cascaded to compliance" : (v==="contained" ? "Contained" : "Circumvented");
+    $("vbig").textContent=label;
+    $("vsum").textContent=res.summary;
+    $("vscoren").textContent=M.pct(res.scores.globalExclusion);
+    var ul=$("reasons"); ul.innerHTML="";
+    res.reasons.forEach(function(r){
+      var li=el("li",r.tone);
+      var icon = r.tone==="pro" ? '<path d="M5 12l5 5L20 7"/>' : (r.tone==="con" ? '<path d="M6 6l12 12M18 6L6 18"/>' : '<path d="M12 8v5"/><path d="M12 16h.01"/>');
+      li.innerHTML='<span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">'+icon+'</svg></span><span>'+r.text+'</span>';
+      ul.appendChild(li);
+    });
+  }
+
+  // ---- Controls ----
+  function reset(){
+    state.scenario="evasion"; state.character="commercial"; state.jurisdictions=["US","EU"];
+    state.levers={ marketWeight:M.DEFAULT_LEVERS.marketWeight, bankingWeight:M.DEFAULT_LEVERS.bankingWeight,
+      deRisking:M.DEFAULT_LEVERS.deRisking, emulationLikelihood:M.DEFAULT_LEVERS.emulationLikelihood };
+    buildScenarios(); syncScenarioUI(); buildCharacter(); syncCharacterUI(); buildJurisdictions(); buildLevers();
+    update(true);
+  }
+
+  // ---- Theme + boot ----
+  (function initTheme(){
+    var root=document.documentElement, KEY="cf-theme";
+    try{ var s=localStorage.getItem(KEY); if(s) root.setAttribute("data-theme", s); }catch(e){}
+    var btn=$("theme");
+    if(btn) btn.addEventListener("click", function(){
+      var next=root.getAttribute("data-theme")==="dark"?"light":"dark";
+      root.setAttribute("data-theme", next);
+      try{ localStorage.setItem(KEY, next); }catch(e){}
+    });
+  })();
+
+  function boot(){
+    var yr=$("yr"); if(yr) yr.textContent=String(new Date().getFullYear());
+    buildScenarios(); syncScenarioUI();
+    buildCharacter(); syncCharacterUI();
+    buildJurisdictions(); buildLevers(); buildRail();
+    $("run").addEventListener("click", function(){ update(true); });
+    $("reset").addEventListener("click", reset);
+    // reveal double-veil animation
+    var svg=$("veilsvg"); if(svg && !reduce) svg.classList.add("anim"); else if(svg) svg.classList.add("static");
+    update(true);
+  }
+
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f17'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='27' font-weight='700' fill='%23d4b24c' text-anchor='middle'%3ECF%3C/text%3E%3C/svg%3E">
+<title>Strategic Procurement and Feasibility Modeling for Large-Scale Autonomous Systems</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{
+    --bg:#0b0f17; --bg2:#0e1420; --surface:#131b2a; --surface2:#182133;
+    --ink:#e9eef7; --ink2:#aab7cc; --muted:#7d8ba3; --line:#233145; --line2:#2c3d54;
+    --accent:#43b3a6; --accent-ink:#84d6ca; --gold:#d4b24c; --gold-soft:#e6cf8f;
+    --good:#43c59e; --warn:#e0a13a; --shadow:0 18px 50px -20px rgba(0,0,0,.7);
+    --radius:14px; --measure:70ch;
+    --font-display:'Zilla Slab',Georgia,'Times New Roman',serif;
+    --font-body:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --font-mono:'IBM Plex Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
+  }
+  html[data-theme="light"]{
+    --bg:#f4f1ec; --bg2:#ebe6dd; --surface:#ffffff; --surface2:#faf7f2;
+    --ink:#221e18; --ink2:#4c473e; --muted:#675f54; --line:#e7e1d6; --line2:#d9d2c5;
+    --accent:#0d5f57; --accent-ink:#0a463f; --gold:#836819; --gold-soft:#6f5714; --good:#0e7a52;
+    --shadow:0 18px 44px -24px rgba(15,30,60,.35);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:radial-gradient(1100px 700px at 82% -8%,rgba(67,179,166,.10),transparent 60%),var(--bg);
+    color:var(--ink);font-family:var(--font-body);line-height:1.72;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  a{color:var(--accent-ink);text-decoration:none}
+  a:hover{text-decoration:underline}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+  ::selection{background:color-mix(in oklab,var(--accent) 32%,transparent)}
+
+  /* Top bar */
+  .top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    padding:11px clamp(16px,4vw,34px);background:color-mix(in oklab,var(--bg),transparent 8%);
+    backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:11px;color:var(--ink);min-width:0}
+  .crest{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;flex:0 0 auto;
+    background:linear-gradient(145deg,#0e7b6f,#0b655b);color:#fff;font-family:var(--font-display);font-weight:700;font-size:14px;box-shadow:var(--shadow)}
+  .brand .nm{font-family:var(--font-display);font-weight:700;font-size:14.5px;line-height:1.05}
+  .brand .rl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+  .topacts{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:8px 13px;border-radius:10px;font-weight:600;font-size:13px;
+    border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer;transition:.16s;white-space:nowrap;font-family:var(--font-body)}
+  .btn:hover{border-color:var(--accent);transform:translateY(-1px);text-decoration:none}
+  .btn svg{width:16px;height:16px}
+  .btn.icon{padding:8px;width:36px}
+
+  /* Article */
+  main.wrap{max-width:calc(var(--measure) + 8rem);margin:0 auto;padding:clamp(26px,5vw,52px) clamp(18px,5vw,40px) 40px}
+  article.paper{max-width:var(--measure);margin:0 auto;font-size:1.05rem}
+  article.paper > *{max-width:var(--measure)}
+  .paper h1,.paper h2,.paper h3,.paper h4,.paper h5{font-family:var(--font-display);font-weight:600;line-height:1.18;color:var(--ink);letter-spacing:-.005em}
+  .paper h1{font-size:clamp(27px,4.4vw,40px);line-height:1.1;margin:0 0 .5rem;letter-spacing:-.015em}
+  .paper h2{font-size:clamp(20px,2.9vw,27px);margin:2.4rem 0 .9rem;padding-bottom:.35rem;border-bottom:1px solid var(--line)}
+  .paper h3{font-size:clamp(17px,2.2vw,21px);margin:1.9rem 0 .7rem}
+  .paper h4{font-size:16px;margin:1.5rem 0 .5rem;color:var(--ink2)}
+  .paper p{margin:0 0 1.05rem;overflow-wrap:anywhere;word-break:break-word}
+  .paper li{overflow-wrap:anywhere;word-break:break-word}
+  .paper strong{color:var(--ink);font-weight:700}
+  .paper em{color:inherit}
+  /* Byline: first bold paragraph right after the title */
+  .paper h1 + p{font-size:1.06rem;color:var(--ink);margin-bottom:.4rem}
+  .paper h1 + p + p em{color:var(--muted);font-size:.92rem}
+  .paper ul,.paper ol{margin:0 0 1.1rem;padding-left:1.5rem}
+  .paper li{margin:.3rem 0}
+  .paper li::marker{color:var(--accent)}
+  .paper a{color:var(--accent-ink);border-bottom:1px solid color-mix(in oklab,var(--accent) 35%,transparent)}
+  .paper a:hover{border-bottom-color:var(--accent);text-decoration:none}
+  .paper hr{border:none;border-top:1px solid var(--line);margin:2rem 0}
+
+  /* Blockquote (scope notes) */
+  .paper blockquote{margin:1.4rem 0;padding:1rem 1.2rem;border:1px solid var(--line2);border-left:3px solid var(--gold);
+    border-radius:12px;background:color-mix(in oklab,var(--gold) 7%,var(--surface));color:var(--ink2)}
+  .paper blockquote p{margin:0 0 .6rem}
+  .paper blockquote p:last-child{margin-bottom:0}
+  .paper blockquote strong{color:var(--ink)}
+
+  /* Tables */
+  .paper .tablewrap{overflow-x:auto;margin:1.3rem 0;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+  .paper table{border-collapse:collapse;width:100%;font-size:.95rem;line-height:1.5}
+  .paper th,.paper td{text-align:left;padding:.6rem .85rem;border-bottom:1px solid var(--line);vertical-align:top}
+  .paper thead th{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--accent-ink);background:color-mix(in oklab,var(--accent) 8%,var(--surface2));border-bottom:1px solid var(--line2)}
+  .paper tbody tr:last-child td{border-bottom:none}
+  .paper tbody tr:nth-child(even){background:color-mix(in oklab,var(--ink) 3%,transparent)}
+
+  /* Code */
+  .paper code{font-family:var(--font-mono);font-size:.88em;background:color-mix(in oklab,var(--accent) 10%,var(--surface));
+    border:1px solid var(--line);border-radius:5px;padding:.08em .38em;color:var(--accent-ink)}
+  .paper pre{background:var(--bg2);border:1px solid var(--line2);border-radius:12px;padding:1rem 1.15rem;overflow-x:auto;
+    margin:1.3rem 0;line-height:1.55}
+  .paper pre code{background:none;border:none;padding:0;color:var(--ink2);font-size:.86rem}
+
+  /* Mermaid figures */
+  .diagram-figure{margin:1.6rem 0;background:#f7f8fb;border:1px solid var(--line2);border-radius:14px;padding:1.1rem 1rem .6rem;
+    box-shadow:var(--shadow);overflow-x:auto}
+  html[data-theme="light"] .diagram-figure{background:#fbfaf7}
+  .diagram-figure pre.mermaid{background:none;border:none;box-shadow:none;padding:0;margin:0;text-align:center;
+    color:#1c2530;font-family:var(--font-mono);font-size:.82rem;line-height:1.5;white-space:pre-wrap}
+  .diagram-figure svg{max-width:100%;height:auto;display:block;margin:0 auto}
+  .diagram-figure figcaption{margin-top:.7rem;text-align:center;font-family:var(--font-mono);font-size:.7rem;
+    letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+
+  /* Footnotes */
+  .paper .footnote{margin-top:2.6rem;padding-top:1rem;border-top:1px solid var(--line);font-size:.9rem;color:var(--ink2)}
+  .paper .footnote hr{display:none}
+  .paper .footnote ol{padding-left:1.3rem}
+  .paper .footnote li{margin:.45rem 0}
+  .paper .footnote-backref{border-bottom:none;margin-left:.3rem}
+  .paper sup a.footnote-ref{border-bottom:none;color:var(--accent-ink);font-weight:600;padding:0 .05em}
+
+  /* TOC (if [TOC] used) */
+  .paper .toc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:.9rem 1.2rem;margin:1.4rem 0;font-size:.95rem}
+  .paper .toc > ul{margin:0}
+
+  footer.paperfoot{max-width:var(--measure);margin:3rem auto 0;padding-top:1.3rem;border-top:1px solid var(--line);
+    color:var(--muted);font-size:.82rem;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}
+  footer.paperfoot a{color:var(--ink2)}
+  footer.paperfoot .mono{font-family:var(--font-mono)}
+
+  .pubnav{display:flex;flex-wrap:wrap;gap:2px 16px;align-items:center;padding:9px clamp(18px,4vw,40px);
+    background:color-mix(in oklab,var(--bg2),transparent 20%);border-bottom:1px solid var(--line);
+    font-family:var(--font-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase}
+  .pubnav a{color:var(--ink2);padding:4px 0;border-bottom:2px solid transparent;text-decoration:none}
+  .pubnav a:hover{color:var(--ink)}
+  .pubnav a[aria-current="page"]{color:var(--accent-ink);border-bottom-color:var(--accent)}
+
+  .cfside{display:none}
+  @media(min-width:1080px){
+    body{padding-left:280px}
+    .pubnav{display:none}
+    .cfside{position:fixed;left:0;top:0;bottom:0;width:280px;z-index:30;display:flex;flex-direction:column;gap:18px;
+      padding:22px 18px;background:var(--bg2);border-right:1px solid var(--line);overflow-y:auto}
+  }
+  .cfside .cfbrand{display:flex;align-items:center;gap:11px}
+  .cfside .cfbrand img{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:0 0 auto}
+  .cfside .cfbrand .nm{font-family:var(--font-display);font-weight:700;font-size:15.5px;color:var(--ink);line-height:1.1}
+  .cfside .cfbrand .rl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px;line-height:1.5}
+  .cfside nav{display:flex;flex-direction:column;gap:4px}
+  .cfside nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;color:var(--ink2);font-size:14px;font-weight:500;border:1px solid transparent;text-decoration:none}
+  .cfside nav a svg{width:18px;height:18px;flex:0 0 auto}
+  .cfside nav a:hover{background:var(--surface);color:var(--ink)}
+  .cfside nav a.on{background:var(--surface);border-color:var(--line);color:var(--ink)}
+  .cfside .cffoot{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+  .cfside .cfavail{font-size:12px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+  .cfside .cfdot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 10px var(--good);flex:0 0 auto;margin-top:4px}
+  .cfside .cfbtns{display:flex;gap:8px}
+  .cfside .cfcv{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:12px;font-weight:600;font-size:13px;
+    background:var(--accent);border:1px solid var(--accent);color:#fff;text-decoration:none}
+  .cfside .cfcv:hover{filter:brightness(1.08)}
+  .cfside .cftheme{width:40px;display:inline-flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer}
+  .cfside .cftheme svg{width:16px;height:16px}
+</style>
+</head>
+<body>
+  <aside class="cfside" aria-label="Site navigation">
+    <div class="cfbrand">
+      <img src="../../assets/img/portrait-2026.png" alt="Christopher Farmer">
+      <div><div class="nm">Christopher Farmer</div><div class="rl">Legal, Risk &amp; Technology Transformation</div></div>
+    </div>
+    <nav>
+      <a href="../../index.html#overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg><span>Overview</span></a>
+      <a href="../../index.html#projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Projects</span></a>
+      <a href="../../case-studies/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 5h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h7z"/></svg><span>Case studies</span></a>
+      <a href="../../index.html#experience"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Experience</span></a>
+      <a href="../../index.html#warroom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>War Room</span></a>
+      <a href="../../index.html#expertise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.1L12 17l-5.5 3.3 1-6.1L3 8.9 9 8z"/></svg><span>Expertise</span></a>
+      <a href="../../index.html#credentials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg><span>Credentials</span></a>
+      <a href="../../publications/index.html" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg><span>Publications</span></a>
+      <a href="../../index.html#contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M4 7l8 6 8-6"/></svg><span>Contact</span></a>
+    </nav>
+    <div class="cffoot">
+      <div class="cfavail"><span class="cfdot"></span> Open to legal, risk &amp; transformation roles &mdash; Geneva</div>
+      <div class="cfbtns">
+        <a class="cfcv" href="../../docs/CV-Christopher-Farmer-2026-08.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg> CV</a>
+        <button class="cftheme" onclick="document.getElementById('theme')?document.getElementById('theme').click():(function(){var h=document.documentElement,n=h.getAttribute('data-theme')==='light'?'dark':'light';h.setAttribute('data-theme',n);try{localStorage.setItem('cf-theme',n)}catch(e){}})()" title="Toggle theme" aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="top">
+    <a class="brand" href="../index.html" aria-label="Back to Publications">
+      <div class="crest">CF</div>
+      <div><div class="nm">Christopher Farmer</div><div class="rl">Publications</div></div>
+    </a>
+    <div class="topacts">
+      <a class="btn" href="../index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M15 18l-6-6 6-6"/></svg>
+        Back to Publications
+      </a>
+      <button class="btn icon" id="theme" title="Toggle light / dark" aria-label="Toggle light or dark theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </div>
+  </div>
+<nav class="pubnav" aria-label="Site">
+  <a href="../../index.html#overview">Overview</a>
+  <a href="../../index.html#projects">Projects</a>
+  <a href="../../case-studies/index.html">Case studies</a>
+  <a href="../../index.html#experience">Experience</a>
+  <a href="../../index.html#warroom">War Room</a>
+  <a href="../../index.html#expertise">Expertise</a>
+  <a href="../../index.html#credentials">Credentials</a>
+  <a href="../index.html" aria-current="page">Publications</a>
+  <a href="../../index.html#contact">Contact</a>
+</nav>
+
+  <main class="wrap">
+    <article class="paper">
+<h1 id="strategic-procurement-and-feasibility-modeling-for-large-scale-autonomous-systems">Strategic Procurement and Feasibility Modeling for Large-Scale Autonomous Systems</h1>
+<p><strong>Christopher I. V. Farmer, LL.M. (University of Worcester) · Independent Researcher · civfarmer@gmail.com</strong></p>
+<p><em>Preprint — submitted; pending peer review. Methodology paper. Version 1.0, July 2026.</em></p>
+<blockquote>
+<p><strong>Scope note.</strong> This is a domain-general systems-engineering methodology paper. It presents transferable modelling techniques for estimating cost, schedule, and risk on very large, capital-intensive autonomous and infrastructure programmes — for example large renewable-energy build-outs, hyperscale data-centre programmes, autonomous logistics networks, and space infrastructure. The worked illustration is a generic, de-identified civilian autonomous-freight programme. All numerical values in the illustration are notional and clearly labelled as such; they are not empirical estimates for any real programme.</p>
+</blockquote>
+<hr>
+<h2 id="abstract">Abstract</h2>
+<p>Large-scale autonomous systems — networks that combine first-of-a-kind (FOAK) technology, heavy civil and energy infrastructure, and a novel software-and-sensing autonomy stack — are among the most difficult programmes to cost, schedule, and de-risk before commitment. The empirical record for megaprojects is unforgiving: cost overruns and schedule slippage are the norm, driven by optimism bias, immature technology, correlated risks, and long-lead supply constraints. This paper sets out an integrated, reproducible pre-commitment modelling methodology with five components: (1) a work-breakdown-structure (WBS)-driven capital-expenditure (CapEx) estimate carrying explicit uncertainty ranges and learning-curve effects for mass-produced elements; (2) critical-path scheduling under deep uncertainty using an event-sourced engine, <em>Helm</em>, that computes a working-calendar critical path, resource capacity, and Monte-Carlo finish-date distributions and re-plans deterministically from a logged event stream; (3) feasibility <em>gates</em> — technology-readiness, supply-chain, power/energy budget, and integration risk — each with explicit go/no-go criteria; (4) a procurement layer covering make-versus-buy, single-source versus competitive tendering, and long-lead item management; and (5) an integrated feasibility index that triangulates bottom-up estimates against reference-class benchmarks. A fully de-identified worked illustration on a generic autonomous-freight network demonstrates the method end to end. The approach is technology-neutral and applies to any multi-billion-unit-of-currency autonomous or infrastructure programme.</p>
+<p><strong>Keywords:</strong> systems engineering; feasibility modelling; work breakdown structure; cost estimation; learning curve; technology readiness level; critical-path scheduling; Monte-Carlo schedule risk; critical chain; procurement strategy; make-or-buy; long-lead procurement; megaproject; reference-class forecasting; go/no-go decision gates.</p>
+<hr>
+<h2 id="1-introduction">1. Introduction</h2>
+<p>A <em>large-scale autonomous system</em> couples three things at once: a fleet or network of many physical units capable of unsupervised or lightly-supervised operation; the fixed infrastructure (civil works, energy, communications) that hosts them; and an autonomy stack — sensing, compute, and decision software — that is frequently the least mature element in the whole undertaking. Such programmes are appearing across sectors: hyperscale and autonomously-operated data centres, gigawatt-scale renewable build-outs with automated balancing, autonomous logistics and freight networks, automated ports, and space infrastructure such as satellite constellations and their ground segments. They share scale (typically multi-billion in whatever currency), novelty (a FOAK or near-FOAK core), and a dependence on infrastructure and supply chains whose lead times dwarf the software development that usually attracts management attention.</p>
+<p>The central problem this paper addresses is <em>feasibility modelling before commitment</em>: how to produce a defensible estimate of what such a programme will cost, how long it will take, and whether it can be delivered at all, at the point where the sponsor must decide whether to proceed, defer, or stop. This is precisely where the historical record is worst. The megaproject literature has established, across thousands of projects and several decades, that large capital programmes are delivered over budget and behind schedule "over and over again" (Flyvbjerg, 2014) — a pattern robust enough that Flyvbjerg (2017) named it the <em>Iron Law of Megaprojects</em>. The causes are well characterised: <em>optimism bias</em> (systematic underestimation of cost, time, and risk), <em>strategic misrepresentation</em> (incentives to make projects look better than they are to win approval), immature technology carried into full-rate commitment, and the <em>correlation</em> of risks that naive estimates treat as independent.</p>
+<p>Autonomous systems sharpen every one of these failure modes. The autonomy stack is typically at a low technology-readiness level (TRL) when budgets are set; the energy and grid-connection elements have lead times measured in years and are easy to under-scope; the sensing and compute supply chain is concentrated in a handful of vendors, creating single-source fragility; and the integration of novel software with novel physical infrastructure is a source of "unknown-unknowns" that point estimates do not capture.</p>
+<p>The contribution of this paper is not a new theory but an <em>integrated, reproducible modelling method</em> binding five established bodies of practice — cost estimation, learning curves, schedule-risk analysis, technology-readiness assessment, and strategic procurement — into a single pre-commitment workflow, instrumenting the schedule with an auditable, event-sourced engine. The method is deliberately technology-neutral: nothing in it depends on what the autonomous units <em>do</em>; it models only money, time, maturity, supply, and risk. That neutrality is what makes it transferable across the sectors above.</p>
+<p>The remainder of the paper is organised as follows. Section 2 reviews the related work the method draws on. Section 3 sets out the methodology in five parts plus an integrating index. Section 4 works a fully de-identified illustration on a generic autonomous-freight network. Section 5 states the limitations. Section 6 concludes.</p>
+<hr>
+<h2 id="2-related-work-and-background">2. Related Work and Background</h2>
+<p><strong>Systems-engineering lifecycle and the WBS.</strong> The methodology sits inside the standard systems-engineering (SE) lifecycle codified by the INCOSE <em>Systems Engineering Handbook</em> (INCOSE, 2023) and ISO/IEC/IEEE 15288:2015, both of which frame development as a progression through stages separated by <em>decision gates</em> at which the programme is assessed and either continued or held. The <em>work breakdown structure</em> — a product-oriented, hierarchical decomposition of everything the programme must deliver — is the backbone artefact for cost and schedule estimation, and the <em>PMBOK Guide</em> (PMI, 2021) treats it as the object against which scope, budget, and progress are measured. You cannot estimate, schedule, or de-risk what you have not decomposed.</p>
+<p><strong>Cost estimation and its discontents.</strong> The public-sector canon is the GAO <em>Cost Estimating and Assessment Guide</em> (GAO, 2020a), which defines the four characteristics of a reliable estimate (comprehensive, well-documented, accurate, credible), insists on explicit <em>risk and uncertainty analysis</em>, a <em>range of confidence levels</em>, and adequate <em>contingency and management reserve</em>, and formalises <em>parametric estimating</em> (a statistical relationship between historical cost and a driver variable). The GAO warns that estimates carrying "meaningless confidence levels" are common when analysts do not understand the underlying uncertainty mathematics — a caution this paper takes seriously.</p>
+<p><strong>Optimism bias and reference-class forecasting.</strong> The most influential empirical strand is Flyvbjerg's work on megaproject performance. Flyvbjerg, Holm and Buhl (2002) found systematic cost underestimation across hundreds of transport projects, with average real-terms overruns of roughly 45% for rail, 34% for fixed links (bridges and tunnels), and 20% for roads. Flyvbjerg (2006) proposed <em>reference-class forecasting</em> (RCF) as the corrective: rather than building a budget purely bottom-up, one identifies a class of comparable completed projects, derives the empirical distribution of their outcomes, and uses it to adjust the specific estimate. RCF operationalises Kahneman's <em>planning fallacy</em> (Lovallo &amp; Kahneman, 2003; Kahneman, 2011) and underlies the <em>optimism-bias uplifts</em> of the UK's HM Treasury <em>Green Book</em> (HM Treasury, 2022). Flyvbjerg, Garbuio and Lovallo (2009) separated honest optimism from strategic misrepresentation; the <em>Oxford Olympics Study</em> (Flyvbjerg et al., 2016) showed some project classes carry average overruns well above 100%; and Flyvbjerg and Gardner (2023) synthesise the practical lessons. This paper uses RCF not as an alternative to bottom-up WBS estimation but as an independent <em>triangulation</em> against it.</p>
+<p><strong>Learning curves.</strong> For any programme with a mass-produced element, unit cost is not constant. Wright (1936), studying aircraft manufacturing, established that cost per unit falls by a roughly constant percentage with each doubling of cumulative output — the <em>learning</em> or <em>experience</em> curve, later generalised by the Boston Consulting Group (1970). Autonomous-systems programmes depend on exactly the components that display the steepest learning: photovoltaics and lithium-ion batteries have historically followed learning rates of roughly 18–20% per doubling. Costing <code>N</code> units at the FOAK unit price is one of the largest single errors in FOAK estimation, and Section 3.2 treats it explicitly.</p>
+<p><strong>Technology readiness.</strong> Technology maturity is captured by the nine-level <em>Technology Readiness Level</em> (TRL) scale, originated at NASA and formalised by Mankins (1995), now standard across NASA, the U.S. Department of Defense and Department of Energy, and internationally; the GAO <em>Technology Readiness Assessment Guide</em> (GAO, 2020b) codifies best practice for assessing it. Two features matter here: a <em>system's</em> TRL is governed by the <em>lowest</em> TRL among its critical components, and acquisition frameworks such as DoD Instruction 5000.02 (DoD, 2020) require a technology to reach TRL 6 — demonstrated in a relevant environment — before committing to full development. TRL is therefore a natural feasibility gate.</p>
+<p><strong>Scheduling under uncertainty.</strong> Deterministic critical-path method (CPM) descends from the <em>Program Evaluation and Review Technique</em> (PERT; Malcolm et al., 1959). Goldratt's (1997) <em>Critical Chain Project Management</em> reframed scheduling around the <em>Theory of Constraints</em>: estimate activities at their 50% (median) point, strip the padding hidden in individual tasks, and aggregate it into a shared <em>project buffer</em> sized to protect the delivery date, with <em>feeding buffers</em> protecting the critical chain from its tributaries. Because a single buffer size is hard to defend analytically, Hoel and Taylor (1999) showed Monte-Carlo simulation can size it to a chosen completion probability, and Hulett (2011) developed <em>integrated cost-schedule risk analysis</em>, in which correlated Monte-Carlo over the network yields a finish-date and cost distribution rather than a point. The <em>Helm</em> engine of Section 3.3 instantiates exactly this lineage — CPM backbone, critical-chain buffering against a committed date, Monte-Carlo finish distribution — with an event-sourced architecture added for auditable re-planning.</p>
+<p><strong>Procurement strategy.</strong> Finally, the make-or-buy and sourcing decision is treated in the procurement and operations literature as a <em>strategic</em> rather than purely cost-driven choice, weighing unit economics against intellectual-property control, capacity, quality, and above all <em>supply risk</em>: single-source dependency, geographic and geopolitical concentration, and lead-time variability on long-lead items. The recommended posture — map single points of failure, then mitigate through dual-sourcing, localisation, inventory buffers, and design escrow — informs Section 3.5.</p>
+<p>The ingredients are established; the contribution here is their <em>integration</em> into one pre-commitment feasibility model for autonomous systems, with the schedule instrumented by a reproducible engine.</p>
+<hr>
+<h2 id="3-methodology">3. Methodology</h2>
+<h3 id="31-overview-five-layers-and-one-decision">3.1 Overview: five layers and one decision</h3>
+<p>From a single WBS the method produces four quantitative views — a cost distribution, a schedule distribution, a maturity/feasibility assessment, and a procurement-risk posture — and combines them into one go/no-go recommendation. The five layers are:</p>
+<ol>
+<li><strong>WBS-driven CapEx estimation</strong> with three-point ranges, learning-curve treatment, and correlated aggregation (§3.2).</li>
+<li><strong>Schedule modelling under deep uncertainty</strong> with the <em>Helm</em> engine (§3.3).</li>
+<li><strong>Feasibility gates</strong> — TRL, supply-chain, energy/power budget, integration risk — each with an explicit pass/hold criterion (§3.4).</li>
+<li><strong>Procurement strategy and risk</strong> — make-vs-buy, sourcing, long-lead management (§3.5).</li>
+<li><strong>An integrated feasibility index</strong> that triangulates the bottom-up result against a reference class and rolls the gates into a single recommendation (§3.6).</li>
+</ol>
+<p>The organising principle is <em>honest uncertainty</em>: every output is a range or distribution with a stated confidence level, never a single number presented as fact — the standard the GAO sets when it warns against "meaningless confidence levels."</p>
+<h3 id="32-wbs-driven-capex-estimation-for-first-of-a-kind-systems">3.2 WBS-driven CapEx estimation for first-of-a-kind systems</h3>
+<p><strong>Decomposition.</strong> The estimate begins with a product-oriented WBS decomposed to the level at which a cost driver can be named for each element — typically WBS Level 3. For an autonomous system the top-level elements almost always separate into: the <em>fleet</em> (the replicated autonomous units); the <em>fixed infrastructure</em> (civil works, depots, sites); the <em>energy subsystem</em> (grid connection, substations, storage, charging or fuelling); the <em>autonomy stack</em> (sensing, compute, decision software — the FOAK core); the <em>orchestration/control layer</em>; <em>integration, verification and commissioning</em>; and <em>programme management and owner's costs</em>. The separation matters because these elements obey <em>different cost laws</em>: the fleet follows a learning curve, the infrastructure follows construction parametrics, and the autonomy stack behaves like R&amp;D with a fat right tail.</p>
+<p><strong>Three-point ranges, not point estimates.</strong> Each terminal element receives a low (optimistic, ~P10), most-likely (mode), and high (pessimistic, ~P90) estimate that defines a distribution (triangular or PERT-beta). Mature, competitively-supplied commodities get tight ranges; the FOAK autonomy stack gets a deliberately wide, right-skewed range because its outcome is genuinely uncertain — and suppressing that skew is the modelling equivalent of optimism bias.</p>
+<p><strong>Learning curve for the replicated fleet.</strong> For the fleet element, costing <code>N</code> units at the FOAK unit price is a category error. Wright's law gives the cost of the <code>x</code>-th unit as</p>
+<pre><code>C(x) = C1 · x^(−b),   where   b = −ln(LR) / ln(2)
+</code></pre>
+<p>with <code>C1</code> the first-unit cost and <code>LR</code> the learning rate (e.g. <code>LR = 0.88</code> means a 12% cost reduction per doubling of cumulative output). The <em>cumulative average</em> unit cost over <code>N</code> units is well approximated (for large <code>N</code>) by <code>C1 · N^(−b) / (1 − b)</code>, so total fleet cost is <code>N</code> times that. The gap between the naive estimate (<code>C1 · N</code>) and the learning-adjusted total is frequently a factor of two or more and can be the difference between a fleet line that looks unaffordable and one that is feasible. The learning rate itself is uncertain and should be carried as a range; the fleet cost distribution is then a function of both <code>C1</code> and <code>LR</code> distributions.</p>
+<p><strong>Parametric anchoring.</strong> Wherever a comparable database exists — construction cost per square metre, grid-connection cost per MW, storage cost per MWh, compute cost per rack — terminal elements are anchored to a <em>parametric</em> cost-estimating relationship (GAO, 2020a) rather than expert judgement alone. Parametrics keep the estimate connected to reality; expert three-point ranges handle the genuine novelty (the autonomy stack) where no parametric exists.</p>
+<p><strong>Correlated aggregation.</strong> The programme cost distribution is obtained by Monte-Carlo aggregation of the element distributions — <em>not</em> by summing the most-likely values (which understates the mean because of skew) and <em>not</em> by assuming independence (which understates the tail). Element costs on one programme are positively correlated: the macro conditions that inflate one element — labour markets, commodity prices, schedule slippage — inflate others, so a modest assumed correlation (illustratively <code>ρ ≈ 0.3</code>) materially fattens the aggregate tail and is far closer to reality than independence. From the aggregate the model reads the <strong>P50</strong> (a realistic expected outcome) and the <strong>P80</strong> (a prudent funding level); <em>contingency</em> is sized as roughly <code>P80 − P50</code> and attached to the risk register, and a <em>management reserve</em> of a few percent is held above P80 for unknown-unknowns, per GAO practice.</p>
+<p><strong>Triangulation against a reference class.</strong> The bottom-up P80 is finally cross-checked against a <em>reference-class</em> estimate (Flyvbjerg, 2006): take a comparable class of completed FOAK programmes and apply their empirical <em>optimism-bias uplift</em> to the naive point estimate. Agreement raises confidence; a bottom-up number far below the reference class signals optimism and sends the decomposition back for revision. The two methods are complementary — bottom-up for structure, reference-class for realism.</p>
+<h3 id="33-schedule-modeling-under-deep-uncertainty-the-helm-engine">3.3 Schedule modelling under deep uncertainty: the <em>Helm</em> engine</h3>
+<p>Cost cannot be separated from time: on capital programmes, schedule slip <em>is</em> cost, through prolonged overheads, financing, and the escalation of un-let contracts. The schedule layer therefore uses the author's project-scheduling engine, <strong>Helm</strong>, which is designed for planning under deep uncertainty and, importantly, for <em>auditable re-planning</em> as the programme moves.</p>
+<p><strong>Event-sourced core.</strong> Helm's central abstraction is a pure function</p>
+<pre><code>plan = schedule(seed, events, today)
+</code></pre>
+<p>The <strong>seed</strong> is an immutable description of the intended programme: <em>tasks</em> (each with an id, duration, dependency list, assigned resource, and low/medium/high risk class), <em>resources</em> (each with a full-time-equivalent capacity and internal/external flag), optional <em>stages</em>, a committed <em>deadline</em>, and a fixed <em>Monte-Carlo seed</em>. The <strong>events</strong> are an append-only log of what has actually happened or been decided — delays, blockers, progress updates, duration changes, reassignments, task splits, "not-before" constraints, decisions. The <strong>plan</strong> is a deterministic function of the two, which gives the architecture its two defining properties: it is <em>reproducible</em> (same seed + events + Monte-Carlo seed ⇒ identical outputs, so any number in a board paper regenerates exactly) and <em>auditable</em> (every deviation from baseline is carried in the event that caused it).</p>
+<p><strong>Dependency graph with overlap.</strong> Dependencies are not restricted to finish-to-start; a dependency may be <em>fractional</em> — "start when the predecessor is <code>p</code> fraction complete" — letting the model represent deliberate <em>overlap</em> (fast-tracking), e.g. beginning software integration when the fleet build is 40% delivered rather than waiting for the last unit. Fast-tracking is one of the few genuine levers for schedule compression on a deadline-constrained programme, and modelling it explicitly rather than by hand-shortening durations keeps the compression honest and visible.</p>
+<p><strong>Deterministic backbone.</strong> Over a <em>working calendar</em> (weekends and non-working days removed), Helm computes a forward pass giving each task a start day, end day, and <em>slack</em>; zero-slack tasks form the <strong>critical path</strong>, and tasks that are not strictly critical but still drive the finish date are flagged as <em>driving</em>. This is standard CPM, made calendar-honest.</p>
+<p><strong>Resource capacity.</strong> Because durations assume resources are available, Helm computes resource <em>capacity</em> utilisation across a window: where an assigned resource — especially an external vendor or grid contractor — is over-committed, the apparent critical path is optimistic. Capacity checking prevents the classic error of a schedule that is feasible task-by-task but infeasible in aggregate because one scarce resource is claimed by three parallel tasks at once.</p>
+<p><strong>Monte-Carlo finish distribution.</strong> The deterministic critical path is the <em>optimistic</em> schedule. Helm perturbs task durations by risk class and re-runs the network many times against its seeded generator, producing a <em>distribution of finish dates</em> from which it reports a <strong>P80 finish</strong> (met in 80% of simulations), a <strong>confidence</strong> figure (probability of meeting the deadline), and a <strong>buffer</strong> (working-day margin between the risk-adjusted finish and the deadline). This is Goldratt's project buffer sized by Hoel–Taylor Monte-Carlo rather than rule of thumb, and Hulett-style integrated risk applied to the finish date. Helm rolls these into a <strong>feasibility label</strong> and a traffic-light <strong>health</strong> state: green when the P80 sits comfortably inside the deadline, amber when the buffer is thin, red when the P80 breaches it.</p>
+<p><strong>Evidence-based progress.</strong> The engine enforces one principle: <em>progress is only ever recognised from a logged event</em>, never inferred from a stage label or a plan that "should" have advanced. Nothing is marked complete by assumption — the scheduling analogue of earned-value discipline, which directly resists the optimism bias that makes reported progress outrun real progress.</p>
+<p><strong>Logged-delay re-planning.</strong> When something slips, the response is not to redraw the chart by hand but to <em>append an event</em> — a delay, a blocker with an impact in days, a duration revision. Re-running <code>schedule</code> re-levels the entire network: downstream tasks move, the critical path may switch, and the Monte-Carlo distribution, buffer, and health state recompute. Because the causing event carries a note, the <em>reason</em> travels with the moved task, so a reviewer sees not just that the finish date moved but <em>why</em>. Helm also compares the current plan against the <strong>baseline</strong> (the same seed with an empty event log), reporting drift explicitly: how many tasks have moved and how far the finish date has slipped from the approved plan.</p>
+<p><strong>Decision support: escalations.</strong> Finally, Helm surfaces <em>escalations</em> structured as <em>what happened / what was tried / the impact / the options</em>. Rather than a bare red flag, the reviewer is handed a decision — e.g. "long-lead energisation delayed; expediting attempted; +N days to P80 finish and deadline breach; options are interim on-site generation or phased commissioning" — turning the schedule model from a reporting tool into a decision instrument.</p>
+<h3 id="34-feasibility-gates-and-gono-go-criteria">3.4 Feasibility gates and go/no-go criteria</h3>
+<p>Cost and schedule distributions answer "how much" and "how long"; <em>feasibility gates</em> answer "can this be done at all, now?" Each gate is a graded test with an explicit criterion; failing one does not cancel a programme but bars it from full-rate commitment until cleared — usually via a dedicated maturation phase. The method uses four gates, aligned with the stage-gate discipline of Cooper (1990) and the decision gates of the SE lifecycle (INCOSE, 2023).</p>
+<p><strong>Gate 1 — Technology readiness.</strong> Assess the TRL of every critical subsystem; the <em>system</em> TRL is the minimum across them (Mankins, 1995; GAO, 2020b). Criterion: the system TRL must reach the acquisition threshold — conventionally <strong>TRL 6</strong>, demonstrated in a relevant environment (DoD, 2020) — before committing to build. The <em>pacing item</em> is the lowest-TRL critical subsystem, and for autonomous systems it is almost always the autonomy decision stack or whole-system integration. A sub-threshold TRL sends the programme to a technology-maturation phase rather than to commitment.</p>
+<p><strong>Gate 2 — Supply chain.</strong> Assess, for every critical procured item, the number of qualified suppliers, the geographic/geopolitical concentration, and the lead time and its variability. Criterion: no <em>critical single point of failure</em> on the delivery path without a funded mitigation (dual-source, buffer stock, design escrow). Concentrated, long-lead items (advanced compute, high-power grid transformers, battery cells) fail this gate unless mitigated.</p>
+<p><strong>Gate 3 — Power/energy budget.</strong> Autonomous systems are energy systems. Compute the aggregate energy and, critically, the <em>peak power</em> demand, and test it against what candidate sites and grid connections can deliver within the schedule. Criterion: firm capacity — including the grid-connection <em>lead time</em> — must be securable within the plan, or the deficit closed by on-site generation/storage. This gate frequently binds harder than any software risk, because grid connection is both a long-lead item and a hard physical constraint.</p>
+<p><strong>Gate 4 — Integration risk.</strong> Assess the number and novelty of interfaces between the FOAK autonomy stack and the physical infrastructure, and the whole-system integration TRL. Criterion: integration maturity must be demonstrated (typically via a representative prototype/pilot) before full-rate build; a low integration TRL with many novel interfaces is the classic source of unknown-unknowns and fails the gate.</p>
+<p>The gates are <em>conjunctive</em>: the programme is feasible for commitment only if all four pass. A single red gate is a <em>no-go for commitment</em> and a <em>go for maturation</em> — the correct, and often politically difficult, outcome that the method is designed to make defensible.</p>
+<h3 id="35-procurement-strategy-and-risk">3.5 Procurement strategy and risk</h3>
+<p>Procurement is where the cost, schedule, and supply-risk pictures become contractual commitments, and its choices feed straight back into the model.</p>
+<p><strong>Make versus buy.</strong> Each major element's make/buy choice is decided on <em>strategic</em> grounds, not unit cost alone (see §2). The heuristic: <em>buy</em> mature, competitively-supplied elements (the hardware platform, commodity sensors) to capture market pricing and suppliers' already-realised learning; <em>make or partner-with-control</em> the core-IP differentiators (the autonomy decision stack, the orchestration layer), because control of the FOAK core is the programme's actual value and cannot be safely outsourced. Where a strategic element must be bought (few suppliers exist), the buy is protected with <em>design/source-code escrow</em> and second-source qualification so a supplier failure is survivable.</p>
+<p><strong>Single-source versus competitive.</strong> Competitive tendering disciplines price and improves resilience, and is the default wherever a real supplier market exists. But genuine single-source situations are common — advanced compute and specialised sensors may have only one or two viable suppliers. Single-source is not automatically wrong (it can buy integration coherence and priority in an allocation-constrained market) but must be <em>recognised and mitigated</em> through buffer stock, an invested second-source, and contractual protection. The model records each critical item's sourcing posture and residual risk, feeding Gate 2.</p>
+<p><strong>Long-lead items.</strong> The items that most often determine feasibility have the longest, least-compressible lead times — grid connections and high-power transformers, battery cells, advanced compute. The rule is explicit: <em>identify long-lead items first, and reserve them ahead of the works that logically precede them.</em> In Helm these appear as long-duration tasks carrying <em>not-before</em> constraints, almost always on or near the critical path; their lead time, not the construction or software, is frequently the true schedule driver. Committing early — before design is complete — trades a bounded financial risk (a reservation that may be wasted) against an unbounded schedule risk (a multi-year connection queue). For deadline-constrained programmes that trade is usually correct, and the model quantifies it: the <em>cost of early commitment</em> against the <em>schedule value of the buffer it protects</em>, read off the Helm buffer and the cost distribution.</p>
+<h3 id="36-bringing-it-together-an-integrated-feasibility-view">3.6 Bringing it together: an integrated feasibility view</h3>
+<p>The four quantitative views are combined into a single recommendation:</p>
+<ul>
+<li><strong>Cost:</strong> fund at the aggregate <strong>P80</strong>, hold <strong>management reserve</strong> above it, and confirm the bottom-up P80 is consistent with the <strong>reference-class</strong> benchmark (§3.2).</li>
+<li><strong>Schedule:</strong> commit to a date at or beyond the Helm <strong>P80 finish</strong>, with a non-negative <strong>buffer</strong> and an acceptable <strong>confidence</strong>; health must be green or a well-understood amber (§3.3).</li>
+<li><strong>Gates:</strong> all four feasibility gates pass, or a costed and scheduled <strong>maturation phase</strong> is defined to clear the failing gate(s) (§3.4).</li>
+<li><strong>Procurement:</strong> every critical item has a defined sourcing posture with residual risk mitigated to acceptable, and long-lead commitments are sequenced (§3.5).</li>
+</ul>
+<p>A programme satisfying all four is a <em>go</em>. One that fails on affordability, on a red schedule with no buffer, or on a gate that cannot be cleared within the sponsor's constraints is a <em>no-go-for-now</em> with a defined path (usually maturation) to a future gate. The method's value is that this recommendation is <em>reproducible and auditable</em>: every number regenerates from the WBS, the estimate assumptions, and the Helm seed-plus-events, so the decision can be defended and, when circumstances change, cheaply re-run.</p>
+<hr>
+<h2 id="4-worked-illustration">4. Worked Illustration</h2>
+<blockquote>
+<p><strong>All figures in this section are illustrative and notional.</strong> They are chosen to demonstrate the method and its arithmetic on a realistic-looking but entirely generic programme. They are not estimates for any actual project, product, or organisation, and no figure should be cited as an empirical result.</p>
+</blockquote>
+<p><strong>The programme.</strong> Consider <em>Programme A</em>, a hypothetical FOAK national <strong>autonomous electric-freight shuttle network</strong>: roughly 2,000 self-driving electric cargo shuttles on a defined route network, served by twelve automated depots/terminals, an energy and charging backbone, an autonomy sensing-and-decision stack, and a central orchestration ("control tower") layer. Programme A is representative only; the identical modelling applies to a renewable build-out, a hyperscale data-centre, or a satellite constellation by re-labelling the WBS.</p>
+<h3 id="41-wbs-and-capex-estimate">4.1 WBS and CapEx estimate</h3>
+<p>Table 1 gives the illustrative Level-1 WBS with three-point CapEx ranges (currency units, "cu", in millions).</p>
+<p><strong>Table 1 — Illustrative WBS CapEx (cu millions, notional).</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th style="text-align: right;">WBS</th>
+<th>Element</th>
+<th style="text-align: right;">Low</th>
+<th style="text-align: right;">Most-likely</th>
+<th style="text-align: right;">High</th>
+<th>Cost law</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1.0</td>
+<td>Autonomous vehicle fleet (2,000 units)</td>
+<td style="text-align: right;">520</td>
+<td style="text-align: right;">600</td>
+<td style="text-align: right;">780</td>
+<td>Learning curve</td>
+</tr>
+<tr>
+<td style="text-align: right;">2.0</td>
+<td>Automated depots &amp; terminals (×12)</td>
+<td style="text-align: right;">700</td>
+<td style="text-align: right;">820</td>
+<td style="text-align: right;">1,150</td>
+<td>Construction parametric</td>
+</tr>
+<tr>
+<td style="text-align: right;">3.0</td>
+<td>Energy &amp; charging backbone</td>
+<td style="text-align: right;">520</td>
+<td style="text-align: right;">640</td>
+<td style="text-align: right;">950</td>
+<td>Parametric + grid</td>
+</tr>
+<tr>
+<td style="text-align: right;">4.0</td>
+<td>Autonomy &amp; sensing stack (FOAK core)</td>
+<td style="text-align: right;">380</td>
+<td style="text-align: right;">520</td>
+<td style="text-align: right;">980</td>
+<td>R&amp;D, right-skewed</td>
+</tr>
+<tr>
+<td style="text-align: right;">5.0</td>
+<td>Network control-tower / orchestration</td>
+<td style="text-align: right;">175</td>
+<td style="text-align: right;">240</td>
+<td style="text-align: right;">420</td>
+<td>Software</td>
+</tr>
+<tr>
+<td style="text-align: right;">6.0</td>
+<td>Integration, V&amp;V &amp; commissioning</td>
+<td style="text-align: right;">220</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: right;">560</td>
+<td>% of build, risk-loaded</td>
+</tr>
+<tr>
+<td style="text-align: right;">7.0</td>
+<td>Programme mgmt &amp; owner's costs</td>
+<td style="text-align: right;">285</td>
+<td style="text-align: right;">330</td>
+<td style="text-align: right;">470</td>
+<td>% of programme</td>
+</tr>
+<tr>
+<td style="text-align: right;"></td>
+<td><strong>Sum of most-likely</strong></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"><strong>3,450</strong></td>
+<td style="text-align: right;"></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Learning-curve derivation of the fleet line (1.0).</strong> Naively costing 2,000 shuttles at an illustrative FOAK unit price <code>C1 = 0.90</code> cu gives <code>0.90 × 2,000 = 1,800</code> cu — the largest line in the programme. Applying Wright's law with an illustrative learning rate <code>LR = 0.88</code> (<code>b = −ln 0.88 / ln 2 ≈ 0.184</code>), the cumulative-average unit cost over 2,000 units is <code>C1 · N^(−b) / (1 − b) ≈ 0.272</code> cu, so the total build ≈ <code>2,000 × 0.272 ≈ 543</code> cu; with tooling and spares the fleet most-likely is ≈ <strong>600 cu</strong>, one-third of the naive figure. The learning curve is the single largest correction in the estimate, and treating it explicitly is what makes the fleet line credible.</p>
+<p><strong>Aggregate distribution.</strong> Summing the most-likely column gives 3,450 cu — neither the mean nor a safe budget. Monte-Carlo aggregation of the seven element distributions under a modest positive correlation (<code>ρ ≈ 0.3</code>) yields an illustrative <strong>P50 ≈ 3,600 cu</strong> and <strong>P80 ≈ 4,300 cu</strong>. The method funds at ≈ 4,300 cu, with <em>contingency ≈ P80 − P50 ≈ 700 cu</em> on the risk register and a <em>management reserve of ~5% (~215 cu)</em> above P80 — a total authorisation near 4,500 cu. Two traps are avoided: summing most-likely values under-funds by ~850 cu against P80, and assuming independence would have produced a falsely tight P80.</p>
+<p><strong>Reference-class triangulation.</strong> Independently applying an illustrative 30% optimism-bias uplift (drawn from a reference class of comparable FOAK programmes) to the naive estimate gives <code>3,450 × 1.30 ≈ 4,485 cu</code>. That the top-down figure (~4,485 cu) and the bottom-up P80-plus-reserve (~4,300–4,500 cu) <em>land in the same region</em> is the signal the method seeks: the estimate is internally consistent and not obviously optimistic.</p>
+<h3 id="42-technology-readiness-assessment-gate-1">4.2 Technology-readiness assessment (Gate 1)</h3>
+<p><strong>Table 2 — Illustrative TRL assessment.</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Subsystem</th>
+<th style="text-align: center;">Illustrative TRL</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Vehicle platform (drive-by-wire EV)</td>
+<td style="text-align: center;">8</td>
+<td>Mature, adapted</td>
+</tr>
+<tr>
+<td>Energy &amp; charging backbone</td>
+<td style="text-align: center;">8</td>
+<td>Established</td>
+</tr>
+<tr>
+<td>Depot automation / mechatronics</td>
+<td style="text-align: center;">7</td>
+<td>Near-mature</td>
+</tr>
+<tr>
+<td>Perception / sensor suite</td>
+<td style="text-align: center;">6</td>
+<td>At threshold</td>
+</tr>
+<tr>
+<td>Fleet orchestration software</td>
+<td style="text-align: center;">6</td>
+<td>At threshold</td>
+</tr>
+<tr>
+<td><strong>Autonomy decision stack (full self-driving in ODD)</strong></td>
+<td style="text-align: center;"><strong>5</strong></td>
+<td><strong>Pacing item</strong></td>
+</tr>
+<tr>
+<td><strong>Whole-system integration</strong></td>
+<td style="text-align: center;"><strong>4</strong></td>
+<td><strong>Pacing item</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>The <strong>system TRL is 4</strong> (the minimum). Against the conventional <strong>TRL 6</strong> commitment threshold, <strong>Gate 1 does not pass</strong>: the autonomy decision stack (TRL 5) and whole-system integration (TRL 4) are immature. The correct decision is <em>no-go for full commitment, go for a technology-maturation phase</em> that raises the autonomy stack and the integration to TRL 6 via a representative prototype/pilot before the main build is authorised.</p>
+<h3 id="43-powerenergy-budget-gate-3">4.3 Power/energy budget (Gate 3)</h3>
+<p>Illustratively, 2,000 shuttles averaging 250 kWh/day consume ≈ <strong>500 MWh/day</strong> (≈ 150 GWh/year over ~300 operating days). The binding number is <em>peak power</em>: if 40% of the fleet charges concurrently at 150 kW, peak demand is <code>2,000 × 0.40 × 150 kW = 120 MW</code>, ≈ 10 MW at each of the twelve depots. <strong>Gate 3</strong> therefore requires securing ≈120 MW of firm grid capacity <em>and</em> accommodating the connection lead time within the schedule (§4.5); where firm capacity is unavailable in time, the deficit is closed with on-site storage and staged energisation — a design and cost input, not an afterthought.</p>
+<h3 id="44-schedule-model-in-helm">4.4 Schedule model in Helm</h3>
+<p>Table 3 gives the illustrative Helm seed (durations in working days; dependencies show fractional overlaps where used).</p>
+<p><strong>Table 3 — Illustrative Helm schedule seed.</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Description</th>
+<th style="text-align: center;">Dur (wd)</th>
+<th>Depends on</th>
+<th>Resource</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>Concept &amp; requirements</td>
+<td style="text-align: center;">40</td>
+<td>—</td>
+<td>Engineering</td>
+</tr>
+<tr>
+<td>B</td>
+<td>Technology maturation &amp; prototype demo</td>
+<td style="text-align: center;">120</td>
+<td>A</td>
+<td>Autonomy team</td>
+</tr>
+<tr>
+<td>C</td>
+<td>Detailed design</td>
+<td style="text-align: center;">90</td>
+<td>B</td>
+<td>Engineering</td>
+</tr>
+<tr>
+<td>D</td>
+<td>Grid connection &amp; energisation <em>(long-lead)</em></td>
+<td style="text-align: center;">520</td>
+<td>C (not-before)</td>
+<td>Grid contractor (ext.)</td>
+</tr>
+<tr>
+<td>E</td>
+<td>Autonomy compute &amp; sensor procurement <em>(long-lead)</em></td>
+<td style="text-align: center;">300</td>
+<td>C</td>
+<td>Vendor (ext.)</td>
+</tr>
+<tr>
+<td>F</td>
+<td>Depot civil works</td>
+<td style="text-align: center;">180</td>
+<td>C</td>
+<td>Civils (ext.)</td>
+</tr>
+<tr>
+<td>G</td>
+<td>Energy &amp; charging installation</td>
+<td style="text-align: center;">120</td>
+<td>D, F@0.7</td>
+<td>Civils (ext.)</td>
+</tr>
+<tr>
+<td>H</td>
+<td>Fleet build ramp</td>
+<td style="text-align: center;">220</td>
+<td>C</td>
+<td>Vendor (ext.)</td>
+</tr>
+<tr>
+<td>I</td>
+<td>Autonomy software integration &amp; V&amp;V</td>
+<td style="text-align: center;">160</td>
+<td>E, H@0.4</td>
+<td>Autonomy team</td>
+</tr>
+<tr>
+<td>J</td>
+<td>System integration &amp; commissioning</td>
+<td style="text-align: center;">90</td>
+<td>G, I</td>
+<td>Integration/T&amp;E</td>
+</tr>
+<tr>
+<td>K</td>
+<td>Pilot operations &amp; acceptance</td>
+<td style="text-align: center;">60</td>
+<td>J</td>
+<td>Operations</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Deterministic result.</strong> The longest chain is <code>A → B → C → D → G → J → K</code> (<code>40+120+90+520+120+90+60 = 1,040</code> working days ≈ <strong>month 50</strong>), <em>driven by the grid-connection long-lead task D</em>, not the software; the autonomy chain via E (860 wd) and the fleet chain via H (780 wd) run inside it. This is counter-intuitive but characteristic: on an autonomous-systems programme the pacing schedule item is frequently the <em>energy/grid</em> element, because its lead time is the least compressible.</p>
+<p><strong>Monte-Carlo result.</strong> Perturbing durations by risk class, Helm's seeded simulation yields an illustrative <strong>P80 finish ≈ month 56</strong>. Against a committed deadline of <strong>month 57</strong>, that is a <strong>buffer of ≈ 1 month</strong>, a <strong>confidence ≈ 80%</strong>, and a <strong>health state of amber</strong> — deliverable, but with little margin, and dominated by a single long-lead item.</p>
+<p><strong>Logged-delay re-planning.</strong> Suppose grid energisation (task D) subsequently slips: the planner appends a <code>blocker</code> event of +60 working days noted "network-operator connection-queue delay." Re-running <code>schedule</code> re-levels the network; the P80 finish moves to ≈ <strong>month 59</strong>, the buffer goes <em>negative</em> (a ~2-month deadline breach), and health turns <strong>red</strong>. Helm raises a structured escalation — <em>what:</em> grid energisation delayed 60 wd; <em>tried:</em> expedite request; <em>impact:</em> +≈2 months to P80 finish, deadline breach, ~+40 cu prolongation cost; <em>options:</em> (a) interim on-site generation to decouple pilot start from full energisation, (b) phased depot energisation to bring part of the network live earlier — and the baseline comparison reports the drift explicitly. The decision-maker is handed a <em>decision</em>, with quantified options, not a red bar.</p>
+<h3 id="45-procurement-posture-gates-2-4-and-strategy">4.5 Procurement posture (Gates 2, 4 and strategy)</h3>
+<p><strong>Table 4 — Illustrative procurement and long-lead posture.</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Make/Buy</th>
+<th>Sourcing</th>
+<th style="text-align: center;">Illustrative lead</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Vehicle platform</td>
+<td>Buy</td>
+<td>Competitive</td>
+<td style="text-align: center;">9–12 mo</td>
+<td>Market tender; captures supplier learning</td>
+</tr>
+<tr>
+<td>Autonomy decision stack</td>
+<td>Make / partner-with-control</td>
+<td>Strategic</td>
+<td style="text-align: center;">n/a (core IP)</td>
+<td>In-house control; source-code escrow if partnered</td>
+</tr>
+<tr>
+<td>Autonomy compute</td>
+<td>Buy</td>
+<td><strong>Single/dual-source</strong></td>
+<td style="text-align: center;">9–18 mo</td>
+<td>Buffer stock; qualify second source</td>
+</tr>
+<tr>
+<td>Sensor suite</td>
+<td>Buy</td>
+<td>Competitive/dual</td>
+<td style="text-align: center;">6–12 mo</td>
+<td>Dual-source; standard interfaces</td>
+</tr>
+<tr>
+<td>Battery cells</td>
+<td>Buy</td>
+<td>Few-source</td>
+<td style="text-align: center;">12–18 mo</td>
+<td>Advance reservation; buffer stock</td>
+</tr>
+<tr>
+<td><strong>Grid connection / transformers</strong></td>
+<td>Buy</td>
+<td><strong>Single (network operator)</strong></td>
+<td style="text-align: center;"><strong>18–30 mo</strong></td>
+<td><strong>Order first; not-before task D; interim generation option</strong></td>
+</tr>
+<tr>
+<td>Orchestration software</td>
+<td>Make</td>
+<td>Strategic</td>
+<td style="text-align: center;">n/a</td>
+<td>Core IP retained</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Gate 2 (supply chain)</strong> does not pass unmitigated: grid connection and advanced compute are concentrated, long-lead single points of failure. With the mitigations shown — early ordering, buffer stock, second-source qualification — residual risk is acceptable and the gate passes <em>conditionally on those mitigations being funded and scheduled.</em> <strong>Gate 4 (integration)</strong> fails at system TRL 4 and, like Gate 1, is cleared only by the maturation phase (task B and the pilot). The long-lead grid connection is deliberately sequenced first — a bounded early commitment bought to protect the otherwise unbounded 18–30-month schedule risk that Helm shows to be the true critical driver.</p>
+<h3 id="46-integrated-recommendation">4.6 Integrated recommendation</h3>
+<p>Rolling the layers together for Programme A: fund at ≈ P80 + reserve (≈ 4,500 cu), consistent with the reference class; commit no earlier than the Helm P80 (month 56–57), recognising the thin, grid-dominated buffer; <strong>but hold full commitment</strong> because Gates 1 and 4 fail at system TRL 4. The defensible decision is a <em>staged go</em>: authorise a costed technology-maturation phase (raise autonomy and integration to TRL 6, run the pilot), place the long-lead grid and compute commitments now, and defer full-rate build authorisation to a second gate once maturity and buffer are demonstrated. Every figure regenerates from the WBS, the estimate assumptions, and the Helm seed-plus-events — which is what lets the staged decision be defended and cheaply re-run as conditions change.</p>
+<hr>
+<h2 id="5-limitations">5. Limitations</h2>
+<p><strong>Garbage-in remains garbage-in.</strong> The method disciplines and makes transparent the assumptions behind a feasibility case; it does not manufacture data. Three-point ranges, learning rates, correlations, and risk classes are judgements, and a biased analyst can still produce a biased model. Reference-class triangulation is the main guard, but it depends on a genuinely comparable class — which, for the most novel FOAK programmes, may be thin or absent, leaving the estimate resting more heavily on expert judgement whose uncertainty should then be widened.</p>
+<p><strong>Correlation is hard, and TRL is coarse.</strong> The aggregate cost tail is sensitive to the assumed inter-element correlation, which is difficult to estimate; the method's modest-positive default is defensible but is an assumption, and the P80's sensitivity to it should be reported. Likewise the nine-level TRL scale is a useful common language but a blunt instrument — it compresses many risks into one integer, can be gamed, and says little about <em>integration</em> specifically. Treating integration as its own gate compensates only partly.</p>
+<p><strong>Monte-Carlo is only as good as its inputs.</strong> Helm's finish-date distribution depends on the risk-class duration model and on the seed's dependency structure; missing dependencies or unmodelled resource contention make any schedule optimistic. <em>Deep</em> uncertainty — the model being structurally wrong, not merely its parameters uncertain — is captured by no Monte-Carlo, which is why the management reserve and staged-commitment posture, not the distribution itself, are the real guard.</p>
+<p><strong>Illustration, not evidence; governance, not modelling.</strong> The Section 4 numbers are notional throughout, chosen for pedagogical clarity, not fitted to data. And strategic misrepresentation (Flyvbjerg et al., 2009) is a <em>governance</em> problem: an auditable model raises the cost of misrepresentation by making assumptions explicit but cannot remove the incentives that produce it — that requires independent review and accountable decision gates around the model.</p>
+<hr>
+<h2 id="6-conclusion">6. Conclusion</h2>
+<p>Large-scale autonomous systems fail at the feasibility stage for reasons now well understood: optimism about cost and schedule, immature technology carried too far too fast, concentrated and slow supply chains, and correlated risks treated as independent. None of the individual remedies is new; the contribution here is to bind five of them — WBS-driven three-point estimation with learning curves, correlated Monte-Carlo aggregation triangulated against a reference class, TRL-and-integration feasibility gates, event-sourced schedule-risk modelling in the <em>Helm</em> engine, and a procurement posture centred on long-lead items — into one reproducible, auditable, pre-commitment workflow, shown end-to-end on a generic autonomous programme. The discipline is honest uncertainty: fund at a stated confidence level, commit only past demonstrated maturity, and let every number be regenerated from its inputs so a hard "no-go-for-now, here is the path" can be defended as readily as an easy "go." The approach is technology-neutral and transfers directly to renewable build-outs, hyperscale data centres, autonomous logistics, and space infrastructure — any programme large enough, novel enough, and slow enough that guessing is not good enough.</p>
+<hr>
+<h2 id="references">References</h2>
+<p>Boston Consulting Group. (1970). <em>Perspectives on Experience.</em> Boston, MA: BCG.</p>
+<p>Cooper, R. G. (1990). Stage-Gate Systems: A New Tool for Managing New Products. <em>Business Horizons, 33</em>(3), 44–54.</p>
+<p>Flyvbjerg, B., Holm, M. S., &amp; Buhl, S. (2002). Underestimating Costs in Public Works Projects: Error or Lie? <em>Journal of the American Planning Association, 68</em>(3), 279–295.</p>
+<p>Flyvbjerg, B. (2006). From Nobel Prize to Project Management: Getting Risks Right. <em>Project Management Journal, 37</em>(3), 5–15.</p>
+<p>Flyvbjerg, B., Garbuio, M., &amp; Lovallo, D. (2009). Delusion and Deception in Large Infrastructure Projects: Two Models for Explaining and Preventing Executive Disaster. <em>California Management Review, 51</em>(2), 170–193.</p>
+<p>Flyvbjerg, B. (2014). What You Should Know About Megaprojects and Why: An Overview. <em>Project Management Journal, 45</em>(2), 6–19.</p>
+<p>Flyvbjerg, B., Stewart, A., &amp; Budzier, A. (2016). <em>The Oxford Olympics Study 2016: Cost and Cost Overrun at the Games.</em> Saïd Business School Working Papers, University of Oxford (arXiv:1607.04484).</p>
+<p>Flyvbjerg, B. (2017). Introduction: The Iron Law of Megaproject Management. In B. Flyvbjerg (Ed.), <em>The Oxford Handbook of Megaproject Management</em> (pp. 1–18). Oxford: Oxford University Press.</p>
+<p>Flyvbjerg, B., &amp; Gardner, D. (2023). <em>How Big Things Get Done.</em> New York: Currency.</p>
+<p>Goldratt, E. M. (1997). <em>Critical Chain.</em> Great Barrington, MA: North River Press.</p>
+<p>HM Treasury. (2022). <em>The Green Book: Central Government Guidance on Appraisal and Evaluation</em> (incl. supplementary guidance on optimism bias). London: HM Treasury.</p>
+<p>Hoel, K., &amp; Taylor, S. G. (1999). Quantifying Buffers for Project Schedules. <em>Production and Inventory Management Journal, 40</em>(2), 43–47.</p>
+<p>Hulett, D. T. (2011). <em>Integrated Cost-Schedule Risk Analysis.</em> Farnham: Gower.</p>
+<p>INCOSE. (2023). <em>Systems Engineering Handbook: A Guide for System Life Cycle Processes and Activities</em> (5th ed.; D. D. Walden et al., Eds.). Hoboken, NJ: Wiley.</p>
+<p>ISO/IEC/IEEE. (2015). <em>ISO/IEC/IEEE 15288:2015 — Systems and Software Engineering — System Life Cycle Processes.</em> Geneva: International Organization for Standardization.</p>
+<p>Kahneman, D. (2011). <em>Thinking, Fast and Slow.</em> New York: Farrar, Straus and Giroux.</p>
+<p>Lovallo, D., &amp; Kahneman, D. (2003). Delusions of Success: How Optimism Undermines Executives' Decisions. <em>Harvard Business Review, 81</em>(7), 56–63.</p>
+<p>Malcolm, D. G., Roseboom, J. H., Clark, C. E., &amp; Fazar, W. (1959). Application of a Technique for Research and Development Program Evaluation. <em>Operations Research, 7</em>(5), 646–669.</p>
+<p>Mankins, J. C. (1995). <em>Technology Readiness Levels: A White Paper.</em> Washington, DC: NASA, Office of Space Access and Technology.</p>
+<p>Project Management Institute. (2021). <em>A Guide to the Project Management Body of Knowledge (PMBOK Guide)</em> (7th ed.). Newtown Square, PA: PMI.</p>
+<p>U.S. Department of Defense. (2020). <em>DoD Instruction 5000.02: Operation of the Adaptive Acquisition Framework.</em> Washington, DC: DoD.</p>
+<p>U.S. Government Accountability Office. (2020a). <em>Cost Estimating and Assessment Guide</em> (GAO-20-195G). Washington, DC: GAO.</p>
+<p>U.S. Government Accountability Office. (2020b). <em>Technology Readiness Assessment Guide</em> (GAO-20-48G). Washington, DC: GAO.</p>
+<p>Wright, T. P. (1936). Factors Affecting the Cost of Airplanes. <em>Journal of the Aeronautical Sciences, 3</em>(4), 122–128.</p>
+<hr>
+<p><em>Preprint — submitted; pending peer review. All numerical values in the worked illustration are illustrative and notional. This paper contains no weapons, munitions, or operational-military content of any kind.</em></p>
+    </article>
+    <footer class="paperfoot">
+      <span>&copy; <span id="yr">2026</span> Christopher I. V. Farmer</span>
+      <span>&middot;</span>
+      <a href="../index.html">Back to Publications</a>
+      <span>&middot;</span>
+      <a href="../../docs/CV-Christopher-Farmer-2026-08.pdf" target="_blank" rel="noopener">CV</a>
+      <span>&middot;</span>
+      <span class="mono">Preprint &mdash; submitted; pending peer review &middot; not legal advice</span>
+    </footer>
+  </main>
+
+<script>
+  (function(){
+    var root=document.documentElement, KEY='cf-theme';
+    try{ var s=localStorage.getItem(KEY); if(s){ root.setAttribute('data-theme', s); } }catch(e){}
+    var btn=document.getElementById('theme');
+    if(btn){ btn.addEventListener('click', function(){
+      var next=root.getAttribute('data-theme')==='dark'?'light':'dark';
+      root.setAttribute('data-theme', next);
+      try{ localStorage.setItem(KEY, next); }catch(e){}
+    }); }
+    var yr=document.getElementById('yr'); if(yr){ yr.textContent=String(new Date().getFullYear()); }
+  })();
+</script>
+
+</body>
+</html>

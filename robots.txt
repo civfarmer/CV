@@ -1,0 +1,4 @@
+# Christopher Farmer — portfolio
+# This site contains only public material; nothing here is restricted.
+User-agent: *
+Allow: /

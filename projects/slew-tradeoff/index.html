@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en-GB" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Slew-time / dipole tradeoff — Christopher I. V. Farmer</title>
+<style>
+  :root{
+    --bg:#0b0f17; --bg2:#0e1420; --surface:#131b2a; --surface2:#182133;
+    --ink:#e9eef7; --ink2:#aab7cc; --muted:#7d8ba3; --line:#233145; --line2:#2c3d54;
+    --accent:#43b3a6; --accent-ink:#84d6ca; --gold:#d4b24c; --good:#43c59e; --bad:#e2683c;
+    --shadow:0 18px 50px -20px rgba(0,0,0,.7); --radius:14px;
+    --fd:'Zilla Slab',Georgia,serif; --fb:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif; --fm:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  }
+  html[data-theme="light"]{
+    --bg:#f4f1ec; --bg2:#ebe6dd; --surface:#fff; --surface2:#faf7f2;
+    --ink:#221e18; --ink2:#4c473e; --muted:#675f54; --line:#e7e1d6; --line2:#d9d2c5;
+    --accent:#0d5f57; --accent-ink:#0a463f; --gold:#836819; --good:#0e7a52; --bad:#b1431d;
+    --shadow:0 18px 44px -24px rgba(15,30,60,.35);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1100px 700px at 80% -8%,rgba(67,179,166,.10),transparent 60%),var(--bg);
+    color:var(--ink);font-family:var(--fb);line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent-ink);text-decoration:none}
+  h1,h2,h3{font-family:var(--fd);font-weight:600;line-height:1.15;margin:0}
+  .top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:12px clamp(16px,4vw,32px);background:color-mix(in oklab,var(--bg),transparent 8%);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:11px;color:var(--ink)}
+  .crest{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(145deg,#0e7b6f,#0b655b);color:#fff;font-family:var(--fd);font-weight:700;font-size:14px}
+  .brand .nm{font-family:var(--fd);font-weight:700;font-size:14px;line-height:1.05}
+  .brand .rl{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:8px 13px;border-radius:9px;font-weight:600;font-size:12.5px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer;font-family:var(--fb)}
+  .btn:hover{border-color:var(--accent)}
+  .wrap{max-width:1180px;margin:0 auto;padding:clamp(20px,4vw,34px) clamp(16px,4vw,32px) 60px}
+  .eyebrow{font-family:var(--fm);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+  h1.title{font-size:clamp(24px,3.6vw,34px);letter-spacing:-.015em;margin-bottom:8px}
+  .lede{color:var(--ink2);font-size:15px;max-width:75ch}
+  .note{margin:16px 0 0;padding:11px 15px;border:1px solid var(--line2);border-left:3px solid var(--gold);border-radius:10px;background:var(--surface);color:var(--ink2);font-size:13px}
+  .grid{display:grid;grid-template-columns:1fr 320px;gap:20px;margin-top:22px}
+  @media(max-width:880px){.grid{grid-template-columns:1fr}}
+  .panel{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+  .panel h2{font-size:15px;margin-bottom:4px}
+  .sub{color:var(--muted);font-size:12px;margin-bottom:14px}
+  .ctrl{margin:15px 0}
+  .ctrl label{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;margin-bottom:7px}
+  .ctrl .val{font-family:var(--fm);font-size:13px;color:var(--accent-ink);font-weight:600}
+  input[type=range]{width:100%;accent-color:var(--accent);height:4px}
+  .seg{display:flex;gap:6px;margin-top:6px}
+  .seg button{flex:1;font-family:var(--fm);font-size:11px;padding:6px 5px;border-radius:8px;border:1px solid var(--line2);background:var(--bg2);color:var(--ink2);cursor:pointer}
+  .seg button.on{border-color:var(--accent);color:var(--ink);background:color-mix(in oklab,var(--accent) 14%,transparent)}
+  canvas{width:100%;height:auto;display:block;border-radius:10px;background:var(--bg2);border:1px solid var(--line)}
+  .out{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .metric{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .metric .k{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+  .metric .v{font-family:var(--fm);font-size:16px;font-weight:600;color:var(--ink);margin-top:3px}
+  .metric .u{font-size:10.5px;color:var(--muted)}
+  .verdict{margin-top:12px;padding:11px 13px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);font-size:13px}
+  .verdict b{color:var(--ink)}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:12px;color:var(--ink2)}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .sw{width:14px;height:4px;border-radius:2px;display:inline-block}
+  .sw.band{height:11px;border-radius:3px}
+  .foot{margin-top:22px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:14px}
+  .prov{font-family:var(--fm)}
+</style>
+</head>
+<body>
+  <div class="top">
+    <a class="brand" href="../../publications/index.html"><span class="crest">CF</span><span><span class="nm">Christopher Farmer</span><br><span class="rl">Slew-time / dipole tradeoff</span></span></a>
+    <div style="display:flex;gap:8px">
+      <a class="btn" href="../../publications/index.html">&#8592; Publications</a>
+      <button class="btn" id="theme" aria-label="Toggle theme">&#9789;</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="eyebrow">Interactive · geomagnetic attitude control</div>
+    <h1 class="title">Why magnetic control is stabilising but slow</h1>
+    <p class="lede">The companion paper's central result in one chart. A magnetic actuator's torque is bounded by its dipole moment times the local field (&tau; = m&times;B). For a rest-to-rest slew of a large flexible platform, the time to turn scales as t = 2&radic;(I&theta;/mB). Set the platform and watch the required dipole for a fast slew rocket past anything ever flown — while an achievable dipole leaves you slewing for hours to days. That slowness is the paper's point: it is a virtue for a gravity-gradient-stabilised structure, not a defect.</p>
+
+    <div class="note"><b>Illustrative screening relation.</b> Bang-bang, single-axis, rigid-body slew under a bounded magnetic torque; the field is the deposited IGRF-14 orbit-mean. It bounds the <i>rate</i> question only — not pointing accuracy, flexible-mode coupling or three-axis control. Numbers are study values for a hypothetical platform.</div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>Dipole required vs slew time</h2>
+        <div class="sub">log–log · your platform is the gold curve</div>
+        <canvas id="chart" width="720" height="440"></canvas>
+        <div class="legend">
+          <span><span class="sw" style="background:var(--gold)"></span> required dipole for a 90° slew</span>
+          <span><span class="sw band" style="background:rgba(67,197,158,.28);border:1px solid var(--good)"></span> ever-flown magnetorquer range</span>
+          <span><span class="sw" style="background:var(--accent)"></span> your target slew time</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Platform &amp; orbit</h2>
+        <div class="ctrl">
+          <label>Platform mass <span class="val" id="mLab">100,000 kg</span></label>
+          <input type="range" id="mass" min="3" max="6" step="0.02" value="5">
+          <div class="sub" style="margin:6px 0 0">10³ – 10⁶ kg (log)</div>
+        </div>
+        <div class="ctrl">
+          <label>Characteristic size <span class="val" id="lLab">1,000 m</span></label>
+          <input type="range" id="len" min="1" max="3.3" step="0.02" value="3">
+          <div class="sub" style="margin:6px 0 0">slender-body inertia I = mL²/12</div>
+        </div>
+        <div class="ctrl">
+          <label>Slew angle <span class="val" id="thLab">90°</span></label>
+          <input type="range" id="ang" min="5" max="180" step="5" value="90">
+        </div>
+        <div class="ctrl">
+          <label>Orbit field (IGRF-14 mean) <span class="val" id="bLab">32.0 µT</span></label>
+          <div class="seg" id="orbitSeg">
+            <button data-b="32.0" class="on">LEO 400 km</button>
+            <button data-b="26.9">800 km</button>
+            <button data-b="17.0">2000 km</button>
+          </div>
+        </div>
+        <div class="ctrl">
+          <label>Target slew time <span class="val" id="tLab">7 min</span></label>
+          <input type="range" id="ttime" min="1.7" max="6.4" step="0.02" value="2.62">
+          <div class="sub" style="margin:6px 0 0">50 s – 30 days (log)</div>
+        </div>
+
+        <div class="out" id="metrics"></div>
+        <div class="verdict" id="verdict"></div>
+      </div>
+    </div>
+
+    <div class="foot">
+      Provenance: slew bound t = 2&radic;(I&theta;/mB) from the companion paper; orbit-mean |B| at 51.6&deg; inclination from the deposited IGRF-14 screen (<span class="prov">geomagnetic_orbit_screen.csv</span>). Reference check: a 1-km, 10⁵-kg platform, 90° in ~7 min → ~10¹⁰ A·m², reproducing the paper's figure. Flown-magnetorquer band ≈ 1–500 A·m² (illustrative). Not a controller design.
+    </div>
+  </div>
+
+<script>
+const FLOWN_LO=1, FLOWN_HI=500; // A·m², illustrative range of flown magnetorquers
+let DATA={};
+const lerp=(a,b,t)=>a+(b-a)*t;
+function calc(){
+  const mass=Math.pow(10,+document.getElementById('mass').value);
+  const L=Math.pow(10,+document.getElementById('len').value);
+  const thDeg=+document.getElementById('ang').value;
+  const th=thDeg*Math.PI/180;
+  const B=+DATA.B*1e-6;
+  const I=mass*L*L/12;
+  const tTarget=Math.pow(10,+document.getElementById('ttime').value);
+  // required dipole for target time: m = 4 I θ / (B t²)
+  const mReq=4*I*th/(B*tTarget*tTarget);
+  // achievable slew time with a flown dipole: t = 2√(Iθ/(mB))
+  const tFlown=2*Math.sqrt(I*th/(FLOWN_HI*B));
+  return {mass,L,th,thDeg,B,I,tTarget,mReq,tFlown};
+}
+const fmtSci=x=>{const e=Math.floor(Math.log10(x));const m=x/Math.pow(10,e);return m.toFixed(1)+'×10'+sup(e);};
+function sup(n){const s={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};return String(n).split('').map(c=>s[c]||c).join('');}
+function fmtTime(s){
+  if(s<90)return s.toFixed(0)+' s';
+  if(s<5400)return (s/60).toFixed(1)+' min';
+  if(s<172800)return (s/3600).toFixed(1)+' h';
+  return (s/86400).toFixed(1)+' days';
+}
+function render(){
+  const r=calc();
+  document.getElementById('mLab').textContent=Math.round(r.mass).toLocaleString('en-GB')+' kg';
+  document.getElementById('lLab').textContent=Math.round(r.L).toLocaleString('en-GB')+' m';
+  document.getElementById('thLab').textContent=r.thDeg+'°';
+  document.getElementById('bLab').textContent=(+DATA.B).toFixed(1)+' µT';
+  document.getElementById('tLab').textContent=fmtTime(r.tTarget);
+  const M=[
+    ['Moment of inertia',fmtSci(r.I),'kg·m²'],
+    ['Dipole for target',fmtSci(r.mReq),'A·m²'],
+    ['× largest flown',fmtSci(r.mReq/FLOWN_HI),'×'],
+    ['Slew at flown dipole',fmtTime(r.tFlown),''],
+  ];
+  document.getElementById('metrics').innerHTML=M.map(x=>`<div class="metric"><div class="k">${x[0]}</div><div class="v">${x[1]} <span class="u">${x[2]}</span></div></div>`).join('');
+  const feasible=r.mReq<=FLOWN_HI;
+  const v=document.getElementById('verdict');
+  v.innerHTML = feasible
+    ? `<b>Reachable magnetically.</b> The target slew needs ${fmtSci(r.mReq)} A·m², within the flown range — this platform is small or the target slow enough for magnetic-only control.`
+    : `<b>Not a magnetic-only slew.</b> Turning in ${fmtTime(r.tTarget)} would need ${fmtSci(r.mReq)} A·m² — about ${fmtSci(r.mReq/FLOWN_HI)}× the largest flown magnetorquer. With an achievable dipole the same turn takes <b>${fmtTime(r.tFlown)}</b>. Magnetic control here is a slow, stabilising trim, exactly as the paper argues.`;
+  draw(r);
+}
+function draw(r){
+  const cv=document.getElementById('chart'),x=cv.getContext('2d');
+  const W=cv.width,H=cv.height,padL=64,padB=52,padT=16,padR=16;
+  const css=getComputedStyle(document.body),col=n=>css.getPropertyValue(n).trim();
+  x.clearRect(0,0,W,H);
+  // axes: x = slew time [50s .. 30d] log ; y = dipole [1 .. 1e13] log
+  const tLo=50,tHi=2.6e6, mLo=1,mHi=1e13;
+  const X=t=>padL+(Math.log10(t)-Math.log10(tLo))/(Math.log10(tHi)-Math.log10(tLo))*(W-padL-padR);
+  const Y=m=>H-padB-(Math.log10(m)-Math.log10(mLo))/(Math.log10(mHi)-Math.log10(mLo))*(H-padB-padT);
+  // grid
+  x.strokeStyle=col('--line');x.lineWidth=1;x.fillStyle=col('--muted');x.font='10px IBM Plex Mono, monospace';
+  [[60,'1m'],[600,'10m'],[3600,'1h'],[86400,'1d'],[2.6e6,'30d']].forEach(([t,lab])=>{
+    const px=X(t);x.globalAlpha=.5;x.beginPath();x.moveTo(px,padT);x.lineTo(px,H-padB);x.stroke();x.globalAlpha=1;x.fillText(lab,px-6,H-padB+16);
+  });
+  for(let e=1;e<=13;e+=2){const py=Y(Math.pow(10,e));x.globalAlpha=.5;x.beginPath();x.moveTo(padL,py);x.lineTo(W-padR,py);x.stroke();x.globalAlpha=1;x.fillText('10'+sup(e),8,py+3);}
+  x.fillStyle=col('--muted');x.fillText('slew time →',W/2-30,H-8);
+  x.save();x.translate(16,H/2+40);x.rotate(-Math.PI/2);x.fillText('required magnetic dipole (A·m²) →',0,0);x.restore();
+  // flown-magnetorquer band
+  x.fillStyle='rgba(67,197,158,.16)';x.fillRect(padL,Y(FLOWN_HI),W-padL-padR,Y(FLOWN_LO)-Y(FLOWN_HI));
+  x.strokeStyle=col('--good');x.setLineDash([4,4]);x.beginPath();x.moveTo(padL,Y(FLOWN_HI));x.lineTo(W-padR,Y(FLOWN_HI));x.stroke();x.setLineDash([]);
+  x.fillStyle=col('--good');x.fillText('ever-flown magnetorquers',padL+8,Y(FLOWN_HI)-6);
+  // required-dipole curve: m(t)=4 I θ / (B t²)
+  x.strokeStyle=col('--gold');x.lineWidth=2.4;x.beginPath();
+  let first=true;
+  for(let lt=Math.log10(tLo);lt<=Math.log10(tHi);lt+=0.02){
+    const t=Math.pow(10,lt),m=4*r.I*r.th/(r.B*t*t);
+    if(m<mLo||m>mHi){first=true;continue;}
+    const px=X(t),py=Y(m);first?(x.moveTo(px,py),first=false):x.lineTo(px,py);
+  }
+  x.stroke();
+  // target vertical + intersection marker
+  x.strokeStyle=col('--accent');x.setLineDash([3,3]);x.beginPath();x.moveTo(X(r.tTarget),padT);x.lineTo(X(r.tTarget),H-padB);x.stroke();x.setLineDash([]);
+  const my=Math.min(Math.max(r.mReq,mLo),mHi);
+  x.fillStyle=col('--gold');x.strokeStyle=col('--bg');x.lineWidth=2;
+  x.beginPath();x.arc(X(r.tTarget),Y(my),6,0,7);x.fill();x.stroke();
+  // reference platform marker (1km,1e5kg,90deg,~7min -> ~1e10)
+  x.fillStyle=col('--ink2');x.beginPath();x.arc(X(420),Y(9.9e9),3.5,0,7);x.fill();
+  x.fillText('paper reference',X(420)-30,Y(9.9e9)-9);
+}
+document.querySelectorAll('#orbitSeg button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#orbitSeg button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');DATA.B=b.dataset.b;render();
+});
+['mass','len','ang','ttime'].forEach(id=>document.getElementById(id).addEventListener('input',render));
+document.getElementById('theme').addEventListener('click',()=>{
+  const h=document.documentElement,n=h.getAttribute('data-theme')==='light'?'dark':'light';
+  h.setAttribute('data-theme',n);try{localStorage.setItem('cf-theme',n)}catch(e){}render();
+});
+try{var _q=new URLSearchParams(location.search).get('theme');if(_q){document.documentElement.setAttribute('data-theme',_q);}else{var t=localStorage.getItem('cf-theme');if(t)document.documentElement.setAttribute('data-theme',t);}}catch(e){}
+window.addEventListener('resize',render);
+DATA.B='32.0';render();
+</script>
+</body>
+</html>

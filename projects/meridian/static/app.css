@@ -1,0 +1,339 @@
+/* Meridian design system — restrained, information-dense, WCAG-conscious.
+   Colour is always a secondary cue: every coloured state also carries a
+   glyph, letter code or text (WCAG 1.4.1). Foreground/background pairs are
+   contrast-tested in tests/test_visual.py (>= 4.5:1 on the plain surface AND
+   on the tinted badge/chip backgrounds, in both themes). No external assets
+   (CSP is self-only): all icons are CSS glyphs, all colours are variables. */
+:root {
+  --bg: #f6f7f9; --surface: #ffffff; --ink: #1a2233; --ink-soft: #4a5468;
+  --line: #d9dee7; --accent: #1f5eaa; --accent-ink: #ffffff;
+  --ok: #176d3d; --warn: #8a5c00; --err: #b3261e; --unv: #5f6672;
+  --focus: #1f5eaa;
+  /* value-class hues for the six truthfulness labels (SF/CD/ORF/CM/EBI/UNV) */
+  --vc-sf: #0b675f; --vc-cd: #6d28a8; --vc-orf: #1d5c9d;
+  --vc-cm: #a01a68; --vc-ebi: #8a4a08; --vc-unv: #5f6672;
+  /* tint strength for badge/chip backgrounds (theme-tuned; contrast-tested) */
+  --tint-badge: 10%; --tint-chip: 13%;
+  --shadow-1: 0 1px 2px rgba(16, 24, 40, .07);
+  --shadow-2: 0 6px 18px rgba(16, 24, 40, .14);
+  /* categorical chip hues (decorative reinforcement; text carries meaning) */
+  --ch0: #d64550; --ch1: #e08a3c; --ch2: #c9a227; --ch3: #6aa127;
+  --ch4: #2f9e6e; --ch5: #26a5a5; --ch6: #3d8fd1; --ch7: #5f6ee0;
+  --ch8: #8f5fd6; --ch9: #c04fc0; --ch10: #d6538f; --ch11: #8a7a66;
+}
+[data-theme="dark"] {
+  --bg: #10141b; --surface: #171d27; --ink: #e8ecf3; --ink-soft: #a6b0c0;
+  --line: #2a3342; --accent: #6ca6e8; --accent-ink: #0c1017;
+  --ok: #58c184; --warn: #e3b341; --err: #f28b82; --unv: #97a1b0;
+  --vc-sf: #4cc9b4; --vc-cd: #bda4f5; --vc-orf: #7fb5f2;
+  --vc-cm: #ef92cc; --vc-ebi: #e2a25e; --vc-unv: #97a1b0;
+  --tint-badge: 12%;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, .45);
+  --shadow-2: 0 8px 22px rgba(0, 0, 0, .55);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #10141b; --surface: #171d27; --ink: #e8ecf3; --ink-soft: #a6b0c0;
+    --line: #2a3342; --accent: #6ca6e8; --accent-ink: #0c1017;
+    --ok: #58c184; --warn: #e3b341; --err: #f28b82; --unv: #97a1b0;
+    --vc-sf: #4cc9b4; --vc-cd: #bda4f5; --vc-orf: #7fb5f2;
+    --vc-cm: #ef92cc; --vc-ebi: #e2a25e; --vc-unv: #97a1b0;
+    --tint-badge: 12%;
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, .45);
+    --shadow-2: 0 8px 22px rgba(0, 0, 0, .55);
+  }
+}
+* { box-sizing: border-box; }
+html { font-size: 15px; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif; line-height: 1.45;
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+.skip-link { position: absolute; left: -999px; top: 0; background: var(--accent);
+  color: var(--accent-ink); padding: .5rem 1rem; z-index: 10; }
+.skip-link:focus { left: 0; }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible,
+textarea:focus-visible, summary:focus-visible {
+  outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+.topbar { display: flex; justify-content: space-between; align-items: center;
+  padding: .6rem 1.2rem; background: var(--surface);
+  border-bottom: 2px solid var(--accent);
+  border-image: linear-gradient(90deg, var(--accent), var(--vc-sf), var(--vc-cm)) 1;
+  position: sticky; top: 0; z-index: 5; }
+.brand a { font-weight: 700; letter-spacing: .18em; color: var(--ink);
+  text-decoration: none; font-size: 1.05rem; }
+.brand-sub { color: var(--ink-soft); font-size: .78rem; margin-left: .8rem; }
+#theme-toggle { background: var(--surface); border: 1px solid var(--line);
+  color: var(--ink); border-radius: 6px; padding: .3rem .7rem; cursor: pointer;
+  font-size: 1rem; min-width: 44px; min-height: 34px; }
+#theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+.mode-banner { background: color-mix(in srgb, var(--warn) 16%, var(--surface));
+  border-bottom: 1px solid var(--line); color: var(--ink);
+  padding: .5rem 1.2rem; font-size: .88rem; }
+.mode-banner::before { content: "⚠\FE0E"; content: "⚠\FE0E" / "";
+  color: var(--warn); font-weight: 700; margin-right: .4em; }
+.shell { display: grid; grid-template-columns: 215px 1fr; min-height: calc(100vh - 60px); }
+.sidenav { border-right: 1px solid var(--line); padding: .9rem .5rem;
+  background: var(--surface); display: flex; flex-direction: column; gap: 2px; }
+.sidenav a { display: block; padding: .42rem .7rem; border-radius: 6px;
+  color: var(--ink); text-decoration: none; font-size: .92rem; }
+.sidenav a:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.sidenav a.active { background: var(--accent); color: var(--accent-ink); font-weight: 600;
+  box-shadow: inset 3px 0 0 0 color-mix(in srgb, var(--accent-ink) 80%, transparent); }
+main { padding: 1.1rem 1.4rem 3rem; max-width: 1350px; }
+h1 { font-size: 1.45rem; margin: .2rem 0 .7rem; }
+h2 { font-size: 1.05rem; margin: 0 0 .5rem; }
+.card { background: var(--surface); border: 1px solid var(--line);
+  border-radius: 10px; padding: 1rem 1.1rem; margin: 1rem 0;
+  box-shadow: var(--shadow-1); transition: box-shadow .18s ease; }
+.card:hover { box-shadow: var(--shadow-2); }
+.card-sub { color: var(--ink-soft); font-size: .85rem; margin: -0.2rem 0 .6rem; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: .7rem; margin: .8rem 0 1.1rem; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  border-top: 3px solid var(--accent); padding: .7rem .9rem;
+  box-shadow: var(--shadow-1); }
+/* state accents for KPI tiles (pair with a text/badge cue, never colour-only) */
+.kpi.kpi-ok { border-top-color: var(--ok); }
+.kpi.kpi-warn { border-top-color: var(--warn); }
+.kpi.kpi-err { border-top-color: var(--err); }
+.kpi.kpi-unv { border-top-color: var(--unv); }
+.kpi-value { font-size: 1.55rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.kpi-label { color: var(--ink-soft); font-size: .8rem; }
+.kpi-note { color: var(--ink-soft); font-size: .75rem; }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+caption { text-align: left; color: var(--ink-soft); padding-bottom: .4rem; }
+th { text-align: left; font-weight: 600; color: var(--ink-soft);
+  border-bottom: 2px solid var(--line); padding: .4rem .55rem;
+  background: var(--surface); }
+td { border-bottom: 1px solid var(--line); padding: .4rem .55rem; vertical-align: top; }
+/* subtle zebra keeps dense rows scannable; add class="no-zebra" on .table-wrap
+   to opt out for very sparse tables */
+tbody tr:nth-child(even):not(:hover) td {
+  background: color-mix(in srgb, var(--ink) 4%, transparent); }
+.no-zebra tbody tr:nth-child(even):not(:hover) td { background: transparent; }
+tbody tr:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+td small { color: var(--ink-soft); }
+.badge { display: inline-block; border-radius: 999px; padding: .05rem .55rem;
+  font-size: .74rem; font-weight: 600; border: 1px solid; cursor: help;
+  white-space: nowrap; }
+.badge-ok { color: var(--ok);
+  border-color: color-mix(in srgb, var(--ok) 55%, var(--line));
+  background: color-mix(in srgb, var(--ok) var(--tint-badge), var(--surface)); }
+.badge-warn { color: var(--warn);
+  border-color: color-mix(in srgb, var(--warn) 55%, var(--line));
+  background: color-mix(in srgb, var(--warn) var(--tint-badge), var(--surface)); }
+.badge-err { color: var(--err);
+  border-color: color-mix(in srgb, var(--err) 55%, var(--line));
+  background: color-mix(in srgb, var(--err) var(--tint-badge), var(--surface)); }
+.badge-auth { color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+  background: color-mix(in srgb, var(--accent) var(--tint-badge), var(--surface)); }
+.badge-unv { color: var(--unv);
+  border-color: color-mix(in srgb, var(--unv) 55%, var(--line));
+  background: color-mix(in srgb, var(--unv) var(--tint-badge), var(--surface)); }
+/* glyph reinforcement so colour is never the only cue (WCAG 1.4.1); the
+   second declaration (CSS alt-text syntax) hides the glyph from the
+   accessibility tree in browsers that support it */
+.badge-ok::before, .badge-warn::before, .badge-err::before,
+.badge-auth::before, .badge-unv::before { margin-right: .3em; }
+.badge-ok::before { content: "✓"; content: "✓" / ""; }
+.badge-warn::before { content: "⚠\FE0E"; content: "⚠\FE0E" / ""; }
+.badge-err::before { content: "✕"; content: "✕" / ""; }
+.badge-auth::before { content: "◆"; content: "◆" / ""; }
+.badge-unv::before { content: "○"; content: "○" / ""; }
+.badge-verif { color: var(--ink-soft); border-color: var(--line); background: var(--bg); }
+/* Six truthfulness value classes, keyed on the stable explanatory title text
+   emitted by meridian/web/html.py VERIFICATION_LABELS (tests keep the two
+   files in sync). The letter code stays the primary, colour-independent cue. */
+.badge-verif[title^="Source Fact"] { --vc: var(--vc-sf); }
+.badge-verif[title^="Company Disclosure"] { --vc: var(--vc-cd); }
+.badge-verif[title^="Official Regulatory Fact"] { --vc: var(--vc-orf); }
+.badge-verif[title^="Calculated Metric"] { --vc: var(--vc-cm); }
+.badge-verif[title^="Evidence-Based Inference"] { --vc: var(--vc-ebi); }
+.badge-verif[title^="Unverified"] { --vc: var(--vc-unv); }
+.badge-verif[title^="Source Fact"], .badge-verif[title^="Company Disclosure"],
+.badge-verif[title^="Official Regulatory Fact"], .badge-verif[title^="Calculated Metric"],
+.badge-verif[title^="Evidence-Based Inference"], .badge-verif[title^="Unverified"] {
+  color: var(--vc);
+  border-color: color-mix(in srgb, var(--vc) 55%, var(--line));
+  background: color-mix(in srgb, var(--vc) var(--tint-badge), var(--surface)); }
+.badge-verif[title^="Source Fact"]::before, .badge-verif[title^="Company Disclosure"]::before,
+.badge-verif[title^="Official Regulatory Fact"]::before, .badge-verif[title^="Calculated Metric"]::before,
+.badge-verif[title^="Evidence-Based Inference"]::before, .badge-verif[title^="Unverified"]::before {
+  content: "●"; content: "●" / ""; margin-right: .3em; font-size: .72em;
+  position: relative; top: -.09em; }
+.badge-prov { color: var(--ink-soft); border-color: transparent; cursor: help; }
+.unavail { color: var(--unv); font-style: italic; }
+.unavail::before { content: "∅ "; font-style: normal; }
+.empty-state { color: var(--ink-soft); font-style: italic; padding: .4rem 0; }
+/* ---- movement cues (delta_span helper): glyph + sign + colour ---------- */
+.pos { color: var(--ok); }
+.neg { color: var(--err); }
+.neu { color: var(--ink-soft); }
+.delta { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.delta > [aria-hidden] { font-size: .82em; }
+/* ---- inline score meter (score_bar helper). CSP forbids inline styles, so
+   widths are quantised utility classes; the exact number is always printed. */
+.score { display: inline-flex; align-items: center; gap: .45rem;
+  vertical-align: middle; }
+.score-track { flex: none; width: 120px; height: .55rem; border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 10%, transparent);
+  box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; }
+.score-fill { display: block; height: 100%; border-radius: inherit;
+  background: var(--accent); }
+.score-fill.score-lo { background: var(--unv); }
+.score-fill.score-mid { background: var(--accent); }
+.score-fill.score-hi { background: var(--ok); }
+.score-num { font-size: .82rem; color: var(--ink-soft);
+  font-variant-numeric: tabular-nums; }
+.w0 { width: 0; } .w5 { width: 5%; } .w10 { width: 10%; } .w15 { width: 15%; }
+.w20 { width: 20%; } .w25 { width: 25%; } .w30 { width: 30%; } .w35 { width: 35%; }
+.w40 { width: 40%; } .w45 { width: 45%; } .w50 { width: 50%; } .w55 { width: 55%; }
+.w60 { width: 60%; } .w65 { width: 65%; } .w70 { width: 70%; } .w75 { width: 75%; }
+.w80 { width: 80%; } .w85 { width: 85%; } .w90 { width: 90%; } .w95 { width: 95%; }
+.w100 { width: 100%; }
+/* ---- categorical chips (chip helper): deterministic hue per label -------- */
+.chip { display: inline-flex; align-items: center; padding: .1rem .6rem;
+  border-radius: 999px; font-size: .78rem; font-weight: 500; color: var(--ink);
+  border: 1px solid color-mix(in srgb, var(--chue, var(--unv)) 42%, var(--line));
+  background: color-mix(in srgb, var(--chue, var(--unv)) var(--tint-chip), var(--surface));
+  white-space: nowrap; }
+.chip::before { content: "●"; content: "●" / ""; color: var(--chue, var(--unv));
+  font-size: .68em; margin-right: .38em; position: relative; top: -.07em; }
+.chip-region { border-radius: 5px; } /* shape distinguishes kind, not colour */
+/* session 12: clickable filter chips (country toggles on /universe) */
+a.chip { text-decoration: none; cursor: pointer; margin: 0 .18rem .3rem 0; }
+a.chip:hover { border-color: var(--accent, var(--ink)); }
+.chip-on { border-width: 2px; font-weight: 700;
+  border-color: var(--accent, var(--ink));
+  outline: 1px solid var(--accent, var(--ink)); }
+.chip-h0 { --chue: var(--ch0); } .chip-h1 { --chue: var(--ch1); }
+.chip-h2 { --chue: var(--ch2); } .chip-h3 { --chue: var(--ch3); }
+.chip-h4 { --chue: var(--ch4); } .chip-h5 { --chue: var(--ch5); }
+.chip-h6 { --chue: var(--ch6); } .chip-h7 { --chue: var(--ch7); }
+.chip-h8 { --chue: var(--ch8); } .chip-h9 { --chue: var(--ch9); }
+.chip-h10 { --chue: var(--ch10); } .chip-h11 { --chue: var(--ch11); }
+.filters { display: flex; flex-wrap: wrap; gap: .8rem; align-items: end;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  padding: .7rem .9rem; margin-bottom: .9rem; font-size: .9rem; }
+.filters label { display: flex; flex-direction: column; gap: .2rem; }
+.filters input { background: var(--bg); color: var(--ink); border: 1px solid var(--line);
+  border-radius: 6px; padding: .35rem .5rem; min-height: 34px; }
+.filters button, .btn-link { background: var(--accent); color: var(--accent-ink);
+  border: none; border-radius: 6px; padding: .45rem .9rem; cursor: pointer;
+  text-decoration: none; font-size: .9rem; min-height: 36px; }
+.filters button:hover, .btn-link:hover {
+  background: color-mix(in srgb, var(--accent) 86%, var(--ink)); }
+.why { margin: .6rem 0; border: 1px solid var(--line); border-left: 3px solid var(--accent);
+  border-radius: 8px; background: color-mix(in srgb, var(--accent) 5%, var(--surface));
+  padding: .45rem .7rem; font-size: .88rem; }
+.why summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+.foot { color: var(--ink-soft); font-size: .78rem; padding: 1rem 1.4rem;
+  border-top: 1px solid var(--line); }
+q { quotes: "«" "»"; color: var(--ink); background: color-mix(in srgb, var(--accent) 9%, transparent);
+  padding: 0 .2rem; border-radius: 3px; }
+@media (max-width: 900px) {
+  .shell { grid-template-columns: 1fr; }
+  .sidenav { flex-direction: row; flex-wrap: wrap; border-right: none;
+    border-bottom: 1px solid var(--line); position: static; }
+  .brand-sub { display: none; }
+}
+
+.region-tabs { display: flex; gap: .4rem; flex-wrap: wrap; margin: .2rem 0 .9rem; }
+.region-tabs a { padding: .35rem .9rem; border: 1px solid var(--line); border-radius: 999px;
+  text-decoration: none; color: var(--ink); font-size: .9rem; background: var(--surface); }
+.region-tabs a:hover { border-color: var(--accent); }
+.region-tabs a.active { background: var(--accent); color: var(--accent-ink);
+  border-color: var(--accent); font-weight: 600; }
+.ext-links a { font-size: .8rem; margin-right: .45rem; }
+
+/* ---- print basics: keep the evidence, drop the app chrome --------------- */
+@media print {
+  :root, [data-theme="dark"] {
+    --bg: #ffffff; --surface: #ffffff; --ink: #000000; --ink-soft: #333d4d;
+    --line: #9aa3b2; --shadow-1: none; --shadow-2: none; }
+  .sidenav, #theme-toggle, .skip-link { display: none !important; }
+  .shell { display: block; }
+  .topbar { position: static; }
+  main { max-width: none; padding: 0 0 1rem; }
+  body { background: #fff; color: #000; }
+  a { color: #000; }
+  .card, .kpi { box-shadow: none; break-inside: avoid; }
+  tbody tr:nth-child(even):not(:hover) td { background: #f0f2f5; }
+}
+
+/* Price-history sparkline (companies table): real recorded closes only;
+   the SVG is omitted entirely below 5 bars. Colour via CSS variable so both
+   themes work; no inline styles (CSP style-src 'self'). */
+.spark { display: block; margin-top: .2rem; opacity: .9; }
+.spark path { stroke: var(--accent); stroke-width: 1.5; fill: none;
+  stroke-linejoin: round; stroke-linecap: round; }
+
+/* --- Poster companies (home) — accent border per policy-risk channel.
+   Colours reuse the contrast-tested palette variables only (no new hexes);
+   the channel is also written in text inside the card (WCAG 1.4.1). --- */
+.poster-grid { display: grid; gap: .9rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.poster { background: var(--surface); border: 1px solid var(--line);
+  border-left: 6px solid var(--accent); border-radius: 10px;
+  padding: .7rem .9rem; box-shadow: var(--shadow-1); }
+.poster:hover { box-shadow: var(--shadow-2); }
+.poster h3 { margin: .1rem 0 .3rem; font-size: 1.02rem; }
+.poster h4 { margin: .5rem 0 .2rem; font-size: .85rem;
+  color: var(--ink-soft); text-transform: uppercase; letter-spacing: .04em; }
+.poster p { margin: .28rem 0; font-size: .9rem; }
+.poster-ch-trade { border-left-color: var(--warn); }
+.poster-ch-finreg { border-left-color: var(--accent); }
+.poster-ch-product { border-left-color: var(--ok); }
+.poster-empty { border-left-color: var(--unv); border-style: dashed; }
+.poster-channel { color: var(--ink-soft); font-size: .82rem; }
+.poster-expo { margin: .2rem 0 .3rem 1.1rem; padding: 0; font-size: .88rem; }
+.poster-expo li { margin-bottom: .45rem; }
+.poster-limits { color: var(--ink-soft); border-top: 1px dashed var(--line);
+  padding-top: .35rem; }
+
+/* --- Brand crest (session 13, owner-supplied artwork) ------------------
+   logo-crest.png is the gold linework extracted from "logo mock up 1.png"
+   (navy background + baked wordmark removed — the header text carries the
+   name; the img is decorative, alt="" aria-hidden). Self-hosted static
+   asset — CSP self-only is respected. */
+.brand a { display: inline-flex; align-items: center; gap: .55rem; }
+.brand-logo { height: 30px; width: auto; display: inline-block; }
+
+/* Watermark: the same crest, fixed behind the content plane (z-index -1 =
+   above the body background, below all content; opaque card/side surfaces
+   cover it, so dense tables stay clean and it reads only on the page
+   canvas). Decorative: hidden for print and forced-colors; opacity is low
+   enough that measured text/background contrast is unaffected. */
+body::before {
+  content: ""; position: fixed; z-index: -1; pointer-events: none;
+  left: 50%; top: 55%; width: min(74vmin, 560px); height: min(74vmin, 560px);
+  transform: translate(-50%, -50%);
+  background: url("logo-crest.png") center / contain no-repeat;
+  opacity: .05;
+}
+@media print { body::before { display: none; } }
+@media (forced-colors: active) { body::before { display: none; } }
+
+/* static-snapshot banner (exporter-appended; live site css is untouched) */
+.static-banner { background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  border-bottom: 1px solid var(--line); color: var(--ink);
+  padding: .45rem 1.2rem; font-size: .85rem; }
+
+/* ---- horizontal-overflow guard (2026-07-28 bug fix) ---------------------
+   `.shell` used `grid-template-columns: 215px 1fr`; a `1fr` track is
+   `minmax(auto,1fr)`, so the track could never shrink below the min-content
+   width of `main`. Long sector labels, wide tables and nowrap chips therefore
+   pushed the whole document past the viewport (e.g. 1215 px at a 390 px
+   viewport). `minmax(0,…)` lets the track shrink so `.table-wrap`'s existing
+   `overflow-x:auto` does its job, and long tokens/chips wrap instead of
+   stretching the page. Desktop layout is unchanged. */
+.shell { grid-template-columns: minmax(0,215px) minmax(0,1fr); }
+@media (max-width: 900px) { .shell { grid-template-columns: minmax(0,1fr); } }
+main, .card, .poster, .poster-grid, .kpi { min-width: 0; }
+.poster p, .poster h3, .card p, .kpi { overflow-wrap: anywhere; }
+.chip { white-space: normal; max-width: 100%; overflow-wrap: anywhere; }
