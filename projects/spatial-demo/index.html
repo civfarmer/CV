@@ -1,5 +1,21 @@
 <!doctype html>
 <!-- CHANGELOG
+  2026-07-29b (cordon scenario now TERMINATES instead of looping):
+   1) THE SUBJECT STAYS ON THE GROUND. subdue() replaces the timed knockdown on a successful
+      interception — he does not get back up, and the run does not restart. His collision radius
+      drops to 0.42× (a prone body is not a standing obstacle), which lets the machine hold
+      station directly over him instead of being pushed out to standing clearance.
+   2) HANDS BEHIND THE HEAD. makeHuman() gained handsOnHead(k): elbows splayed, forearms folded
+      up, hands laced behind the skull, eased in over ~0.8 s so it reads as compliance rather
+      than a snap to a pose. pose() yields to it while the flag is set, so the walk cycle cannot
+      fight the posture. Cleared on reset.
+   3) THE MACHINE STANDS OVER HIM, THEN STOPS. New terminal 'hold' state: it takes station 1.25 u
+      from him on the cordon side, faces him, gestures the order once, and holds. After ~4 s the
+      run simply ends (running=false) with a closing line saying the machine has no arrest power
+      and everything past this point is the officers' decision. The old 'recover' loop — where he
+      got up, walked back round the car and the whole thing replayed forever — is gone.
+   4) THE FAILURE ENDING ALSO TERMINATES. Reaching the cordon on the vision lane, or timing out,
+      now ends the run cleanly with a message rather than restarting.
   2026-07-29 (the guardian stops falling over; split sensing lanes in the ring; ring-edge clipping; car routing):
    1) ONLY THE THING BEING INTERCEPTED GOES DOWN. The guardian used to knock itself over on every successful
       interposition, which read as the machine failing at the moment it succeeded. Added brace(): it plants,
@@ -258,8 +274,21 @@ function makeHuman(o){
   const armL=limb(-.63,2.66,.62,.6,Mc,Ms), armR=limb(.63,2.66,.62,.6,Mc,Ms);
   const legL=limb(-.26,1.5,.76,.72,Mt,Mt), legR=limb(.26,1.5,.76,.72,Mt,Mt);
   [legL,legR].forEach(l=>{const s=new THREE.Mesh(box(.3,.16,.56),Mb);s.position.set(0,-.78,.1);s.castShadow=true;l.lo.add(s);});
-  return {g:g,body:body,kind:'human',h:3.6,limbs:{armL:armL,armR:armR,legL:legL,legR:legR},down:0,
-    pose(t,spd){const s=Math.min(1,spd/5),a=Math.sin(t*8.5)*.85*s,b=Math.cos(t*8.5);
+  return {g:g,body:body,kind:'human',h:3.6,limbs:{armL:armL,armR:armR,legL:legL,legR:legR},down:0,hoh:0,
+    /* compliance posture: face down, elbows splayed, hands laced behind the head. Eased in
+       over ~0.8 s so it reads as him complying rather than snapping into a pose. */
+    handsOnHead(k){
+      const L=this.limbs, e=Math.min(1,Math.max(0,k));
+      const ease=(a,b)=>a+(b-a)*e;
+      L.armL.up.rotation.set(ease(0,2.45),0, ease(0, 0.52));
+      L.armR.up.rotation.set(ease(0,2.45),0, ease(0,-0.52));
+      L.armL.lo.rotation.x=ease(-.3,0.30);L.armR.lo.rotation.x=ease(-.3,0.30);
+      L.legL.up.rotation.x=ease(0,0.12);L.legR.up.rotation.x=ease(0,-0.12);
+      L.legL.lo.rotation.x=ease(0,0.10);L.legR.lo.rotation.x=ease(0,0.10);
+    },
+    pose(t,spd){
+      if(this.hoh>0){this.handsOnHead(this.hoh);this.body.position.y=0;return;}
+      const s=Math.min(1,spd/5),a=Math.sin(t*8.5)*.85*s,b=Math.cos(t*8.5);
       this.limbs.legL.up.rotation.x=a;this.limbs.legR.up.rotation.x=-a;
       this.limbs.legL.lo.rotation.x=Math.max(0,-a*.9+.1);this.limbs.legR.lo.rotation.x=Math.max(0,a*.9+.1);
       this.limbs.armL.up.rotation.x=-a*.85;this.limbs.armR.up.rotation.x=a*.85;
@@ -653,6 +682,7 @@ let A={},props=[],baseY=0,TURBO=1,introEnd=3.8;
 function addBody(o,r,k,opt){
   const b=Object.assign({o:o,r:r,r0:r,k:k,vel:new THREE.Vector3(),fixed:false,prot:false,down:0,hh:3.2,
     moving:false,rig:null,hold:0},opt||{});
+  b.fixed0=b.fixed;                       // remembered so a terminal hold can be undone on reset
   bodies.push(b);return b;
 }
 function addProp(x,z,r,hh){props.push({o:{position:new THREE.Vector3(x,0,z)},r:r,hh:hh||2.5,moving:false});}
@@ -695,6 +725,10 @@ function faceTo(a,tx,tz,dt){const dx=tx-a.o.position.x,dz=tz-a.o.position.z;
 function act(a,name,fade,hold){if(a.k!=='robot')return;a.rig.play(name,fade===undefined?.15:fade);a.hold=simT+(hold||0.5);}
 function knock(a,secs){a.down=Math.max(a.down,secs);a.r=a.r0*1.55;
   if(a.k==='robot'){a.rig.play('Death',.1);a.hold=simT+secs;}}
+/* SUBDUE — he stays on the ground. Not a timed knockdown that he gets up from: the run is over.
+   Radius drops because a prone body is not a standing obstacle, which lets the machine hold
+   station directly over him rather than being pushed out to standing-clearance. */
+function subdue(a){a.down=1e9;a.subdued=true;a.t0=simT;a.r=a.r0*0.42;a.fixed=true;a.vel.set(0,0,0);}
 /* BRACE — the guardian absorbs a contact WITHOUT going down: it plants, rocks back
    along the contact normal, and stays on its feet. Only the arena (sport) uses knock()
    on a robot; every protective scenario braces instead. */
@@ -723,6 +757,8 @@ function tickAgent(a,dt){
     else{const sp=a.spd;
       if(sp>5.0)a.rig.play('Running',.16);else if(sp>0.30)a.rig.play('Walking',.18);else a.rig.play('Idle',.25);}
   } else if(a.k==='human'&&a.rig){
+    // subdued: ease into the compliance posture over ~0.8 s and hold it
+    if(a.subdued)a.rig.hoh=Math.min(1,(simT-(a.t0||simT))/0.8);
     a.rig.pose(simT,a.down>0?0:a.vel.length());
     const tg=a.down>0?-1.32:0;
     a.rig.body.rotation.x+=(tg-a.rig.body.rotation.x)*Math.min(1,dt*6.5);
@@ -1189,33 +1225,43 @@ SCN.cordon={
          goes through the space he has already left. It tries, and it misses. */
       if(hit(A.g,A.sub)&&LANE()==='reflex'){
         tally.ok++;tally.contacts++;setTally();
-        /* the machine plants and holds; only the man it stopped goes to the ground */
+        /* the machine plants and holds; only the man it stopped goes to the ground, and he STAYS there */
         const nb=Math.atan2(S.x-A.g.o.position.x,S.z-A.g.o.position.z);
         brace(A.g,0.9,-Math.sin(nb),-Math.cos(nb));
-        knock(A.sub,1.35);
-        A.state='recover';A.t0=simT;A.ret=0;predMark.visible=false;showTrack(null);
-        say('INTERCEPTED — non-kinetic: the machine simply got in the way and <b>took the collision on its feet</b>. It braced, absorbed the impulse and held the line; he is the one on the floor, and he is unhurt. Contained without a shot being fired and without an officer having to close the distance.');
+        subdue(A.sub);
+        A.state='hold';A.t0=simT;predMark.visible=false;showTrack(null);
+        say('INTERCEPTED — non-kinetic: the machine simply got in the way and <b>took the collision on its feet</b>. It braced, absorbed the impulse and held the line; he is the one on the ground, and he is unhurt. Contained without a shot being fired and without an officer having to close the distance.');
       }
       if(LANE()==='vision'&&!A.missSaid&&A.bolt>0&&S.z>2.5){
         A.missSaid=true;
         say('LUNGED AND MISSED — the machine <b>did</b> commit: it drove at the last position vision gave it and arrived through empty pavement, because he had already been past that point for ~'+Math.round(CAD.vision*1000)+' ms. Trying and missing is the whole failure mode — the machine was willing, the pipeline was late.');
       }
       if(S.z>12.8){
-        tally.no++;setTally();A.state='recover';A.t0=simT;A.ret=0;predMark.visible=false;showTrack(null);
-        say('HE GOT PAST — the vision lane acquired him too late and committed to a stale position, so he reached the cordon and the officers are now the ones who have to react. ⚠ Switch to the LiDAR reflex lane and run it again.');
+        tally.no++;setTally();A.state='over';A.t0=simT;predMark.visible=false;showTrack(null);
+        A.sub.vel.set(0,0,0);A.sub.fixed=true;
+        say('HE GOT PAST — the vision lane acquired him too late and committed to a stale position, so he reached the cordon and the officers are now the ones who have to react. That is the end of this run. ⚠ Switch to the LiDAR reflex lane and press ▶ Run again.');
       }
-      if(simT-A.t0>7){A.state='recover';A.t0=simT;A.ret=0;}
+      if(simT-A.t0>9){A.state='over';A.t0=simT;A.sub.vel.set(0,0,0);A.sub.fixed=true;
+        say('RUN ENDED — no interception attempt resolved. Press ↺ Reset, or switch lanes and run it again.');}
     }
-    else if(A.state==='recover'){
-      if(simT-A.t0>2.4&&A.sub.down<=0&&A.g.down<=0){
-        /* he walks back round the car to the near side — never through it */
-        const rp=[this.CAR.gate,[5.2,-5.6]][Math.min(A.ret||0,1)];
-        if(this.route(A.sub,rp[0],rp[1],3.4,dt,.8)){A.ret=(A.ret||0)+1;
-          if(A.ret>1){A.state='orders';A.t0=simT;A.tries++;A.ret=0;A.missSaid=false;}}
-        /* the machine takes the same gap west of the car — it never drives at the wing */
-        const w=this.interpose();this.route(A.g,w[0],w[1],5.5,dt,.5);
-        say('RESET — the machine walks back into the gap between the subject and the cordon, routing round the car rather than into it, and resumes the standoff. It has no other authority: block, absorb, repeat, and wait for people to decide.');
-      } else A.sub.vel.multiplyScalar(0);
+    /* ---- TERMINAL: he is on the ground and stays there; the machine holds station over him.
+       This is deliberately NOT a loop — the machine's authority ends here and people take over. ---- */
+    else if(A.state==='hold'){
+      A.sub.vel.set(0,0,0);
+      /* stand over him, on the cordon side, facing him */
+      const dx=0-S.x,dz=16.5-S.z,L=Math.hypot(dx,dz)||1;
+      const hx=S.x+dx/L*1.25,hz=S.z+dz/L*1.25;
+      seek(A.g,hx,hz,3.0,dt,.12);
+      faceTo(A.g,S.x,S.z,dt);
+      const e=simT-A.t0;
+      if(e>0.9&&e<2.6){if(A.g.rig.curName!=='No')act(A.g,'No',.14,1.7);}   /* stay down — hands where I can see them */
+      if(e>2.6&&e<3.2)say('CONTAINED — he is face down with his hands laced behind his head, and the machine is standing over him keeping the space. No weapon was drawn, no officer had to close the distance, and nothing here is a use of force beyond having been in the way.');
+      if(e>=3.2)say('HELD — and that is where the machine stops. It has no arrest power, no weapon and no further authority: it stands over him and waits. Everything from this point is a decision for the officers behind the cordon. <b>Run complete</b> — press ↺ Reset to run it again.');
+      if(e>4.2)running=false;     /* the run is finished; the scene simply holds */
+    }
+    else if(A.state==='over'){
+      A.sub.vel.set(0,0,0);A.g.vel.multiplyScalar(0);
+      if(simT-A.t0>1.2)running=false;
     }
   }};
 /* ============================================================================================
@@ -1251,8 +1297,9 @@ function resetRun(){
   laneOv=null;resetTrack();clearPoints();
   trackBox.visible=false;predMark.visible=false;ghost.visible=false;irBeam.visible=false;
   bodies.forEach(b=>{b.down=0;b.r=b.r0;b.vel.set(0,0,0);b.hold=0;b.braceT=0;b.spd=0;
+    if(b.subdued){b.subdued=false;b.fixed=!!b.fixed0;}          // clear the terminal hold
     if(b.k==='robot'&&b.rig){b.rig.mixer.stopAllAction();b.rig.cur=null;b.rig.curName='';b.rig.play('Idle',0);b.rig.inner.rotation.x=0;}
-    if(b.k==='human'&&b.rig){b.rig.body.rotation.x=0;b.rig.body.position.y=0;}});
+    if(b.k==='human'&&b.rig){b.rig.body.rotation.x=0;b.rig.body.position.y=0;b.rig.hoh=0;b.rig.handsOnHead(0);}});
   srand(20260728);SEEN={};
   SCN[scenario].reset();
   setTally();

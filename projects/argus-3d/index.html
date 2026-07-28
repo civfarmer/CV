@@ -1,5 +1,36 @@
 <!doctype html>
+<!-- DISTANCE MODEL (read this before moving any body)
+     True figures: Moon Ø 3,474 km at 384,400 km. Mars Ø 6,779 km at 54.6e6 km on a favourable
+     approach — so Mars is 1.95× the Moon's DIAMETER and about 142× its DISTANCE. The target sits
+     at the papers' 0.5 AU response-time reference = 74.8e6 km, which is 1.37× Mars's closest
+     approach: the asteroid genuinely lies BEYOND Mars, and the 1,000 km/s dart reaches it in ~21 h.
+     Scene mapping: body RADII are true to each other (Moon 7.00 u, Mars 13.66 u). DISTANCES are
+     log-compressed about the target — d_scene = 1287·(d_real/0.5AU)^0.35 — which preserves the
+     ordering and keeps everything inside one frame: Moon 241 u, Mars 1,154 u, target 1,287 u.
+     The Moon→Mars gap is therefore 4.1× the station→Moon gap (it used to be 0.5×, i.e. backwards).
+     Earth's disc remains drawn at an exaggerated radius, as it always has been — that is a separate,
+     long-standing liberty so the limb fills the frame, and ranges here are quoted from the STATION.
+-->
 <!-- CHANGELOG
+  2026-07-29b (real distance ordering, true relative body sizes, full screen, free-look):
+   1) MARS IS NOW BIGGER THAN THE MOON AND MUCH FURTHER AWAY. Mars was drawn at r 4.5 against the
+      Moon's 7.0 — i.e. SMALLER than the Moon, which is backwards — and sat only 1.4× further out.
+      Mars is now r 13.66 (the true 1.95:1 ratio) at 1,154 u, the Moon 7.00 u at 241 u. Measured
+      over the flight the peak apparent sizes are Moon 13.0°, Mars 25.3° — a ratio of 1.95, exactly
+      the true figure. You cross the Moon early, pass Mars late, and the target is beyond both.
+   2) THE GAPS ARE THE RIGHT WAY ROUND. Moon→Mars separation was SHORTER than station→Moon (0.5×).
+      It is now 982 u against 241 u — 4.1× — via the log-compressed distance law documented above.
+   3) THE DEPTH CUE NO LONGER DISTORTS RELATIVE SIZE. It previously normalised each body to its own
+      start range, so whichever body you passed first looked biggest. It now uses ONE shared
+      reference range (420 u, gain 0.55, clamp 2.6×) for every body, so at the fly-past the Moon and
+      Mars sit on the same curve and their true 1.95:1 ratio survives.
+   4) FULL SCREEN. New ⛶ button promotes the whole viewbox (canvas, target cam, HUD and controls)
+      via the Fullscreen API, with a resize on entry and exit.
+   5) FREE LOOK (opt-in). New 🎥 toggle. With it on, dragging during a launch orbits the camera
+      around the flying projectile instead of being locked to the scripted chase offset — you can
+      ride alongside, look back at the station, or turn to watch the Moon and Mars go past. The
+      wheel trims the follow distance while free-looking. Off by default, so the directed camera
+      remains the out-of-the-box experience.
   2026-07-29 (depth cue on the Moon/Mars fly-past + overmatch one-shot kill + family-dependent flight time.
               Only the apparent-size block, the coast-duration constants and the fracture branch changed;
               geometry, materials, auto-aim, camera, cone, surface view and all copy are untouched):
@@ -212,6 +243,11 @@
   @media(max-width:900px){.stage{grid-template-columns:1fr}}
   .panel{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--line);border-radius:var(--radius);padding:16px}
   .viewbox{position:relative;background:#04060c;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  /* full screen: the viewbox becomes the whole display and the canvas fills it */
+  .viewbox:fullscreen{border-radius:0;border:0;width:100vw;height:100vh}
+  .viewbox:fullscreen #scene{height:100vh!important;width:100vw!important}
+  .viewbox:-webkit-full-screen{border-radius:0;border:0;width:100vw;height:100vh}
+  .viewbox:-webkit-full-screen #scene{height:100vh!important;width:100vw!important}
   /* FIXED heights only (vh-calc heights caused buffer/CSS mismatches on some window sizes);
      a ResizeObserver keeps the WebGL buffer glued to the CSS box in all cases */
   #scene{width:100%;height:600px;display:block;touch-action:none;cursor:grab}
@@ -388,6 +424,8 @@
           <button data-mode="projectile">Projectile (exploded)</button>
           <button id="camBtn" class="on" title="Toggle the picture-in-picture target camera (tracks the asteroid / current fragment so distant impacts stay legible)">◉ Target cam</button>
           <button id="fitBtn" title="Compact view: shrink the 3D viewport so the launch controls fit on screen without scrolling">⤡ Compact</button>
+          <button id="fsBtn" title="Fill the screen with the 3D view">⛶ Full screen</button>
+          <button id="freeBtn" title="Free look: during a launch, keep dragging to orbit the camera around the flying projectile instead of being locked to the scripted chase view">🎥 Free look: OFF</button>
         </div>
         <div class="tgtcam" id="tgtcamFrame" style="display:none">
           <span class="tc-lab" id="tgtcamLab">◉ TARGET CAM</span>
@@ -544,6 +582,7 @@ function glowTexture(){ // soft radial glow (no square) for the Sun and impact p
   GLOW_TEX=new THREE.CanvasTexture(c);return GLOW_TEX;
 }
 let firing=false,fireT=0,phase='ready',speed=0.5,impactFlash=null,impacted=false,dragMoved=false;
+let freeLook=false,freeZoom=1;   // free-look orbit around the flying projectile (opt-in)
 // ---- SALVO (multi-shot campaign): fire N shots, RECHARGING the pulse buffer between each. Recharge time is
 //      tied to electricity per Paper II §8 (VERIFIED): a 428.571 GJ pulse ÷ 10 MW net charging ≈ 11.9 h ideal
 //      (longer in practice; conservative thermal cadence ≈ 1 shot/day). Sped-up here; the READOUT states the
@@ -884,13 +923,19 @@ function initThree(){
   //      the Moon (~384,000 km away, Ø 3,474 km) LOOKS far larger than Mars (tens of millions of km away,
   //      Ø 6,779 km). Mars is physically ~2× the Moon but appears as a small red point from here. So the
   //      Moon is the LARGE grey disc; Mars the small distant red dot. ----
+  // ---- TRUE RELATIVE BODY SIZES, ORDERED DISTANCES (see the DISTANCE MODEL note above the changelog).
+  //      Moon r 1,737 km → 7.00 u; Mars r 3,390 km → 13.66 u, i.e. the true 1.95:1 diameter ratio.
+  //      Ranges from the station: Moon 241 u (384,400 km), Mars 1,154 u (54.6e6 km at a favourable
+  //      approach), target 1,287 u (0.5 AU). So you cross the Moon early, pass Mars late, and the
+  //      target lies BEYOND Mars — which is what the 0.5 AU response-time reference actually implies. ----
   moon=new THREE.Mesh(new THREE.SphereGeometry(7.0,40,40),B.rock?new THREE.MeshPhongMaterial({map:ldb.load(B.rock),bumpMap:ldb.load(B.rock),bumpScale:0.22,color:0x8f8b84,shininess:1}):new THREE.MeshPhongMaterial({color:0x8f8b84,shininess:1}));
-  moon.position.set(210,-6,-360);label(moon,'moon','The Moon','The LARGE grey disc — from Earth\'s vicinity the Moon (~384,000 km away) appears far bigger than Mars, which is tens of millions of km distant. (Physically Mars is ~2× the Moon\'s diameter — what you see here is apparent size, the honest view from Earth orbit.) Illustrative position.','nearby body · large apparent disc');scene.add(moon);
-  mars=new THREE.Mesh(new THREE.SphereGeometry(4.5,32,32),B.mars?new THREE.MeshPhongMaterial({map:ldb.load(B.mars),shininess:2,color:0xd2673f}):new THREE.MeshPhongMaterial({color:0xb0492c,shininess:2}));
-  mars.position.set(390,-10,-480);scene.add(mars); // kept clear of the target-cam inset corner in the default view
-  label(mars,'mars','Mars','The small red point — from Earth\'s vicinity Mars appears far smaller than the Moon despite being physically ~2× its diameter (it is tens of millions of km away). Apparent sizes; illustrative. The planetary-defence context is interplanetary; the series specifies no operational orbit.','distant body · small red point');
-  // depth cue: both bodies grow as the chase camera closes on them during a shot and fall away behind it
-  registerApparent(moon,0.62,3.4);registerApparent(mars,0.62,3.4);
+  moon.position.set(224,40,-78);label(moon,'moon','The Moon','Ø 3,474 km, ~384,400 km from Earth — the NEAR body, crossed early in the shot. It is drawn at the true 1:1.95 size ratio against Mars, so once you are alongside them Mars is unmistakably the larger world. From Earth the Moon still looks the bigger disc, because it is ~142× closer; that is the ordering this scene reproduces. Distances are log-compressed (see header) — schematic, not to scale.','near body · Ø 3,474 km · 384,400 km');scene.add(moon);
+  mars=new THREE.Mesh(new THREE.SphereGeometry(13.66,40,40),B.mars?new THREE.MeshPhongMaterial({map:ldb.load(B.mars),shininess:2,color:0xd2673f}):new THREE.MeshPhongMaterial({color:0xb0492c,shininess:2}));
+  mars.position.set(593,64,-988);scene.add(mars);
+  label(mars,'mars','Mars','Ø 6,779 km — physically ~1.95× the Moon, and here drawn that way. At a favourable approach it is ~54.6 million km from Earth, ~142× the Moon\'s distance, so it is passed LATE in the shot and the target still lies beyond it. Distances are log-compressed (see header) — schematic, not to scale.','far body · Ø 6,779 km · ~54.6e6 km');
+  // depth cue on a SHARED reference range, so the two bodies keep their true 1.95:1 size ratio
+  // against each other at the fly-past instead of each being normalised to its own start range
+  registerApparent(moon);registerApparent(mars);
   // Earth below (illustrative altitude — series declares none)
   const T=window.EARTH_TEX||{},ld=new THREE.TextureLoader();
   const em=new THREE.MeshPhongMaterial({map:T.day?ld.load(T.day):null,bumpMap:T.bump?ld.load(T.bump):null,bumpScale:0.4,specularMap:T.specular?ld.load(T.specular):null,specular:0x2a4a66,shininess:14,color:T.day?0xffffff:0x24507e});
@@ -936,19 +981,17 @@ let cine=0, camLook=new THREE.Vector3(0,-1.5,0);
    so passing the Moon at ~100 u fills a real part of the frame and it shrinks away again after.
    Illustrative depth cue in an explicitly schematic scene — positions were never to scale.
    ============================================================================================ */
-const APPAR=[];
-function registerApparent(obj,gain,max){
-  if(!obj)return;
-  APPAR.push({o:obj,d0:null,gain:gain,max:max});
-}
+const APPAR=[], APPAR_D0=420, APPAR_GAIN=0.55, APPAR_MAX=2.6;
+function registerApparent(obj){if(obj)APPAR.push(obj);}
 function updateApparentBodies(){
   for(let i=0;i<APPAR.length;i++){
-    const B=APPAR[i];if(!B.o||!B.o.visible)continue;
-    if(B.d0===null){B.d0=camera.position.distanceTo(B.o.position)||1;continue;}
-    const d=Math.max(6,camera.position.distanceTo(B.o.position));
-    const s=(d>=B.d0)?1:Math.min(B.max,Math.pow(B.d0/d,B.gain));
-    const c=B.o.scale.x;
-    B.o.scale.setScalar(c+(s-c)*0.22);          // eased, so the swell is smooth rather than snapping
+    const o=APPAR[i];if(!o||!o.visible)continue;
+    const d=Math.max(6,camera.position.distanceTo(o.position));
+    // ONE shared reference range for every body, so relative sizes are preserved: at the fly-past
+    // both the Moon and Mars sit on the same clamp and Mars reads 1.95× the Moon, exactly as it is.
+    const s=(d>=APPAR_D0)?1:Math.min(APPAR_MAX,Math.pow(APPAR_D0/d,APPAR_GAIN));
+    const c=o.scale.x;
+    o.scale.setScalar(c+(s-c)*0.22);            // eased, so the swell is smooth rather than snapping
   }
 }
 function loop(){raf=requestAnimationFrame(loop);
@@ -959,8 +1002,15 @@ function loop(){raf=requestAnimationFrame(loop);
   const homeLook=new THREE.Vector3(0,-1.5,0);
   let tPos=homePos,tLook=homeLook;
   if(cine>0.01){
-    // cinematic: camera = focus + per-phase offset direction × distance (set each frame by stepFire)
-    const cinePos=cineFocus.clone().add(cineDir.clone().normalize().multiplyScalar(cineZoom));
+    // cinematic: camera = focus + per-phase offset direction × distance (set each frame by stepFire).
+    // FREE LOOK: the offset direction instead comes from the user's own yaw/pitch drag, so the camera
+    // orbits the flying projectile — you can fly alongside it and look back at the station, or round
+    // to see the Moon and Mars go past. The scripted zoom still applies, scaled by the wheel.
+    const cinePos=freeLook
+      ? cineFocus.clone().add(new THREE.Vector3(
+          Math.cos(pitch)*Math.sin(yaw),Math.sin(pitch),Math.cos(pitch)*Math.cos(yaw)
+        ).multiplyScalar(cineZoom*freeZoom))
+      : cineFocus.clone().add(cineDir.clone().normalize().multiplyScalar(cineZoom));
     tPos=homePos.clone().lerp(cinePos,cine); tLook=homeLook.clone().lerp(cineFocus,cine);
   }
   if(cine>0.01){ camera.position.lerp(tPos,0.10); camLook.lerp(tLook,0.10); }
@@ -1789,6 +1839,27 @@ document.getElementById('camBtn').addEventListener('click',function(){insetOn=!i
     resize();}
   if(fb)fb.addEventListener('click',()=>{compact=!compact;try{localStorage.setItem('argus3d-compact',compact?'1':'0')}catch(e){}ap();});
   ap();
+  // ---- FULL SCREEN: promote the viewbox itself, so every overlay (target cam, HUD, controls) comes with it ----
+  const fs=document.getElementById('fsBtn');
+  const inFS=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
+  if(fs&&vb){
+    fs.addEventListener('click',()=>{
+      if(inFS()){(document.exitFullscreen||document.webkitExitFullscreen).call(document);}
+      else{const r=vb.requestFullscreen||vb.webkitRequestFullscreen;
+        if(r)r.call(vb);else fs.textContent='⛶ Full screen unavailable';}
+    });
+    ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{
+      const on=inFS();fs.textContent=on?'⛶ Exit full screen':'⛶ Full screen';fs.classList.toggle('on',on);
+      setTimeout(resize,60);setTimeout(resize,320);   // let the browser settle the new box before measuring
+    }));
+  }
+  // ---- FREE LOOK: opt-in orbit around the projectile while it is in transit ----
+  const fl=document.getElementById('freeBtn');
+  if(fl)fl.addEventListener('click',()=>{
+    freeLook=!freeLook;freeZoom=1;
+    fl.textContent='🎥 Free look: '+(freeLook?'ON — drag to orbit the shot':'OFF');
+    fl.classList.toggle('on',freeLook);
+  });
 })();
 // ---- SALVO controller: fires SALVO_TOTAL_DEFAULT shots, RECHARGING the pulse buffer between each (recharge
 //      time tied to electricity: 428.571 GJ ÷ 10 MW ≈ 11.9 h ideal — Paper II §8). Does NOT touch single Launch. ----
@@ -2171,7 +2242,11 @@ cv.addEventListener('click',e=>{if(dragMoved)return;const r=cv.getBoundingClient
 cv.addEventListener('pointerdown',e=>{dragging=true;dragMoved=false;lx=e.clientX;ly=e.clientY;cv.setPointerCapture(e.pointerId);});
 cv.addEventListener('pointermove',e=>{if(!dragging)return;const dx=e.clientX-lx,dy=e.clientY-ly;if(Math.abs(dx)+Math.abs(dy)>3)dragMoved=true;yaw-=dx*0.007;pitch=Math.max(-0.55,Math.min(1.2,pitch+dy*0.007));lx=e.clientX;ly=e.clientY;}); // lower pitch bound keeps the orbit from diving under the Earth limb
 cv.addEventListener('pointerup',()=>dragging=false);
-cv.addEventListener('wheel',e=>{e.preventDefault();dist=Math.max(6,Math.min(120,dist+Math.sign(e.deltaY)*(mode==='system'?1.8:0.8)));},{passive:false});
+cv.addEventListener('wheel',e=>{e.preventDefault();
+  // while free-looking at a shot in flight the wheel trims the follow distance, not the home orbit
+  if(freeLook&&firing&&(phase==='coast'||phase==='impact')){
+    freeZoom=Math.max(0.35,Math.min(3.5,freeZoom*(e.deltaY>0?1.09:0.92)));return;}
+  dist=Math.max(6,Math.min(120,dist+Math.sign(e.deltaY)*(mode==='system'?1.8:0.8)));},{passive:false});
 window.addEventListener('resize',resize);
 document.getElementById('theme').addEventListener('click',()=>{const h=document.documentElement,n=h.getAttribute('data-theme')==='light'?'dark':'light';h.setAttribute('data-theme',n);try{localStorage.setItem('cf-theme',n)}catch(e){}});
 try{var _q=new URLSearchParams(location.search).get('theme');if(_q){document.documentElement.setAttribute('data-theme',_q);}else{var t=localStorage.getItem('cf-theme');if(t)document.documentElement.setAttribute('data-theme',t);}}catch(e){}
