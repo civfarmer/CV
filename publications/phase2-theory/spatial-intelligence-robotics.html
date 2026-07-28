@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f17'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='27' font-weight='700' fill='%23d4b24c' text-anchor='middle'%3ECF%3C/text%3E%3C/svg%3E">
+<title>A Software-First Spatial-Intelligence Layer for Contact-Capable Robots: Perception, Dynamic Tracking, Impact Recovery, and Governance-by-Design</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{
+    --bg:#0b0f17; --bg2:#0e1420; --surface:#131b2a; --surface2:#182133;
+    --ink:#e9eef7; --ink2:#aab7cc; --muted:#7d8ba3; --line:#233145; --line2:#2c3d54;
+    --accent:#43b3a6; --accent-ink:#84d6ca; --gold:#d4b24c; --gold-soft:#e6cf8f;
+    --good:#43c59e; --warn:#e0a13a; --shadow:0 18px 50px -20px rgba(0,0,0,.7);
+    --radius:14px; --measure:70ch;
+    --font-display:'Zilla Slab',Georgia,'Times New Roman',serif;
+    --font-body:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --font-mono:'IBM Plex Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
+  }
+  html[data-theme="light"]{
+    --bg:#f4f1ec; --bg2:#ebe6dd; --surface:#ffffff; --surface2:#faf7f2;
+    --ink:#221e18; --ink2:#4c473e; --muted:#675f54; --line:#e7e1d6; --line2:#d9d2c5;
+    --accent:#0d5f57; --accent-ink:#0a463f; --gold:#836819; --gold-soft:#6f5714; --good:#0e7a52;
+    --shadow:0 18px 44px -24px rgba(15,30,60,.35);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:radial-gradient(1100px 700px at 82% -8%,rgba(67,179,166,.10),transparent 60%),var(--bg);
+    color:var(--ink);font-family:var(--font-body);line-height:1.72;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  a{color:var(--accent-ink);text-decoration:none}
+  a:hover{text-decoration:underline}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+  ::selection{background:color-mix(in oklab,var(--accent) 32%,transparent)}
+
+  /* Top bar */
+  .top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    padding:11px clamp(16px,4vw,34px);background:color-mix(in oklab,var(--bg),transparent 8%);
+    backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:11px;color:var(--ink);min-width:0}
+  .crest{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;flex:0 0 auto;
+    background:linear-gradient(145deg,#0e7b6f,#0b655b);color:#fff;font-family:var(--font-display);font-weight:700;font-size:14px;box-shadow:var(--shadow)}
+  .brand .nm{font-family:var(--font-display);font-weight:700;font-size:14.5px;line-height:1.05}
+  .brand .rl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+  .topacts{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:8px 13px;border-radius:10px;font-weight:600;font-size:13px;
+    border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer;transition:.16s;white-space:nowrap;font-family:var(--font-body)}
+  .btn:hover{border-color:var(--accent);transform:translateY(-1px);text-decoration:none}
+  .btn svg{width:16px;height:16px}
+  .btn.icon{padding:8px;width:36px}
+
+  /* Article */
+  main.wrap{max-width:calc(var(--measure) + 8rem);margin:0 auto;padding:clamp(26px,5vw,52px) clamp(18px,5vw,40px) 40px}
+  article.paper{max-width:var(--measure);margin:0 auto;font-size:1.05rem}
+  article.paper > *{max-width:var(--measure)}
+  .paper h1,.paper h2,.paper h3,.paper h4,.paper h5{font-family:var(--font-display);font-weight:600;line-height:1.18;color:var(--ink);letter-spacing:-.005em}
+  .paper h1{font-size:clamp(27px,4.4vw,40px);line-height:1.1;margin:0 0 .5rem;letter-spacing:-.015em}
+  .paper h2{font-size:clamp(20px,2.9vw,27px);margin:2.4rem 0 .9rem;padding-bottom:.35rem;border-bottom:1px solid var(--line)}
+  .paper h3{font-size:clamp(17px,2.2vw,21px);margin:1.9rem 0 .7rem}
+  .paper h4{font-size:16px;margin:1.5rem 0 .5rem;color:var(--ink2)}
+  .paper p{margin:0 0 1.05rem;overflow-wrap:anywhere;word-break:break-word}
+  .paper li{overflow-wrap:anywhere;word-break:break-word}
+  .paper strong{color:var(--ink);font-weight:700}
+  .paper em{color:inherit}
+  /* Byline: first bold paragraph right after the title */
+  .paper h1 + p{font-size:1.06rem;color:var(--ink);margin-bottom:.4rem}
+  .paper h1 + p + p em{color:var(--muted);font-size:.92rem}
+  .paper ul,.paper ol{margin:0 0 1.1rem;padding-left:1.5rem}
+  .paper li{margin:.3rem 0}
+  .paper li::marker{color:var(--accent)}
+  .paper a{color:var(--accent-ink);border-bottom:1px solid color-mix(in oklab,var(--accent) 35%,transparent)}
+  .paper a:hover{border-bottom-color:var(--accent);text-decoration:none}
+  .paper hr{border:none;border-top:1px solid var(--line);margin:2rem 0}
+
+  /* Blockquote (scope notes) */
+  .paper blockquote{margin:1.4rem 0;padding:1rem 1.2rem;border:1px solid var(--line2);border-left:3px solid var(--gold);
+    border-radius:12px;background:color-mix(in oklab,var(--gold) 7%,var(--surface));color:var(--ink2)}
+  .paper blockquote p{margin:0 0 .6rem}
+  .paper blockquote p:last-child{margin-bottom:0}
+  .paper blockquote strong{color:var(--ink)}
+
+  /* Tables */
+  .paper .tablewrap{overflow-x:auto;margin:1.3rem 0;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+  .paper table{border-collapse:collapse;width:100%;font-size:.95rem;line-height:1.5}
+  .paper th,.paper td{text-align:left;padding:.6rem .85rem;border-bottom:1px solid var(--line);vertical-align:top}
+  .paper thead th{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--accent-ink);background:color-mix(in oklab,var(--accent) 8%,var(--surface2));border-bottom:1px solid var(--line2)}
+  .paper tbody tr:last-child td{border-bottom:none}
+  .paper tbody tr:nth-child(even){background:color-mix(in oklab,var(--ink) 3%,transparent)}
+
+  /* Code */
+  .paper code{font-family:var(--font-mono);font-size:.88em;background:color-mix(in oklab,var(--accent) 10%,var(--surface));
+    border:1px solid var(--line);border-radius:5px;padding:.08em .38em;color:var(--accent-ink)}
+  .paper pre{background:var(--bg2);border:1px solid var(--line2);border-radius:12px;padding:1rem 1.15rem;overflow-x:auto;
+    margin:1.3rem 0;line-height:1.55}
+  .paper pre code{background:none;border:none;padding:0;color:var(--ink2);font-size:.86rem}
+
+  /* Mermaid figures */
+  .diagram-figure{margin:1.6rem 0;background:#f7f8fb;border:1px solid var(--line2);border-radius:14px;padding:1.1rem 1rem .6rem;
+    box-shadow:var(--shadow);overflow-x:auto}
+  html[data-theme="light"] .diagram-figure{background:#fbfaf7}
+  .diagram-figure pre.mermaid{background:none;border:none;box-shadow:none;padding:0;margin:0;text-align:center;
+    color:#1c2530;font-family:var(--font-mono);font-size:.82rem;line-height:1.5;white-space:pre-wrap}
+  .diagram-figure svg{max-width:100%;height:auto;display:block;margin:0 auto}
+  .diagram-figure figcaption{margin-top:.7rem;text-align:center;font-family:var(--font-mono);font-size:.7rem;
+    letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+
+  /* Footnotes */
+  .paper .footnote{margin-top:2.6rem;padding-top:1rem;border-top:1px solid var(--line);font-size:.9rem;color:var(--ink2)}
+  .paper .footnote hr{display:none}
+  .paper .footnote ol{padding-left:1.3rem}
+  .paper .footnote li{margin:.45rem 0}
+  .paper .footnote-backref{border-bottom:none;margin-left:.3rem}
+  .paper sup a.footnote-ref{border-bottom:none;color:var(--accent-ink);font-weight:600;padding:0 .05em}
+
+  /* TOC (if [TOC] used) */
+  .paper .toc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:.9rem 1.2rem;margin:1.4rem 0;font-size:.95rem}
+  .paper .toc > ul{margin:0}
+
+  footer.paperfoot{max-width:var(--measure);margin:3rem auto 0;padding-top:1.3rem;border-top:1px solid var(--line);
+    color:var(--muted);font-size:.82rem;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}
+  footer.paperfoot a{color:var(--ink2)}
+  footer.paperfoot .mono{font-family:var(--font-mono)}
+
+  .pubnav{display:flex;flex-wrap:wrap;gap:2px 16px;align-items:center;padding:9px clamp(18px,4vw,40px);
+    background:color-mix(in oklab,var(--bg2),transparent 20%);border-bottom:1px solid var(--line);
+    font-family:var(--font-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase}
+  .pubnav a{color:var(--ink2);padding:4px 0;border-bottom:2px solid transparent;text-decoration:none}
+  .pubnav a:hover{color:var(--ink)}
+  .pubnav a[aria-current="page"]{color:var(--accent-ink);border-bottom-color:var(--accent)}
+
+  .cfside{display:none}
+  @media(min-width:1080px){
+    body{padding-left:280px}
+    .pubnav{display:none}
+    .cfside{position:fixed;left:0;top:0;bottom:0;width:280px;z-index:30;display:flex;flex-direction:column;gap:18px;
+      padding:22px 18px;background:var(--bg2);border-right:1px solid var(--line);overflow-y:auto}
+  }
+  .cfside .cfbrand{display:flex;align-items:center;gap:11px}
+  .cfside .cfbrand img{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:0 0 auto}
+  .cfside .cfbrand .nm{font-family:var(--font-display);font-weight:700;font-size:15.5px;color:var(--ink);line-height:1.1}
+  .cfside .cfbrand .rl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px;line-height:1.5}
+  .cfside nav{display:flex;flex-direction:column;gap:4px}
+  .cfside nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;color:var(--ink2);font-size:14px;font-weight:500;border:1px solid transparent;text-decoration:none}
+  .cfside nav a svg{width:18px;height:18px;flex:0 0 auto}
+  .cfside nav a:hover{background:var(--surface);color:var(--ink)}
+  .cfside nav a.on{background:var(--surface);border-color:var(--line);color:var(--ink)}
+  .cfside .cffoot{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+  .cfside .cfavail{font-size:12px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+  .cfside .cfdot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 10px var(--good);flex:0 0 auto;margin-top:4px}
+  .cfside .cfbtns{display:flex;gap:8px}
+  .cfside .cfcv{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:12px;font-weight:600;font-size:13px;
+    background:var(--accent);border:1px solid var(--accent);color:#fff;text-decoration:none}
+  .cfside .cfcv:hover{filter:brightness(1.08)}
+  .cfside .cftheme{width:40px;display:inline-flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer}
+  .cfside .cftheme svg{width:16px;height:16px}
+</style>
+</head>
+<body>
+  <aside class="cfside" aria-label="Site navigation">
+    <div class="cfbrand">
+      <img src="../../assets/img/portrait-2026.png" alt="Christopher Farmer">
+      <div><div class="nm">Christopher Farmer</div><div class="rl">Legal, Risk &amp; Technology Transformation</div></div>
+    </div>
+    <nav>
+      <a href="../../index.html#overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg><span>Overview</span></a>
+      <a href="../../index.html#projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Projects</span></a>
+      <a href="../../case-studies/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 5h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h7z"/></svg><span>Case studies</span></a>
+      <a href="../../index.html#experience"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Experience</span></a>
+      <a href="../../index.html#warroom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>War Room</span></a>
+      <a href="../../index.html#expertise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.1L12 17l-5.5 3.3 1-6.1L3 8.9 9 8z"/></svg><span>Expertise</span></a>
+      <a href="../../index.html#credentials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg><span>Credentials</span></a>
+      <a href="../../publications/index.html" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg><span>Publications</span></a>
+      <a href="../../index.html#contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M4 7l8 6 8-6"/></svg><span>Contact</span></a>
+    </nav>
+    <div class="cffoot">
+      <div class="cfavail"><span class="cfdot"></span> Open to legal, risk &amp; transformation roles &mdash; Geneva</div>
+      <div class="cfbtns">
+        <a class="cfcv" href="../../docs/CV-Christopher-Farmer-2026-08.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg> CV</a>
+        <button class="cftheme" onclick="document.getElementById('theme')?document.getElementById('theme').click():(function(){var h=document.documentElement,n=h.getAttribute('data-theme')==='light'?'dark':'light';h.setAttribute('data-theme',n);try{localStorage.setItem('cf-theme',n)}catch(e){}})()" title="Toggle theme" aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="top">
+    <a class="brand" href="../index.html" aria-label="Back to Publications">
+      <div class="crest">CF</div>
+      <div><div class="nm">Christopher Farmer</div><div class="rl">Publications</div></div>
+    </a>
+    <div class="topacts">
+      <a class="btn" href="../index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M15 18l-6-6 6-6"/></svg>
+        Back to Publications
+      </a>
+      <button class="btn icon" id="theme" title="Toggle light / dark" aria-label="Toggle light or dark theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </div>
+  </div>
+<nav class="pubnav" aria-label="Site">
+  <a href="../../index.html#overview">Overview</a>
+  <a href="../../index.html#projects">Projects</a>
+  <a href="../../case-studies/index.html">Case studies</a>
+  <a href="../../index.html#experience">Experience</a>
+  <a href="../../index.html#warroom">War Room</a>
+  <a href="../../index.html#expertise">Expertise</a>
+  <a href="../../index.html#credentials">Credentials</a>
+  <a href="../index.html" aria-current="page">Publications</a>
+  <a href="../../index.html#contact">Contact</a>
+</nav>
+
+  <main class="wrap">
+    <article class="paper">
+<h1 id="a-software-first-spatial-intelligence-layer-for-contact-capable-robots-perception-dynamic-tracking-impact-recovery-and-governance-by-design">A Software-First Spatial-Intelligence Layer for Contact-Capable Robots: Perception, Dynamic Tracking, Impact Recovery, and Governance-by-Design</h1>
+<p><strong>Christopher I. V. Farmer, LL.M. (University of Worcester) · Independent Researcher · civfarmer@gmail.com</strong></p>
+<p><em>Preprint — submitted; pending peer review. Phase II systems-architecture / theory paper. Version 1.0, July 2026.</em></p>
+<blockquote>
+<p><strong>Scope and responsibility note.</strong> This paper describes a <em>software and control-layer</em> architecture — a perception, tracking, contact-recovery and governance runtime intended to run on commercially available robot hardware. It does not describe, specify, or endorse any weapon, munition, or autonomous use of force against persons. Throughout, physical response is treated as <em>human-authorised, bounded, and non-kinetic</em> (inspect, escort, interpose, block a path, illuminate, alarm, retreat, and summon a human team). The reference demonstrator, sensor cadences, and latency figures are engineering <em>targets</em> and vendor-published capabilities, clearly labelled as such; <strong>no measured benchmark, telemetry value, or performance result is claimed anywhere in this paper.</strong> Any figure presented is an illustration of method, not evidence of outcome. Governance — meaningful human authority, auditability, standards conformance, and export/dual-use control — is treated as a first-class layer of the product, not a disclaimer appended to it.</p>
+</blockquote>
+<hr>
+<h2 id="abstract">Abstract</h2>
+<p>Robot hardware is commoditising. Humanoid, quadruped, and wheeled platforms with usable software-development kits are falling in price and rising in availability, and the associated actuator, battery, and LiDAR supply chains are maturing in parallel. As that happens, the scarce and defensible layer migrates upward, from the machine to the intelligence that makes the machine dependable — specifically, <em>spatial intelligence</em> that remains stable during contact, shock, and rapid motion. This paper sets out, at a systems level, a software-first spatial-intelligence layer for contact-capable robots built from four coupled components: (1) a hardware-abstraction and sensor-fusion runtime that separates a deterministic high-rate <em>reflex</em> lane from a slower <em>spatial</em> lane and an advisory <em>semantic</em> lane, correcting the common error of placing a vision-language model inside an inner balance loop; (2) a perception stack combining LiDAR-inertial odometry and localisation, a static-map-subtraction dynamic world model, and dynamic multi-object tracking that predicts target motion between LiDAR frames rather than waiting passively; (3) a contact-prediction and impact-recovery primitive — pre-load, detect, absorb, reacquire — that keeps a world-frame track alive while the body and sensor frame are displaced; and (4) a platform-adapter architecture that reuses one core across robot sport, industrial autonomy, critical-infrastructure security, and, later and only under regulation, human-governed protective robotics. The paper gives particular weight to <em>governance by design</em>: meaningful human authority and oversight, immutable auditability and logging, functional-safety and standards conformance, and export/dual-use screening built into the control layer rather than bolted onto it. The contribution is architectural and integrative, not empirical; the defensible asset is the test corpus, safety evidence, and cross-platform abstraction, not any single robot.</p>
+<p><strong>Keywords:</strong> robot perception; LiDAR-inertial odometry; simultaneous localisation and mapping; sensor fusion; multi-object tracking; data association; whole-body control; impact recovery; control barrier functions; sim-to-real; human-in-the-loop autonomy; meaningful human control; functional safety; ISO 10218; ISO/TS 15066; responsible AI governance; auditability; dual-use export control.</p>
+<hr>
+<h2 id="1-introduction">1. Introduction</h2>
+<h3 id="11-an-inversion-of-scarcity">1.1 An inversion of scarcity</h3>
+<p>For most of the history of robotics the hard, expensive, differentiating thing was the machine. Actuators, power electronics, structural design, and the integration of the two were where value concentrated, and software was the thin layer that animated a costly and bespoke body. That relationship is inverting. General-purpose legged and mobile platforms with documented secondary-development interfaces are now sold at price points an order of magnitude below where comparable capability sat only a few years ago; humanoid platforms in particular are the subject of large and widely cited market projections into the 2030s (Goldman Sachs, 2024), and the International Federation of Robotics reports that a rising share of new service-robot ventures compete on software rather than on mechatronics (IFR, 2025). When the body becomes a purchasable commodity, the scarce layer moves upward.</p>
+<p>The claim of this paper is specific about <em>which</em> upward layer is scarce. It is not general-purpose visual understanding — foundation models for images and language are advancing on their own trajectory and are not the bottleneck for a robot that must keep its balance. The scarce layer is <em>dependable spatial intelligence</em>: the ability to build and maintain an accurate, timely model of where the robot is, where everything around it is, how those things are moving, and how to remain stable and continue tracking through physical contact and shock. Spatial intelligence is scarce precisely because it is where the easy abstractions break. A perception stack that performs well on a smoothly moving survey robot can fail on a machine that is struck, that strikes, that stumbles and recovers, or that must keep a designated target in frame while its own sensor frame is violently displaced.</p>
+<h3 id="12-what-contact-capable-changes">1.2 What "contact-capable" changes</h3>
+<p>A <em>contact-capable</em> robot is one whose intended function includes deliberate or unavoidable physical interaction with the world at non-trivial energy: an industrial arm that rivets, drills, or demolishes; a humanoid that must recover from a shove or a collision; a mobile platform that interposes itself, under human authority, between a hazard and a person it is escorting. Contact changes three things at once. First, it injects large, fast disturbances into the state estimate exactly when that estimate matters most. Second, it couples the slow, semantically rich perception layer to the fast, safety-critical control layer, and the naive coupling of the two — running everything at the pace of the slowest sensor — is the true latency problem, not the raw refresh rate of any single device. Third, it raises the stakes of every design choice from a question of performance to a question of safety and, ultimately, of law: a machine that can exert force near people is a <em>safety component</em> in the regulatory sense, and its software is part of that safety case.</p>
+<h3 id="13-contributions-and-structure">1.3 Contributions and structure</h3>
+<p>This paper's contribution is architectural and integrative rather than empirical. It does not report an experiment; it specifies, at a systems level, how the established building blocks of robot perception and control should be <em>assembled and governed</em> to make contact-capable autonomy dependable and deployable across several markets from one reusable core. Concretely, it offers: a three-lane latency architecture that separates reflex, spatial, and semantic processing (Section 3); a perception stack integrating LiDAR-inertial odometry, a dynamic world model, and between-frame predictive multi-object tracking, with a compliant operator-designation module in place of unsafe alternatives (Section 4); a contact-prediction and impact-recovery primitive built on whole-body control (Section 5); a platform-adapter architecture spanning robot sport, industrial autonomy, infrastructure security, and later human-governed protective robotics (Section 6); and — given deliberate weight — a governance-by-design layer covering human authority, auditability, functional-safety conformance, and dual-use export control (Section 7). Section 8 describes a labelled reference implementation and a validation approach that fabricates no benchmarks; Section 9 states limitations; Section 10 concludes.</p>
+<h3 id="14-a-responsible-robotics-stance-stated-first">1.4 A responsible-robotics stance, stated first</h3>
+<p>Because the perception and control capabilities discussed here are dual-use, the paper's normative stance is stated at the outset rather than left to a closing caveat. The architecture is designed so that any physical response is <em>bounded</em> (limited in force, speed, and contact by a safety governor), <em>human-authorised</em> (a person, not the system, decides on physical intervention), and <em>non-weaponised</em> (the enumerated behaviours are inspection, escort, interposition, path-blocking, illumination, alarm, and retreat). This is not a rhetorical gesture. As Sections 5 through 7 develop in detail, the same design decisions that make the system safe — a narrow deterministic reflex lane, an advisory-only semantic lane, a hard safety governor, an immutable audit trail, and export classification by function — are also what make it defensible commercially and legally. Responsibility and product quality are, here, the same engineering problem.</p>
+<hr>
+<h2 id="2-the-scarcity-thesis-spatial-intelligence-as-the-value-layer">2. The Scarcity Thesis: Spatial Intelligence as the Value Layer</h2>
+<h3 id="21-falling-hardware-cost-rising-software-premium">2.1 Falling hardware cost, rising software premium</h3>
+<p>The investment logic of a software-first spatial layer rests on a factual premise and an inference. The premise is that the physical substrate of contact-capable robotics is becoming cheaper and more widely available: base humanoids with development editions, quadrupeds with mature SDKs, industrial arms, and the LiDAR, IMU, and compute components that instrument them are all subject to competitive supply and, in the mass-produced cases, to learning-curve cost decline. The inference is that as the body commoditises, buyers stop paying a premium for it and start paying a premium for whatever remains scarce and hard to replicate. History across computing hardware, smartphones, and automotive electronics is consistent: margin migrates from the commoditised layer to the layer that is still difficult.</p>
+<p>The difficult layer, for contact-capable robots, is dependable spatial intelligence. This is defensible because it is <em>earned</em>, not bought: it is the accumulated result of test data across many contact events, tuned perception and control modules, a demonstrated safety record, and a cross-platform abstraction that lets the same competence run on different bodies. None of that transfers with a purchase order. A competitor can buy the identical humanoid and the identical LiDAR the next morning; it cannot buy the corpus of impact-recovery episodes, the calibrated fusion pipeline, or the safety evidence pack.</p>
+<h3 id="22-what-to-build-and-what-deliberately-not-to-build">2.2 What to build, and what deliberately not to build</h3>
+<p>A software-first strategy is disciplined as much by what it declines to build as by what it builds. Table 1 states the division.</p>
+<p><strong>Table 1 — Build versus deliberately-not-build for a software-first spatial layer.</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Build (the scarce layer)</th>
+<th>Deliberately do not build</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hardware-abstraction and sensor-fusion runtime</td>
+<td>Actuators, batteries, motors, structural robot bodies</td>
+</tr>
+<tr>
+<td>Deterministic high-rate reflex lane (balance, impact, recovery)</td>
+<td>LiDAR, IMU, camera, or UWB hardware</td>
+</tr>
+<tr>
+<td>Spatial lane: dynamic-object isolation and between-frame prediction</td>
+<td>A general-purpose visual foundation model</td>
+</tr>
+<tr>
+<td>Application modules (industrial contact, security, protection, sport)</td>
+<td>A manufacturing plant ahead of product-market fit</td>
+</tr>
+<tr>
+<td>Safety governor, evidence pack, and deployment audit trail</td>
+<td>Bespoke robots when a reference platform will serve</td>
+</tr>
+</tbody>
+</table></div>
+<p>The right posture is <em>reference hardware, not a robot factory</em>. The company integrates against a small number of well-documented reference platforms and treats each as replaceable behind a platform-adapter interface (Section 6). This keeps capital expenditure low, avoids competing with the OEMs who make the bodies, and positions the software as the layer those OEMs would rather license than rebuild. It also keeps the engineering focused on the scarce competence instead of dissipating it across a supply chain the company does not need to own.</p>
+<h3 id="23-why-not-simply-scale-a-visual-foundation-model">2.3 Why not simply scale a visual foundation model</h3>
+<p>A tempting alternative is to treat the problem as one more application of a large multimodal model: give a general vision-language system enough context and let it drive. This is the wrong tool for the load-bearing part of the problem, and Section 3 explains why in timing terms. In brief: the inner loops that keep a contact-capable robot upright and safe operate at hundreds to a thousand hertz with hard deadlines, and semantic models — however capable — are asynchronous, high-latency, and non-deterministic. A dependable spatial layer is not a bigger model; it is a <em>correctly stratified system</em> in which fast deterministic estimation and control are protected from slow probabilistic cognition, and in which the semantic layer informs but does not command high-force motion.</p>
+<hr>
+<h2 id="3-the-latency-problem-and-a-three-lane-architecture">3. The Latency Problem and a Three-Lane Architecture</h2>
+<h3 id="31-the-real-bottleneck-is-coupling-not-refresh-rate">3.1 The real bottleneck is coupling, not refresh rate</h3>
+<p>A recurring misconception is that dependable reflexes require every sensor to run at kilohertz rates. Serious robots do not, and cannot, put a vision-language model in the inner balance loop; the practical bottleneck is not the speed of any single sensor but the <em>coupling</em> of slow semantic perception, asynchronous sensors, and whole-body control — especially under impact, when the disturbance arrives faster than the slow layers can react. The architectural answer is to stop pretending the sensors are homogeneous and instead to stratify processing by the cadence each modality can honestly sustain.</p>
+<p><strong>Table 2 — Credible prototype cadences by layer (vendor-capability and engineering targets; not measured system results).</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Credible cadence</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IMU / joint state</td>
+<td>500–1,000 Hz</td>
+<td>shock detection, posture and state update</td>
+</tr>
+<tr>
+<td>Whole-body control</td>
+<td>100–500 Hz</td>
+<td>torque targets, balance and recovery</td>
+</tr>
+<tr>
+<td>LiDAR refresh</td>
+<td>10–40 Hz</td>
+<td>world geometry and dynamic-object updates</td>
+</tr>
+<tr>
+<td>Optical-marker camera</td>
+<td>60–115 fps</td>
+<td>operator-designated track confirmation</td>
+</tr>
+<tr>
+<td>Semantic vision / VLM</td>
+<td>asynchronous</td>
+<td>context, classification, reporting</td>
+</tr>
+</tbody>
+</table></div>
+<p>The cadences in Table 2 are drawn from published sensor capabilities (for example, 1 kHz-class inertial units, 10–40 Hz spatial LiDAR, and global-shutter near-infrared cameras in the 60–115 fps range). They are presented as design targets, not as achieved measurements.</p>
+<h3 id="32-three-lanes">3.2 Three lanes</h3>
+<p>From Table 2, the architecture separates three lanes with different determinism guarantees, different rates, and — critically — different <em>authority</em> over motion.</p>
+<ul>
+<li>
+<p><strong>Reflex lane.</strong> Deterministic, high-rate, and deliberately narrow. It consumes IMU, joint-state, and force/torque signals to detect impacts and drive balance and recovery. Its authority is to protect the machine and its surroundings on a hard deadline; its scope is intentionally small so that it can be made deterministic and verifiable. An honest engineering target here is sub-5-millisecond processing for <em>selected inertial reflex operations</em> and a low-single-digit-millisecond state-to-command budget — but only for the narrow reflex computation, never as an end-to-end perception claim.</p>
+</li>
+<li>
+<p><strong>Spatial lane.</strong> Consumes LiDAR, depth, UWB, and the near-infrared marker to maintain the world model and the dynamic-object tracks. Because its native rate is 10–40 Hz, it must <em>predict</em> motion between frames rather than wait passively for the next scan; the tracker (Section 4.4) carries a motion model precisely so that the 25–100-millisecond gap between LiDAR frames does not translate into blind time.</p>
+</li>
+<li>
+<p><strong>Semantic lane.</strong> Advisory context, classification, and reporting from cameras and, optionally, a vision-language model. It runs asynchronously and, by rule, <em>does not directly command high-force motion</em>. It can raise a flag, propose a classification, or annotate a track for a human; it cannot instruct the reflex or whole-body layers to exert force.</p>
+</li>
+</ul>
+<h3 id="33-an-honesty-principle-about-latency-claims">3.3 An honesty principle about latency claims</h3>
+<p>A software-first spatial layer must be scrupulous about what it claims. It is legitimate to target sub-5-millisecond processing for a narrow inertial reflex operation, because that computation genuinely can be made small and deterministic. It is not legitimate to claim sub-5-millisecond <em>end-to-end perception</em> from a 10–40 Hz LiDAR, because the physics of the sensor forbid it: a new spatial frame simply is not available more often than every 25–100 milliseconds. The three-lane split is what lets both statements be true simultaneously — fast reflexes and honest spatial latency — and stating the distinction plainly is itself part of the governance posture, because inflated latency claims are how safety cases quietly become fiction.</p>
+<h3 id="34-the-control-core">3.4 The control core</h3>
+<p>Figure 1 gives the layered control core. Inputs are stratified into robot state, inertial, spatial, and semantic groups; a state estimator fuses them into a time-synchronised estimate; a dynamic world model maintains the static map and the moving-object tracks; a policy layer proposes tasks; a <em>safety governor</em> filters every proposed action against hard limits and the human-authority gate; a whole-body controller renders authorised actions into torque targets; a platform adapter maps those to a specific embodiment; and an evidence-and-telemetry layer records everything for replay and audit.</p>
+<p><strong>Figure 1 — System architecture: one control core, replaceable sensors, embodiments, and applications. Illustrative schematic.</strong></p>
+<figure class="diagram-figure">
+<pre class="mermaid">flowchart TD
+    subgraph IN["Sensor and state inputs"]
+        RS["Robot state&lt;br/&gt;joint encoders · motor current · force/torque"]
+        IM["Inertial&lt;br/&gt;~1 kHz IMU · impact event detector"]
+        SP["Spatial&lt;br/&gt;LiDAR · depth · UWB · NIR marker"]
+        SM["Semantic&lt;br/&gt;camera / VLM · operator context"]
+    end
+    RS --&gt; EST
+    IM --&gt; EST
+    SP --&gt; WM
+    SM --&gt; POL
+    EST["State estimator&lt;br/&gt;time-sync · LIO / ESIKF · kinematics · covariance"] --&gt; WM
+    WM["Dynamic world model&lt;br/&gt;static voxel map · clustering · track prediction"] --&gt; POL
+    POL["Policy layer&lt;br/&gt;task planner · residual RL · operator instruction"] --&gt; GOV
+    GOV["Safety governor&lt;br/&gt;control barrier functions · geofence · speed / force limits · E-stop"] --&gt; WBC
+    WBC["Whole-body controller&lt;br/&gt;MPC / inverse dynamics / torque targets"] --&gt; ADP
+    ADP["Platform adapter&lt;br/&gt;humanoid · quadruped · wheeled · fixed station"] --&gt; EV
+    EV[("Evidence and telemetry&lt;br/&gt;rosbag2 · signed builds · replay · incident logs · audit")]
+    GOV --&gt;|physical response requires authorisation| HUM["Human operator"]
+    HUM --&gt;|authorise bounded task| GOV
+    HUM --&gt; EV</pre>
+<figcaption>Flowchart</figcaption>
+</figure>
+<p>This core is the reusable asset. Everything above the platform adapter is embodiment-neutral; everything the adapter touches is replaceable. Sections 4 and 5 detail the two most demanding blocks — the dynamic world model with its tracker, and the impact-recovery primitive inside the whole-body controller — and Section 7 details the safety governor and the evidence layer, which are where governance lives in the runtime.</p>
+<hr>
+<h2 id="4-the-perception-stack">4. The Perception Stack</h2>
+<h3 id="41-hardware-abstraction-time-synchronisation-and-fusion">4.1 Hardware abstraction, time synchronisation, and fusion</h3>
+<p>The runtime's lowest layer is a hardware-abstraction and sensor-fusion substrate whose first job is unglamorous but decisive: to bring heterogeneous, asynchronous sensors into a common time base. Fusion of inertial, LiDAR, and camera data is only as good as the timestamps that align them; on a contact-capable robot, a few milliseconds of clock skew between the IMU and the LiDAR becomes a geometric error precisely during the fast motion that matters. The substrate therefore uses hardware timestamps and a precision time protocol where the hardware supports it, exposes each sensor behind a uniform interface so that a Livox-class or an Ouster-class LiDAR can be swapped without touching downstream code, and publishes state with explicit covariance so that consumers know not just the estimate but its uncertainty. Modern robot middleware — a data-distribution-service transport under a real-time-patched kernel — provides the bounded-latency messaging this requires and has been shown to underpin reliable deployments across land, air, sea, and space domains (Macenski et al., 2022).</p>
+<h3 id="42-lidar-inertial-odometry-and-localisation">4.2 LiDAR-inertial odometry and localisation</h3>
+<p>Localisation is the foundation of spatial intelligence: everything else is expressed relative to where the robot believes it is. The problem is the classic one of simultaneous localisation and mapping (SLAM), whose modern formulation, open problems, and maturity are surveyed by Cadena et al. (2016) and, in tutorial form, by Durrant-Whyte and Bailey (2006). For a contact-capable robot the estimator of choice is a tightly coupled <em>LiDAR-inertial odometry</em> (LIO), which fuses the high-rate IMU with the geometric constraint of the LiDAR so that the inertial signal carries the estimate through the gaps and the fast rotations that would defeat LiDAR alone. The lineage runs from feature-based LiDAR odometry and mapping (Zhang &amp; Singh, 2014) through tightly coupled smoothing (Shan et al., 2020) to direct, filter-based methods that register raw points without feature extraction using an iterated error-state Kalman filter (Xu et al., 2022; the error-state formulation itself is set out by Solà, 2017). The error-state Kalman filter matters here because it maintains the covariance the fusion substrate needs to advertise, and because its iterated form is fast enough to run inside the spatial lane's budget.</p>
+<p>A licensing caveat belongs in the engineering plan, not only in a legal appendix. Several of the most capable open LIO implementations are distributed under strong copyleft (GPL-2.0). They are entirely appropriate for research evaluation, but a commercial product should either isolate such components with proper architectural and licence separation, obtain specialist licensing advice, or implement a clean proprietary equivalent of the LIO/ESIKF concepts. Permissively licensed point-cloud and 3D-processing libraries (BSD- and MIT-licensed) can supply much of the surrounding machinery without that constraint. Treating open-source diligence as a design input rather than an afterthought is, again, part of governing the product rather than merely building it.</p>
+<h3 id="43-the-static-world-model-and-dynamic-object-isolation">4.3 The static world model and dynamic-object isolation</h3>
+<p>With a pose estimate in hand, the world model separates the world into what stays put and what moves. A probabilistic volumetric map — an octree-based occupancy representation that explicitly encodes occupied, free, and unknown space and compresses aggressively (Hornung et al., 2013), or a voxel map maintained by the LIO front end — captures the static geometry. <em>Dynamic-object isolation</em> is then performed by subtracting the static map from the current scan: returns that the static map does not explain are candidate moving objects. These residual points are grouped into object hypotheses by spatial clustering — Euclidean clustering or density-based clustering such as DBSCAN — yielding, at each spatial-lane tick, a set of clustered detections with position and extent. The occupancy grid idea that underlies this separation traces to Elfes (1989); its value for a contact-capable robot is that it lets the tracker (Section 4.4) reason only about the handful of things that are actually moving, rather than about the whole point cloud.</p>
+<h3 id="44-dynamic-multi-object-tracking-with-between-frame-prediction">4.4 Dynamic multi-object tracking with between-frame prediction</h3>
+<p>Detections are not tracks. Turning a sequence of per-frame clusters into stable, identity-preserving <em>tracks</em> — each with an estimated position, velocity, and uncertainty that persists across frames and survives momentary occlusion — is the province of multi-object tracking (MOT), a mature discipline whose algorithmic canon is compiled by Bar-Shalom, Willett, and Tian (2011). Three ideas from that canon are load-bearing here.</p>
+<ul>
+<li>
+<p><strong>Recursive state estimation per track.</strong> Each track carries a Kalman filter (Kalman, 1960) predicting its next state from a motion model and correcting it against the associated detection. Because a moving person or robot does not obey a single motion model — it walks, then turns, then accelerates — an <em>interacting multiple model</em> (IMM) estimator runs a bank of models (for example constant-velocity, constant-turn, and constant-acceleration) and blends them according to their running likelihood (Blom &amp; Bar-Shalom, 1988), which is what keeps the estimate honest through manoeuvres.</p>
+</li>
+<li>
+<p><strong>Data association.</strong> With several tracks and several detections per frame, the tracker must decide which detection updates which track. Classical solutions span global-nearest-neighbour assignment via the Hungarian algorithm, joint probabilistic data association (JPDA) for cluttered scenes, and multiple-hypothesis tracking (MHT), which defers hard association decisions by carrying competing hypotheses forward (Reid, 1979). A pragmatic modern baseline for the 3D LiDAR case combines a 3D Kalman filter with Hungarian assignment and runs comfortably in real time (Weng et al., 2020); the two-dimensional analogue that pairs a Kalman filter with simple association (Bewley et al., 2016) is a useful reference point for the camera-only case.</p>
+</li>
+<li>
+<p><strong>Prediction between LiDAR frames.</strong> This is where the spatial lane earns its keep. Because LiDAR delivers geometry only every 25–100 milliseconds, the tracker's motion model is used to <em>propagate</em> each track forward between scans, so that the policy and safety layers always have a current best estimate of where each moving object is <em>now</em>, not where it was at the last frame. Predicting rather than waiting is the difference between a robot that reacts to stale geometry and one that anticipates.</p>
+</li>
+</ul>
+<p>The tracker publishes <em>world-frame</em> tracks — expressed in the fixed world frame rather than the moving sensor frame — which is what allows a track to persist while the robot's own body is displaced (Section 5.4). Figure 2 shows the perception pipeline; Figure 3 shows the tracking loop.</p>
+<p><strong>Figure 2 — Perception pipeline from raw sensors to world-frame dynamic tracks. Illustrative schematic.</strong></p>
+<figure class="diagram-figure">
+<pre class="mermaid">flowchart LR
+    L["LiDAR point cloud&lt;br/&gt;10-40 Hz"] --&gt; LIO
+    I["IMU&lt;br/&gt;~1 kHz"] --&gt; LIO["LiDAR-inertial odometry&lt;br/&gt;ESIKF pose + covariance"]
+    LIO --&gt; MAP["Static voxel / octree map"]
+    LIO --&gt; SUB["Map subtraction&lt;br/&gt;remove explained static returns"]
+    MAP --&gt; SUB
+    SUB --&gt; CL["Clustering&lt;br/&gt;Euclidean / DBSCAN"]
+    CL --&gt; TRK["Multi-object tracker&lt;br/&gt;Kalman / IMM · JPDA / MHT"]
+    U["UWB tag&lt;br/&gt;protected-person ID"] --&gt; ASSOC
+    N["Coded NIR marker&lt;br/&gt;+ global-shutter camera"] --&gt; ASSOC["Track association&lt;br/&gt;2D bearing projected to 3D track"]
+    TRK --&gt; ASSOC
+    ASSOC --&gt; OUT["World-frame dynamic tracks&lt;br/&gt;+ between-frame prediction"]
+    OUT --&gt; POL["Policy layer + safety governor"]</pre>
+<figcaption>Flowchart</figcaption>
+</figure>
+<p><strong>Figure 3 — The tracking loop: a recursive predict–gate–associate–update–manage cycle. Illustrative schematic.</strong></p>
+<figure class="diagram-figure">
+<pre class="mermaid">flowchart LR
+    P["Predict&lt;br/&gt;IMM motion models&lt;br/&gt;propagate between frames"] --&gt; G["Gate&lt;br/&gt;validation region per track"]
+    G --&gt; A["Associate&lt;br/&gt;Hungarian / JPDA / MHT"]
+    A --&gt; UP["Update&lt;br/&gt;Kalman correction"]
+    UP --&gt; M["Track management&lt;br/&gt;birth · confirm · coast · delete"]
+    M --&gt; P
+    UP --&gt; PUB["Publish world-frame tracks&lt;br/&gt;to policy + safety governor"]</pre>
+<figcaption>Flowchart</figcaption>
+</figure>
+<h3 id="45-operator-designated-tracking-without-unsafe-optics">4.5 Operator-designated tracking without unsafe optics</h3>
+<p>A contact-capable protective or inspection robot often needs a human to <em>designate</em> which object matters — this person to escort, that panel to inspect. A superficially attractive way to do this is a near-infrared "invisible" pointer, but it is both unsafe and legally self-defeating, and the architecture explicitly rejects it. An 850-nanometre beam is not safe merely because it is invisible; the absence of a blink reflex can make near-infrared exposure <em>more</em> hazardous than visible light, and mounting any such pointer on a weapon would create immediate safety, liability, and export-control problems.</p>
+<p>The compliant alternative preserves the useful sensor-fusion idea and discards the hazard. A trained operator places a <em>coded, Class-1 (eye-safe) near-infrared LED beacon or a passive retroreflective marker</em>. A global-shutter near-infrared camera detects the code and estimates its two-dimensional bearing; a calibration projects that bearing into the LiDAR world model and associates it with a three-dimensional track (Section 4.4); and the robot then follows an <em>approved, bounded</em> task — inspect, approach, illuminate, block, or maintain standoff. Figure 4 shows the chain. Any coercive or armed use would require destination-specific export classification, a customer safety case, and explicit human authorisation; neutral file names and civilian mounts do not change that, and the architecture does not pretend otherwise.</p>
+<p><strong>Figure 4 — Compliant operator-designation chain (replaces unsafe "invisible pointer" concepts). Illustrative schematic.</strong></p>
+<pre><code> CODED NIR MARKER        NIR GLOBAL-SHUTTER        2D-&gt;3D CALIBRATION       TRACK ID           BOUNDED TASK
+ (placed by trained  -&gt;  CAMERA                -&gt;  (project marker into -&gt;  (associate with -&gt;  inspect · approach ·
+  operator; Class-1       (detect code,             LiDAR world model)       3D world track)     illuminate · block ·
+  eye-safe)               estimate 2D bearing)                                                   maintain standoff)
+</code></pre>
+<hr>
+<h2 id="5-contact-prediction-and-impact-recovery">5. Contact Prediction and Impact Recovery</h2>
+<h3 id="51-why-contact-breaks-conventional-stacks">5.1 Why contact breaks conventional stacks</h3>
+<p>The claim that spatial intelligence, not hardware, is the scarce layer is sharpest at the moment of contact. An impact is a large, fast disturbance that simultaneously (a) corrupts the state estimate through violent sensor motion, (b) threatens balance, and (c) displaces the sensor frame so that a target being tracked can leave the field of view. A perception-and-control stack tuned for smooth motion tends to fail on all three at once: the estimate diverges, the controller reacts too late, and the track is lost. A contact-capable system must instead treat impact as a <em>first-class, anticipated event</em> with its own dedicated primitive.</p>
+<h3 id="52-the-impulse-recovery-primitive">5.2 The impulse-recovery primitive</h3>
+<p>The core primitive is a four-phase cycle — pre-load, detect, absorb, reacquire — that spans the reflex and spatial lanes and is the single most reusable piece of the value proposition, because the same primitive serves robot sport and high-impact industrial work alike.</p>
+<ol>
+<li><strong>Pre-load.</strong> Where an impact or a tool cycle is <em>known in advance</em> — a rivet stroke, a drilling engagement, a scripted arena exchange — the controller adjusts joint stiffness and torque bias <em>before</em> the event, so the machine meets the impulse already braced rather than reacting after the fact.</li>
+<li><strong>Detect.</strong> When the impulse arrives, high-rate IMU, joint, and force/torque signals in the reflex lane identify it and estimate its direction within the reflex lane's low-single-digit-millisecond budget.</li>
+<li><strong>Absorb.</strong> The whole-body controller redirects the incoming momentum through the hips, trunk, and support contacts, rather than resisting it rigidly at a single joint — the difference between a system that dissipates a blow and one that is toppled by it.</li>
+<li><strong>Reacquire.</strong> Throughout, the <em>world-frame</em> target track (Section 4.4) is maintained so that, once the body and sensor frame have moved, the system re-associates the target from its predicted world position rather than searching blindly.</li>
+</ol>
+<p><strong>Figure 5 — The Dynamic Impulse Recovery cycle. Illustrative schematic.</strong></p>
+<figure class="diagram-figure">
+<pre class="mermaid">flowchart LR
+    A["1 · Pre-load&lt;br/&gt;set joint stiffness + torque bias&lt;br/&gt;before a known impact / tool cycle"] --&gt; B["2 · Detect&lt;br/&gt;high-rate IMU + joint + force&lt;br/&gt;identify impulse, estimate direction"]
+    B --&gt; C["3 · Absorb&lt;br/&gt;whole-body control redirects momentum&lt;br/&gt;through hips · trunk · support contacts"]
+    C --&gt; D["4 · Reacquire&lt;br/&gt;world-frame track persists&lt;br/&gt;as body + sensor frame move"]
+    D -.-&gt; A</pre>
+<figcaption>Flowchart</figcaption>
+</figure>
+<h3 id="53-the-whole-body-control-substrate">5.3 The whole-body control substrate</h3>
+<p>The absorb and pre-load phases rest on a whole-body controller that reasons about the full multi-body dynamics rather than about isolated joints. The established substrate is optimisation-based: model-predictive control that plans ground-reaction forces or joint torques over a short horizon, solved fast enough to run in the control lane. Convex formulations for legged systems solve such problems to optimality in around a millisecond at tens of hertz (Di Carlo et al., 2018), and optimisation-based estimation and whole-body control have been demonstrated on full humanoids (Kuindersma et al., 2016). Onto this deterministic substrate the system layers <em>residual reinforcement learning</em> — a learned policy that outputs a bounded <em>correction</em> to the model-based controller rather than replacing it (Johannink et al., 2019). The residual is deliberately confined to a bounded action envelope so that learning improves behaviour within limits the safety governor still enforces; the learned component can help, but it cannot exceed the envelope that the model-based controller and the governor define. This is a governance decision as much as a performance one: it keeps the verifiable core in charge and the learned part on a leash.</p>
+<h3 id="54-track-persistence-through-shock">5.4 Track persistence through shock</h3>
+<p>The reacquire phase deserves emphasis because it is where perception and control meet. By expressing tracks in the world frame and propagating them with the tracker's motion model, the system decouples <em>what the target is doing</em> from <em>what the robot's body is doing</em>. When an impact throws the sensor frame, the target's world-frame track continues to be predicted forward; when the sensors stabilise, the system re-associates incoming detections with the predicted track rather than initialising a new one. The competence being sold is precisely this: keeping the world model coherent while the machine that hosts it is being knocked around.</p>
+<h3 id="55-proof-metrics-to-be-benchmarked-not-claimed">5.5 Proof metrics — to be benchmarked, not claimed</h3>
+<p>A credible programme states <em>how it would be measured</em> without pretending it has already been measured. Table 3 lists the metrics by which an impulse-recovery capability should be benchmarked against the platform's stock controller. Every entry is a <em>proposed measurement</em>, to be established against a baseline under controlled conditions; <strong>no value for any of them is claimed in this paper.</strong></p>
+<p><strong>Table 3 — Proposed impact-recovery proof metrics (to be benchmarked against the stock controller; no figures claimed).</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>What it captures</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Peak torso angular velocity vs. stock controller</td>
+<td>severity of the disturbance the controller allows</td>
+</tr>
+<tr>
+<td>Time to stable support state</td>
+<td>how quickly the machine recovers</td>
+</tr>
+<tr>
+<td>Fall rate across randomised impacts</td>
+<td>robustness over a distribution of shocks</td>
+</tr>
+<tr>
+<td>World-track error during and after shock</td>
+<td>whether the target track survives the impact</td>
+</tr>
+<tr>
+<td>Thermal and actuator-limit compliance</td>
+<td>whether recovery stays within safe operating limits</td>
+</tr>
+</tbody>
+</table></div>
+<p>The industrial framing here is substantive, not cosmetic: demolition, riveting, drilling, rescue, and heavy manipulation genuinely require shock stability, and the same primitive that keeps a humanoid upright after a collision keeps an industrial arm's tool on target through a stroke. Regulatory classification, however, follows technical function and end use, not the market label attached to a capability — a point Section 7 takes up.</p>
+<hr>
+<h2 id="6-the-platform-adapter-architecture-across-markets">6. The Platform-Adapter Architecture Across Markets</h2>
+<h3 id="61-one-core-many-bodies">6.1 One core, many bodies</h3>
+<p>The commercial reach of a software-first layer comes from reusing a single core across embodiments and applications without multiplying the core engineering team. The mechanism is the <em>platform adapter</em> of Figure 1: a thin, embodiment-specific layer that maps the core's abstract commands (torque targets, task goals) onto a particular robot's interfaces, and maps that robot's sensors back into the core's abstractions. Above the adapter, the estimator, world model, tracker, impulse-recovery primitive, safety governor, and evidence layer are shared. Below it, the humanoid, quadruped, wheeled, fixed, or arm embodiment is replaceable. Application <em>modules</em> — thin configurations of the shared core for a particular job — sit alongside the adapter.</p>
+<h3 id="62-four-wedges-and-a-later-regulated-fifth">6.2 Four wedges and a later, regulated fifth</h3>
+<p>The architecture is brought to market through a sequence of wedges chosen so that early revenue comes where buying cycles are short and evidence is valued, and sensitive markets are entered only after governance has caught up.</p>
+<ul>
+<li>
+<p><strong>Robot sport (the proving ground).</strong> Robot-on-robot contact in a closed, instrumented arena is an ideal <em>validation environment</em>, not the core market. High-energy contacts generate exactly the balance and durability data the impulse-recovery primitive needs; rules and arenas constrain the environment; and visible outcomes make benchmarks legible to customers and investors. It is a real but small commercial wedge, and it should be treated as a source of engineering evidence rather than mistaken for the total addressable market.</p>
+</li>
+<li>
+<p><strong>Industrial contact and autonomy.</strong> Demolition, riveting, drilling, maintenance, rescue, and heavy manipulation require the shock stability the primitive provides; inspection autonomy on quadrupeds requires the world model and tracking. This is where the impulse-recovery competence has its largest, least speculative demand.</p>
+</li>
+<li>
+<p><strong>Critical-infrastructure security.</strong> Perimeter tracking on quadrupeds, fixed sentry and pan-tilt intrusion tracking, and inspection escort turn the perception stack toward detection, three-dimensional intrusion tracks, and alarm — with, always, <em>human-authorised</em> and non-kinetic responses.</p>
+</li>
+<li>
+<p><strong>Protective robotics — later, and only under regulation.</strong> Personal-protection applications (the "Guardian" pattern of Section 6.3) are commercially compelling only if the first product is <em>visibly safe and human-governed</em>, and are deferred until the safety and governance case supports them.</p>
+</li>
+</ul>
+<h3 id="63-the-guardian-pattern-human-governed-protection">6.3 The Guardian pattern: human-governed protection</h3>
+<p>The protective pattern illustrates the responsible-robotics stance concretely. A wearable ultra-wideband (UWB) tag establishes the protected person's track; published module accuracy is on the order of sub-15-centimetre two-dimensional and sub-30-centimetre three-dimensional under suitable conditions, which is useful but is <em>not</em> guaranteed centimetre-perfect positioning, and the system is designed around that honest envelope rather than an idealised one. The <em>permitted first behaviours</em> are strictly bounded and non-kinetic: escort, interpose, block a path, illuminate or alarm, retreat to safety, and summon a human response team. The control principle is that an approaching cluster is <em>risk-scored</em> from its speed, trajectory, and proximity, and that human-defined policy limits the force, speed, and contact the machine may use. Validation begins with adult staff, mannequins, and soft targets behind safety cages — never with the vulnerable people such a system might one day protect. The commercial route is through licensed security integrators who own the site, the staffing, the communications, and the local regulatory relationship; the software supplier remains the <em>motion-intelligence and safety layer</em>, not the operator.</p>
+<h3 id="64-device-diversification">6.4 Device diversification</h3>
+<p>Table 4 shows how one core spreads across embodiments. The point is not that the company builds all of these at once — aerial systems in particular are explicitly <em>not</em> an initial build — but that each is a configuration of the same shared competence.</p>
+<p><strong>Table 4 — Platform-adapter matrix: one core, replaceable embodiments and application modules.</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Embodiment</th>
+<th>Representative modules</th>
+<th>Illustrative buyers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Humanoid</td>
+<td>impulse recovery · body shielding · dynamic interception · whole-body-control adapter</td>
+<td>OEMs · research labs · competition teams · industrial integrators</td>
+</tr>
+<tr>
+<td>Quadruped</td>
+<td>perimeter tracking · inspection escort · impact stability · stair/terrain world model</td>
+<td>energy · chemicals · mining · utilities · emergency response</td>
+</tr>
+<tr>
+<td>Wheeled robot</td>
+<td>Guardian pattern · patrol · access-zone enforcement · dynamic site map</td>
+<td>campuses · hospitals · logistics · security providers</td>
+</tr>
+<tr>
+<td>Fixed sentry / pan-tilt</td>
+<td>3D intrusion tracks · operator designation · alarm and illumination · drone cueing</td>
+<td>ports · substations · warehouses · critical infrastructure</td>
+</tr>
+<tr>
+<td>Industrial arm / tool</td>
+<td>pre-tension · shock rejection · vibration recovery · target-frame persistence</td>
+<td>demolition · riveting · drilling · maintenance OEMs</td>
+</tr>
+<tr>
+<td>Aerial (future; not an initial build)</td>
+<td>world-model service · track handoff · base-station fusion</td>
+<td>inspection and facility-security integrators</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="65-the-moat">6.5 The moat</h3>
+<p>It follows that the defensible asset is not a single robot of any kind. It is the <em>test corpus</em> of contact and tracking episodes, the <em>safety evidence</em> accumulated across deployments, the <em>cross-platform abstraction</em> that lets competence move between bodies, and the <em>tuned control and perception modules</em> that make contact-capable autonomy deployable. Those four things compound with use and do not transfer with a hardware purchase, which is exactly what makes a software-first strategy defensible where a hardware-first one would not be.</p>
+<hr>
+<h2 id="7-governance-by-design">7. Governance by Design</h2>
+<p>Governance is treated here as a <em>layer of the product</em>, engineered into the runtime, rather than as a policy wrapped around it. Four sub-layers make it concrete: meaningful human authority and oversight; auditability and logging; functional-safety and standards conformance; and export/dual-use screening. A fifth subsection states the non-weaponisation boundary that constrains all of them.</p>
+<h3 id="71-meaningful-human-authority-and-oversight">7.1 Meaningful human authority and oversight</h3>
+<p>The design principle is that a human, not the system, holds authority over physical intervention, and that this authority is <em>meaningful</em> rather than nominal. The human-factors literature has long distinguished <em>levels and types of automation</em> — automation can assist with information acquisition, information analysis, decision selection, and action implementation, each at a level from fully manual to fully automatic (Parasuraman, Sheridan, &amp; Wickens, 2000) — and the tradition of human <em>supervisory</em> control (Sheridan, 1992) frames the operator as the supervisor of an automated process rather than its passive monitor. The philosophical account of <em>meaningful human control</em> sharpens this into two design conditions (Santoni de Sio &amp; van den Hoven, 2018): a <em>tracking</em> condition, that the system responds to the reasons and intentions of the humans who design and deploy it and to the relevant facts of its environment; and a <em>tracing</em> condition, that every outcome be traceable back to at least one human in the design–deployment–operation chain. These are not abstractions; they map directly onto the architecture.</p>
+<ul>
+<li><strong>The semantic lane is advisory only.</strong> By construction (Section 3.2), the slow cognitive layer can inform, classify, and flag, but cannot command high-force motion. This is a tracking-condition guarantee written into the dataflow.</li>
+<li><strong>The safety governor is a hard filter.</strong> Every action the policy layer proposes passes through a safety governor that enforces <em>control barrier functions</em> — a formal method for guaranteeing that a system's state stays within a safe set by filtering any commanded action that would leave it (Ames et al., 2017; Ames et al., 2019) — together with geofences, speed and force limits, and an independent emergency stop. The governor cannot be talked past by the policy layer or the semantic lane; it is the last deterministic gate before actuation.</li>
+<li><strong>Physical response requires explicit human authorisation.</strong> For any bounded physical intervention, the governor routes an authorisation request to a human, whose decision is the proximate cause of the action and is recorded as such — the tracing condition, instrumented. This addresses directly the <em>responsibility gap</em> that arises when a learning system acts in ways its operators did not specify (Matthias, 2004): the architecture is arranged so that no high-force action occurs without a human in the causal chain who authorised it.</li>
+</ul>
+<p>Figure 6 shows the authority flow. Note that the human-authority gate and the audit log are not optional add-ons; they are on the critical path from perception to actuation.</p>
+<p><strong>Figure 6 — Governance and human-authority flow. Every physical response passes a hard safety filter and a human-authority gate, and everything is logged immutably. Illustrative schematic.</strong></p>
+<figure class="diagram-figure">
+<pre class="mermaid">flowchart TD
+    PERC["Perception + tracking&lt;br/&gt;risk-scored dynamic tracks"] --&gt; POL["Policy layer&lt;br/&gt;proposes a bounded action"]
+    POL --&gt; GOV{"Safety governor&lt;br/&gt;CBF · geofence · speed / force limits"}
+    GOV --&gt;|violates envelope| STOP["Reject / E-stop&lt;br/&gt;retreat to safe state"]
+    GOV --&gt;|within envelope| GATE{"Human-authority gate"}
+    GATE --&gt;|physical response| HUM["Human operator authorises"]
+    GATE --&gt;|advisory or low-risk| ACT["Bounded actuation&lt;br/&gt;inspect · block · escort · illuminate · retreat"]
+    HUM --&gt;|authorise| ACT
+    ACT --&gt; LOG[("Immutable audit log&lt;br/&gt;signed builds · rosbag2 · incident record")]
+    STOP --&gt; LOG
+    HUM --&gt; LOG
+    LOG --&gt; AUD["Customer / regulator audit&lt;br/&gt;replay + evidence pack"]</pre>
+<figcaption>Flowchart</figcaption>
+</figure>
+<h3 id="72-auditability-and-logging">7.2 Auditability and logging</h3>
+<p>A system that can exert force near people must be able to <em>show what it did and why</em>. The runtime therefore records a tamper-evident evidence trail: full sensor-and-command bags for deterministic replay (rosbag2-style recording), cryptographically signed builds so that the exact software version in the field is provable, a model registry pinning which learned policy was active, and structured incident logs. This is the engineering realisation of the "ethical black box" argued for by Winfield and Jirotka (2017) — a flight-recorder analogue for robots, without which accident investigation is guesswork — and it aligns with the emerging IEEE standard on transparency of autonomous systems (IEEE, 2021), which frames the ability to explain and reconstruct a system's behaviour as a design requirement. The audit trail serves three constituencies at once: engineers replaying a failure, customers demonstrating due diligence, and regulators or investigators reconstructing an incident. Because the log is on the critical path (Figure 6), auditability is not something the system <em>can</em> do; it is something it <em>cannot avoid</em> doing.</p>
+<h3 id="73-functional-safety-and-standards-conformance">7.3 Functional safety and standards conformance</h3>
+<p>A contact-capable robot is a safety component, and its control software is inside the safety case. The conformance target is therefore a stack of established standards rather than a single certificate. Table 5 maps the relevant standards to the parts of the architecture they govern.</p>
+<p><strong>Table 5 — Standards and governance mapping.</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Standard / instrument</th>
+<th>Governs</th>
+<th>Relevance to this architecture</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ISO 12100:2010</td>
+<td>Machinery safety — general principles, risk assessment</td>
+<td>the top-level risk-assessment method for the whole system</td>
+</tr>
+<tr>
+<td>ISO 10218-1:2025</td>
+<td>Robotics — safety requirements for industrial robots</td>
+<td>the 2025 revision folds in collaborative requirements and adds functional-safety and cybersecurity clauses</td>
+</tr>
+<tr>
+<td>ISO/TS 15066:2016</td>
+<td>Collaborative robots — power and force limiting</td>
+<td>body-region force/pressure limits informing the governor's contact limits</td>
+</tr>
+<tr>
+<td>ISO 13482:2014</td>
+<td>Safety requirements for personal-care robots</td>
+<td>the reference frame for human-proximate mobile/service robots</td>
+</tr>
+<tr>
+<td>ISO 13849-1:2023</td>
+<td>Safety-related parts of control systems</td>
+<td>performance-level requirements for the governor and E-stop</td>
+</tr>
+<tr>
+<td>IEC 61508:2010</td>
+<td>Functional safety of E/E/PE systems</td>
+<td>safety-integrity-level lifecycle for the safety-critical software</td>
+</tr>
+<tr>
+<td>Regulation (EU) 2023/1230</td>
+<td>EU Machinery Regulation</td>
+<td>first EU machinery regime to treat AI safety functions explicitly (applies from 2027)</td>
+</tr>
+<tr>
+<td>Regulation (EU) 2024/1689</td>
+<td>EU AI Act</td>
+<td>high-risk-system obligations where the AI is a safety component</td>
+</tr>
+<tr>
+<td>NIST AI RMF 1.0 (2023)</td>
+<td>AI risk management</td>
+<td>Govern–Map–Measure–Manage functions organising the programme</td>
+</tr>
+<tr>
+<td>ISO/IEC 42001:2023</td>
+<td>AI management system</td>
+<td>organisational management system for responsible AI</td>
+</tr>
+</tbody>
+</table></div>
+<p>Three points about this stack are worth drawing out. First, the 2025 revision of ISO 10218-1 is significant for exactly this class of system: it consolidates the collaborative-operation content formerly carried in ISO/TS 15066, introduces a robot-classification scheme, and adds explicit functional-safety and cybersecurity requirements — so a contact-capable industrial robot's safety case now sits more squarely inside a single, updated standard. Second, the power-and-force-limiting values of ISO/TS 15066 (derived from body-region tolerance studies) give the safety governor concrete numbers for its contact limits, which is precisely the sort of externally validated constraint a governor should enforce rather than invent. Third, functional safety is a <em>lifecycle</em>, not a feature: IEC 61508's safety-integrity levels demand disciplined development, verification, and change control of the safety-critical software, which is why signed builds and a model registry (Section 7.2) are safety artefacts and not merely engineering conveniences. Above the machinery standards, the EU AI Act's high-risk obligations, the OECD's AI Principles (OECD, 2019, rev. 2024), and the NIST AI Risk Management Framework's Govern–Map–Measure–Manage structure (NIST, 2023) supply the organisational scaffolding, and an AI management system (ISO/IEC 42001:2023) institutionalises it.</p>
+<h3 id="74-export-and-dual-use-screening-in-the-control-layer">7.4 Export and dual-use screening in the control layer</h3>
+<p>Perception, tracking, and autonomy technologies are dual-use, and export control is therefore a design constraint, not a shipping formality. The controlling principle is that <em>classification follows technical function, design intent, destination, end user, and end use</em> — not the name a developer gives a software node. A component called a "DynamicImpulseDampeningNode" is classified on what it does, not on what it is called; euphemistic file names, the absence of weapon mounts, or an "open-source adapter" label do not change an item's legal status, and a private-security intermediary is not a legal firewall. Table 6 lists the regimes a Swiss-anchored, internationally sourced programme must screen against.</p>
+<p><strong>Table 6 — Dual-use export-control regimes to screen against.</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Regime / authority</th>
+<th>Scope relevant here</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Wassenaar Arrangement</td>
+<td>multilateral control list for conventional-arms-related and dual-use goods and technologies, including software and technology</td>
+</tr>
+<tr>
+<td>Regulation (EU) 2021/821</td>
+<td>EU dual-use regulation implementing Wassenaar and the other regimes; controls export, transit, brokering, and technical assistance</td>
+</tr>
+<tr>
+<td>Swiss SECO (Goods Control Act / Ordinance)</td>
+<td>licenses dual-use and specific military goods, including <em>intangible</em> software and technology transfers</td>
+</tr>
+<tr>
+<td>US EAR (15 CFR 730–774)</td>
+<td>classification, de minimis, and re-export rules that follow US-origin components (e.g., certain compute) even in a non-US product</td>
+</tr>
+<tr>
+<td>UK export controls (ECJU)</td>
+<td>listed controls plus a military end-use "catch-all" reaching software, technology, and technical assistance</td>
+</tr>
+</tbody>
+</table></div>
+<p>The programme therefore builds, into the product and the company rather than into a legal appendix: independent export classification; sanctions and end-user screening; human-rights due diligence on customers and destinations; the human-authority and bounded-force guarantees of Section 7.1; the audit logs of Section 7.2; cyber-hardening and incident response; insurance; and a documented safety case. Screening is, where possible, <em>instrumented in the control layer</em> — for example, geofencing and feature-gating that can be bound to a destination-specific configuration and recorded in the audit trail — so that compliance is demonstrable from the same evidence pack that demonstrates safety.</p>
+<h3 id="75-the-non-weaponisation-boundary">7.5 The non-weaponisation boundary</h3>
+<p>Finally, the boundary that constrains everything above. The architecture's enumerated physical behaviours are inspection, approach, illumination, alarm, interposition, path-blocking, escort, retreat, and the summoning of a human team. It does <em>not</em> provide, and this paper does not describe, autonomous use of force against persons, weapon integration, or automated "neutralisation." Any coercive or armed application would fall outside this architecture and would require, at minimum, destination-specific classification, an independent customer safety case, and explicit human authorisation — and would remain subject to the export regimes of Table 6 regardless of framing. The reason to state this as an engineering boundary rather than a mission statement is that it is enforced by the same mechanisms that make the system safe and auditable: an advisory-only semantic lane, a hard safety governor, a human-authority gate on the critical path, and an immutable log. Governance by design means that the boundary is <em>in the runtime</em>, not only in the brochure.</p>
+<hr>
+<h2 id="8-reference-implementation-and-validation-approach">8. Reference Implementation and Validation Approach</h2>
+<h3 id="81-a-labelled-reference-demonstrator">8.1 A labelled reference demonstrator</h3>
+<p>To make the architecture concrete without over-claiming, a <em>reference demonstrator</em> is specified as an illustration of feasibility, not a product. Its purpose is to generate evidence, and every component is a replaceable reference behind the platform adapter. Table 7 lists an illustrative configuration; the specific parts are examples of a class, not endorsements or the only viable choices.</p>
+<p><strong>Table 7 — Illustrative reference-demonstrator configuration (an example of method; not a product specification).</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Illustrative reference component</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Base platform</td>
+<td>secondary-development humanoid with SDK access (e.g., a G1-class EDU unit)</td>
+</tr>
+<tr>
+<td>Spatial sensor</td>
+<td>compact spatial LiDAR (lean build) or higher-refresh/-resolution LiDAR</td>
+</tr>
+<tr>
+<td>Reflex sensor</td>
+<td>1 kHz-class IMU (e.g., a CV7- or MTi-class unit)</td>
+</tr>
+<tr>
+<td>Protected-person tag</td>
+<td>UWB module (BLE retained only for discovery/presence)</td>
+</tr>
+<tr>
+<td>Optical designation</td>
+<td>coded Class-1 NIR LED / retroreflective marker + NIR global-shutter camera</td>
+</tr>
+<tr>
+<td>On-robot compute</td>
+<td>embedded GPU compute module</td>
+</tr>
+<tr>
+<td>Training compute</td>
+<td>workstation-class GPU (off-robot)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="82-two-demonstrations-one-core">8.2 Two demonstrations, one core</h3>
+<p>The demonstrator supports two scenarios that exercise the shared core from opposite ends: an <strong>Arena</strong> scenario (robot-on-robot soft contact, impact recovery, and track reacquisition), which stresses the reflex lane and the impulse-recovery primitive; and a <strong>Guardian</strong> scenario (escort, path-blocking, alarm, and retreat around a <em>tagged</em> person, using soft targets and safety cages), which stresses the spatial lane, the tracker, and the human-authority path. Both run under safety controls: force-limited targets, an independent emergency stop, safety cages, and measured baselines. Crucially, a proper first build is a <em>contained laboratory benchmark</em>, not a field deployment.</p>
+<h3 id="83-software-stack-and-simulation-discipline">8.3 Software stack and simulation discipline</h3>
+<p>The learning and simulation pipeline follows established sim-to-real practice. Contact-rich policies are trained in a GPU-accelerated simulator (Makoviychuk et al., 2021) and cross-checked against an independent contact-dynamics engine (Todorov et al., 2012), with <em>domain randomisation</em> over mass, friction, latency, and sensor noise to bridge the reality gap (Tobin et al., 2017). Teleoperation demonstrations seed policies before any reinforcement-learning fine-tuning; reward functions are human-reviewed; and — as a governance rule — no machine-generated reward function is deployed to hardware without human review. The runtime is a real-time-patched Linux with a data-distribution-service transport under bounded quality-of-service (Macenski et al., 2022); inference is compiled and accelerated for the edge; and control barrier functions and watchdogs guard actuation. Permissively licensed perception libraries are preferred, and any strongly copyleft component is isolated, licensed, or reimplemented (Section 4.2).</p>
+<h3 id="84-what-is-explicitly-out-of-scope-near-term">8.4 What is explicitly out of scope near-term</h3>
+<p>An honest plan is explicit about what it is <em>not</em> delivering early: market-ready certification, autonomous force against people, weapon integration, and unrestricted outdoor operation are all out of scope for an initial feasibility build. Stating these exclusions is part of the governance posture, because a validation programme that quietly implies certification or field-readiness it has not earned is exactly the kind of over-claim that safety and export regimes exist to catch.</p>
+<hr>
+<h2 id="9-limitations">9. Limitations</h2>
+<p><strong>This is an architecture paper, not an evaluation.</strong> Its central claims are about how to <em>assemble and govern</em> known components, and it deliberately reports no measured performance. Every latency figure, sensor cadence, and proof metric is a target or a proposed measurement, clearly labelled; the reference demonstrator is an illustration. Nothing here should be cited as an empirical result, and the burden of proof — benchmarking against a stock controller under controlled conditions — remains to be discharged in future work.</p>
+<p><strong>The sim-to-real gap for contact is real and under-modelled.</strong> Contact dynamics are the hardest thing to simulate faithfully; a policy that recovers gracefully in simulation can fail on hardware where friction, compliance, and timing differ. Domain randomisation and independent-engine cross-checks reduce but do not eliminate this risk, and the impulse-recovery primitive in particular must be validated physically before any claim about it is credible.</p>
+<p><strong>Spatial latency and occlusion bound the tracker.</strong> Between-frame prediction mitigates the 25–100-millisecond LiDAR gap but cannot conjure information the sensor did not capture; fast, erratic, or occluded targets will still challenge association, and a mis-association during shock can lose a track precisely when it matters. The UWB positioning that anchors the Guardian pattern has a known accuracy <em>envelope</em> (sub-15-centimetre-class two-dimensional under suitable conditions), not centimetre-perfect certainty, and the system is only as good as the honesty of that envelope.</p>
+<p><strong>Governance reduces but does not remove risk.</strong> A hard safety governor, a human-authority gate, and an immutable log make the system auditable and bound its behaviour, but they cannot make a dual-use technology non-dual-use, and they depend on the standards and legal regimes of Section 7 continuing to mature — several of which (the EU Machinery Regulation's AI provisions, the AI Act's high-risk regime) are new and still settling. Nor can instrumented screening substitute for organisational diligence: classification, end-user vetting, and human-rights assessment are human responsibilities that the runtime can <em>support</em> but not replace.</p>
+<p><strong>The strategy's own success condition is unproven.</strong> The thesis that spatial intelligence, not hardware, is the scarce and defensible layer is an argument, not a demonstrated fact; it depends on hardware continuing to commoditise and on OEMs continuing to prefer to license rather than rebuild the spatial layer. Both are plausible and consistent with current market signals, but neither is guaranteed, and a vertically integrated OEM that builds the layer internally is the clearest competitive risk.</p>
+<hr>
+<h2 id="10-conclusion">10. Conclusion</h2>
+<p>As robot bodies commoditise, value migrates to the layer that stays hard: dependable spatial intelligence that remains coherent through contact, shock, and rapid motion. This paper has set out, at a systems level, how to build that layer software-first. The architecture stratifies processing into a deterministic reflex lane, a predictive spatial lane, and an advisory semantic lane, correcting the error of putting a slow cognitive model inside a fast balance loop. On that spine it composes a perception stack — LiDAR-inertial odometry, a static-map-subtraction world model, and between-frame predictive multi-object tracking — and a contact primitive, pre-load–detect–absorb–reacquire, that keeps a world-frame track alive while the machine is displaced. One reusable core spreads across robot sport, industrial autonomy, and infrastructure security through a platform adapter, with human-governed protective robotics deferred until the safety case supports it. The defensible asset is not any robot but the test corpus, the safety evidence, and the cross-platform abstraction that accumulate with use.</p>
+<p>The paper's deliberate emphasis is that governance is part of the product. Meaningful human authority, an advisory-only semantic lane, a hard safety governor enforcing formally grounded barriers and force limits, an immutable "ethical black box" on the critical path, conformance to the functional-safety and robot-safety standards, and export/dual-use screening bound to the control layer are not constraints imposed on the engineering from outside — they <em>are</em> the engineering. The same decisions that make a contact-capable robot safe and auditable make it lawful to sell and hard to misuse, and they enforce the non-weaponisation boundary in the runtime rather than in the prospectus. A responsible spatial-intelligence layer is not a capable system with governance added; it is a system whose capability and its governance are the same design.</p>
+<hr>
+<h2 id="references">References</h2>
+<p>Ames, A. D., Xu, X., Grizzle, J. W., &amp; Tabuada, P. (2017). Control Barrier Function Based Quadratic Programs for Safety Critical Systems. <em>IEEE Transactions on Automatic Control, 62</em>(8), 3861–3876.</p>
+<p>Ames, A. D., Coogan, S., Egerstedt, M., Notomista, G., Sreenath, K., &amp; Tabuada, P. (2019). Control Barrier Functions: Theory and Applications. <em>2019 18th European Control Conference (ECC)</em>, 3420–3431.</p>
+<p>Bar-Shalom, Y., Willett, P. K., &amp; Tian, X. (2011). <em>Tracking and Data Fusion: A Handbook of Algorithms.</em> Storrs, CT: YBS Publishing.</p>
+<p>Bewley, A., Ge, Z., Ott, L., Ramos, F., &amp; Upcroft, B. (2016). Simple Online and Realtime Tracking. <em>2016 IEEE International Conference on Image Processing (ICIP)</em>, 3464–3468.</p>
+<p>Blom, H. A. P., &amp; Bar-Shalom, Y. (1988). The Interacting Multiple Model Algorithm for Systems with Markovian Switching Coefficients. <em>IEEE Transactions on Automatic Control, 33</em>(8), 780–783.</p>
+<p>Cadena, C., Carlone, L., Carrillo, H., Latif, Y., Scaramuzza, D., Neira, J., Reid, I., &amp; Leonard, J. J. (2016). Past, Present, and Future of Simultaneous Localization and Mapping: Toward the Robust-Perception Age. <em>IEEE Transactions on Robotics, 32</em>(6), 1309–1332.</p>
+<p>Di Carlo, J., Wensing, P. M., Katz, B., Bledt, G., &amp; Kim, S. (2018). Dynamic Locomotion in the MIT Cheetah 3 Through Convex Model-Predictive Control. <em>2018 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)</em>, 1–9.</p>
+<p>Durrant-Whyte, H., &amp; Bailey, T. (2006). Simultaneous Localization and Mapping: Part I. <em>IEEE Robotics &amp; Automation Magazine, 13</em>(2), 99–110.</p>
+<p>Elfes, A. (1989). Using Occupancy Grids for Mobile Robot Perception and Navigation. <em>Computer, 22</em>(6), 46–57.</p>
+<p>Goldman Sachs Research. (2024). <em>Humanoid Robots: The Global Market Could Reach $38 Billion by 2035.</em> New York: Goldman Sachs.</p>
+<p>Hornung, A., Wurm, K. M., Bennewitz, M., Stachniss, C., &amp; Burgard, W. (2013). OctoMap: An Efficient Probabilistic 3D Mapping Framework Based on Octrees. <em>Autonomous Robots, 34</em>(3), 189–206.</p>
+<p>IEEE. (2021). <em>IEEE Std 7001-2021 — IEEE Standard for Transparency of Autonomous Systems.</em> Piscataway, NJ: IEEE.</p>
+<p>International Federation of Robotics. (2025). <em>World Robotics 2025 — Industrial Robots and Service Robots.</em> Frankfurt: IFR Statistical Department.</p>
+<p>International Electrotechnical Commission. (2010). <em>IEC 61508:2010 — Functional Safety of Electrical/Electronic/Programmable Electronic Safety-Related Systems.</em> Geneva: IEC.</p>
+<p>International Organization for Standardization. (2010). <em>ISO 12100:2010 — Safety of Machinery — General Principles for Design — Risk Assessment and Risk Reduction.</em> Geneva: ISO.</p>
+<p>International Organization for Standardization. (2014). <em>ISO 13482:2014 — Robots and Robotic Devices — Safety Requirements for Personal Care Robots.</em> Geneva: ISO.</p>
+<p>International Organization for Standardization. (2016). <em>ISO/TS 15066:2016 — Robots and Robotic Devices — Collaborative Robots.</em> Geneva: ISO.</p>
+<p>International Organization for Standardization. (2023). <em>ISO 13849-1:2023 — Safety of Machinery — Safety-Related Parts of Control Systems — Part 1: General Principles for Design.</em> Geneva: ISO.</p>
+<p>International Organization for Standardization. (2025). <em>ISO 10218-1:2025 — Robotics — Safety Requirements — Part 1: Industrial Robots.</em> Geneva: ISO.</p>
+<p>ISO/IEC. (2023). <em>ISO/IEC 42001:2023 — Information Technology — Artificial Intelligence — Management System.</em> Geneva: ISO/IEC.</p>
+<p>Johannink, T., Bahl, S., Nair, A., Luo, J., Kumar, A., Loskyll, M., Ojea, J. A., Solowjow, E., &amp; Levine, S. (2019). Residual Reinforcement Learning for Robot Control. <em>2019 IEEE International Conference on Robotics and Automation (ICRA)</em>, 6023–6029.</p>
+<p>Kalman, R. E. (1960). A New Approach to Linear Filtering and Prediction Problems. <em>Journal of Basic Engineering, 82</em>(1), 35–45.</p>
+<p>Kuindersma, S., Deits, R., Fallon, M., Valenzuela, A., Dai, H., Permenter, F., Koolen, T., Marion, P., &amp; Tedrake, R. (2016). Optimization-Based Locomotion Planning, Estimation, and Control Design for the Atlas Humanoid Robot. <em>Autonomous Robots, 40</em>(3), 429–455.</p>
+<p>Macenski, S., Foote, T., Gerkey, B., Lalancette, C., &amp; Woodall, W. (2022). Robot Operating System 2: Design, Architecture, and Uses in the Wild. <em>Science Robotics, 7</em>(66), eabm6074.</p>
+<p>Makoviychuk, V., Wawrzyniak, L., Guo, Y., Lu, M., Storey, K., Macklin, M., Hoeller, D., Rudin, N., Allshire, A., Handa, A., &amp; State, G. (2021). Isaac Gym: High Performance GPU-Based Physics Simulation for Robot Learning. <em>arXiv:2108.10470.</em></p>
+<p>Matthias, A. (2004). The Responsibility Gap: Ascribing Responsibility for the Actions of Learning Automata. <em>Ethics and Information Technology, 6</em>(3), 175–183.</p>
+<p>National Institute of Standards and Technology. (2023). <em>Artificial Intelligence Risk Management Framework (AI RMF 1.0)</em> (NIST AI 100-1). Gaithersburg, MD: U.S. Department of Commerce.</p>
+<p>Organisation for Economic Co-operation and Development. (2019, rev. 2024). <em>Recommendation of the Council on Artificial Intelligence</em> (OECD/LEGAL/0449). Paris: OECD.</p>
+<p>Parasuraman, R., Sheridan, T. B., &amp; Wickens, C. D. (2000). A Model for Types and Levels of Human Interaction with Automation. <em>IEEE Transactions on Systems, Man, and Cybernetics — Part A: Systems and Humans, 30</em>(3), 286–297.</p>
+<p>Regulation (EU) 2021/821 of the European Parliament and of the Council of 20 May 2021 setting up a Union regime for the control of exports, brokering, technical assistance, transit and transfer of dual-use items. <em>Official Journal of the European Union.</em></p>
+<p>Regulation (EU) 2023/1230 of the European Parliament and of the Council of 14 June 2023 on machinery (Machinery Regulation). <em>Official Journal of the European Union.</em></p>
+<p>Regulation (EU) 2024/1689 of the European Parliament and of the Council of 13 June 2024 laying down harmonised rules on artificial intelligence (Artificial Intelligence Act). <em>Official Journal of the European Union.</em></p>
+<p>Reid, D. B. (1979). An Algorithm for Tracking Multiple Targets. <em>IEEE Transactions on Automatic Control, 24</em>(6), 843–854.</p>
+<p>Santoni de Sio, F., &amp; van den Hoven, J. (2018). Meaningful Human Control over Autonomous Systems: A Philosophical Account. <em>Frontiers in Robotics and AI, 5</em>, 15.</p>
+<p>Shan, T., Englot, B., Meyers, D., Wang, W., Ratti, C., &amp; Rus, D. (2020). LIO-SAM: Tightly-Coupled Lidar Inertial Odometry via Smoothing and Mapping. <em>2020 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)</em>, 5135–5142.</p>
+<p>Sheridan, T. B. (1992). <em>Telerobotics, Automation, and Human Supervisory Control.</em> Cambridge, MA: MIT Press.</p>
+<p>Solà, J. (2017). Quaternion Kinematics for the Error-State Kalman Filter. <em>arXiv:1711.02508.</em></p>
+<p>Tobin, J., Fong, R., Ray, A., Schneider, J., Zaremba, W., &amp; Abbeel, P. (2017). Domain Randomization for Transferring Deep Neural Networks from Simulation to the Real World. <em>2017 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)</em>, 23–30.</p>
+<p>Todorov, E., Erez, T., &amp; Tassa, Y. (2012). MuJoCo: A Physics Engine for Model-Based Control. <em>2012 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)</em>, 5026–5033.</p>
+<p>Wassenaar Arrangement. (1996, as amended). <em>The Wassenaar Arrangement on Export Controls for Conventional Arms and Dual-Use Goods and Technologies — Lists of Dual-Use Goods and Technologies and Munitions List.</em> Vienna: Wassenaar Arrangement Secretariat.</p>
+<p>Weng, X., Wang, J., Held, D., &amp; Kitani, K. (2020). 3D Multi-Object Tracking: A Baseline and New Evaluation Metrics. <em>2020 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)</em>, 10359–10366.</p>
+<p>Winfield, A. F. T., &amp; Jirotka, M. (2017). The Case for an Ethical Black Box. In <em>Towards Autonomous Robotic Systems (TAROS 2017), Lecture Notes in Computer Science</em> (Vol. 10454, pp. 262–273). Cham: Springer.</p>
+<p>Xu, W., Cai, Y., He, D., Lin, J., &amp; Zhang, F. (2022). FAST-LIO2: Fast Direct LiDAR-Inertial Odometry. <em>IEEE Transactions on Robotics, 38</em>(4), 2053–2073.</p>
+<p>Zhang, J., &amp; Singh, S. (2014). LOAM: Lidar Odometry and Mapping in Real-Time. <em>Robotics: Science and Systems (RSS) X.</em></p>
+<hr>
+<p><em>Preprint — submitted; pending peer review. This paper describes a software and control-layer architecture for responsible, human-governed, contact-capable robotics. It contains no weapon, munition, or autonomous-use-of-force content of any kind; all physical responses discussed are bounded, non-kinetic, and human-authorised. All latency figures, sensor cadences, and proof metrics are engineering targets or vendor-published capabilities, clearly labelled; no measured benchmark or performance result is claimed.</em></p>
+    </article>
+    <footer class="paperfoot">
+      <span>&copy; <span id="yr">2026</span> Christopher I. V. Farmer</span>
+      <span>&middot;</span>
+      <a href="../index.html">Back to Publications</a>
+      <span>&middot;</span>
+      <a href="../../docs/CV-Christopher-Farmer-2026-08.pdf" target="_blank" rel="noopener">CV</a>
+      <span>&middot;</span>
+      <span class="mono">Preprint &mdash; submitted; pending peer review &middot; not legal advice</span>
+    </footer>
+  </main>
+
+<script>
+  (function(){
+    var root=document.documentElement, KEY='cf-theme';
+    try{ var s=localStorage.getItem(KEY); if(s){ root.setAttribute('data-theme', s); } }catch(e){}
+    var btn=document.getElementById('theme');
+    if(btn){ btn.addEventListener('click', function(){
+      var next=root.getAttribute('data-theme')==='dark'?'light':'dark';
+      root.setAttribute('data-theme', next);
+      try{ localStorage.setItem(KEY, next); }catch(e){}
+    }); }
+    var yr=document.getElementById('yr'); if(yr){ yr.textContent=String(new Date().getFullYear()); }
+  })();
+</script>
+<script src="../assets/vendor/mermaid.min.js"></script>
+<script>
+  (function(){
+    if(!window.mermaid) return;
+    try{
+      mermaid.initialize({startOnLoad:false, theme:"neutral", securityLevel:"loose", flowchart:{htmlLabels:true, useMaxWidth:true}});
+      if(mermaid.run){ mermaid.run({querySelector:".mermaid"}); }
+      else { mermaid.init(undefined, document.querySelectorAll(".mermaid")); }
+    }catch(e){ /* leave the diagram source visible as a readable fallback */ }
+  })();
+</script>
+</body>
+</html>

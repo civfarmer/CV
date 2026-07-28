@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en-GB" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Geomagnetic Orbit Screen — 3D · Christopher I. V. Farmer</title>
+<style>
+  :root{
+    --bg:#0b0f17; --bg2:#0e1420; --surface:#131b2a; --surface2:#182133;
+    --ink:#e9eef7; --ink2:#aab7cc; --muted:#7d8ba3; --line:#233145; --line2:#2c3d54;
+    --accent:#43b3a6; --accent-ink:#84d6ca; --gold:#d4b24c; --good:#43c59e; --bad:#e2683c;
+    --shadow:0 18px 50px -20px rgba(0,0,0,.7); --radius:14px;
+    --fd:'Zilla Slab',Georgia,serif; --fb:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif; --fm:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  }
+  html[data-theme="light"]{
+    --bg:#f4f1ec; --bg2:#ebe6dd; --surface:#fff; --surface2:#faf7f2;
+    --ink:#221e18; --ink2:#4c473e; --muted:#675f54; --line:#e7e1d6; --line2:#d9d2c5;
+    --accent:#0d5f57; --accent-ink:#0a463f; --gold:#836819; --good:#0e7a52; --bad:#b1431d;
+    --shadow:0 18px 44px -24px rgba(15,30,60,.35);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1100px 700px at 80% -8%,rgba(67,179,166,.10),transparent 60%),var(--bg);
+    color:var(--ink);font-family:var(--fb);line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent-ink);text-decoration:none}
+  h1,h2,h3{font-family:var(--fd);font-weight:600;line-height:1.15;margin:0}
+  .mono{font-family:var(--fm)}
+  .top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:12px clamp(16px,4vw,32px);background:color-mix(in oklab,var(--bg),transparent 8%);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:11px;color:var(--ink)}
+  .crest{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(145deg,#0e7b6f,#0b655b);color:#fff;font-family:var(--fd);font-weight:700;font-size:14px}
+  .brand .nm{font-family:var(--fd);font-weight:700;font-size:14px;line-height:1.05}
+  .brand .rl{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:8px 13px;border-radius:9px;font-weight:600;font-size:12.5px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer;font-family:var(--fb)}
+  .btn:hover{border-color:var(--accent)}
+  .wrap{max-width:1180px;margin:0 auto;padding:clamp(20px,4vw,34px) clamp(16px,4vw,32px) 60px}
+  .eyebrow{font-family:var(--fm);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+  h1.title{font-size:clamp(24px,3.6vw,34px);letter-spacing:-.015em;margin-bottom:8px}
+  .lede{color:var(--ink2);font-size:15px;max-width:75ch}
+  .note{margin:16px 0 0;padding:11px 15px;border:1px solid var(--line2);border-left:3px solid var(--gold);border-radius:10px;background:var(--surface);color:var(--ink2);font-size:13px}
+  .grid{display:grid;grid-template-columns:1fr 330px;gap:20px;margin-top:22px}
+  @media(max-width:880px){.grid{grid-template-columns:1fr}}
+  .panel{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+  .panel h2{font-size:15px;margin-bottom:4px}
+  .sub{color:var(--muted);font-size:12px;margin-bottom:14px}
+  #scene{width:100%;height:520px;border-radius:12px;background:radial-gradient(circle at 50% 40%,#0a1424,#05080f);border:1px solid var(--line);display:block;touch-action:none;cursor:grab}
+  #scene:active{cursor:grabbing}
+  .ctrl{margin:15px 0}
+  .ctrl label{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;margin-bottom:7px}
+  .ctrl .val{font-family:var(--fm);font-size:13px;color:var(--accent-ink);font-weight:600}
+  input[type=range]{width:100%;accent-color:var(--accent);height:4px}
+  .seg{display:flex;gap:6px;margin-top:6px}
+  .seg button{flex:1;font-family:var(--fm);font-size:11.5px;padding:7px 6px;border-radius:8px;border:1px solid var(--line2);background:var(--bg2);color:var(--ink2);cursor:pointer}
+  .seg button.on{border-color:var(--accent);color:var(--ink);background:color-mix(in oklab,var(--accent) 14%,transparent)}
+  .out{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .metric{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .metric .k{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+  .metric .v{font-family:var(--fm);font-size:16px;font-weight:600;color:var(--ink);margin-top:3px}
+  .metric .u{font-size:10.5px;color:var(--muted)}
+  .verdict{margin-top:12px;padding:11px 13px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);font-size:13px}
+  .verdict b{color:var(--ink)}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:12px;color:var(--ink2)}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .sw{width:14px;height:4px;border-radius:2px;display:inline-block}
+  .check{margin-top:10px;font-family:var(--fm);font-size:11px;color:var(--muted)}
+  .foot{margin-top:22px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:14px}
+  .prov{font-family:var(--fm)}
+</style>
+</head>
+<body>
+  <div class="top">
+    <a class="brand" href="../../publications/index.html"><span class="crest">CF</span><span><span class="nm">Christopher Farmer</span><br><span class="rl">Geomagnetic Orbit Screen · 3D</span></span></a>
+    <div style="display:flex;gap:8px">
+      <a class="btn" href="../../publications/index.html">&#8592; Publications</a>
+      <button class="btn" id="theme" aria-label="Toggle theme">&#9789;</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="eyebrow">Interactive 3D · IGRF-14 degree-1 screen</div>
+    <h1 class="title">Geomagnetic attitude-control authority — orbit screen</h1>
+    <p class="lede">Drag to orbit the Earth. Choose an altitude, inclination and body torque axis, and the panel recomputes the IGRF-14 degree-1 field along one orbit and the fraction of magnetic control authority available to that axis — the screen behind the companion attitude-control paper. The in-browser calculation reproduces the deposited Python screen at every one of its 27 reference cases — nine orbits &times; three torque axes (checked live, below).</p>
+
+    <div class="note"><b>Screening model, not a simulator.</b> Degree-1 (dipole) IGRF-14 at epoch 2025.0 — an auditable screen, not a full degree-13 propagation, disturbance model, structural model, or controller simulation. Authority &eta; is the per-orbit fraction of torque a magnetic actuator can direct along the chosen axis; it says nothing about slew <i>rate</i>, which the paper bounds separately.</div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>Orbit &amp; field</h2>
+        <div class="sub">Drag to rotate · scroll to zoom</div>
+        <canvas id="scene"></canvas>
+        <div class="legend">
+          <span><span class="sw" style="background:#4ea3ff"></span> orbit track</span>
+          <span><span class="sw" style="background:#d4b24c"></span> geomagnetic dipole field</span>
+          <span><span class="sw" style="background:#43c59e"></span> field vector on the orbit</span>
+        </div>
+        <div class="check" id="check">verifying against deposited screen…</div>
+      </div>
+
+      <div class="panel">
+        <h2>Screen inputs</h2>
+        <div class="ctrl">
+          <label>Altitude <span class="val" id="altLab">400 km</span></label>
+          <input type="range" id="alt" min="300" max="2000" step="50" value="400">
+        </div>
+        <div class="ctrl">
+          <label>Inclination <span class="val" id="incLab">51.6°</span></label>
+          <input type="range" id="inc" min="0" max="98" step="0.2" value="51.6">
+          <div class="seg" id="incPresets"></div>
+        </div>
+        <div class="ctrl">
+          <label>Body torque axis</label>
+          <div class="seg" id="axisSeg">
+            <button data-ax="ECI-X" class="on">ECI-X</button>
+            <button data-ax="ECI-Y">ECI-Y</button>
+            <button data-ax="ECI-Z">ECI-Z</button>
+          </div>
+        </div>
+
+        <div class="out" id="metrics"></div>
+        <div class="verdict" id="verdict"></div>
+      </div>
+    </div>
+
+    <div class="foot">
+      Provenance: in-browser port of <span class="prov">argus_pd_repro/geomagnetic.py</span> (IGRF-14 epoch 2025.0 degree-1: g₁⁰=−29,350.0, g₁¹=−1,410.3, h₁¹=4,545.5 nT). The <span class="prov">screen.json</span> reference set is the deposited <span class="prov">geomagnetic_orbit_screen.csv</span>; the badge above confirms the browser calculation matches it at every deposited orbit. Earth imagery: NASA Blue Marble (public domain). Illustrative screening model — not a controller simulation.
+    </div>
+  </div>
+
+<script src="three.min.js"></script>
+<script src="../_assets/earth/earth-textures.js"></script>
+<script id="screen-data" type="application/json">[{"torque_axis": "ECI-X", "altitude_km": 400.0, "inclination_deg": 0.0, "period_min": 92.41834619135126, "field_min_uT": 24.76913671845111, "field_mean_uT": 25.255002700816497, "field_max_uT": 25.70341730418776, "axis_authority_mean": 0.9847322967318587, "axis_authority_rms": 0.9848092671426916, "axis_authority_min": 0.9595298417633126}, {"torque_axis": "ECI-Y", "altitude_km": 400.0, "inclination_deg": 0.0, "period_min": 92.41834619135126, "field_min_uT": 24.76913671845111, "field_mean_uT": 25.255002700816497, "field_max_uT": 25.70341730418776, "axis_authority_mean": 0.9837011437661404, "axis_authority_rms": 0.9838158429640387, "axis_authority_min": 0.9531754664544085}, {"torque_axis": "ECI-Z", "altitude_km": 400.0, "inclination_deg": 0.0, "period_min": 92.41834619135126, "field_min_uT": 24.76913671845111, "field_mean_uT": 25.255002700816497, "field_max_uT": 25.70341730418776, "axis_authority_mean": 0.24389484514746568, "axis_authority_rms": 0.24951371602145014, "axis_authority_min": 0.16006466478093465}, {"torque_axis": "ECI-X", "altitude_km": 400.0, "inclination_deg": 51.6, "period_min": 92.41834619135126, "field_min_uT": 24.769175067667007, "field_mean_uT": 31.992189750764616, "field_max_uT": 38.83258215635895, "axis_authority_mean": 0.8088031733139305, "axis_authority_rms": 0.8217699355106032, "axis_authority_min": 0.5685355947567382}, {"torque_axis": "ECI-Y", "altitude_km": 400.0, "inclination_deg": 51.6, "period_min": 92.41834619135126, "field_min_uT": 24.769175067667007, "field_mean_uT": 31.992189750764616, "field_max_uT": 38.83258215635895, "axis_authority_mean": 0.7551756645105668, "axis_authority_rms": 0.7828373207149956, "axis_authority_min": 0.39958220394921845}, {"torque_axis": "ECI-Z", "altitude_km": 400.0, "inclination_deg": 51.6, "period_min": 92.41834619135126, "field_min_uT": 24.769175067667007, "field_mean_uT": 31.992189750764616, "field_max_uT": 38.83258215635895, "axis_authority_mean": 0.8046510216364859, "axis_authority_rms": 0.8437179045075827, "axis_authority_min": 0.11598600249669977}, {"torque_axis": "ECI-X", "altitude_km": 400.0, "inclination_deg": 98.0, "period_min": 92.41834619135126, "field_min_uT": 24.7692306104232, "field_mean_uT": 38.07421886621508, "field_max_uT": 49.53747711192362, "axis_authority_mean": 0.6391336307013943, "axis_authority_rms": 0.7094199770642812, "axis_authority_min": 0.0023164373498160058}, {"torque_axis": "ECI-Y", "altitude_km": 400.0, "inclination_deg": 98.0, "period_min": 92.41834619135126, "field_min_uT": 24.7692306104232, "field_mean_uT": 38.07421886621508, "field_max_uT": 49.53747711192362, "axis_authority_mean": 0.9951295507677909, "axis_authority_rms": 0.9951355807777055, "axis_authority_min": 0.9883247401896884}, {"torque_axis": "ECI-Z", "altitude_km": 400.0, "inclination_deg": 98.0, "period_min": 92.41834619135126, "field_min_uT": 24.7692306104232, "field_mean_uT": 38.07421886621508, "field_max_uT": 49.53747711192362, "axis_authority_mean": 0.6510973428679162, "axis_authority_rms": 0.7116378798323861, "axis_authority_min": 0.12315082983640113}, {"torque_axis": "ECI-X", "altitude_km": 800.0, "inclination_deg": 0.0, "period_min": 100.72736716100121, "field_min_uT": 20.851259068601465, "field_mean_uT": 21.26064226645995, "field_max_uT": 21.63775824054866, "axis_authority_mean": 0.9846728052998196, "axis_authority_rms": 0.9847518649647655, "axis_authority_min": 0.9589549015114991}, {"torque_axis": "ECI-Y", "altitude_km": 800.0, "inclination_deg": 0.0, "period_min": 100.72736716100121, "field_min_uT": 20.851259068601465, "field_mean_uT": 21.26064226645995, "field_max_uT": 21.63775824054866, "axis_authority_mean": 0.9837448207523988, "axis_authority_rms": 0.9838582508085169, "axis_authority_min": 0.953273916178196}, {"torque_axis": "ECI-Z", "altitude_km": 800.0, "inclination_deg": 0.0, "period_min": 100.72736716100121, "field_min_uT": 20.851259068601465, "field_mean_uT": 21.26064226645995, "field_max_uT": 21.63775824054866, "axis_authority_mean": 0.24392044786638703, "axis_authority_rms": 0.24957304895445262, "axis_authority_min": 0.16006457273066751}, {"torque_axis": "ECI-X", "altitude_km": 800.0, "inclination_deg": 51.6, "period_min": 100.72736716100121, "field_min_uT": 20.851261964577926, "field_mean_uT": 26.944715158600253, "field_max_uT": 32.743971434322106, "axis_authority_mean": 0.808405245135628, "axis_authority_rms": 0.8214566899077974, "axis_authority_min": 0.5664876294120772}, {"torque_axis": "ECI-Y", "altitude_km": 800.0, "inclination_deg": 51.6, "period_min": 100.72736716100121, "field_min_uT": 20.851261964577926, "field_mean_uT": 26.944715158600253, "field_max_uT": 32.743971434322106, "axis_authority_mean": 0.7559459469320646, "axis_authority_rms": 0.7835110849284669, "axis_authority_min": 0.4000460830232115}, {"torque_axis": "ECI-Z", "altitude_km": 800.0, "inclination_deg": 51.6, "period_min": 100.72736716100121, "field_min_uT": 20.851261964577926, "field_mean_uT": 26.944715158600253, "field_max_uT": 32.743971434322106, "axis_authority_mean": 0.8041247650499257, "axis_authority_rms": 0.8433974664415003, "axis_authority_min": 0.11174857879067429}, {"torque_axis": "ECI-X", "altitude_km": 800.0, "inclination_deg": 98.0, "period_min": 100.72736716100121, "field_min_uT": 20.851265860077643, "field_mean_uT": 32.04403038534162, "field_max_uT": 41.701391278177205, "axis_authority_mean": 0.639336343393861, "axis_authority_rms": 0.7095957567763945, "axis_authority_min": 0.0042525517333772125}, {"torque_axis": "ECI-Y", "altitude_km": 800.0, "inclination_deg": 98.0, "period_min": 100.72736716100121, "field_min_uT": 20.851265860077643, "field_mean_uT": 32.04403038534162, "field_max_uT": 41.701391278177205, "axis_authority_mean": 0.9951290339152895, "axis_authority_rms": 0.9951350982324498, "axis_authority_min": 0.9883247401896884}, {"torque_axis": "ECI-Z", "altitude_km": 800.0, "inclination_deg": 98.0, "period_min": 100.72736716100121, "field_min_uT": 20.851265860077643, "field_mean_uT": 32.04403038534162, "field_max_uT": 41.701391278177205, "axis_authority_mean": 0.6508462898716815, "axis_authority_rms": 0.7114632796081807, "axis_authority_min": 0.11955951243547677}, {"torque_axis": "ECI-X", "altitude_km": 2000.0, "inclination_deg": 0.0, "period_min": 127.04024044792112, "field_min_uT": 13.108248409497067, "field_mean_uT": 13.3656120305206, "field_max_uT": 13.602683549160732, "axis_authority_mean": 0.984526595968969, "axis_authority_rms": 0.9846121390680191, "axis_authority_min": 0.9572083954308345}, {"torque_axis": "ECI-Y", "altitude_km": 2000.0, "inclination_deg": 0.0, "period_min": 127.04024044792112, "field_min_uT": 13.108248409497067, "field_mean_uT": 13.3656120305206, "field_max_uT": 13.602683549160732, "axis_authority_mean": 0.9838937537632068, "axis_authority_rms": 0.9840028507537739, "axis_authority_min": 0.9536045614694428}, {"torque_axis": "ECI-Z", "altitude_km": 2000.0, "inclination_deg": 0.0, "period_min": 127.04024044792112, "field_min_uT": 13.108248409497067, "field_mean_uT": 13.3656120305206, "field_max_uT": 13.602683549160732, "axis_authority_mean": 0.24378897808603536, "axis_authority_rms": 0.2495542532363373, "axis_authority_min": 0.1600649657611407}, {"torque_axis": "ECI-X", "altitude_km": 2000.0, "inclination_deg": 51.6, "period_min": 127.04024044792112, "field_min_uT": 13.108267728078976, "field_mean_uT": 16.967731277785713, "field_max_uT": 20.698435308312373, "axis_authority_mean": 0.8069901889789816, "axis_authority_rms": 0.820331643580385, "axis_authority_min": 0.5597371473369527}, {"torque_axis": "ECI-Y", "altitude_km": 2000.0, "inclination_deg": 51.6, "period_min": 127.04024044792112, "field_min_uT": 13.108267728078976, "field_mean_uT": 16.967731277785713, "field_max_uT": 20.698435308312373, "axis_authority_mean": 0.7584777231488643, "axis_authority_rms": 0.7857192710080589, "axis_authority_min": 0.40157844322558095}, {"torque_axis": "ECI-Z", "altitude_km": 2000.0, "inclination_deg": 51.6, "period_min": 127.04024044792112, "field_min_uT": 13.108267728078976, "field_mean_uT": 16.967731277785713, "field_max_uT": 20.698435308312373, "axis_authority_mean": 0.802546489573241, "axis_authority_rms": 0.8424376663630779, "axis_authority_min": 0.09735557275483218}, {"torque_axis": "ECI-X", "altitude_km": 2000.0, "inclination_deg": 98.0, "period_min": 127.04024044792112, "field_min_uT": 13.10825545642068, "field_mean_uT": 20.12993853976196, "field_max_uT": 26.216052068335262, "axis_authority_mean": 0.6399753441075584, "axis_authority_rms": 0.7101202127081568, "axis_authority_min": 0.0029072413381100327}, {"torque_axis": "ECI-Y", "altitude_km": 2000.0, "inclination_deg": 98.0, "period_min": 127.04024044792112, "field_min_uT": 13.10825545642068, "field_mean_uT": 20.12993853976196, "field_max_uT": 26.216052068335262, "axis_authority_mean": 0.9951151986195789, "axis_authority_rms": 0.9951215070987186, "axis_authority_min": 0.9883247401896884}, {"torque_axis": "ECI-Z", "altitude_km": 2000.0, "inclination_deg": 98.0, "period_min": 127.04024044792112, "field_min_uT": 13.10825545642068, "field_mean_uT": 20.12993853976196, "field_max_uT": 26.216052068335262, "axis_authority_mean": 0.6501136038818603, "axis_authority_rms": 0.7109588381987363, "axis_authority_min": 0.10690194069222318}]</script>
+<script>
+// ---- deposited IGRF-14 degree-1 screen, ported from geomagnetic.py ----
+const Re = 6371200.0, MU = 3.986004418e14, WE = 7.2921150e-5;
+const G10=-29350.0, G11=-1410.3, H11=4545.5;
+function rz(a){const c=Math.cos(a),s=Math.sin(a);return [[c,-s,0],[s,c,0],[0,0,1]];}
+function matvec(m,v){return [m[0][0]*v[0]+m[0][1]*v[1]+m[0][2]*v[2], m[1][0]*v[0]+m[1][1]*v[1]+m[1][2]*v[2], m[2][0]*v[0]+m[2][1]*v[1]+m[2][2]*v[2]];}
+function transpose(m){return [[m[0][0],m[1][0],m[2][0]],[m[0][1],m[1][1],m[2][1]],[m[0][2],m[1][2],m[2][2]]];}
+function igrfDeg1Ecef(p){
+  const x=p[0],y=p[1],z=p[2];
+  const r=Math.hypot(x,y,z), theta=Math.acos(z/r), phi=Math.atan2(y,x);
+  const st=Math.sin(theta),ct=Math.cos(theta),sp=Math.sin(phi),cp=Math.cos(phi);
+  const scale=Math.pow(Re/r,3);
+  const common=G10*ct+G11*st*cp+H11*st*sp;
+  const br=2*scale*common;
+  const bth=scale*(G10*st-G11*ct*cp-H11*ct*sp);
+  const bph=scale*(G11*sp-H11*cp);
+  const er=[st*cp,st*sp,ct], eth=[ct*cp,ct*sp,-st], eph=[-sp,cp,0];
+  return [ (br*er[0]+bth*eth[0]+bph*eph[0])*1e-9,
+           (br*er[1]+bth*eth[1]+bph*eph[1])*1e-9,
+           (br*er[2]+bth*eth[2]+bph*eph[2])*1e-9 ];
+}
+const AX={'ECI-X':[1,0,0],'ECI-Y':[0,1,0],'ECI-Z':[0,0,1]};
+function orbitScreen(altKm, incDeg, axisName, samples=1440){
+  const radius=Re+altKm*1000, n=Math.sqrt(MU/Math.pow(radius,3)), period=2*Math.PI/n;
+  const inc=incDeg*Math.PI/180, axis=AX[axisName];
+  let mags=[],auth=[],track=[],vecs=[];
+  for(let k=0;k<samples;k++){
+    const t=period*k/samples, u=n*t;
+    const pEci=[radius*Math.cos(u), radius*Math.sin(u)*Math.cos(inc), radius*Math.sin(u)*Math.sin(inc)];
+    const R=rz(-WE*t);
+    const pEcef=matvec(R,pEci);
+    const bEcef=igrfDeg1Ecef(pEcef);
+    const bEci=matvec(transpose(R),bEcef);
+    const mag=Math.hypot(bEci[0],bEci[1],bEci[2]);
+    const bh=[bEci[0]/mag,bEci[1]/mag,bEci[2]/mag];
+    const dot=axis[0]*bh[0]+axis[1]*bh[1]+axis[2]*bh[2];
+    const eta=Math.sqrt(Math.max(0,1-dot*dot));
+    mags.push(mag);auth.push(eta);
+    if(k%12===0){track.push(pEci);vecs.push(bEci);}
+  }
+  const mean=a=>a.reduce((s,x)=>s+x,0)/a.length;
+  return {
+    period_min:period/60,
+    field_min_uT:Math.min(...mags)*1e6, field_mean_uT:mean(mags)*1e6, field_max_uT:Math.max(...mags)*1e6,
+    authority_mean:mean(auth), authority_rms:Math.sqrt(mean(auth.map(x=>x*x))), authority_min:Math.min(...auth),
+    radius, inc, track, vecs
+  };
+}
+
+// ---- self-check against deposited rows ----
+(function(rows){
+  let worst=0;
+  rows.forEach(row=>{
+    const s=orbitScreen(row.altitude_km,row.inclination_deg,row.torque_axis,1440);
+    worst=Math.max(worst, Math.abs(s.field_mean_uT-row.field_mean_uT), Math.abs(s.authority_mean-row.axis_authority_mean)*100);
+  });
+  const el=document.getElementById('check');
+  el.textContent = worst<0.05
+    ? `✓ browser screen reproduces all ${rows.length} deposited orbits (max Δ ${worst.toExponential(1)})`
+    : `Δ vs deposited: ${worst.toFixed(3)} (check)`;
+  el.style.color = worst<0.05 ? 'var(--good)':'var(--bad)';
+})((function(){try{return JSON.parse(document.getElementById('screen-data').textContent);}catch(e){return[];}})());
+
+// ---- three.js scene ----
+let renderer,scene,camera,earth,orbitLine,fieldGroup,vecGroup,raf,yaw=0.6,pitch=0.5,dist=3.4,dragging=false,lx,ly;
+const cv=document.getElementById('scene');
+function initThree(){
+  renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  scene=new THREE.Scene();
+  camera=new THREE.PerspectiveCamera(42,1,0.01,100);
+  const amb=new THREE.AmbientLight(0xffffff,0.42); scene.add(amb);
+  const sun=new THREE.DirectionalLight(0xfff4e6,1.25); sun.position.set(4,1.4,3.2); scene.add(sun);
+  // Earth — NASA Blue Marble day map + night lights on the dark side + topography + ocean specular
+  const loader=new THREE.TextureLoader();
+  const SRC=(window.EARTH_TEX||{});
+  const KEY={'day.jpg':'day','night.jpg':'night','bump.jpg':'bump','specular.jpg':'specular'};
+  const tx=n=>{const src=SRC[KEY[n]]||('../_assets/earth/'+n);const t=loader.load(src,()=>{}); t.anisotropy=4; return t;};
+  const geo=new THREE.SphereGeometry(1,72,72);
+  const nightTex=tx('night.jpg');
+  const mat=new THREE.MeshPhongMaterial({
+    map:tx('day.jpg'), bumpMap:tx('bump.jpg'), bumpScale:0.02,
+    specularMap:tx('specular.jpg'), specular:0x33526e, shininess:18
+  });
+  // inject NASA night lights only on the shadowed hemisphere (blend by sun angle)
+  mat.onBeforeCompile=(sh)=>{
+    sh.uniforms.nightMap={value:nightTex};
+    sh.uniforms.sunDir={value:new THREE.Vector3(4,1.4,3.2).normalize()};
+    sh.fragmentShader='uniform sampler2D nightMap;\nuniform vec3 sunDir;\n'+sh.fragmentShader;
+    sh.fragmentShader=sh.fragmentShader.replace('#include <emissivemap_fragment>',
+      '#include <emissivemap_fragment>\n'+
+      '  float sun = dot(normalize(vNormal), normalize((viewMatrix*vec4(sunDir,0.0)).xyz));\n'+
+      '  float night = smoothstep(0.05,-0.25,sun);\n'+
+      '  vec3 lights = texture2D(nightMap, vUv).rgb;\n'+
+      '  totalEmissiveRadiance += lights*vec3(1.0,0.85,0.55)*night*2.2;');
+    mat.userData.sh=sh;
+  };
+  earth=new THREE.Mesh(geo,mat); scene.add(earth);
+  // atmosphere glow (back-lit rim)
+  const atmo=new THREE.Mesh(new THREE.SphereGeometry(1.03,48,48),
+    new THREE.MeshBasicMaterial({color:0x5aa9ff,transparent:true,opacity:0.10,side:THREE.BackSide}));
+  scene.add(atmo);
+  // spin axis
+  const ax=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,-1.4),new THREE.Vector3(0,0,1.4)]),new THREE.LineBasicMaterial({color:0x53617a}));
+  scene.add(ax);
+  fieldGroup=new THREE.Group(); scene.add(fieldGroup);
+  vecGroup=new THREE.Group(); scene.add(vecGroup);
+  resize();
+  loop();
+}
+function dipoleFieldLines(){
+  // magnetic dipole field lines from degree-1 tilt (drawn as r = L sin^2(theta) shells, rotated to dipole axis)
+  const g=new THREE.Group();
+  // dipole moment direction (unit) from Gauss coeffs in ECEF: m ∝ (g11, h11, g10)
+  const m=new THREE.Vector3(G11,H11,G10).normalize();
+  const zx=new THREE.Vector3(0,0,1);
+  const quat=new THREE.Quaternion().setFromUnitVectors(zx,m);
+  const col=0xd4b24c;
+  for(let Lshell=1.35; Lshell<=2.4; Lshell+=0.35){
+    for(let ph=0; ph<Math.PI*2; ph+=Math.PI/3){
+      const pts=[];
+      for(let th=0.18; th<=Math.PI-0.18; th+=0.06){
+        const r=Lshell*Math.sin(th)*Math.sin(th);
+        if(r<1.0) continue;
+        const v=new THREE.Vector3(r*Math.sin(th)*Math.cos(ph), r*Math.sin(th)*Math.sin(ph), r*Math.cos(th));
+        v.applyQuaternion(quat); pts.push(v);
+      }
+      if(pts.length>1){
+        g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),
+          new THREE.LineBasicMaterial({color:col,transparent:true,opacity:0.32})));
+      }
+    }
+  }
+  return g;
+}
+function rebuild(alt,inc,axis){
+  const s=orbitScreen(alt,inc,axis,1440);
+  if(!scene) return s; // numeric panel works even without WebGL
+  const scaleR = 1/Re; // Earth radius = 1 unit
+  // orbit track
+  if(orbitLine) scene.remove(orbitLine);
+  const pts=s.track.map(p=>new THREE.Vector3(p[0]*scaleR,p[2]*scaleR,-p[1]*scaleR)); // map ECI(x,y,z)->three(x,z,-y)
+  pts.push(pts[0].clone());
+  orbitLine=new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:0x4ea3ff,linewidth:2}));
+  scene.add(orbitLine);
+  // field lines
+  fieldGroup.clear(); fieldGroup.add(dipoleFieldLines());
+  // field vectors sampled along orbit
+  vecGroup.clear();
+  const bmax=Math.max(...s.vecs.map(v=>Math.hypot(v[0],v[1],v[2])));
+  s.track.forEach((p,i)=>{
+    if(i%2) return;
+    const base=new THREE.Vector3(p[0]*scaleR,p[2]*scaleR,-p[1]*scaleR);
+    const b=s.vecs[i]; const bl=0.28*Math.hypot(b[0],b[1],b[2])/bmax;
+    const bv=new THREE.Vector3(b[0],b[2],-b[1]).normalize().multiplyScalar(bl);
+    vecGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([base,base.clone().add(bv)]),
+      new THREE.LineBasicMaterial({color:0x43c59e,transparent:true,opacity:0.85})));
+  });
+  return s;
+}
+function loop(){ raf=requestAnimationFrame(loop);
+  const cx=dist*Math.cos(pitch)*Math.sin(yaw), cy=dist*Math.sin(pitch), cz=dist*Math.cos(pitch)*Math.cos(yaw);
+  camera.position.set(cx,cy,cz); camera.lookAt(0,0,0);
+  if(earth) earth.rotation.y+=0.0009;
+  renderer.render(scene,camera);
+}
+function resize(){ const w=cv.clientWidth,h=cv.clientHeight||520; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); }
+cv.addEventListener('pointerdown',e=>{dragging=true;lx=e.clientX;ly=e.clientY;cv.setPointerCapture(e.pointerId);});
+cv.addEventListener('pointermove',e=>{if(!dragging)return;yaw-=(e.clientX-lx)*0.008;pitch=Math.max(-1.3,Math.min(1.3,pitch+(e.clientY-ly)*0.008));lx=e.clientX;ly=e.clientY;});
+cv.addEventListener('pointerup',()=>dragging=false);
+cv.addEventListener('wheel',e=>{e.preventDefault();dist=Math.max(1.8,Math.min(7,dist+Math.sign(e.deltaY)*0.25));},{passive:false});
+window.addEventListener('resize',resize);
+
+// ---- UI ----
+let ax='ECI-X';
+const fmt=(x,d=1)=>x.toLocaleString('en-GB',{minimumFractionDigits:d,maximumFractionDigits:d});
+function refresh(){
+  const alt=+document.getElementById('alt').value, inc=+document.getElementById('inc').value;
+  document.getElementById('altLab').textContent=alt+' km';
+  document.getElementById('incLab').textContent=inc.toFixed(1)+'°';
+  const s=rebuild(alt,inc,ax);
+  const M=[['B mean',fmt(s.field_mean_uT),'µT'],['B range',fmt(s.field_min_uT)+'–'+fmt(s.field_max_uT),'µT'],
+    ['Authority η mean',s.authority_mean.toFixed(3),''],['η min',s.authority_min.toFixed(3),''],
+    ['Period',fmt(s.period_min),'min'],['η RMS',s.authority_rms.toFixed(3),'']];
+  document.getElementById('metrics').innerHTML=M.map(x=>`<div class="metric"><div class="k">${x[0]}</div><div class="v">${x[1]} <span class="u">${x[2]}</span></div></div>`).join('');
+  const v=document.getElementById('verdict');
+  const good=s.authority_mean>=0.5;
+  v.innerHTML=`<b>${good?'Axis controllable on average':'Axis weakly controllable'}.</b> Mean authority ${(s.authority_mean*100).toFixed(0)}% along ${ax}; worst-point ${(s.authority_min*100).toFixed(0)}%. `+
+    (s.authority_min<0.2?'Near-singular geometry occurs within the orbit — a second actuator or momentum device is needed for those arcs.':'Authority stays usable around the whole orbit.');
+}
+document.querySelectorAll('#axisSeg button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#axisSeg button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); ax=b.dataset.ax; refresh();
+});
+const ip=document.getElementById('incPresets');
+[['ISS',51.6],['Equatorial',0],['Sun-sync',98]].forEach(([lab,val])=>{
+  const b=document.createElement('button');b.textContent=lab;
+  b.onclick=()=>{document.getElementById('inc').value=val;refresh();};ip.appendChild(b);
+});
+['alt','inc'].forEach(id=>document.getElementById(id).addEventListener('input',refresh));
+document.getElementById('theme').addEventListener('click',()=>{
+  const h=document.documentElement,n=h.getAttribute('data-theme')==='light'?'dark':'light';
+  h.setAttribute('data-theme',n);try{localStorage.setItem('cf-theme',n)}catch(e){}
+});
+try{var _q=new URLSearchParams(location.search).get('theme');if(_q){document.documentElement.setAttribute('data-theme',_q);}else{var t=localStorage.getItem('cf-theme');if(t)document.documentElement.setAttribute('data-theme',t);}}catch(e){}
+
+if(window.THREE){ try{ initThree(); }catch(e){ cv.outerHTML='<div class="note">This device could not start WebGL, so the 3D globe is unavailable — the IGRF-14 numeric screen below is fully live.</div>'; } }
+else{ cv.outerHTML='<div class="note">3D library unavailable offline — the IGRF-14 numeric screen below is fully live.</div>'; }
+refresh();
+</script>
+</body>
+</html>

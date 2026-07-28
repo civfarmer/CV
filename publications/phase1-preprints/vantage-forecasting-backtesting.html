@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f17'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='27' font-weight='700' fill='%23d4b24c' text-anchor='middle'%3ECF%3C/text%3E%3C/svg%3E">
+<title>Comparative Efficacy of Holt-Winters, ETS and Croston Methods in Multi-Industry Rolling-Origin Backtesting</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{
+    --bg:#0b0f17; --bg2:#0e1420; --surface:#131b2a; --surface2:#182133;
+    --ink:#e9eef7; --ink2:#aab7cc; --muted:#7d8ba3; --line:#233145; --line2:#2c3d54;
+    --accent:#43b3a6; --accent-ink:#84d6ca; --gold:#d4b24c; --gold-soft:#e6cf8f;
+    --good:#43c59e; --warn:#e0a13a; --shadow:0 18px 50px -20px rgba(0,0,0,.7);
+    --radius:14px; --measure:70ch;
+    --font-display:'Zilla Slab',Georgia,'Times New Roman',serif;
+    --font-body:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --font-mono:'IBM Plex Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
+  }
+  html[data-theme="light"]{
+    --bg:#f4f1ec; --bg2:#ebe6dd; --surface:#ffffff; --surface2:#faf7f2;
+    --ink:#221e18; --ink2:#4c473e; --muted:#675f54; --line:#e7e1d6; --line2:#d9d2c5;
+    --accent:#0d5f57; --accent-ink:#0a463f; --gold:#836819; --gold-soft:#6f5714; --good:#0e7a52;
+    --shadow:0 18px 44px -24px rgba(15,30,60,.35);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:radial-gradient(1100px 700px at 82% -8%,rgba(67,179,166,.10),transparent 60%),var(--bg);
+    color:var(--ink);font-family:var(--font-body);line-height:1.72;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  a{color:var(--accent-ink);text-decoration:none}
+  a:hover{text-decoration:underline}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+  ::selection{background:color-mix(in oklab,var(--accent) 32%,transparent)}
+
+  /* Top bar */
+  .top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    padding:11px clamp(16px,4vw,34px);background:color-mix(in oklab,var(--bg),transparent 8%);
+    backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:11px;color:var(--ink);min-width:0}
+  .crest{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;flex:0 0 auto;
+    background:linear-gradient(145deg,#0e7b6f,#0b655b);color:#fff;font-family:var(--font-display);font-weight:700;font-size:14px;box-shadow:var(--shadow)}
+  .brand .nm{font-family:var(--font-display);font-weight:700;font-size:14.5px;line-height:1.05}
+  .brand .rl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+  .topacts{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:8px 13px;border-radius:10px;font-weight:600;font-size:13px;
+    border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer;transition:.16s;white-space:nowrap;font-family:var(--font-body)}
+  .btn:hover{border-color:var(--accent);transform:translateY(-1px);text-decoration:none}
+  .btn svg{width:16px;height:16px}
+  .btn.icon{padding:8px;width:36px}
+
+  /* Article */
+  main.wrap{max-width:calc(var(--measure) + 8rem);margin:0 auto;padding:clamp(26px,5vw,52px) clamp(18px,5vw,40px) 40px}
+  article.paper{max-width:var(--measure);margin:0 auto;font-size:1.05rem}
+  article.paper > *{max-width:var(--measure)}
+  .paper h1,.paper h2,.paper h3,.paper h4,.paper h5{font-family:var(--font-display);font-weight:600;line-height:1.18;color:var(--ink);letter-spacing:-.005em}
+  .paper h1{font-size:clamp(27px,4.4vw,40px);line-height:1.1;margin:0 0 .5rem;letter-spacing:-.015em}
+  .paper h2{font-size:clamp(20px,2.9vw,27px);margin:2.4rem 0 .9rem;padding-bottom:.35rem;border-bottom:1px solid var(--line)}
+  .paper h3{font-size:clamp(17px,2.2vw,21px);margin:1.9rem 0 .7rem}
+  .paper h4{font-size:16px;margin:1.5rem 0 .5rem;color:var(--ink2)}
+  .paper p{margin:0 0 1.05rem;overflow-wrap:anywhere;word-break:break-word}
+  .paper li{overflow-wrap:anywhere;word-break:break-word}
+  .paper strong{color:var(--ink);font-weight:700}
+  .paper em{color:inherit}
+  /* Byline: first bold paragraph right after the title */
+  .paper h1 + p{font-size:1.06rem;color:var(--ink);margin-bottom:.4rem}
+  .paper h1 + p + p em{color:var(--muted);font-size:.92rem}
+  .paper ul,.paper ol{margin:0 0 1.1rem;padding-left:1.5rem}
+  .paper li{margin:.3rem 0}
+  .paper li::marker{color:var(--accent)}
+  .paper a{color:var(--accent-ink);border-bottom:1px solid color-mix(in oklab,var(--accent) 35%,transparent)}
+  .paper a:hover{border-bottom-color:var(--accent);text-decoration:none}
+  .paper hr{border:none;border-top:1px solid var(--line);margin:2rem 0}
+
+  /* Blockquote (scope notes) */
+  .paper blockquote{margin:1.4rem 0;padding:1rem 1.2rem;border:1px solid var(--line2);border-left:3px solid var(--gold);
+    border-radius:12px;background:color-mix(in oklab,var(--gold) 7%,var(--surface));color:var(--ink2)}
+  .paper blockquote p{margin:0 0 .6rem}
+  .paper blockquote p:last-child{margin-bottom:0}
+  .paper blockquote strong{color:var(--ink)}
+
+  /* Tables */
+  .paper .tablewrap{overflow-x:auto;margin:1.3rem 0;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+  .paper table{border-collapse:collapse;width:100%;font-size:.95rem;line-height:1.5}
+  .paper th,.paper td{text-align:left;padding:.6rem .85rem;border-bottom:1px solid var(--line);vertical-align:top}
+  .paper thead th{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--accent-ink);background:color-mix(in oklab,var(--accent) 8%,var(--surface2));border-bottom:1px solid var(--line2)}
+  .paper tbody tr:last-child td{border-bottom:none}
+  .paper tbody tr:nth-child(even){background:color-mix(in oklab,var(--ink) 3%,transparent)}
+
+  /* Code */
+  .paper code{font-family:var(--font-mono);font-size:.88em;background:color-mix(in oklab,var(--accent) 10%,var(--surface));
+    border:1px solid var(--line);border-radius:5px;padding:.08em .38em;color:var(--accent-ink)}
+  .paper pre{background:var(--bg2);border:1px solid var(--line2);border-radius:12px;padding:1rem 1.15rem;overflow-x:auto;
+    margin:1.3rem 0;line-height:1.55}
+  .paper pre code{background:none;border:none;padding:0;color:var(--ink2);font-size:.86rem}
+
+  /* Mermaid figures */
+  .diagram-figure{margin:1.6rem 0;background:#f7f8fb;border:1px solid var(--line2);border-radius:14px;padding:1.1rem 1rem .6rem;
+    box-shadow:var(--shadow);overflow-x:auto}
+  html[data-theme="light"] .diagram-figure{background:#fbfaf7}
+  .diagram-figure pre.mermaid{background:none;border:none;box-shadow:none;padding:0;margin:0;text-align:center;
+    color:#1c2530;font-family:var(--font-mono);font-size:.82rem;line-height:1.5;white-space:pre-wrap}
+  .diagram-figure svg{max-width:100%;height:auto;display:block;margin:0 auto}
+  .diagram-figure figcaption{margin-top:.7rem;text-align:center;font-family:var(--font-mono);font-size:.7rem;
+    letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+
+  /* Footnotes */
+  .paper .footnote{margin-top:2.6rem;padding-top:1rem;border-top:1px solid var(--line);font-size:.9rem;color:var(--ink2)}
+  .paper .footnote hr{display:none}
+  .paper .footnote ol{padding-left:1.3rem}
+  .paper .footnote li{margin:.45rem 0}
+  .paper .footnote-backref{border-bottom:none;margin-left:.3rem}
+  .paper sup a.footnote-ref{border-bottom:none;color:var(--accent-ink);font-weight:600;padding:0 .05em}
+
+  /* TOC (if [TOC] used) */
+  .paper .toc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:.9rem 1.2rem;margin:1.4rem 0;font-size:.95rem}
+  .paper .toc > ul{margin:0}
+
+  footer.paperfoot{max-width:var(--measure);margin:3rem auto 0;padding-top:1.3rem;border-top:1px solid var(--line);
+    color:var(--muted);font-size:.82rem;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}
+  footer.paperfoot a{color:var(--ink2)}
+  footer.paperfoot .mono{font-family:var(--font-mono)}
+
+  .pubnav{display:flex;flex-wrap:wrap;gap:2px 16px;align-items:center;padding:9px clamp(18px,4vw,40px);
+    background:color-mix(in oklab,var(--bg2),transparent 20%);border-bottom:1px solid var(--line);
+    font-family:var(--font-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase}
+  .pubnav a{color:var(--ink2);padding:4px 0;border-bottom:2px solid transparent;text-decoration:none}
+  .pubnav a:hover{color:var(--ink)}
+  .pubnav a[aria-current="page"]{color:var(--accent-ink);border-bottom-color:var(--accent)}
+
+  .cfside{display:none}
+  @media(min-width:1080px){
+    body{padding-left:280px}
+    .pubnav{display:none}
+    .cfside{position:fixed;left:0;top:0;bottom:0;width:280px;z-index:30;display:flex;flex-direction:column;gap:18px;
+      padding:22px 18px;background:var(--bg2);border-right:1px solid var(--line);overflow-y:auto}
+  }
+  .cfside .cfbrand{display:flex;align-items:center;gap:11px}
+  .cfside .cfbrand img{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:0 0 auto}
+  .cfside .cfbrand .nm{font-family:var(--font-display);font-weight:700;font-size:15.5px;color:var(--ink);line-height:1.1}
+  .cfside .cfbrand .rl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px;line-height:1.5}
+  .cfside nav{display:flex;flex-direction:column;gap:4px}
+  .cfside nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;color:var(--ink2);font-size:14px;font-weight:500;border:1px solid transparent;text-decoration:none}
+  .cfside nav a svg{width:18px;height:18px;flex:0 0 auto}
+  .cfside nav a:hover{background:var(--surface);color:var(--ink)}
+  .cfside nav a.on{background:var(--surface);border-color:var(--line);color:var(--ink)}
+  .cfside .cffoot{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+  .cfside .cfavail{font-size:12px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+  .cfside .cfdot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 10px var(--good);flex:0 0 auto;margin-top:4px}
+  .cfside .cfbtns{display:flex;gap:8px}
+  .cfside .cfcv{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:12px;font-weight:600;font-size:13px;
+    background:var(--accent);border:1px solid var(--accent);color:#fff;text-decoration:none}
+  .cfside .cfcv:hover{filter:brightness(1.08)}
+  .cfside .cftheme{width:40px;display:inline-flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer}
+  .cfside .cftheme svg{width:16px;height:16px}
+</style>
+</head>
+<body>
+  <aside class="cfside" aria-label="Site navigation">
+    <div class="cfbrand">
+      <img src="../../assets/img/portrait-2026.png" alt="Christopher Farmer">
+      <div><div class="nm">Christopher Farmer</div><div class="rl">Legal, Risk &amp; Technology Transformation</div></div>
+    </div>
+    <nav>
+      <a href="../../index.html#overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg><span>Overview</span></a>
+      <a href="../../index.html#projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Projects</span></a>
+      <a href="../../case-studies/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 5h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h7z"/></svg><span>Case studies</span></a>
+      <a href="../../index.html#experience"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Experience</span></a>
+      <a href="../../index.html#warroom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>War Room</span></a>
+      <a href="../../index.html#expertise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.1L12 17l-5.5 3.3 1-6.1L3 8.9 9 8z"/></svg><span>Expertise</span></a>
+      <a href="../../index.html#credentials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg><span>Credentials</span></a>
+      <a href="../../publications/index.html" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg><span>Publications</span></a>
+      <a href="../../index.html#contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M4 7l8 6 8-6"/></svg><span>Contact</span></a>
+    </nav>
+    <div class="cffoot">
+      <div class="cfavail"><span class="cfdot"></span> Open to legal, risk &amp; transformation roles &mdash; Geneva</div>
+      <div class="cfbtns">
+        <a class="cfcv" href="../../docs/CV-Christopher-Farmer-2026-08.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg> CV</a>
+        <button class="cftheme" onclick="document.getElementById('theme')?document.getElementById('theme').click():(function(){var h=document.documentElement,n=h.getAttribute('data-theme')==='light'?'dark':'light';h.setAttribute('data-theme',n);try{localStorage.setItem('cf-theme',n)}catch(e){}})()" title="Toggle theme" aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="top">
+    <a class="brand" href="../index.html" aria-label="Back to Publications">
+      <div class="crest">CF</div>
+      <div><div class="nm">Christopher Farmer</div><div class="rl">Publications</div></div>
+    </a>
+    <div class="topacts">
+      <a class="btn" href="../index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M15 18l-6-6 6-6"/></svg>
+        Back to Publications
+      </a>
+      <button class="btn icon" id="theme" title="Toggle light / dark" aria-label="Toggle light or dark theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </div>
+  </div>
+<nav class="pubnav" aria-label="Site">
+  <a href="../../index.html#overview">Overview</a>
+  <a href="../../index.html#projects">Projects</a>
+  <a href="../../case-studies/index.html">Case studies</a>
+  <a href="../../index.html#experience">Experience</a>
+  <a href="../../index.html#warroom">War Room</a>
+  <a href="../../index.html#expertise">Expertise</a>
+  <a href="../../index.html#credentials">Credentials</a>
+  <a href="../index.html" aria-current="page">Publications</a>
+  <a href="../../index.html#contact">Contact</a>
+</nav>
+
+  <main class="wrap">
+    <article class="paper">
+<h1 id="comparative-efficacy-of-holt-winters-ets-and-croston-methods-in-multi-industry-rolling-origin-backtesting">Comparative Efficacy of Holt-Winters, ETS and Croston Methods in Multi-Industry Rolling-Origin Backtesting</h1>
+<p><strong>Christopher I. V. Farmer, LL.M. (University of Worcester) · Independent Researcher · civfarmer@gmail.com</strong></p>
+<p><em>Preprint — submitted; pending peer review. Version 1.0, July 2026.</em></p>
+<hr>
+<h2 id="abstract">Abstract</h2>
+<p>Operational demand forecasting rarely fails because a single algorithm is weak; it fails because one algorithm is imposed on heterogeneous series whose statistical shapes differ. We study a dependency-free forecasting engine that implements the classical exponential-smoothing family (simple exponential smoothing, Holt's linear trend, and additive Holt-Winters — the point-forecast equivalents of the additive error-trend-seasonal, or ETS, models), ordinary-least-squares regression with trend, seasonal dummies and exogenous drivers, and Croston's method for intermittent demand, together with seasonal-naive and moving-average baselines. Rather than committing to one model, the engine performs per-series <strong>rolling-origin (walk-forward) backtesting</strong> and selects a champion by lowest held-out <strong>Weighted Absolute Percentage Error (WAPE)</strong>, retaining challengers for transparency. We apply the engine across five commercial domains with deliberately different operational cadences: brewery, direct-to-consumer (DTC) e-commerce and discrete manufacturing on <strong>weekly</strong> data with a 13-week (one-quarter) operational horizon; software-as-a-service (SaaS) recurring revenue and education enrolment on <strong>monthly</strong> data with a 12-month horizon. Running the reference engine over the 31 benchmark series produces an interpretable and consistent pattern: additive Holt-Winters wins where annual seasonality is strong and at least two seasonal cycles of history exist (8 of 31 series); Holt's linear trend wins for compounding recurring revenue where no genuine annual season exists (5 series, including every SaaS segment); regression captures clean trending series, including structurally declining lines (5 series); robust local-level models (moving average, simple exponential smoothing) win on high-volume, weakly seasonal, noisy lines (8 series); and — importantly — <strong>seasonal-naive beats Croston on every intermittent line in the corpus</strong>, because the intermittency present is <em>scheduled</em> (limited seasonal releases, cyclic service batches) rather than the memoryless random arrival process Croston assumes. We argue that the operational horizon and bucket must be matched to the domain's decision cadence and lead-time structure, not chosen for statistical convenience, and that backtest-driven per-series selection is the honest way to let each series declare its own model. All reported figures are computed by executing the reference engine on semi-synthetic benchmark datasets whose seasonal shapes are anchored to public sources and whose operational detail is clearly-labelled simulation; they should therefore be read as demonstrating <em>selection behaviour under known generating processes</em>, not as measured accuracy on proprietary operational data.</p>
+<p><strong>Keywords:</strong> demand forecasting; exponential smoothing; Holt-Winters; ETS; Croston's method; intermittent demand; rolling-origin evaluation; walk-forward backtesting; WAPE; model selection; inventory management; recurring revenue</p>
+<hr>
+<h2 id="1-introduction">1. Introduction</h2>
+<p>Applied forecasting practice contains a recurring category error. A team adopts one model family — often whatever a library defaults to, or whatever the most recent competition rewarded — and applies it uniformly to a portfolio of series that in reality have nothing statistically in common. A brewery's flagship lager, a fast-growing skincare hero SKU, a compounding enterprise SaaS segment, and a trickle of after-sales spare parts are not four instances of the same forecasting problem. They differ in the strength and existence of seasonality, in whether growth is compounding or linear, in the fraction of periods with zero demand, in the length of available history, and — crucially — in the <em>decision</em> the forecast must support and the <em>cadence</em> at which that decision is taken.</p>
+<p>This paper takes the opposite stance: <strong>the model should be a property of the series, discovered empirically, not a property of the vendor, imposed by default.</strong> We examine a compact, dependency-free forecasting engine built around this principle. The engine implements a bank of transparent, classical methods — the exponential-smoothing family, OLS regression with calendar and exogenous features, and Croston's method for intermittent demand, plus honest baselines — and, for each series, decides among them by rolling-origin backtesting. The champion is whichever model forecasts held-out actuals most accurately, measured primarily by WAPE. Nothing is selected on the basis of in-sample fit, and nothing is selected by name or reputation.</p>
+<p>We make four contributions. First, <strong>a reproducible, inspectable engine</strong>: because it has no external dependencies and computes real statistics, every claim here can be reproduced by executing the same code on the same data. Second, <strong>a genuinely multi-industry evaluation</strong> across five domains configured independently, each with its own model policy, seasonality assumption, metrics, constraints and — deliberately — its own granularity and horizon. Third, <strong>an argument that horizon must match domain</strong>: weekly buckets with a 13-week horizon are correct for brewery, DTC and manufacturing because supplier lead times are quoted in weeks, whereas monthly buckets with a 12-month horizon are correct for SaaS and education because recurring revenue and termly enrolment are month-native. Fourth, <strong>a precise account of which method wins where, and why</strong>, connecting champion selection to two measurable properties — seasonality strength and intermittency structure — and correcting a common misconception about Croston's method: it is the right model for <em>random</em> intermittent demand, and its defeat by seasonal-naive on <em>scheduled</em> intermittent demand is diagnostic, not a malfunction.</p>
+<p>The remainder of the paper reviews related work (§2), specifies the engine and evaluation protocol (§3), describes the five domains and the experimental design (§4), reports results computed by running the engine (§5), discusses the drivers of model choice and the horizon-matching argument (§6), and states limitations (§7) before concluding (§8).</p>
+<hr>
+<h2 id="2-related-work">2. Related work</h2>
+<p><strong>Exponential smoothing and the ETS family.</strong> The methods at the core of this study descend from the exponentially weighted moving average and its extensions to trend and seasonality by Holt (1957, reprinted 2004) and Winters (1960). For decades these recursions were treated as ad hoc; Ord, Koehler and Snyder (1997) and Hyndman, Koehler, Snyder and Grose (2002) placed them on a rigorous statistical footing by showing that each smoothing method corresponds to a state-space model with a single source of error, giving the now-standard error-trend-seasonal (ETS) taxonomy and an automatic selection procedure based on information criteria. Gardner (2006) surveys the state of the art. Our engine implements the <em>point-forecast recursions</em> of the additive ETS sub-family — ETS(A,N,N) as simple exponential smoothing, ETS(A,A,N) as Holt's linear trend, and ETS(A,A,A) as additive Holt-Winters — fitting smoothing parameters by grid-search minimisation of one-step in-sample squared error. It does not perform full likelihood-based ETS estimation with automatic error/trend/season-type selection; instead it competes the smoothers against other families and selects among them by out-of-sample backtest, a philosophy analogous to automatic ETS but driven by held-out error rather than in-sample penalised likelihood.</p>
+<p><strong>Intermittent demand.</strong> When demand occurs sporadically, with many zero periods, ordinary smoothing of the raw series is biased because it decays the estimate during runs of zeros. Croston (1972) proposed decoupling the problem into two separately smoothed processes — the size of non-zero demand and the interval between demands — and combining them into a demand-rate estimate. Syntetos and Boylan (2005) showed that Croston's estimator is itself biased and proposed the widely used Syntetos-Boylan Approximation (SBA) correction, and Syntetos, Boylan and Croston (2005) gave an operational classification of demand patterns (by average inter-demand interval and the squared coefficient of variation of demand sizes) that tells a practitioner <em>when</em> intermittent methods should be preferred. Our engine implements classical Croston and always competes it on series flagged or detected as intermittent; a production port would add the SBA bias correction. A central empirical finding below is that the presence of zeros is not sufficient justification for Croston: the <em>structure</em> of the intermittency matters.</p>
+<p><strong>Rolling-origin evaluation.</strong> The methodological backbone of this work is out-of-sample evaluation. Tashman (2000) reviews the design of out-of-sample accuracy tests and argues that rolling-origin evaluation — repeatedly advancing the forecast origin through the series and re-forecasting — yields more efficient and reliable accuracy estimates than a single fixed split. Bergmeir and Benítez (2012) examine cross-validation for time-series predictors and support the use of such forward-validation schemes for model selection. We adopt an expanding-window rolling-origin protocol as the sole basis for champion selection.</p>
+<p><strong>Accuracy metrics.</strong> Hyndman and Koehler (2006) showed that many popular accuracy measures degenerate in common situations — percentage errors explode near zero actuals, and symmetric variants have their own pathologies — and recommended scale-free measures such as the Mean Absolute Scaled Error (MASE). For portfolios reported to operators in units of demand and cash, we use WAPE (the sum of absolute errors divided by the sum of absolute actuals, also called weighted MAPE), which is robust to the scale of individual series and to occasional zeros, while retaining sMAPE and MASE-adjacent diagnostics. WAPE and closely related weighted errors are the reporting standard in large-scale retail forecasting; the M5 competition (Makridakis, Spiliotis and Assimakopoulos, 2022), run on Walmart hierarchical unit-sales data, evaluated on a weighted, scaled error and found that only a small minority of entries beat automatic exponential smoothing at the disaggregated series level — a reminder that the classical smoothers remain strong baselines precisely where our study focuses. The comprehensive treatment of all of these methods in Hyndman and Athanasopoulos (2021) is the standard reference and informs the engine's design.</p>
+<p><strong>Positioning.</strong> Relative to this literature, the present work is not a new algorithm but an <em>engineering-and-evaluation</em> study: it asks what happens when a disciplined per-series backtest-and-select procedure, built from well-understood classical components, is applied honestly across five operationally distinct domains, and reports the resulting champion assignments and their explanations.</p>
+<hr>
+<h2 id="3-methods">3. Methods</h2>
+<h3 id="31-the-forecasting-engine">3.1 The forecasting engine</h3>
+<p>The engine is a single dependency-free module. Series are plain arrays of numbers, oldest first; a series carries a seasonal period <code>s</code> (12 for monthly, 52 for weekly) supplied by the domain configuration. All models expose a common interface — a name, fitted parameters, one-step in-sample fitted values (used to estimate residual dispersion), and a <code>forecast(h)</code> function — so they can be competed uniformly.</p>
+<p><strong>Model families.</strong></p>
+<ul>
+<li><strong>Seasonal-naive.</strong> Forecast for period <em>t+h</em> equals the observed value one full season earlier. An honesty baseline; strong when a series simply repeats a fixed seasonal pattern.</li>
+<li><strong>Moving average.</strong> Forecast equals the mean of the last <em>w</em> observations (default <em>w</em>=3). A robust local-level estimator for noisy series with weak structure.</li>
+<li><strong>Simple exponential smoothing (SES).</strong> Level-only smoother; smoothing parameter α chosen by grid search over 0.05–0.95 minimising in-sample sum of squared one-step errors (SSE). Equivalent to the ETS(A,N,N) point forecast.</li>
+<li><strong>Holt's linear trend.</strong> Level and additive trend, parameters (α, β) selected by two-dimensional grid search on SSE. Equivalent to ETS(A,A,N). Suited to compounding or steadily declining series.</li>
+<li><strong>Additive Holt-Winters.</strong> Level, additive trend and additive seasonal components with parameters (α, β, γ) selected by three-dimensional grid search on SSE; requires at least two full seasonal cycles of history. Equivalent to ETS(A,A,A).</li>
+<li><strong>OLS regression (trend + season + drivers).</strong> A linear model with intercept, a linear time trend, <em>s</em>−1 seasonal dummy variables, and optional exogenous drivers (temperature, promotions, price, ad-spend, PMI, marketing spend, pipeline). Coefficients are estimated by ridge-regularised normal equations (penalty 10⁻⁴, intercept unpenalised) for numerical stability. At weekly resolution the design matrix carries 53 calendar columns before drivers, which — as the results show — creates a real overfitting risk.</li>
+<li><strong>Croston's method (intermittent demand).</strong> Separate exponential smoothing (α=0.1) of non-zero demand sizes and inter-arrival intervals, combined into a constant demand-rate forecast. Classical Croston is implemented; the SBA bias correction is noted as the production upgrade.</li>
+</ul>
+<p><strong>Metrics.</strong> For aligned held-out actual/prediction pairs the engine computes MAE, RMSE, MAPE, sMAPE, <strong>WAPE</strong> (headline), bias, and percentage bias. WAPE is defined as Σ|predictionᵢ − actualᵢ| ⁄ Σ|actualᵢ| × 100. When the held-out actuals sum to zero over a backtest window — possible for heavily intermittent series — WAPE is undefined and the engine falls back to sMAPE for ranking.</p>
+<p><strong>Prediction intervals.</strong> From the champion's in-sample residual standard deviation σ, the engine forms 80% and 95% bands using normal quantiles, widening the band with horizon as σ·√(1 + 0.4k) at step <em>k</em> — the standard growth of forecast uncertainty for smoothing models — and flooring lower bounds at zero for non-negative demand.</p>
+<p><strong>Recalibration.</strong> When a new actual arrives, the engine appends it, classifies it against the prior 95% interval and residual scale as <em>normal</em>, <em>anomalous</em> (beyond ~1.5σ) or <em>structural</em> (outside the interval), re-estimates the level and forecast, and re-runs selection, changing the champion only when drift or performance deterioration justifies it. Recalibration is part of the operational system but is not exercised in the static evaluation reported here.</p>
+<h3 id="32-rolling-origin-backtesting-and-champion-selection">3.2 Rolling-origin backtesting and champion selection</h3>
+<p>Model selection is performed exclusively out-of-sample by expanding-window rolling-origin evaluation. Given a series of length <em>n</em>, a backtest horizon <em>H</em>, and a fold count <em>F</em>, the engine defines fold origins at cut points <em>n − H − i</em> for <em>i</em> = 0,…,<em>F</em>−1 (subject to a minimum training length of max(<em>H</em>+1, ⌊<em>n</em>/2⌋)), and, at each origin, fits the model on all observations up to the cut and forecasts <em>H</em> steps ahead. The held-out predictions and actuals are pooled across folds and scored once. In the configuration used by the operational dashboards and reproduced here, <em>H</em> = 3 and <em>F</em> = 4, giving four contiguous, recent, expanding-window origins each evaluated three steps ahead — twelve held-out points per series.</p>
+<p>Candidate models are restricted to the domain's <strong>model policy</strong> (a declared list of eligible families; see §4), with Croston additionally forced onto any series that is flagged intermittent or whose zero fraction exceeds 30%. Each eligible candidate is backtested; candidates are ranked by WAPE (with sMAPE as the fallback when WAPE is undefined); the lowest-error model becomes the champion and the runner-up is retained as a challenger with a human-readable selection reason. This makes model choice a transparent, auditable consequence of measured held-out error rather than an analyst's prior.</p>
+<p>A deliberate design property deserves emphasis: <strong>the selection horizon (H = 3) is shorter than the operational horizon</strong> at which forecasts are actually issued (13 weeks or 12 months). Selection is therefore performed at a short, statistically reliable horizon and the champion is then extrapolated to the operational horizon. We return to the trade-offs of this choice in §6 and §7.</p>
+<hr>
+<h2 id="4-experimental-design">4. Experimental design</h2>
+<h3 id="41-five-domains-five-cadences">4.1 Five domains, five cadences</h3>
+<p>The engine is instantiated across five domains. Each was configured independently with its own company, metrics, constraints, seasonal assumptions, model policy, and — the design lever central to this paper — its own granularity and horizon. Table 1 summarises the configurations.</p>
+<p><strong>Table 1. Domain configurations.</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Domain (company)</th>
+<th>Mode</th>
+<th>Granularity</th>
+<th>Season <em>s</em></th>
+<th>Op. horizon</th>
+<th>History</th>
+<th>Entities</th>
+<th>Model-policy headline</th>
+<th>Public seasonal anchors</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Brewery (Hopmarket Brewing Co.)</td>
+<td>inventory</td>
+<td>weekly</td>
+<td>52</td>
+<td>13 wk</td>
+<td>156 wk (3 yr)</td>
+<td>8 SKUs</td>
+<td>Holt-Winters · ETS · weather-regression · Croston</td>
+<td>FRED MRTSSM4453USN; Boston Beer (NYSE: SAM); BBPA</td>
+</tr>
+<tr>
+<td>DTC e-commerce (Kindred Goods)</td>
+<td>inventory</td>
+<td>weekly</td>
+<td>52</td>
+<td>13 wk</td>
+<td>156 wk</td>
+<td>6 SKUs</td>
+<td>Holt-Winters · ETS · promo-regression · Croston</td>
+<td>FRED ECOMNSA; Warby Parker (WRBY); FIGS</td>
+</tr>
+<tr>
+<td>Manufacturing (Nexus Devices)</td>
+<td>inventory</td>
+<td>weekly</td>
+<td>52</td>
+<td>13 wk</td>
+<td>156 wk</td>
+<td>6 lines</td>
+<td>Holt-Winters · regression · Croston · capacity-constrained</td>
+<td>FRED DGORDER; ISM PMI; Sonos (SONO)</td>
+</tr>
+<tr>
+<td>SaaS (Cadence)</td>
+<td>subscription</td>
+<td>monthly</td>
+<td>12</td>
+<td>12 mo</td>
+<td>30 mo</td>
+<td>5 segments</td>
+<td>Cohort/trend · Holt · regression · conservative baselines</td>
+<td>monday.com (MNDY); HubSpot (HUBS); KeyBanc/OpenView</td>
+</tr>
+<tr>
+<td>Education (Northwind Academy)</td>
+<td>capacity</td>
+<td>monthly</td>
+<td>12</td>
+<td>12 mo</td>
+<td>30 mo</td>
+<td>6 courses</td>
+<td>Holt-Winters · regression on leads/marketing · capacity-constrained</td>
+<td>HESA; UK DfE; Office for Students</td>
+</tr>
+</tbody>
+</table></div>
+<p>The three inventory domains run on <strong>weekly</strong> buckets with a <strong>13-week</strong> (one-quarter) operational horizon, because breweries, online retailers and hardware manufacturers place replenishment or component orders on a weekly cycle against supplier lead times quoted in weeks (typically 4–8). A monthly bucket cannot time a reorder against a five-week lead time; the weekly quarter horizon is the shortest window that spans the longest lead time plus a review period. The two non-inventory domains run on <strong>monthly</strong> buckets with a <strong>12-month</strong> horizon, because their governing quantities — MRR, ARR, churn, net revenue retention and cash runway for SaaS; termly intakes and tutor capacity for education — are month-native, and a weekly bucket has no operational meaning (MRR is billed monthly; tutors are not staffed per week). Section 6 develops this horizon-matching argument.</p>
+<h3 id="42-data-provenance-and-the-honesty-of-the-benchmark">4.2 Data provenance and the honesty of the benchmark</h3>
+<p>The five datasets are <strong>semi-synthetic</strong> and are labelled as such throughout the source system. Their <em>seasonal shapes and scales</em> are anchored to real public data — for example, alcohol-retail seasonality from the U.S. Census/FRED series MRTSSM4453USN and Boston Beer public filings for the brewery; e-commerce seasonality from FRED ECOMNSA and public DTC filings; durable-goods demand and PMI for manufacturing; public SaaS churn/retention benchmarks for the SaaS segments; and HESA intake seasonality for education. The <em>operational detail</em> layered onto those shapes — per-SKU weekly volumes, inventory, lead times, per-segment MRR, per-course enrolment — is deterministically generated simulation, seeded for reproducibility, and is explicitly flagged as simulated wherever it appears. Documented, forecast-changing events are overlaid (a July-2023 heatwave, an August-2024 city festival, a pub-group contract from April 2025 for the brewery; a Black-Friday lift and a flash sale for DTC; a component-shortage output cut and a pre-order ramp for manufacturing; an enterprise-logo step and a self-serve churn quarter for SaaS; a corporate-training framework agreement for education).</p>
+<p>The consequence for interpretation is important and we state it plainly. Because the data-generating process is synthetic, the WAPE figures in §5 are <strong>not</strong> empirical accuracy measurements on real proprietary operational series. They are, however, <strong>not fabricated</strong>: every number is produced by executing the actual reference engine on the actual benchmark series under the protocol of §3.2. They therefore faithfully demonstrate how the selection machinery behaves when the underlying structure — seasonality strength, trend, intermittency — is known by construction, which is exactly what a methodology study needs. Where a documented reference value from the project's own handoff notes exists, we report it and compare.</p>
+<h3 id="43-protocol-and-reproducibility">4.3 Protocol and reproducibility</h3>
+<p>For every entity in every domain, the engine was invoked exactly as the production dashboards invoke it: <code>autoSelect</code> with the domain's season, the domain's model-policy family list, exogenous drivers for entities configured to use them, a backtest horizon of 3, and four folds; followed by <code>buildForecast</code> at the full operational horizon (13 weeks or 12 months) for the point forecast and prediction interval. Champion, champion WAPE, the full challenger ranking, the next-period point forecast and its 95% interval were recorded. The evaluation is deterministic: re-running the engine reproduces every figure below exactly.</p>
+<hr>
+<h2 id="5-results">5. Results</h2>
+<h3 id="51-champion-assignments-and-accuracy">5.1 Champion assignments and accuracy</h3>
+<p>Table 2 reports, for all 31 series, the selected champion, its backtested WAPE (three-step-ahead, four rolling origins), the next-period point forecast and its 95% prediction interval. Two heavily intermittent lines have WAPE undefined on their backtest window (all held-out actuals summed to zero); for these the engine ranked by sMAPE, shown in brackets.</p>
+<p><strong>Table 2. Per-series champions and backtested error (engine output).</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Domain</th>
+<th>Entity</th>
+<th>Champion</th>
+<th>WAPE %</th>
+<th>Next-period forecast (95% PI)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Brewery</td>
+<td>Helios Lager (flagship, summer-peaking)</td>
+<td><strong>Holt-Winters</strong></td>
+<td>7.5</td>
+<td>566 cases (470–662)</td>
+</tr>
+<tr>
+<td>Brewery</td>
+<td>Tropic IPA (fast-growing, +30%/yr)</td>
+<td><strong>Holt-Winters</strong></td>
+<td>3.6</td>
+<td>332 (262–402)</td>
+</tr>
+<tr>
+<td>Brewery</td>
+<td>Midnight Stout (winter line)</td>
+<td>Seasonal-naive</td>
+<td>5.6</td>
+<td>83 (53–113)</td>
+</tr>
+<tr>
+<td>Brewery</td>
+<td>Harvest Pale Ale</td>
+<td><strong>Holt-Winters</strong></td>
+<td>8.8</td>
+<td>175 (137–213)</td>
+</tr>
+<tr>
+<td>Brewery</td>
+<td>Solstice Saison (limited release)</td>
+<td>Seasonal-naive</td>
+<td>n/a (sMAPE 50)</td>
+<td>60 (0–129)</td>
+</tr>
+<tr>
+<td>Brewery</td>
+<td>Aurora Gin (Christmas gifting)</td>
+<td>Holt (trend)</td>
+<td>7.1</td>
+<td>50 (35–64)</td>
+</tr>
+<tr>
+<td>Brewery</td>
+<td>Orchard Cider (strong summer peak)</td>
+<td><strong>Holt-Winters</strong></td>
+<td>3.9</td>
+<td>262 (215–309)</td>
+</tr>
+<tr>
+<td>Brewery</td>
+<td>Clear Skies 0.5% (+38%/yr, Dry-Jan)</td>
+<td>Regression</td>
+<td>4.5</td>
+<td>172 (157–187)</td>
+</tr>
+<tr>
+<td>DTC</td>
+<td>Aurora Serum (hero SKU)</td>
+<td>Moving average</td>
+<td>7.5</td>
+<td>1,128 units (730–1,525)</td>
+</tr>
+<tr>
+<td>DTC</td>
+<td>Lumen Candle (new launch, +55%/yr)</td>
+<td>Regression</td>
+<td>6.4</td>
+<td>437 (370–504)</td>
+</tr>
+<tr>
+<td>DTC</td>
+<td>Everyday Tote (bestseller)</td>
+<td>Moving average</td>
+<td>6.5</td>
+<td>764 (464–1,064)</td>
+</tr>
+<tr>
+<td>DTC</td>
+<td>Trail Bottle (summer accessory)</td>
+<td>Seasonal-naive</td>
+<td>3.9</td>
+<td>745 (622–868)</td>
+</tr>
+<tr>
+<td>DTC</td>
+<td>Summit Jacket (winter apparel)</td>
+<td>Moving average</td>
+<td>7.3</td>
+<td>229 (89–368)</td>
+</tr>
+<tr>
+<td>DTC</td>
+<td>Holiday Gift Set (seasonal bundle)</td>
+<td>Seasonal-naive</td>
+<td>n/a (sMAPE 0)</td>
+<td>0 (0–184)</td>
+</tr>
+<tr>
+<td>Manufacturing</td>
+<td>Nexus Hub (flagship device)</td>
+<td>Moving average</td>
+<td>5.1</td>
+<td>506 units (415–598)</td>
+</tr>
+<tr>
+<td>Manufacturing</td>
+<td>Edge Cam (new launch, +48%/yr)</td>
+<td><strong>Holt-Winters</strong></td>
+<td>7.6</td>
+<td>385 (321–449)</td>
+</tr>
+<tr>
+<td>Manufacturing</td>
+<td>Aura Sensor (volume line)</td>
+<td>SES</td>
+<td>5.4</td>
+<td>837 (718–956)</td>
+</tr>
+<tr>
+<td>Manufacturing</td>
+<td>Nexus Pro (premium, Q4-weighted)</td>
+<td>Moving average</td>
+<td>6.0</td>
+<td>213 (173–254)</td>
+</tr>
+<tr>
+<td>Manufacturing</td>
+<td>Hub v1 legacy (EOL, −12%/yr)</td>
+<td>Regression</td>
+<td>4.5</td>
+<td>142 (116–167)</td>
+</tr>
+<tr>
+<td>Manufacturing</td>
+<td>Service Spares (after-sales)</td>
+<td>Seasonal-naive</td>
+<td>37.6</td>
+<td>70 (0–143)</td>
+</tr>
+<tr>
+<td>SaaS</td>
+<td>Enterprise (lumpy, low churn)</td>
+<td>SES</td>
+<td>2.7</td>
+<td>£215,095 (204,312–225,878)</td>
+</tr>
+<tr>
+<td>SaaS</td>
+<td>Mid-market (compounding core)</td>
+<td>Holt (trend)</td>
+<td>1.2</td>
+<td>£209,143 (207,588–210,697)</td>
+</tr>
+<tr>
+<td>SaaS</td>
+<td>Self-serve SMB (churny)</td>
+<td>Holt (trend)</td>
+<td>1.5</td>
+<td>£188,228 (185,347–191,110)</td>
+</tr>
+<tr>
+<td>SaaS</td>
+<td>Partners/API (+7.5%/mo)</td>
+<td>Holt (trend)</td>
+<td>2.4</td>
+<td>£191,570 (190,097–193,044)</td>
+</tr>
+<tr>
+<td>SaaS</td>
+<td>Legacy plan (declining)</td>
+<td>Holt (trend)</td>
+<td>1.4</td>
+<td>£17,412 (17,105–17,719)</td>
+</tr>
+<tr>
+<td>Education</td>
+<td>Data Analytics Bootcamp (+26%/yr)</td>
+<td><strong>Holt-Winters</strong></td>
+<td>9.9</td>
+<td>93 students (67–118)</td>
+</tr>
+<tr>
+<td>Education</td>
+<td>Cloud Engineering Cert (+30%/yr)</td>
+<td><strong>Holt-Winters</strong></td>
+<td>8.2</td>
+<td>53 (41–66)</td>
+</tr>
+<tr>
+<td>Education</td>
+<td>Intro to Coding (high volume)</td>
+<td><strong>Holt-Winters</strong></td>
+<td>4.0</td>
+<td>104 (84–125)</td>
+</tr>
+<tr>
+<td>Education</td>
+<td>UX Design Diploma (steady)</td>
+<td>Regression</td>
+<td>2.3</td>
+<td>47 (44–50)</td>
+</tr>
+<tr>
+<td>Education</td>
+<td>Business Foundations (−6%/yr)</td>
+<td>Regression</td>
+<td>4.1</td>
+<td>27 (25–29)</td>
+</tr>
+<tr>
+<td>Education</td>
+<td>Leadership (corporate, contract-led)</td>
+<td>SES</td>
+<td>27.8</td>
+<td>70 (53–88)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="52-distribution-of-champions">5.2 Distribution of champions</h3>
+<p>Across the 31 series the champion distribution is:</p>
+<p><strong>Table 3. Champion frequency across all domains.</strong></p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Champion family</th>
+<th>Wins</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Additive Holt-Winters</td>
+<td>8</td>
+<td>Brewery lager, IPA, pale, cider; Mfg Edge Cam; Edu bootcamp, cloud, intro</td>
+</tr>
+<tr>
+<td>Seasonal-naive</td>
+<td>5</td>
+<td>Brewery stout, saison; DTC bottle, gift set; Mfg spares</td>
+</tr>
+<tr>
+<td>Holt (linear trend)</td>
+<td>5</td>
+<td>Brewery gin; all four SaaS growth segments</td>
+</tr>
+<tr>
+<td>OLS regression (trend+season)</td>
+<td>5</td>
+<td>Brewery low/no; DTC candle; Mfg legacy; Edu UX, business</td>
+</tr>
+<tr>
+<td>Moving average</td>
+<td>5</td>
+<td>DTC serum, tote, jacket; Mfg hub, pro</td>
+</tr>
+<tr>
+<td>Simple exponential smoothing</td>
+<td>3</td>
+<td>Mfg sensor; SaaS enterprise; Edu leadership</td>
+</tr>
+<tr>
+<td><strong>Croston</strong></td>
+<td><strong>0</strong></td>
+<td>Tested on saison, gift set, spares — lost every time</td>
+</tr>
+</tbody>
+</table></div>
+<p>No single family dominates; the six winning families are spread almost evenly, which is the central point — a uniform-model deployment would have been wrong for roughly five-sixths of the portfolio. Croston, although eligible and forced onto every intermittent line, never wins; §6.3 explains why this is the correct outcome.</p>
+<h3 id="53-the-model-arena-three-illustrative-competitions">5.3 The model arena: three illustrative competitions</h3>
+<p>The value of backtesting is visible in the full challenger rankings. Three examples (WAPE %, best first) are instructive.</p>
+<p><strong>Helios Lager (brewery flagship, strong annual season, weekly).</strong> Holt-Winters <strong>7.5</strong> | Holt 10.1 | SES 10.7 | Moving average 11.2 | Seasonal-naive 21.9 | Regression+drivers 28.7. Holt-Winters wins cleanly by modelling the 52-week seasonal state; note that the <em>driver-augmented regression is the worst model here</em> — with 51 weekly seasonal dummies plus temperature and promotion columns it overfits the expanding training windows and generalises poorly.</p>
+<p><strong>Service Spares (manufacturing after-sales, lumpy/intermittent).</strong> Seasonal-naive <strong>37.6</strong> | Regression 38.8 | Holt-Winters 55.2 | Moving average 71.3 | SES 72.4 | <strong>Croston 72.4</strong> | Holt 74.6. Every model struggles (lumpy demand is genuinely hard), but the deterministic service cycle is best captured by seasonal-naive; Croston, which assumes random arrivals, is among the worst.</p>
+<p><strong>Partners/API (SaaS, compounding growth, monthly).</strong> Holt <strong>2.4</strong> | Holt-Winters 11.6 | SES 14.0 | Moving average 19.6 | Regression 20.3 | Seasonal-naive 57.7. Holt-Winters was eligible (30 months ≥ two seasonal cycles) and competed, but lost by roughly a factor of five to Holt's trend model — there is no genuine annual season in recurring revenue for Holt-Winters to exploit, so it fits and extrapolates seasonal noise.</p>
+<h3 id="54-comparison-with-documented-reference-values">5.4 Comparison with documented reference values</h3>
+<p>The project's backend-handoff notes record reference champions and errors from an earlier <strong>monthly, horizon-6</strong> brewery seed: Helios Lager → Holt-Winters, WAPE ≈ 10%; Tropic IPA → Regression (trend+season), WAPE ≈ 6.5%; Solstice Saison → seasonal-naive beats Croston. Running the <em>current</em> weekly (horizon-13) seed reproduces two of these three conclusions exactly — Helios Lager remains a Holt-Winters series (WAPE 7.5% at weekly resolution) and Solstice Saison remains a seasonal-naive-beats-Croston series — while the Tropic IPA champion shifts from regression to Holt-Winters (WAPE 3.6%). This shift is not an inconsistency but an illustration of the paper's thesis: the champion is a genuine property of the <em>data and its granularity</em>. At monthly resolution a trend-plus-season regression best described the IPA's rapid growth with mild seasonality; at weekly resolution, with a full 52-week seasonal state and three years of history, Holt-Winters captures the same series more accurately. The selection procedure adapts; the analyst does not have to.</p>
+<hr>
+<h2 id="6-discussion">6. Discussion</h2>
+<h3 id="61-seasonality-strength-selects-holt-winters-when-there-is-enough-history">6.1 Seasonality strength selects Holt-Winters — when there is enough history</h3>
+<p>Every one of the eight Holt-Winters champions has strong, genuine annual seasonality <em>and</em> at least two full seasonal cycles of history: the brewery's weather-driven lager, IPA, pale ale and cider (156 weekly observations at <em>s</em>=52), the manufacturer's Q4-weighted new camera, and the academy's September-intake bootcamp, cloud certificate and intro course (30 monthly observations at <em>s</em>=12). Holt-Winters wins because it estimates and projects the seasonal component explicitly; competitors that ignore season (SES, Holt, moving average) systematically miss the peaks and troughs, and seasonal-naive, which captures the shape, cannot adapt its level or trend and so trails on series that are also growing. The two-cycle requirement is not incidental — it is why Holt-Winters is ineligible on very short series and why short-history growth segments fall back to trend or baseline models.</p>
+<h3 id="62-compounding-growth-without-a-season-selects-trend-models">6.2 Compounding growth without a season selects trend models</h3>
+<p>The cleanest single result is the SaaS column: <strong>all five recurring-revenue segments choose a trend model</strong> (Holt for the four growth/decline segments, SES for the lumpy enterprise segment), and Holt-Winters — though eligible — loses every time, typically by a large margin. Recurring revenue compounds month over month and has no true annual seasonality; a seasonal model asked to explain it will fit spurious seasonal structure into what is really trend plus noise, and pay for it out of sample. Holt's linear trend, by contrast, is almost exactly the right generating assumption for a book of MRR growing or declining at a roughly constant rate, which is why its backtested WAPE for the mid-market, self-serve, partners and legacy segments falls between 1.2% and 2.4%. The brewery's Aurora Gin (a distributed spirit with a Christmas gifting peak but modelled at weekly resolution over a short effective seasonal signal) similarly chooses Holt. The operational lesson is blunt: <strong>do not put a seasonal model on a series that has no season</strong>, and let the backtest enforce it.</p>
+<h3 id="63-intermittency-structure-not-the-mere-presence-of-zeros-decides-croston">6.3 Intermittency structure, not the mere presence of zeros, decides Croston</h3>
+<p>The most easily misread result is that Croston never wins. It would be wrong to conclude that Croston is a poor method; the correct reading is that <strong>none of the intermittent series in this corpus have the structure Croston is designed for.</strong> Croston (1972) models demand that arrives at <em>random</em> intervals with <em>random</em> sizes — a memoryless arrival process — and estimates a smoothed rate. The three intermittent lines here are different in kind: the brewery's Solstice Saison and the DTC Holiday Gift Set are <em>limited seasonal releases</em> whose zeros are scheduled (they are simply out of season for most of the year), and the manufacturer's Service Spares follow a <em>deterministic service cycle</em>. For scheduled zeros, seasonal-naive is close to optimal — it predicts zero out of season and the release quantity in season — while Croston's constant-rate estimate smears demand across periods where it does not occur. This connects directly to the demand-categorization framework of Syntetos, Boylan and Croston (2005): the decision to use an intermittent method should follow from measured inter-demand interval and demand-size variability, not from the observation that a series contains zeros. Our engine encodes exactly this discipline — it <em>tests</em> Croston on every intermittent line but <em>selects</em> it only if it actually wins the backtest, and here the more structured seasonal-naive always does. Reporting Croston's defeat, rather than hiding it, is the honest and informative outcome.</p>
+<h3 id="64-robust-local-level-models-win-on-noisy-weakly-seasonal-high-volume-lines">6.4 Robust local-level models win on noisy, weakly-seasonal, high-volume lines</h3>
+<p>Eight series choose moving average or SES. These are high-volume lines whose seasonal signal is weak relative to their week-to-week operational noise: the DTC hero serum, bestseller tote and winter jacket; the manufacturer's flagship hub, premium Pro and volume sensor; and the lumpy SaaS enterprise segment. On such series the marginal seasonal information a Holt-Winters model tries to estimate is swamped by noise, and the more heavily parameterised model overfits; a three-period moving average or a well-tuned SES tracks the local level more reliably out of sample. This is the bias–variance trade-off made operational: when structure is weak, the parsimonious estimator wins.</p>
+<h3 id="65-regression-earns-its-place-on-structured-trends-including-decline">6.5 Regression earns its place on structured trends, including decline</h3>
+<p>Five series choose OLS regression on trend and seasonal dummies, and the pattern is coherent: the brewery's fast-growing low/no line, the DTC candle launch, and — notably — two <em>declining</em> lines, the manufacturer's end-of-life Hub v1 (−12%/yr) and the academy's shrinking Business Foundations course (−6%/yr). A linear trend-plus-season regression extrapolates a clean, monotone trajectory more crisply than a smoother that must infer the trend from recent levels, and handles decline as naturally as growth. But §5.3 also shows regression's failure mode: at weekly resolution its 53-column seasonal design (plus drivers) is high-dimensional relative to the backtest folds, and on the strongly-seasonal lager and serum the driver-augmented regression is the <em>worst</em> candidate. Regression is powerful where trend is the dominant, clean signal and fragile where a parsimonious seasonal state would do better — precisely the discrimination a backtest can make and a default cannot.</p>
+<h3 id="66-why-the-operational-horizon-must-match-the-domain">6.6 Why the operational horizon must match the domain</h3>
+<p>The horizon and bucket are not free statistical parameters; they are dictated by the decision the forecast serves. The three inventory domains must answer <em>"how much do I order, and when, to avoid a stock-out before the next delivery?"</em> Supplier lead times are 4–8 weeks, review is weekly, and the binding planning window is therefore a quarter of weekly buckets — hence <em>s</em>=52 and a 13-week horizon. Aggregating these businesses to monthly buckets would destroy the resolution needed to time a reorder against a five-week lead time and would blur the very weekly promotional and weather spikes that drive stock-outs. The two non-inventory domains answer different questions — <em>"what will MRR and runway be next quarter?"</em> and <em>"will the September intake oversubscribe tutor capacity?"</em> — whose natural unit is the month; recurring revenue is billed monthly and enrolment is termly, so a weekly bucket would invent structure that has no operational referent and no data to support it. Matching granularity to cadence is thus simultaneously an accuracy decision (the model sees the right signal-to-noise) and an interpretability decision (the forecast lands in the operator's decision unit). A single engine can serve all five only because granularity and horizon are configuration, not hard-coded assumptions — the same code runs at <em>s</em>=52, <em>H</em>=13 and at <em>s</em>=12, <em>H</em>=12 without modification.</p>
+<p>A subtler design point concerns the <em>selection</em> horizon: champions are chosen on a three-step-ahead backtest but deployed to 13- or 12-step forecasts. This favours near-term accuracy and reduces variance in the selection metric (short-horizon errors estimate reliably from few folds), but does not directly optimise the full operational horizon — a model best at three steps is not guaranteed best at thirteen. We flag this as both a defensible efficiency choice and a limitation (§7).</p>
+<hr>
+<h2 id="7-limitations">7. Limitations</h2>
+<p>Several limitations bound the claims above.</p>
+<ol>
+<li>
+<p><strong>Semi-synthetic data.</strong> The benchmark series are simulation anchored to public seasonal shapes, not real proprietary operational data. The reported WAPE values are genuine engine outputs under known generating processes, but they demonstrate <em>selection behaviour</em>, not field accuracy. Absolute error levels (many single-digit WAPEs) are lower than one should expect on real, messier series and reflect the controlled noise of the generator. The champion <em>assignments</em>, which depend on structural properties the generator shares with real series, are the more transferable finding.</p>
+</li>
+<li>
+<p><strong>Selection horizon shorter than operational horizon.</strong> As noted, selection uses <em>H</em>=3 while forecasts are issued at 13 or 12 steps. A multi-horizon or operational-horizon backtest could change some borderline champions (for example, series where a trend model wins at short horizon but drifts at long horizon). The four-fold, recent-origin design also weights the most recent regime heavily, which is appropriate for drift-responsiveness but samples limited history.</p>
+</li>
+<li>
+<p><strong>Classical Croston without SBA.</strong> The engine implements classical Croston, not the Syntetos-Boylan bias-corrected estimator. On genuinely random intermittent demand — absent from this corpus — SBA would be the stronger comparator, and the "Croston never wins" result should not be generalised beyond scheduled-intermittency settings.</p>
+</li>
+<li>
+<p><strong>Additive Holt-Winters only.</strong> The seasonal smoother is additive; multiplicative seasonality (where seasonal amplitude scales with level) is not fitted, and the smoothers are not selected by likelihood/AIC as in a full ETS implementation. Some series with amplitude-scaling seasonality might be better served by multiplicative Holt-Winters or by log-transform-then-additive.</p>
+</li>
+<li>
+<p><strong>Regression conditioning at weekly resolution.</strong> The 53-column seasonal design is high-dimensional relative to the effective sample in each backtest fold; although ridge-regularised, it overfits on strongly seasonal weekly lines. Fourier-term seasonality or penalised seasonal splines would likely make regression more competitive and less fragile.</p>
+</li>
+<li>
+<p><strong>No probabilistic or hierarchical evaluation.</strong> Accuracy is assessed on point forecasts via WAPE/sMAPE; prediction-interval calibration and coverage are computed by the engine but not evaluated here, and no cross-series hierarchical reconciliation (as in M5) is attempted. Metrics also degenerate (WAPE undefined) on the most intermittent windows, where a scaled measure such as MASE would be more robust.</p>
+</li>
+<li>
+<p><strong>Single reference implementation.</strong> Results reflect one engine's parameter grids and defaults; a Python port to statsmodels/StatsForecast (planned in the project's handoff) should reproduce champions within tolerance, but library defaults can shift borderline cases, which is precisely why golden tests are specified.</p>
+</li>
+</ol>
+<hr>
+<h2 id="8-conclusion">8. Conclusion</h2>
+<p>Across five operationally distinct domains and 31 series, a disciplined procedure — build a bank of transparent classical models, backtest each on rolling origins, and select the per-series champion by held-out WAPE — produces an interpretable map from series structure to model choice. Strong annual seasonality with sufficient history selects additive Holt-Winters; compounding recurring revenue with no season selects Holt's trend; clean monotone trends, including decline, select regression; weak-signal high-volume noise selects robust local-level smoothers; and scheduled intermittency selects seasonal-naive over Croston, whose designed-for regime of random arrivals does not occur in this corpus. The champion genuinely changes with the data and even with its granularity, as the Tropic IPA monthly-to-weekly shift shows. The practical thesis is twofold: first, that no single method is best, and the honest way to exploit that is to let each series declare its model through out-of-sample backtesting rather than by analyst default; and second, that the forecasting horizon and bucket are operational commitments — they must match the domain's decision cadence and lead-time structure, so that the model sees the right signal and the forecast lands in the operator's decision unit. A single dependency-free engine can serve a brewery, an online retailer, a hardware manufacturer, a SaaS company and a training provider precisely because these choices are configuration, and because selection is evidence, not opinion.</p>
+<hr>
+<h2 id="reproducibility-statement">Reproducibility statement</h2>
+<p>All figures were produced by executing the reference engine (<code>forecast-engine.js</code>) on the five benchmark datasets (<code>brewery-data.js</code>, <code>dtc-data.js</code>, <code>manufacturing-data.js</code>, <code>saas-data.js</code>, <code>education-data.js</code>) under the protocol of §3.2 (rolling-origin backtest, <em>H</em>=3, four expanding-window folds, ranked by WAPE with sMAPE fallback) and the operational-horizon forecast of §3.1. Because the datasets are deterministically seeded, the evaluation is exactly reproducible. The datasets are semi-synthetic — seasonal shapes anchored to the public sources in Table 1, operational detail clearly-labelled simulation. Documented reference champion/WAPE values from the project's backend-handoff notes (an earlier monthly brewery seed) are cited in §5.4.</p>
+<hr>
+<h2 id="references">References</h2>
+<p>Bergmeir, C., &amp; Benítez, J. M. (2012). On the use of cross-validation for time series predictor evaluation. <em>Information Sciences</em>, 191, 192–213. https://doi.org/10.1016/j.ins.2011.12.028</p>
+<p>Croston, J. D. (1972). Forecasting and stock control for intermittent demands. <em>Operational Research Quarterly</em>, 23(3), 289–303. https://doi.org/10.1057/jors.1972.50</p>
+<p>Gardner, E. S., Jr. (2006). Exponential smoothing: The state of the art — Part II. <em>International Journal of Forecasting</em>, 22(4), 637–666. https://doi.org/10.1016/j.ijforecast.2006.03.005</p>
+<p>Holt, C. C. (1957). Forecasting seasonals and trends by exponentially weighted moving averages. Office of Naval Research Memorandum 52. Reprinted in <em>International Journal of Forecasting</em> (2004), 20(1), 5–10. https://doi.org/10.1016/j.ijforecast.2003.09.015</p>
+<p>Hyndman, R. J., &amp; Athanasopoulos, G. (2021). <em>Forecasting: Principles and Practice</em> (3rd ed.). OTexts, Melbourne. https://otexts.com/fpp3/</p>
+<p>Hyndman, R. J., &amp; Koehler, A. B. (2006). Another look at measures of forecast accuracy. <em>International Journal of Forecasting</em>, 22(4), 679–688. https://doi.org/10.1016/j.ijforecast.2006.03.001</p>
+<p>Hyndman, R. J., Koehler, A. B., Snyder, R. D., &amp; Grose, S. (2002). A state space framework for automatic forecasting using exponential smoothing methods. <em>International Journal of Forecasting</em>, 18(3), 439–454. https://doi.org/10.1016/S0169-2070(01)00110-8</p>
+<p>Makridakis, S., Spiliotis, E., &amp; Assimakopoulos, V. (2022). M5 accuracy competition: Results, findings, and conclusions. <em>International Journal of Forecasting</em>, 38(4), 1346–1364. https://doi.org/10.1016/j.ijforecast.2021.11.013</p>
+<p>Ord, J. K., Koehler, A. B., &amp; Snyder, R. D. (1997). Estimation and prediction for a class of dynamic nonlinear statistical models. <em>Journal of the American Statistical Association</em>, 92(440), 1621–1629. https://doi.org/10.1080/01621459.1997.10473684</p>
+<p>Syntetos, A. A., &amp; Boylan, J. E. (2005). The accuracy of intermittent demand estimates. <em>International Journal of Forecasting</em>, 21(2), 303–314. https://doi.org/10.1016/j.ijforecast.2004.10.001</p>
+<p>Syntetos, A. A., Boylan, J. E., &amp; Croston, J. D. (2005). On the categorization of demand patterns. <em>Journal of the Operational Research Society</em>, 56(5), 495–503. https://doi.org/10.1057/palgrave.jors.2601841</p>
+<p>Tashman, L. J. (2000). Out-of-sample tests of forecasting accuracy: An analysis and review. <em>International Journal of Forecasting</em>, 16(4), 437–450. https://doi.org/10.1016/S0169-2070(00)00065-0</p>
+<p>Winters, P. R. (1960). Forecasting sales by exponentially weighted moving averages. <em>Management Science</em>, 6(3), 324–342. https://doi.org/10.1287/mnsc.6.3.324</p>
+    </article>
+    <footer class="paperfoot">
+      <span>&copy; <span id="yr">2026</span> Christopher I. V. Farmer</span>
+      <span>&middot;</span>
+      <a href="../index.html">Back to Publications</a>
+      <span>&middot;</span>
+      <a href="../../docs/CV-Christopher-Farmer-2026-08.pdf" target="_blank" rel="noopener">CV</a>
+      <span>&middot;</span>
+      <span class="mono">Preprint &mdash; submitted; pending peer review &middot; not legal advice</span>
+    </footer>
+  </main>
+
+<script>
+  (function(){
+    var root=document.documentElement, KEY='cf-theme';
+    try{ var s=localStorage.getItem(KEY); if(s){ root.setAttribute('data-theme', s); } }catch(e){}
+    var btn=document.getElementById('theme');
+    if(btn){ btn.addEventListener('click', function(){
+      var next=root.getAttribute('data-theme')==='dark'?'light':'dark';
+      root.setAttribute('data-theme', next);
+      try{ localStorage.setItem(KEY, next); }catch(e){}
+    }); }
+    var yr=document.getElementById('yr'); if(yr){ yr.textContent=String(new Date().getFullYear()); }
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Methodology — Meridian</title>
+<link rel="stylesheet" href="../static/app.css">
+<link rel="icon" href="../static/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../static/apple-touch-icon.png">
+</head>
+<body>
+<div class="static-banner">Static export generated 2026-07-28 07:45Z from the private Meridian research build — every value keeps its own as-of timestamp and provenance label; search, filters and admin actions are inactive in this copy. Private academic review only — not for redistribution.</div>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="brand"><a href="../index.html">
+    <img class="brand-logo" src="../static/logo-crest.png" alt="" aria-hidden="true">MERIDIAN</a>
+    <span class="brand-sub">Regulatory &amp; Corporate Impact Intelligence — personal research build</span>
+  </div>
+  <button id="theme-toggle" aria-label="Toggle dark or light theme">◐</button>
+</header>
+
+<div class="shell">
+<nav class="sidenav" aria-label="Primary"><a href="../index.html">Companies</a><a href="../overview/index.html">Command Centre</a><a href="../regulatory/index.html">Regulatory Radar</a><a href="../sanctions/index.html">Sanctions &amp; Trade</a><a href="../matches/index.html">Impact Matches</a><a href="../calendar/index.html">Calendar</a><a href="../alerts/index.html">Alerts</a><a href="../filings/index.html">Filings</a><a href="../analysts/index.html">Analyst Targets</a><a href="#not-in-snapshot">Watchlists</a><a href="#not-in-snapshot">Portfolios</a><a href="#not-in-snapshot">Research Cases</a><a href="../graph/index.html">Link Graph</a><a href="../geography/index.html">Geography</a><a href="../sources/index.html">Source Health</a><a href="../quality/index.html">Data Quality</a><a href="../ingestion/index.html">Ingestion History</a><a href="../glossary/index.html">Glossary</a><a href="#not-in-snapshot">Settings</a><a href="../methodology/index.html" class="active">Methodology</a></nav>
+<main id="main">
+<h1>Methodology</h1>
+<section class="card"><h2>Truthfulness rules</h2>
+<p>Meridian never displays synthetic, estimated or placeholder data. A field
+without a verified source shows an explicit unavailable state and the reason.
+Every sourced row stores: source key, canonical URL, retrieval timestamp,
+publication timestamp, immutable raw artifact, SHA-256 content hash and parser
+version. Derived values are labelled Calculated Metric with formula version.</p></section>
+<section class="card"><h2>Value classes</h2>
+<p>SF Source Fact · CD Company Disclosure · ORF Official Regulatory Fact ·
+CM Calculated Metric · EBI Evidence-Based Inference · UNV Unverified.
+An inference is never presented as a disclosed fact.</p></section>
+<section class="card"><h2>Identity resolution</h2>
+<p>Deterministic identifiers first (ISIN → LEI within a known query batch,
+LEI, Swiss UID, CIK). Name normalisation is used only inside a known ISIN
+batch scope; every acceptance is logged with method, score and review status.
+Unresolved securities remain visibly unresolved.</p></section>
+<section class="card"><h2>Impact scoring (impact-1.1)</h2>
+<p>Each score is a weighted average of named factors:
+score = Σ(weight × value) / Σ(weight), value ∈ [0,1]. Factors, weights, values,
+contributions and explanations are stored per assessment and shown on the match
+page. Exposure and materiality remain «insufficient evidence» until disclosed
+figures (segment/geographic revenue) are ingested — they are never guessed.
+Confidence includes penalties for missing data and counter-evidence.
+The policy score set v1 (impact-1.1) adds 0-100 sub-scores computed only from
+real recorded inputs — source_reliability (source category), legal_certainty
+(legal stage), persistence (documented type+stage heuristic) — plus a triage
+composite (normalized product of available components; a ranking aid, never a
+return forecast). market_surprise, adaptability and market_sensitivity stay
+explicitly unavailable until their real inputs exist.
+See docs/SCORING_METHODOLOGY.md for the full model card.</p></section>
+<section class="card"><h2>Linkage layers</h2>
+<p>L1 direct legal applicability · L2 direct business exposure · L3 indirect
+exposure · L4 semantic/taxonomy candidates · L5 contradictory/negative
+evidence. Semantic similarity alone never establishes a material relationship;
+all matches are review-gated candidates.</p></section>
+<section class="card"><h2>Daily price snapshot timing</h2>
+<p>Prices refresh once daily at 07:30 local time (configurable). Rationale:
+the official closing price is the reference print used for index levels,
+fund NAVs and analyst price targets, making it the most comparable single
+daily figure; and by early morning Central European time the previous
+session's closes are final in every covered region (European closes from the
+prior evening, US overnight, Asia just completed). Intraday movement is
+deliberately not sampled — the Live links (Yahoo/Google Finance) on every
+security open real-time pages. Each stored price carries its exact capture
+and market timestamps.</p></section>
+<section class="card"><h2>Coverage model</h2>
+<p>Sources carry one of 14 coverage states (see Source Health). Failures open
+incidents and alerts; replayed captures are labelled with their capture time;
+nothing is presented as live without timestamp and provider support.</p></section>
+<section class="card" id="attribution"><h2>Data providers &amp; attribution</h2>
+<p>Meridian aggregates data published by the organisations below. Each stored
+value names its provider in its provenance chip; this notice acknowledges them
+collectively, in the spirit of open-data attribution licences (ODC-BY,
+CC&nbsp;BY&nbsp;and&nbsp;kin). Thank you to every one of them.</p>
+<p><strong>Official / public bodies:</strong> SIX Swiss Exchange (issuer
+directory) · GLEIF (LEI reference data, CC0) · Swiss Federal Chancellery —
+Fedlex · FINMA · Swiss National Bank · SECO · Publications Office of the EU
+(CELLAR / EUR-Lex, Decision 2011/833/EU) · European Commission FISMA (EU
+consolidated financial sanctions list) · legislation.gov.uk (Open Government
+Licence) · UK OFSI · US Office of the Federal Register · US SEC (EDGAR) ·
+US OFAC · Library of Congress (Congress.gov API) · United Nations Security
+Council (consolidated sanctions list) · Federal Reserve Bank of St.&nbsp;Louis
+(«Source: FRED&reg; API — this product uses the FRED&reg; API but is not
+endorsed or certified by the Federal Reserve Bank of St.&nbsp;Louis») ·
+The World Bank (Open Data indicators, CC&nbsp;BY-4.0 — trade-dependency
+context series).</p>
+<p><strong>Commercial and community providers (free/personal tiers):</strong>
+Business Quant (segment financials parsed from SEC filings) · Financial
+Modeling Prep · Twelve Data · Finnhub · Alpha Vantage · OpenFIGI (Bloomberg
+open symbology) · OpenSanctions (data &copy; OpenSanctions, CC&nbsp;BY-NC 4.0)
+· Yahoo Finance (unofficial public interfaces; quotes delayed per exchange
+agreements) · Stooq · Wikidata (CC0) and Wikipedia (text excerpts
+CC&nbsp;BY-SA 4.0 — descriptions sourced from Wikipedia name their article in
+provenance) · Zefix (Swiss central business index) · filings.xbrl.org
+(XBRL International — index of official ESEF filings; underlying reports
+remain the issuers' official disclosures).</p>
+<p>Meridian is a private, non-commercial research tool; provider data remains
+subject to each provider's own terms. If you are a provider and want an
+attribution adjusted, the register is
+<code>docs/API_KEYS_REGISTER.md</code>.</p></section>
+</main>
+</div>
+<footer class="foot">
+  <p>Meridian is a private, non-commercial research tool. Every displayed value is either a
+  sourced fact with provenance or an explicitly labelled calculation/inference — missing data
+  is shown as unavailable, never invented. Labels: SF source fact · CD company disclosure ·
+  ORF official regulatory fact · CM calculated metric · EBI evidence-based inference.</p>
+  <p>Data with thanks to SIX, GLEIF, Fedlex, FINMA, SNB, SECO, the EU Publications
+  Office, legislation.gov.uk, the US Federal Register, SEC EDGAR, the Library of
+  Congress, UN, OFAC, OFSI, FRED&reg; (St.&nbsp;Louis Fed), The World Bank
+  (CC&nbsp;BY-4.0), filings.xbrl.org, Business Quant, FMP,
+  Twelve Data, Finnhub, Alpha Vantage, OpenFIGI, OpenSanctions (CC&nbsp;BY-NC),
+  Wikidata/Wikipedia (CC&nbsp;BY-SA) and others —
+  <a href="../methodology/index.html#attribution">full data-providers &amp; attribution notice</a>.</p>
+</footer>
+<script src="../static/app.js"></script>
+</body>
+</html>

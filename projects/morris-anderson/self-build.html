@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Self-Build Support — Morris Anderson Construction</title>
+<meta name="description" content="Supported self-build with Morris Anderson: keep the control you want, hand over the coordination you do not — managed, guided and cost-controlled routes.">
+<style>
+:root{--ground:#faf9f7;--surface:#fff;--ink:#22262a;--ink-soft:#4b5157;--stone:#6f6a61;--line:#e6e2da;--line-strong:#cfc9be;--bronze:#8c6d45;--navy:#1a1449;--navy-deep:#100c30;--charcoal:#1b1e21;--clay:#efece6;--heading:'Manrope','Segoe UI Semibold','Segoe UI',system-ui,sans-serif;--body:'Inter','Segoe UI',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0}body{background:var(--ground);color:var(--ink);font-family:var(--body);line-height:1.6}
+h1,h2,h3,h4{font-family:var(--heading);letter-spacing:-.015em;line-height:1.15;font-weight:650}
+.wrap{max-width:1020px;margin:0 auto;padding:0 24px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--bronze)}
+header.site{position:sticky;top:0;z-index:40;background:rgba(250,249,247,.95);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:64px;gap:24px;max-width:1120px;margin:0 auto;padding:0 24px}
+.nav ul{display:none;list-style:none;gap:clamp(16px,1.9vw,30px);padding:0;flex-wrap:nowrap}
+.nav ul a{font-size:13px;color:var(--ink-soft);text-decoration:none;white-space:nowrap}.nav ul a:hover{color:var(--navy)}
+.btn-ink{display:inline-block;background:var(--navy);color:#fff;border-radius:2px;font-family:var(--heading);font-weight:600;text-decoration:none}.btn-ink:hover{background:var(--navy-deep)}
+.menu-btn{display:flex;flex-direction:column;justify-content:center;gap:4px;width:42px;height:42px;padding:10px;border:1px solid var(--line-strong);background:var(--surface);border-radius:2px;cursor:pointer}
+.menu-btn span{display:block;height:2px;background:var(--ink);border-radius:1px}
+.m-panel{display:none;position:absolute;right:24px;top:60px;z-index:60;min-width:230px;background:var(--surface);border:1px solid var(--line);box-shadow:0 12px 32px rgba(20,18,40,.12);padding:8px 0}
+.m-panel a{display:block;padding:11px 20px;font-size:13.5px;color:var(--ink-soft);text-decoration:none;white-space:nowrap}
+.m-panel a:hover{background:var(--clay);color:var(--ink)}
+.nav .btn-ink{display:none}
+@media(min-width:1140px){.nav ul{display:flex}.menu-btn{display:none}.m-panel{display:none !important}.nav .btn-ink{display:inline-block}}
+.nav ul a.on{color:var(--navy);font-weight:600}
+.mark{display:flex;align-items:center;gap:10px;text-decoration:none}
+.mark img{height:30px}
+.mark b{font-family:var(--heading);font-size:15px;color:var(--navy);display:block}
+.mark .sub{margin-top:4px;font-size:9px;font-weight:600;letter-spacing:.34em;text-transform:uppercase;color:var(--bronze);display:block}
+.hero{position:relative;overflow:hidden;background:var(--surface);border-bottom:1px solid var(--line);padding:56px 0}
+.hero .wm{position:absolute;right:-30px;top:-20px;width:260px;opacity:.05;pointer-events:none}
+.hero h1{font-size:clamp(28px,4vw,44px);margin-top:14px;max-width:760px}
+.hero p.lead{margin-top:16px;color:var(--stone);max-width:680px;font-size:16px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px;padding:0;list-style:none}
+.tabs a{display:inline-block;border:1px solid var(--line);background:var(--surface);padding:8px 16px;font-size:13px;color:var(--ink-soft);text-decoration:none;border-radius:2px}
+.tabs a:hover{border-color:var(--ink)}
+section.blk{padding:56px 0;border-bottom:1px solid var(--line)}
+section.blk.alt{background:var(--surface)}
+.blk h2{font-size:clamp(22px,3vw,30px);margin-top:10px}
+.blk h3{font-size:19px;margin-top:30px}
+.blk p{margin-top:14px;color:var(--ink-soft);max-width:720px;font-size:15px}
+.blk ul.ticks{list-style:none;padding:0;margin-top:16px;max-width:720px}
+.blk ul.ticks li{position:relative;padding-left:26px;margin-top:10px;color:var(--ink-soft);font-size:15px}
+.blk ul.ticks li::before{content:"";position:absolute;left:0;top:11px;width:16px;height:1px;background:var(--bronze)}
+.cols{display:grid;gap:20px;margin-top:26px}
+@media(min-width:820px){.cols.c3{grid-template-columns:1fr 1fr 1fr}.cols.c2{grid-template-columns:1fr 1fr}}
+.card{background:var(--surface);border:1px solid var(--line);padding:24px}
+section.blk.alt .card{background:var(--ground)}
+.card h3,.card h4{margin-top:0;font-size:16px}
+.card p{font-size:13.5px;margin-top:8px}
+.card .tag{font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--bronze)}
+.card a.more{display:inline-block;margin-top:12px;font-size:13px;font-weight:600;color:var(--navy)}
+.steps{counter-reset:s;list-style:none;padding:0;margin-top:22px;max-width:720px}
+.steps li{counter-increment:s;position:relative;padding:16px 0 16px 56px;border-top:1px solid var(--line)}
+.steps li::before{content:counter(s,decimal-leading-zero);position:absolute;left:0;top:18px;font-family:var(--heading);font-weight:650;color:var(--bronze);font-size:15px}
+.steps b{display:block;font-family:var(--heading);font-size:15px;color:var(--ink)}
+.steps span{display:block;font-size:13.5px;color:var(--ink-soft);margin-top:2px}
+.notice{border-left:2px solid var(--bronze);background:var(--clay);padding:16px 20px;margin-top:22px;max-width:720px;font-size:13.5px;color:var(--ink-soft)}
+.cta{background:var(--navy);color:#fff;padding:52px 0}
+.cta h2{color:#fff;font-size:clamp(22px,3vw,30px)}
+.cta p{color:rgba(255,255,255,.75);margin-top:10px;max-width:640px;font-size:15px}
+.cta .btns{margin-top:24px;display:flex;gap:14px;flex-wrap:wrap}
+.cta a.b1{background:#fff;color:var(--navy);padding:13px 26px;font-family:var(--heading);font-weight:600;font-size:14px;text-decoration:none;border-radius:2px}
+.cta a.b2{border:1px solid rgba(255,255,255,.5);color:#fff;padding:13px 26px;font-family:var(--heading);font-weight:600;font-size:14px;text-decoration:none;border-radius:2px}
+footer{background:var(--charcoal);color:rgba(255,255,255,.55);padding:36px 0;font-size:12px}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+footer a{color:rgba(255,255,255,.8)}
+dl.facts{display:grid;gap:14px;margin-top:22px;max-width:760px}
+@media(min-width:720px){dl.facts{grid-template-columns:1fr 1fr}}
+dl.facts>div{background:var(--surface);border:1px solid var(--line);padding:16px 18px}
+section.blk.alt dl.facts>div{background:var(--ground)}
+dl.facts dt{font-family:var(--heading);font-weight:650;font-size:14px}
+dl.facts dd{margin:4px 0 0;font-size:13px;color:var(--ink-soft)}
+</style></head><body>
+<header class="site"><div class="nav">
+  <a href="index.html" class="mark"><img src="assets/ma-monogram.png" alt=""><span><b>Morris&nbsp;Anderson</b><span class="sub">Construction</span></span></a>
+  <ul><li><a href="index.html">Home</a></li><li><a href="turnkey-builds.html">Turnkey Builds</a></li><li><a href="self-build.html" class="on">Self-Build</a></li><li><a href="development.html">Development</a></li><li><a href="information.html">Information</a></li><li><a href="index.html#projects">Projects</a></li><li><a href="index.html#estimator">Estimator</a></li><li><a href="contact.html">Contact</a></li><li><a href="portal.html">Client Portal</a></li></ul>
+  <a class="btn-ink" href="contact.html" style="padding:10px 20px;font-size:13px;white-space:nowrap">Discuss a Project</a>
+  <button id="menuBtn" class="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="mPanel"><span></span><span></span><span></span></button><div id="mPanel" class="m-panel"><a href="index.html">Home</a><a href="turnkey-builds.html">Turnkey Builds</a><a href="self-build.html">Self-Build</a><a href="development.html">Development</a><a href="information.html">Information</a><a href="index.html#projects">Projects</a><a href="index.html#estimator">Estimator</a><a href="contact.html">Contact</a><a href="portal.html">Client Portal</a><a href="helicopter.html">Admin Portal</a></div>
+</div></header>
+<script>
+(function(){var b=document.getElementById('menuBtn'),p=document.getElementById('mPanel');
+if(!b||!p)return;
+b.addEventListener('click',function(){var open=p.style.display==='block';p.style.display=open?'none':'block';b.setAttribute('aria-expanded',String(!open));});
+document.addEventListener('click',function(e){if(!p.contains(e.target)&&e.target!==b&&!b.contains(e.target)){p.style.display='none';b.setAttribute('aria-expanded','false');}});
+})();
+</script>
+<section class="hero"><img class="wm" src="assets/ma-monogram.png" alt="" aria-hidden="true"><div class="wrap">
+<p class="eyebrow">Self-Build</p>
+<h1>Keep the control you want. Hand over the risk you do not.</h1>
+<p class="lead">Self-building rewards the disciplined and punishes the optimistic. Our self-build routes let you decide how much of the running you do yourself — with professional management, procurement muscle and regulatory cover underneath whichever share you keep.</p>
+<ul class="tabs"><li><a href="#routes">The three routes</a></li><li><a href="#keep">What you keep, what we carry</a></li><li><a href="#deploy">How it is best deployed</a></li><li><a href="#projects">Notable projects</a></li></ul>
+</div></section>
+<main>
+<section class="blk" id="routes"><div class="wrap">
+  <p class="eyebrow">The three routes</p><h2>Match the support to your appetite</h2>
+  <div class="cols c3">
+    <div class="card"><span class="tag">Most support</span><h3>Managed self-build</h3><p>We run the programme, procurement and site coordination end to end; you keep design authority and every meaningful decision. Closest to turnkey while remaining your build.</p></div>
+    <div class="card"><span class="tag">Balanced</span><h3>Guided self-build</h3><p>You run the day to day; we set the programme, tender the packages, inspect at stage gates and step in where experience matters most. Structured cover without full management cost.</p></div>
+    <div class="card"><span class="tag">Most independent</span><h3>Cost-controlled self-build</h3><p>You manage the build; we provide the cost plan, procurement framework and scheduled reviews that keep it honest. The discipline, hired in.</p></div>
+  </div>
+  <p>Indicative pricing for each route is built into the <a href="index.html#estimator" style="text-decoration:underline;color:var(--navy)">estimator</a> — choose the self-build route that matches and it prices that level of support.</p>
+</div></section>
+<section class="blk alt" id="keep"><div class="wrap">
+  <p class="eyebrow">The honest division</p><h2>What you keep, what we carry</h2>
+  <dl class="facts">
+    <div><dt>You keep</dt><dd>Design authority, specification choices, supplier preferences you care about, the pace of decisions — and the saving that comes from carrying part of the load.</dd></div>
+    <div><dt>We carry</dt><dd>Programme and sequencing, tender comparison on equal scope, long-lead procurement timing, building-control choreography, and the record-keeping that protects you.</dd></div>
+    <div><dt>Shared, explicitly</dt><dd>Cost control — you see committed against forecast line by line; changes are priced before they are agreed, never after.</dd></div>
+    <div><dt>Never left to chance</dt><dd>Statutory compliance. Whatever the route, inspections are booked at the right moments and evidenced — read <a href="information.html#regulation" style="text-decoration:underline;color:var(--navy)">the regulation guide</a>.</dd></div>
+  </dl>
+  <div class="notice">Thinking of running the whole thing yourself? Genuinely possible — thousands do it well every year. Our plain-spoken guide to <a href="information.html#your-own-build" style="text-decoration:underline;color:var(--navy)">doing your own build</a> sets out exactly what the job involves, so you choose with your eyes open.</div>
+</div></section>
+<section class="blk" id="deploy"><div class="wrap">
+  <p class="eyebrow">How it is best deployed</p><h2>Engage at design stage, not at the first crisis</h2>
+  <ol class="steps">
+    <li><b>Before the plot, ideally</b><span>A plot appraised before purchase is the cheapest risk decision of the whole project — services, access, ground and planning context.</span></li>
+    <li><b>At design stage</b><span>The support route is chosen and the cost plan built alongside the design, so the design is priced as it develops rather than after.</span></li>
+    <li><b>Before ground is broken</b><span>Programme set, packages tendered, long-lead orders placed, building control engaged. The build starts against a plan, not a hope.</span></li>
+    <li><b>During the build</b><span>Stage-gate inspections and scheduled reviews at minimum; full coordination on the managed route. The portal keeps the record either way.</span></li>
+  </ol>
+  <p>Self-builders may also qualify for relief such as the Community Infrastructure Levy self-build exemption and VAT rules specific to new dwellings — the rules change and depend on circumstances, so verify the current position with your local authority and HMRC before relying on either.</p>
+</div></section>
+<section class="blk alt" id="projects"><div class="wrap">
+  <p class="eyebrow">Notable projects</p><h2>Owner-led work we have supported</h2>
+  <div class="cols c2">
+    <div class="card"><span class="tag">Transformation &middot; Owner involvement</span><h3>Bungalow Transformation and Extension</h3><p>A family home rebuilt around its owners — structural reconfiguration and extension with the client close to every specification decision.</p><a class="more" href="projects/bungalow-transformation-extension.html">View the project &rarr;</a></div>
+    <div class="card"><span class="tag">Complex site</span><h3>Contemporary Hillside Residence</h3><p>The kind of site where self-builders most need experienced cover — retaining works, access constraints and unforgiving sequencing.</p><a class="more" href="projects/contemporary-hillside-residence.html">View the project &rarr;</a></div>
+  </div>
+</div></section>
+<section class="cta"><div class="wrap">
+  <h2>Talk the project through before anything is committed</h2>
+  <p>An international construction business with experience across large contractors and bespoke projects — expertly placed to manage teams across single and multi-site builds whilst adhering to the most stringent of building regulations.</p>
+  <div class="btns"><a class="b1" href="contact.html">Submit a Project Brief</a><a class="b2" href="index.html#estimator">Get an Indicative Estimate</a></div>
+</div></section>
+</main>
+<footer><div class="wrap" style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap"><p>&copy; 2026 Morris Anderson Construction. Director: Mathew Morris.</p><p><a href="index.html">Home</a> &middot; <a href="turnkey-builds.html">Turnkey</a> &middot; <a href="self-build.html">Self-Build</a> &middot; <a href="development.html">Development</a> &middot; <a href="information.html">Information</a> &middot; <a href="contact.html">Contact</a> &middot; <a href="portal.html">Client Portal</a> &middot; <a href="helicopter.html" style="opacity:.75">Admin portal</a></p></div></footer>
+</body></html>

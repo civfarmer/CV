@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Contemporary Hillside Residence — Morris Anderson Construction</title>
+<meta name="description" content="A contemporary ~200 m² timber-frame residence positioned into a hillside, requiring careful coordination of retaining works, restricted access and easement considerations.">
+<style>
+:root{--ground:#faf9f7;--surface:#fff;--ink:#22262a;--ink-soft:#4b5157;--stone:#6f6a61;--stone-light:#a39d92;--line:#e6e2da;--line-strong:#cfc9be;--bronze:#8c6d45;--bronze-deep:#74572f;--navy:#1a1449;--navy-deep:#100c30;--charcoal:#1b1e21;--clay:#efece6;--heading:'Manrope','Segoe UI Semibold','Segoe UI',system-ui,sans-serif;--body:'Inter','Segoe UI',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0}html{scroll-behavior:smooth}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--heading);letter-spacing:-.015em;line-height:1.15;font-weight:650}
+a{color:inherit}.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--bronze)}
+.btn{display:inline-block;padding:13px 26px;font-size:14px;font-weight:600;font-family:var(--heading);border-radius:2px;text-decoration:none;border:1px solid transparent;cursor:pointer;transition:.2s}
+.btn-navy{background:var(--navy);color:#fff}.btn-navy:hover{background:var(--navy-deep)}
+.btn-ghost{border-color:var(--line-strong);color:var(--ink);background:transparent}.btn-ghost:hover{border-color:var(--ink)}
+header.site{position:sticky;top:0;z-index:40;background:rgba(250,249,247,.95);backdrop-filter:blur(4px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:64px;gap:24px}
+.mark{display:flex;align-items:center;gap:10px;line-height:1;text-decoration:none}
+.mark img{height:30px;width:auto}
+.mark b{font-family:var(--heading);font-size:15px;letter-spacing:.02em;color:var(--navy);display:block}
+.mark span.sub{margin-top:4px;font-size:9px;font-weight:600;letter-spacing:.34em;text-transform:uppercase;color:var(--bronze);display:block}
+.nav ul{display:none;list-style:none;gap:22px;padding:0}
+.nav ul a{font-size:13px;font-weight:500;color:var(--ink-soft);text-decoration:none}
+.nav ul a:hover{color:var(--ink)}
+@media(min-width:1140px){.nav ul{display:flex}}
+.pv-hero{position:relative;overflow:hidden;background:var(--surface);border-bottom:1px solid var(--line);padding:56px 0 48px}
+.pv-hero .wm{position:absolute;right:-30px;top:-20px;width:260px;opacity:.05;pointer-events:none}
+.pv-hero h1{font-size:clamp(30px,4.4vw,46px);margin-top:14px}
+.pv-hero p.sum{margin-top:16px;font-size:16.5px;color:var(--stone);max-width:680px}
+.pv-crumb{font-size:12px;color:var(--stone)}.pv-crumb a{text-decoration:underline}
+.pv-body{padding:64px 0}
+.pv-grid{display:grid;gap:44px}
+@media(min-width:960px){.pv-grid{grid-template-columns:1.6fr 1fr}}
+.pv-art{aspect-ratio:16/10;background:var(--clay);overflow:hidden}
+.pv-art svg{width:100%;height:100%;display:block}
+.pv-sec h3{font-size:22px;margin-top:36px}.pv-sec h3:first-of-type{margin-top:36px}
+.pv-sec p{margin-top:12px;color:var(--ink-soft);font-size:15px;max-width:640px}
+.pv-list{list-style:none;padding:0;margin-top:14px}
+.pv-list li{display:flex;gap:12px;align-items:baseline;font-size:14.5px;color:var(--ink-soft);margin-top:9px}
+.pv-list li::before{content:"";width:22px;height:1px;background:var(--bronze);flex-shrink:0;transform:translateY(-3px)}
+.pv-facts{border:1px solid var(--line);background:var(--surface);padding:22px}
+.pv-facts h4{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone)}
+.pv-facts div{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line);padding:9px 0;font-size:13.5px}
+.pv-facts dt{font-weight:600}.pv-facts dd{color:var(--stone);text-align:right}
+.pv-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;padding:0;list-style:none}
+.pv-tags li{border:1px solid var(--line);border-radius:2px;padding:3px 9px;font-size:11.5px;color:var(--ink-soft)}
+.pv-gallery{display:grid;gap:20px;margin-top:20px}
+@media(min-width:640px){.pv-gallery{grid-template-columns:1fr 1fr}}
+.pv-gallery figure{margin:0}.pv-gallery figcaption{margin-top:9px;font-size:13px;color:var(--stone)}
+.pv-plan{background:var(--clay);padding:64px 0}
+.pv-plan h2{font-size:clamp(24px,3vw,32px);margin-top:12px}
+.pv-plan .cols{display:grid;gap:36px;margin-top:36px}
+@media(min-width:960px){.pv-plan .cols{grid-template-columns:1fr 1fr}}
+.pv-price{border:1px solid var(--line);background:var(--surface);padding:28px}
+.pv-price .fig{font-family:var(--heading);font-size:30px;font-weight:700;margin-top:10px}
+.pv-price p.note{margin-top:12px;font-size:13.5px;color:var(--stone)}
+.pv-price p.fine{margin-top:12px;font-size:11.5px;color:var(--stone-light)}
+.pv-bar{height:6px;background:var(--line);margin-top:6px}.pv-bar i{display:block;height:100%;background:var(--bronze)}
+.pv-tl ol{padding:0;margin-top:14px}.pv-tl li{list-style:none;margin-top:16px}
+.pv-tl .ph{font-family:var(--heading);font-weight:600;font-size:14px}
+.pv-tl .dt{margin-top:6px;font-size:12.5px;color:var(--stone)}
+.pv-cycle{display:flex;justify-content:space-between;gap:14px;border-top:1px solid var(--line);margin-top:56px;padding-top:22px}
+.pv-cycle a{font-family:var(--heading);font-weight:600;font-size:14px;text-decoration:none}
+.pv-cycle a span{border-bottom:1px solid var(--bronze);padding-bottom:2px}
+.pv-cycle a:hover span{color:var(--bronze)}
+footer.site{background:var(--charcoal);color:#fff;padding:44px 0;margin-top:0}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:18px;align-items:center}
+footer p{font-size:12px;color:rgba(255,255,255,.55)}
+footer a{color:rgba(255,255,255,.8)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+.menu-btn{display:flex;flex-direction:column;justify-content:center;gap:4px;width:42px;height:42px;padding:10px;border:1px solid var(--line-strong);background:var(--surface);border-radius:2px;cursor:pointer}
+.menu-btn span{display:block;height:2px;background:var(--ink);border-radius:1px}
+.m-panel{display:none;position:absolute;right:24px;top:60px;z-index:60;min-width:230px;background:var(--surface);border:1px solid var(--line);box-shadow:0 12px 32px rgba(20,18,40,.12);padding:8px 0}
+.m-panel a{display:block;padding:11px 20px;font-size:13.5px;color:var(--ink-soft);text-decoration:none;white-space:nowrap}
+.m-panel a:hover{background:var(--clay);color:var(--ink)}
+.nav .btn-navy{display:none;white-space:nowrap}
+@media(min-width:1140px){.menu-btn{display:none}.m-panel{display:none !important}.nav .btn-navy{display:inline-block}}
+</style></head><body>
+<header class="site"><div class="wrap nav">
+  <a href="../index.html" class="mark" aria-label="Morris Anderson Construction — home">
+    <img src="../assets/ma-monogram.png" alt=""><span><b>Morris&nbsp;Anderson</b><span class="sub">Construction</span></span></a>
+  <ul>
+    <li><a href="../index.html#turnkey">Services</a></li>
+    <li><a href="../index.html#projects">Projects</a></li>
+    <li><a href="../index.html#estimator">Cost Estimator</a></li>
+    <li><a href="../index.html#director">About</a></li>
+  </ul>
+  <a class="btn btn-navy" style="padding:10px 20px;font-size:13px" href="../contact.html">Discuss a Project</a>
+  <button id="menuBtn" class="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="mPanel"><span></span><span></span><span></span></button>
+  <div id="mPanel" class="m-panel"><a href="../index.html">Home</a><a href="../turnkey-builds.html">Turnkey Builds</a><a href="../self-build.html">Self-Build</a><a href="../development.html">Development</a><a href="../information.html">Information</a><a href="../index.html#projects">Projects</a><a href="../index.html#estimator">Estimator</a><a href="../contact.html">Contact</a><a href="../portal.html">Client Portal</a></div>
+</div></header>
+<main>
+<section class="pv-hero"><img class="wm" src="../assets/ma-monogram.png" alt="" aria-hidden="true"><div class="wrap">
+  <p class="pv-crumb"><a href="../index.html">Home</a> / <a href="../index.html#projects">Projects</a> / Contemporary Hillside Residence</p>
+  <p class="eyebrow" style="margin-top:26px">New Build / Timber Frame / Complex Site</p>
+  <h1>Contemporary Hillside Residence</h1><p class="sum">A contemporary ~200 m² timber-frame residence positioned into a hillside, requiring careful coordination of retaining works, restricted access and easement considerations.</p>
+</div></section>
+<section class="pv-body"><div class="wrap"><div class="pv-grid">
+  <div class="pv-sec">
+    <div class="pv-art"><svg viewBox="0 0 400 300" role="img" aria-label="Contemporary Hillside Residence"><rect width="400" height="300" fill="#efece6"/><rect x="0" y="175" width="400" height="125" fill="#e0dbd2" opacity="1"/><path d="M0 175 L170 175 L170 112 L285 112 L285 175 L400 175 M170 112 L228 70 L285 112" fill="none" stroke="#22262a" stroke-width="2.5" opacity="0.8"/><path d="M0 210 Q100 195 170 210 T400 232" fill="none" stroke="#8c6d45" stroke-width="2" opacity="0.8"/><rect x="186" y="124" width="20" height="44" fill="#cfc9be" opacity="1"/><rect x="219" y="124" width="20" height="44" fill="#cfc9be" opacity="1"/><rect x="252" y="124" width="20" height="44" fill="#cfc9be" opacity="1"/></svg></div>
+    <h3>The challenge</h3><p>The site slopes significantly, placing much of the building volume into the hillside. Retaining structures, restricted access and easement considerations all had to be resolved within one coordinated sequence rather than treated as isolated problems.</p>
+    <h3>The approach</h3><p>The programme was built around the realities of the site: retaining and groundworks sequenced ahead of the frame, deliveries planned around the access constraints, and easement considerations tracked through each stage so they informed decisions rather than interrupting them.</p>
+    <h3>Key considerations</h3><ul class="pv-list"><li>Sequencing retaining structures ahead of superstructure work</li><li>Managing deliveries and plant within restricted access</li><li>Coordinating groundworks with the timber-frame programme</li><li>Keeping easement obligations visible throughout delivery</li></ul>
+    <h3>In pictures</h3><div class="pv-gallery"><figure><div class="pv-art"><svg viewBox="0 0 400 300" role="img" aria-label="The residence set into the hillside"><rect width="400" height="300" fill="#efece6"/><rect x="0" y="175" width="400" height="125" fill="#e0dbd2" opacity="1"/><path d="M0 175 L170 175 L170 112 L285 112 L285 175 L400 175 M170 112 L228 70 L285 112" fill="none" stroke="#22262a" stroke-width="2.5" opacity="0.8"/><path d="M0 210 Q100 195 170 210 T400 232" fill="none" stroke="#8c6d45" stroke-width="2" opacity="0.8"/><rect x="186" y="124" width="20" height="44" fill="#cfc9be" opacity="1"/><rect x="219" y="124" width="20" height="44" fill="#cfc9be" opacity="1"/><rect x="252" y="124" width="20" height="44" fill="#cfc9be" opacity="1"/></svg></div><figcaption>The residence set into the hillside</figcaption></figure><figure><div class="pv-art"><svg viewBox="0 0 400 300" role="img" aria-label="Retaining and frame sequence"><rect width="400" height="300" fill="#efece6"/><rect x="0" y="210" width="400" height="90" fill="#e0dbd2" opacity="1"/><path d="M55 210 L55 75" fill="none" stroke="#22262a" stroke-width="4" opacity="0.6"/><path d="M125 210 L125 75" fill="none" stroke="#22262a" stroke-width="4" opacity="0.6"/><path d="M195 210 L195 75" fill="none" stroke="#22262a" stroke-width="4" opacity="0.6"/><path d="M265 210 L265 75" fill="none" stroke="#22262a" stroke-width="4" opacity="0.6"/><path d="M335 210 L335 75" fill="none" stroke="#22262a" stroke-width="4" opacity="0.6"/><path d="M35 75 L365 75 M35 142 L365 142" fill="none" stroke="#22262a" stroke-width="3" opacity="0.65"/><path d="M55 210 L125 142 M125 210 L195 142 M195 210 L265 142" fill="none" stroke="#8c6d45" stroke-width="2" opacity="0.6"/></svg></div><figcaption>Retaining and frame sequence</figcaption></figure><figure><div class="pv-art"><svg viewBox="0 0 400 300" role="img" aria-label="External works and site integration"><rect width="400" height="300" fill="#efece6"/><rect x="0" y="180" width="400" height="120" fill="#e0dbd2" opacity="1"/><path d="M0 180 Q100 165 200 180 T400 172" fill="none" stroke="#8c6d45" stroke-width="2.5" opacity="0.85"/><rect x="55" y="90" width="62" height="90" fill="#cfc9be" opacity="1"/><path d="M42 90 L86 62 L130 90 M55 90 L117 90" fill="none" stroke="#22262a" stroke-width="2.5" opacity="0.7"/><path d="M175 180 L175 152" fill="none" stroke="#22262a" stroke-width="3" opacity="0.5"/><path d="M207 180 L207 152" fill="none" stroke="#22262a" stroke-width="3" opacity="0.5"/><path d="M239 180 L239 152" fill="none" stroke="#22262a" stroke-width="3" opacity="0.5"/><path d="M271 180 L271 152" fill="none" stroke="#22262a" stroke-width="3" opacity="0.5"/><path d="M303 180 L303 152" fill="none" stroke="#22262a" stroke-width="3" opacity="0.5"/><path d="M335 180 L335 152" fill="none" stroke="#22262a" stroke-width="3" opacity="0.5"/><path d="M175 152 L335 152" fill="none" stroke="#a67c52" stroke-width="2.5" opacity="0.7"/></svg></div><figcaption>External works and site integration</figcaption></figure><figure><div class="pv-art"><svg viewBox="0 0 400 300" role="img" aria-label="Interior spaces"><rect width="400" height="300" fill="#efece6"/><rect x="30" y="50" width="180" height="200" fill="#e0dbd2" opacity="1"/><rect x="235" y="50" width="135" height="90" fill="#cfc9be" opacity="1"/><rect x="235" y="160" width="135" height="90" fill="#8c6d45" opacity="0.28"/><path d="M50 250 L50 120 M78 250 L78 120" fill="none" stroke="#8c6d45" stroke-width="3.5" opacity="0.5"/></svg></div><figcaption>Interior spaces</figcaption></figure></div>
+  </div>
+  <aside><div class="pv-facts"><h4>Project facts</h4><dl><div><dt>Client</dt><dd>Private client</dd></div><div><dt>Size</dt><dd>Approximately 200 m²</dd></div></dl>
+    <h4 style="margin-top:20px">Services used</h4><ul class="pv-tags"><li>Construction management</li><li>Timber-frame construction</li><li>Retaining and external structures</li><li>Programme and trade coordination</li></ul>
+    <p style="margin-top:22px"><a class="btn btn-navy" style="display:block;text-align:center" href="../contact.html">Discuss a Similar Project</a></p>
+  </div></aside>
+</div></div></section>
+<section class="pv-plan"><div class="wrap">
+  <p class="eyebrow">Planning a project like this</p><h2>Typical costs and shape of programme</h2>
+  <div class="cols"><div class="pv-price"><p class="eyebrow">High-end turnkey new build · around 200 m²</p><p class="fig">from £525,000</p><p class="note">Based on a high-end turnkey build of this size on a straightforward site — hillside conditions such as retaining works and restricted access move the figure upward, exactly as this project required.</p><p class="fine">An early planning indication from our published rates — prepared without a site inspection and not a quotation. Run your own numbers in the estimator.</p><p style="margin-top:18px"><a class="btn btn-ghost" href="../index.html#estimator">Estimate a build like this</a></p></div><div class="pv-tl"><h4 style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone)">Indicative programme</h4><ol><li><p class="ph">Feasibility & pre-construction</p><div class="pv-bar" aria-hidden="true"><i style="width:19%"></i></div><p class="dt">Retaining design, access strategy and easements resolved on paper first</p></li><li><p class="ph">Groundworks & retaining</p><div class="pv-bar" aria-hidden="true"><i style="width:25%"></i></div><p class="dt">Excavation into the hillside; retaining ahead of the frame</p></li><li><p class="ph">Timber frame & weathertight</p><div class="pv-bar" aria-hidden="true"><i style="width:19%"></i></div><p class="dt">Frame erection sequenced around restricted deliveries</p></li><li><p class="ph">First & second fix</p><div class="pv-bar" aria-hidden="true"><i style="width:25%"></i></div><p class="dt">Services, interiors and joinery</p></li><li><p class="ph">Completion & handover</p><div class="pv-bar" aria-hidden="true"><i style="width:12%"></i></div><p class="dt">Inspections, external works, organised handover</p></li></ol><p class="dt" style="margin-top:16px;color:var(--stone-light)">An indicative sequence with phases shown in proportion — actual durations are agreed per project once the site and design information are known.</p></div></div>
+  <div class="pv-cycle">
+    <a href="hillside-balcony-structure.html"><span>← Hillside Balcony Structure</span></a>
+    <a href="bungalow-transformation-extension.html"><span>Bungalow Transformation and Extension →</span></a>
+  </div>
+</div></section>
+</main>
+<footer class="site"><div class="wrap" style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap"><p>&copy; 2026 Morris Anderson Construction. Director: Mathew Morris.</p><p><a href="../index.html">Home</a> &middot; <a href="../turnkey-builds.html">Turnkey</a> &middot; <a href="../self-build.html">Self-Build</a> &middot; <a href="../development.html">Development</a> &middot; <a href="../information.html">Information</a> &middot; <a href="../contact.html">Contact</a> &middot; <a href="../portal.html">Client Portal</a> &middot; <a href="../helicopter.html" style="opacity:.75">Admin portal</a></p></div></footer>
+<script>
+(function(){var b=document.getElementById('menuBtn'),p=document.getElementById('mPanel');
+if(!b||!p)return;
+b.addEventListener('click',function(){var open=p.style.display==='block';p.style.display=open?'none':'block';b.setAttribute('aria-expanded',String(!open));});
+document.addEventListener('click',function(e){if(!p.contains(e.target)&&e.target!==b&&!b.contains(e.target)){p.style.display='none';b.setAttribute('aria-expanded','false');}});
+})();
+</script>
+</body></html>

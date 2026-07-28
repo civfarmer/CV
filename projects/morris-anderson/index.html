@@ -1,0 +1,1275 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Morris Anderson Construction — Design &amp; Estimator Preview</title>
+<style>
+  /* Design tokens — mirror app/globals.css */
+  :root{
+    --ground:#faf9f7; --surface:#fff; --ink:#22262a; --ink-soft:#4b5157;
+    --stone:#6f6a61; --stone-light:#a39d92; --line:#e6e2da; --line-strong:#cfc9be;
+    --bronze:#8c6d45; --bronze-deep:#74572f; --navy:#1a1449; --navy-deep:#100c30; --charcoal:#1b1e21; --clay:#efece6;
+    --heading:'Manrope','Segoe UI Semibold','Segoe UI',system-ui,sans-serif;
+    --body:'Inter','Segoe UI',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--ground);color:var(--ink);font-family:var(--body);line-height:1.6;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,h4{font-family:var(--heading);letter-spacing:-.015em;line-height:1.15;font-weight:650}
+  a{color:inherit}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+  .eyebrow{font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--bronze)}
+  .eyebrow.light{color:#c5a97f}
+  .btn{display:inline-block;padding:13px 26px;font-size:14px;font-weight:600;font-family:var(--heading);
+       border-radius:2px;text-decoration:none;border:1px solid transparent;cursor:pointer;transition:.2s}
+  .btn-ink{background:var(--navy);color:#fff}.btn-ink:hover{background:var(--navy-deep)}
+  .btn-ghost{border-color:var(--line-strong);color:var(--ink);background:transparent}.btn-ghost:hover{border-color:var(--ink)}
+  .btn-white{background:#fff;color:var(--ink)}.btn-white:hover{background:var(--clay)}
+  .btn-onDark{border-color:rgba(255,255,255,.3);color:#fff;background:transparent}.btn-onDark:hover{border-color:#fff}
+  .btn-bronze{background:var(--bronze);color:#fff}.btn-bronze:hover{background:var(--bronze-deep)}
+
+  .banner{background:var(--bronze);color:#fff;text-align:center;font-size:12px;padding:8px 16px;letter-spacing:.04em}
+  header.site{position:sticky;top:0;z-index:40;background:rgba(250,249,247,.95);backdrop-filter:blur(4px);border-bottom:1px solid var(--line)}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:64px;gap:24px}
+  .mark{display:flex;flex-direction:column;line-height:1;text-decoration:none}
+  .mark{align-items:center;flex-direction:row;gap:10px}.mark img{height:30px;width:auto}.mark b{font-family:var(--heading);font-size:15px;letter-spacing:.02em;color:var(--navy)}
+  .mark span{margin-top:4px;font-size:9px;font-weight:600;letter-spacing:.34em;text-transform:uppercase;color:var(--bronze)}
+  .nav ul{display:none;list-style:none;gap:clamp(16px,1.9vw,30px);padding:0;flex-wrap:nowrap}
+  .nav ul a{font-size:13px;font-weight:500;color:var(--ink-soft);text-decoration:none;white-space:nowrap}
+  .nav ul a:hover{color:var(--ink)}
+  .menu-btn{display:flex;flex-direction:column;justify-content:center;gap:4px;width:42px;height:42px;padding:10px;border:1px solid var(--line-strong);background:var(--surface);border-radius:2px;cursor:pointer}
+  .menu-btn span{display:block;height:2px;background:var(--ink);border-radius:1px}
+  .m-panel{display:none;position:absolute;right:24px;top:60px;z-index:60;min-width:230px;background:var(--surface);border:1px solid var(--line);box-shadow:0 12px 32px rgba(20,18,40,.12);padding:8px 0}
+  .m-panel a{display:block;padding:11px 20px;font-size:13.5px;color:var(--ink-soft);text-decoration:none;white-space:nowrap}
+  .m-panel a:hover{background:var(--clay);color:var(--ink)}
+  .nav .btn-ink{display:none}
+  @media(min-width:1140px){.nav ul{display:flex}.menu-btn{display:none}.m-panel{display:none !important}.nav .btn-ink{display:inline-block}}
+
+  .hero{position:relative;background:var(--charcoal);color:#fff;overflow:hidden}
+  .hero .art{position:absolute;inset:0;opacity:.22}
+  .hero .shade{position:absolute;inset:0;background:linear-gradient(90deg,var(--charcoal) 25%,rgba(27,30,33,.85) 55%,rgba(27,30,33,.5))}
+  .hero .inner{position:relative;padding:110px 0 120px;max-width:760px}
+  .hero h1{font-size:clamp(34px,5.2vw,58px);margin-top:20px}
+  .hero p.lead{margin-top:22px;font-size:18px;color:rgba(255,255,255,.75);max-width:620px}
+  .hero .ctas{margin-top:34px;display:flex;gap:14px;flex-wrap:wrap}
+  .hero p.qual{margin-top:30px;font-size:13.5px;color:rgba(255,255,255,.55);max-width:560px}
+
+  section.pad{padding:88px 0}
+  .s-head h2{font-size:clamp(26px,3.4vw,36px)}
+  .s-head .intro{margin-top:14px;color:var(--stone);max-width:640px;font-size:15.5px}
+  .gridcards{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);margin-top:44px}
+  @media(min-width:640px){.gridcards{grid-template-columns:repeat(2,1fr)}}
+  @media(min-width:960px){.gridcards.c4{grid-template-columns:repeat(4,1fr)}.gridcards.c3{grid-template-columns:repeat(3,1fr)}.gridcards.c7{grid-template-columns:repeat(7,1fr)}}
+  .cell{background:var(--surface);padding:22px}
+  .cell .no{font-family:var(--heading);font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--bronze)}
+  .cell h3{font-size:15.5px;margin-top:8px}
+  .cell p{font-size:13.5px;color:var(--stone);margin-top:6px}
+
+  .routes{display:grid;gap:22px;margin-top:44px}
+  @media(min-width:960px){.routes{grid-template-columns:repeat(3,1fr)}}
+  .route{border:1px solid var(--line);background:var(--surface);padding:30px;display:flex;flex-direction:column}
+  .route h3{font-size:20px}
+  .route p{margin-top:10px;font-size:14px;color:var(--stone);flex:1}
+  .route a{margin-top:22px;font-family:var(--heading);font-weight:600;font-size:14px;text-decoration:none}
+  .route a span{border-bottom:1px solid var(--bronze);padding-bottom:2px}
+  .route:hover a span{color:var(--bronze)}
+
+  .dark{background:var(--charcoal);color:#fff}
+  .dark .s-head .intro{color:rgba(255,255,255,.65)}
+
+  .proj{display:grid;gap:22px;margin-top:44px}
+  @media(min-width:640px){.proj{grid-template-columns:repeat(2,1fr)}}
+  @media(min-width:960px){.proj{grid-template-columns:repeat(3,1fr)}}
+  .pcard{border:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;text-decoration:none;transition:border-color .2s}
+  .pcard:hover{border-color:var(--line-strong)}
+  .pcard .img{aspect-ratio:4/3;background:var(--clay);position:relative;overflow:hidden}
+  .pcard .img svg{width:100%;height:100%;display:block}
+  .pcard .body{padding:22px;display:flex;flex-direction:column;flex:1}
+  .pcard .cat{font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--bronze)}
+  .pcard h3{font-size:17px;margin-top:8px}
+  .pcard p{font-size:13.5px;color:var(--stone);margin-top:8px;flex:1}
+
+  footer.site{background:var(--charcoal);color:#fff;padding:64px 0 40px}
+  footer .cols{display:grid;gap:36px}
+  @media(min-width:800px){footer .cols{grid-template-columns:1.4fr 1fr 1fr}}
+  footer h4{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--stone-light)}
+  footer ul{list-style:none;padding:0;margin-top:14px}
+  footer li{margin-top:9px;font-size:14px}
+  footer a{color:rgba(255,255,255,.8);text-decoration:none}
+  footer a:hover{color:#fff}
+  footer .small{margin-top:46px;border-top:1px solid rgba(255,255,255,.12);padding-top:20px;font-size:12px;color:rgba(255,255,255,.5)}
+
+  /* Estimator */
+  .est{background:var(--clay)}
+  .panel{background:var(--surface);border:1px solid var(--line);padding:28px;margin-top:26px}
+  .fgrid{display:grid;gap:18px}
+  @media(min-width:760px){.fgrid{grid-template-columns:repeat(3,1fr)}.fgrid.two{grid-template-columns:repeat(2,1fr)}}
+  label.f{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--stone)}
+  input[type=number],select{margin-top:8px;width:100%;padding:11px 12px;font-size:14px;border:1px solid var(--line-strong);border-radius:2px;background:#fff;color:var(--ink);font-family:var(--body)}
+  .checks{display:grid;gap:10px;margin-top:10px}
+  @media(min-width:760px){.checks{grid-template-columns:repeat(2,1fr)}.checks.c3{grid-template-columns:repeat(3,1fr)}}
+  .chk{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:#fff;padding:12px 14px;border-radius:2px;cursor:pointer;font-size:13.5px}
+  .chk:hover{border-color:var(--line-strong)}
+  .chk input{accent-color:var(--bronze);margin-top:3px}
+  .chk.on{border-color:var(--ink)}
+  fieldset{border:0;padding:0;margin:26px 0 0}
+  legend{font-family:var(--heading);font-weight:650;font-size:16px;padding:0}
+  .result-head{font-family:var(--heading);font-size:clamp(30px,4vw,44px);font-weight:700;margin-top:6px;color:var(--navy)}
+  .meter{height:6px;background:var(--line);max-width:340px;margin-top:8px}
+  .meter i{display:block;height:100%;background:var(--bronze);transition:width .3s}
+  .tag{display:inline-block;border:1px solid var(--line);border-radius:2px;padding:2px 7px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--stone);margin-left:8px;vertical-align:2px}
+  .warn{border-left:2px solid #a03e2d;background:var(--clay);padding:11px 15px;font-size:13.5px;color:var(--ink-soft);margin-top:10px}
+  .note{border-left:2px solid var(--line-strong);background:var(--clay);padding:12px 16px;font-size:12px;color:var(--ink-soft);margin-top:22px}
+  table.bd{width:100%;border-collapse:collapse;font-size:13px;margin-top:14px}
+  table.bd th,table.bd td{text-align:left;padding:9px 10px 9px 0;border-bottom:1px solid var(--line);vertical-align:top}
+  table.bd thead th{font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--stone);border-bottom:2px solid var(--ink)}
+  table.bd td.r{text-align:right;white-space:nowrap}
+  .threecol{display:grid;gap:18px;margin-top:22px}
+  @media(min-width:900px){.threecol{grid-template-columns:repeat(3,1fr)}}
+  .threecol .box{border:1px solid var(--line);background:var(--surface);padding:18px}
+  .threecol h4{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone)}
+  .threecol li{font-size:12px;color:var(--ink-soft);margin-top:7px}
+  .threecol ul{padding:0 0 0 0;list-style:none}
+  ul.reasons{list-style:none;padding:0;margin-top:10px}
+  ul.reasons li{font-size:12px;color:var(--stone);margin-top:5px}
+  .sronly{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<div class="banner">STATIC DESIGN PREVIEW — the deliverable is the Next.js application in this folder (see BUILD_STATUS.md). Estimator below is fully functional.</div>
+
+<header class="site">
+  <div class="wrap nav">
+    <a href="#top" class="mark" aria-label="Morris Anderson Construction — home"><img src="assets/ma-monogram.png" alt=""><span style="display:flex;flex-direction:column"><b>Morris&nbsp;Anderson</b><span>Construction</span></span></a>
+    <ul>
+      <li><a href="turnkey-builds.html">Turnkey Builds</a></li>
+      <li><a href="self-build.html">Self-Build</a></li>
+      <li><a href="development.html">Development</a></li>
+      <li><a href="information.html">Information</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#estimator">Cost Estimator</a></li>
+      <li><a href="portal.html">Client Portal</a></li>
+      <li><a href="#director">About</a></li>
+    </ul>
+    <a class="btn btn-ink" href="contact.html" style="padding:10px 20px;font-size:13px;white-space:nowrap">Discuss a Project</a>
+    <button id="menuBtn" class="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="mPanel"><span></span><span></span><span></span></button><div id="mPanel" class="m-panel"><a href="turnkey-builds.html">Turnkey Builds</a><a href="self-build.html">Self-Build</a><a href="development.html">Development</a><a href="information.html">Information</a><a href="#projects">Projects</a><a href="#estimator">Cost Estimator</a><a href="#ninety">First 90 Days</a><a href="portal.html">Client Portal</a><a href="helicopter.html">Admin Portal</a><a href="#director">About</a><a href="contact.html">Discuss a Project</a></div>
+  </div>
+</header>
+<script>
+(function(){var b=document.getElementById('menuBtn'),p=document.getElementById('mPanel');
+if(!b||!p)return;
+b.addEventListener('click',function(){var open=p.style.display==='block';p.style.display=open?'none':'block';b.setAttribute('aria-expanded',String(!open));});
+document.addEventListener('click',function(e){if(!p.contains(e.target)&&e.target!==b&&!b.contains(e.target)){p.style.display='none';b.setAttribute('aria-expanded','false');}});
+})();
+</script>
+
+<!-- HERO -->
+<section class="hero" id="top" aria-labelledby="h1">
+  <div class="art" aria-hidden="true">
+    <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" width="100%" height="100%">
+      <rect width="1200" height="800" fill="#1b1e21"/>
+      <rect y="430" width="1200" height="370" fill="#26292d"/>
+      <path d="M120 430 L120 250 L440 250 L440 430 M80 250 L280 130 L480 250 M560 430 L560 190 L920 190 L920 430 M560 190 L740 90 L920 190" fill="none" stroke="#8c6d45" stroke-width="3" opacity=".8"/>
+      <path d="M0 520 Q300 490 600 520 T1200 540" fill="none" stroke="#8c6d45" stroke-width="2" opacity=".5"/>
+      <rect x="620" y="260" width="70" height="170" fill="#33373c"/><rect x="730" y="260" width="70" height="170" fill="#33373c"/><rect x="840" y="260" width="60" height="170" fill="#33373c"/>
+    </svg>
+  </div>
+  <div class="shade" aria-hidden="true"></div>
+  <img src="assets/ma-monogram-light.png" alt="" aria-hidden="true" style="position:absolute;right:-40px;top:50%;transform:translateY(-50%);width:420px;opacity:.05;pointer-events:none">
+  <div class="wrap"><div class="inner">
+    <p class="eyebrow light">Turnkey Construction · Self-Build · Project Management</p>
+    <h1 id="h1">From site assessment to finished building, one accountable team.</h1>
+    <p class="lead">Morris Anderson Construction is an international construction business with experience across large contractors and bespoke projects — expertly placed to manage teams across single and multi-site builds whilst adhering to the most stringent of building regulations. From initial feasibility through construction, coordination and final handover.</p>
+    <div class="ctas">
+      <a class="btn btn-white" href="contact.html">Discuss Your Project</a>
+      <a class="btn btn-onDark" href="#estimator">Build a Cost Estimate</a>
+    </div>
+    <p class="qual">Best suited to complete builds, self-build programmes, development projects, complex sites and substantial conversion work.</p>
+  </div></div>
+</section>
+
+<!-- PROPOSITION -->
+<section class="pad" style="background:var(--surface)" aria-labelledby="prop-h">
+  <div class="wrap">
+    <div class="s-head">
+      <p class="eyebrow">The complete route</p>
+      <h2 id="prop-h" style="margin-top:12px">A complete route from concept to completion</h2>
+      <p class="intro">We combine practical construction experience with cost awareness, programme control and direct site management, helping clients move from an initial idea to a completed building without having to coordinate every consultant, trade and supplier themselves.</p>
+    </div>
+    <ol class="gridcards c4" style="list-style:none;padding:0">
+      <li class="cell"><span class="no">01</span><h3>Feasibility</h3></li>
+      <li class="cell"><span class="no">02</span><h3>Cost &amp; programme planning</h3></li>
+      <li class="cell"><span class="no">03</span><h3>Design coordination</h3></li>
+      <li class="cell"><span class="no">04</span><h3>Procurement</h3></li>
+      <li class="cell"><span class="no">05</span><h3>Site delivery</h3></li>
+      <li class="cell"><span class="no">06</span><h3>Trade management</h3></li>
+      <li class="cell"><span class="no">07</span><h3>Quality control</h3></li>
+      <li class="cell"><span class="no">08</span><h3>Completion &amp; handover</h3></li>
+    </ol>
+  </div>
+</section>
+
+<!-- SERVICE ROUTES -->
+<section class="pad" id="turnkey" aria-labelledby="routes-h">
+  <div class="wrap">
+    <div class="s-head">
+      <p class="eyebrow">Three ways to work with us</p>
+      <h2 id="routes-h" style="margin-top:12px">Choose the level of responsibility you want us to carry</h2>
+    </div>
+    <div class="routes">
+      <div class="route"><h3>Turnkey Construction</h3><p>For clients who want one party coordinating the project from early planning through completion.</p><a href="turnkey-builds.html"><span>Explore Turnkey Delivery</span></a></div>
+      <div class="route"><h3>Supported Self-Build</h3><p>For self-builders who want professional management while retaining an agreed degree of control.</p><a href="self-build.html"><span>Explore Self-Build Support</span></a></div>
+      <div class="route"><h3>Development &amp; Commercial</h3><p>For developers, landowners and businesses seeking commercially aware construction delivery.</p><a href="development.html"><span>Explore Development Services</span></a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ESTIMATOR -->
+<section class="pad est" id="estimator" aria-labelledby="est-h">
+  <div class="wrap">
+    <div class="s-head">
+      <p class="eyebrow">Cost orientation</p>
+      <h2 id="est-h" style="margin-top:12px">Understand the likely scale of your build</h2>
+      <p class="intro">Use the estimator to explore an early cost range based on floor area, construction route, specification and site conditions. It is an initial planning tool, not a quotation. <em>(Preview note: the production site presents this as a ten-step guided flow with PDF download, email and submit-for-review — the core mathematics below match the live estimator (the live version also asks about construction method and project position, which refine confidence further).)</em></p>
+    </div>
+
+    <form class="panel" id="estForm">
+      <div class="fgrid">
+        <div>
+          <label class="f" for="f-route">Delivery route</label>
+          <select id="f-route">
+            <option value="highEndTurnkey">High-end turnkey new build</option>
+            <option value="managedSelfBuild">Managed self-build</option>
+            <option value="costControlledSelfBuild">Guided / cost-controlled self-build</option>
+            <option value="advisorySelfBuild">Self-build with advisory support (hourly)</option>
+            <option value="extensionRenovation">Extension or major renovation</option>
+            <option value="commercialConversion">Commercial conversion</option>
+            <option value="developerMultiUnit">Developer or multi-unit project</option>
+            <option value="unsure">Not sure yet</option>
+          </select>
+        </div>
+        <div>
+          <label class="f" for="f-area">Floor area (m²)</label>
+          <input id="f-area" type="number" min="1" value="150" inputmode="numeric">
+        </div>
+        <div>
+          <label class="f" for="f-spec">Specification</label>
+          <select id="f-spec">
+            <option value="highEnd">High-end</option>
+            <option value="bespoke">Bespoke</option>
+            <option value="exceptional">Exceptional / architecturally complex</option>
+            <option value="practicalStandard">Practical standard</option>
+            <option value="highlyCostControlled">Highly cost-controlled</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="fgrid two" style="margin-top:18px;border:1px solid var(--line);background:var(--clay);padding:16px 18px 20px">
+        <div>
+          <label class="f" for="f-design">Build design</label>
+          <select id="f-design">
+            <option value="twoStorey">Two-storey house</option>
+            <option value="bungalow">Bungalow (single-storey)</option>
+            <option value="oneAndAHalfStorey">1.5-storey (dormer / rooms in the roof)</option>
+            <option value="threeStorey">Three-storey house</option>
+            <option value="flatsApartments">Flats or apartments</option>
+            <option value="notDecided">Not decided yet</option>
+          </select>
+          <p style="font-size:11.5px;color:var(--stone);margin-top:4px">Changes the cost per m² — a bungalow spreads foundations and roof over one floor; flats carry cores and communal provision.</p>
+        </div>
+        <div>
+          <label class="f" for="f-plot">Plot size (m², optional)</label>
+          <input id="f-plot" type="number" min="0" max="1000000" value="0" inputmode="numeric">
+          <p id="plotNote" style="font-size:11.5px;color:var(--stone);margin-top:4px"></p>
+        </div>
+      </div>
+
+      <div id="unitsRow" class="fgrid two" hidden style="margin-top:18px;border:1px solid var(--line);background:var(--clay);padding:16px 18px 20px">
+        <div>
+          <label class="f" for="f-units">Number of units</label>
+          <input id="f-units" type="number" min="2" max="500" value="2" inputmode="numeric">
+          <p id="unitsErr" style="display:none;font-size:12px;color:#a03e2d;font-weight:600;margin-top:4px"></p>
+        </div>
+        <div>
+          <label class="f" for="f-unitsize">Average unit size (m²)</label>
+          <input id="f-unitsize" type="number" min="10" max="2000" placeholder="e.g. 85" inputmode="numeric">
+        </div>
+        <p style="grid-column:1/-1;margin-top:2px;font-size:12px;color:var(--stone)">Total floor area fills in automatically from units × average size — you can still adjust it above. Results include a per-unit figure.</p>
+      </div>
+
+      <fieldset>
+        <legend>Ground levels</legend>
+        <div class="fgrid" style="margin-top:10px">
+          <div>
+            <label class="f" for="f-terrain-mode">How level is the site?</label>
+            <select id="f-terrain-mode">
+              <option value="0">Level throughout</option>
+              <option value="50">Mixed / partly sloping</option>
+              <option value="100">Sloping throughout</option>
+            </select>
+          </div>
+          <div id="terrainSlideWrap" hidden style="grid-column:span 2">
+            <label class="f" for="f-terrain">Roughly how much of the site is not level? <span id="terrainLabel" style="font-weight:400;color:var(--stone)"></span></label>
+            <input id="f-terrain" type="range" min="5" max="95" step="5" value="50" style="width:100%;max-width:420px;accent-color:var(--navy);margin-top:8px">
+          </div>
+          <div>
+            <label class="f" for="f-services">Mains services (water &amp; electricity)</label>
+            <select id="f-services">
+              <option value="onSite">On site or at the boundary</option>
+              <option value="nearby">Nearby, but not yet connected</option>
+              <option value="notNearby">Not nearby — new connections likely</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Site conditions <span style="font-weight:400;font-size:13px;color:var(--stone)">— select everything that applies</span></legend>
+        <div class="checks" id="siteChecks"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Form and complexity</legend>
+        <div class="checks c3" id="cxChecks"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Garaging, cellar and demolition</legend>
+        <p style="font-size:12px;color:var(--stone);margin-top:6px">Doubles and shared blocks cost less per space than singles (shared roof and foundations) — the total always rises with more spaces.</p>
+        <div class="fgrid" style="margin-top:10px">
+          <div>
+            <label class="f" for="f-garage-mode">Garaging</label>
+            <select id="f-garage-mode">
+              <option value="none">No garage</option>
+              <option value="perUnit" id="garagePerUnitOpt">A garage on the house</option>
+              <option value="sharedBlock" id="garageBlockOpt">A separate garage block</option>
+            </select>
+          </div>
+          <div id="garagePerWrap" hidden>
+            <label class="f" for="f-garage-per"><span id="garagePerLabel">Garage spaces</span></label>
+            <input id="f-garage-per" type="number" min="0" max="4" value="1">
+            <p id="garagePerNote" style="font-size:11.5px;color:var(--stone);margin-top:4px"></p>
+          </div>
+          <div id="garageTotalWrap" hidden>
+            <label class="f" for="f-garage-total">Total garage spaces</label>
+            <input id="f-garage-total" type="number" min="0" max="2000" value="4">
+          </div>
+          <div id="garageBldWrap" hidden>
+            <label class="f" for="f-garage-bld">Number of garage buildings</label>
+            <input id="f-garage-bld" type="number" min="1" max="500" value="1">
+          </div>
+          <div id="garageAreaWrap" hidden>
+            <label class="f" for="f-garage-area">Garage floor area (m², if known)</label>
+            <input id="f-garage-area" type="number" min="0" max="2000" value="0">
+            <p id="garageAreaNote" style="font-size:11.5px;color:var(--stone);margin-top:4px">Leave 0 to price by spaces (single ≈ 18 m², double ≈ 36 m²).</p>
+          </div>
+          <div>
+            <label class="f" for="f-cellar">Cellar floor area (m², 0 = none)</label>
+            <input id="f-cellar" type="number" min="0" max="5000" value="0">
+          </div>
+          <div>
+            <label class="f" for="f-demolition">Demolition floor area (m², 0 = standard allowance)</label>
+            <input id="f-demolition" type="number" min="0" max="5000" value="0">
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset id="advisoryFieldset" hidden>
+        <legend>Advisory support <span style="font-weight:400;font-size:13px;color:var(--stone)">— how much advice do you want?</span></legend>
+        <p style="font-size:12px;color:var(--stone);margin-top:6px">You run the build and hold the contracts with your trades; Mathew Morris advises at an hourly rate on programme, procurement, cost control and buildability. Busier stages usually need more hours than quieter ones.</p>
+        <div class="fgrid" style="margin-top:10px">
+          <div>
+            <label class="f" for="f-advisory-hours">Hours of advice per week</label>
+            <input id="f-advisory-hours" type="number" min="0" max="48" value="4">
+          </div>
+          <div>
+            <label class="f" for="f-advisory-weeks">Programme length (weeks)</label>
+            <input id="f-advisory-weeks" type="number" min="0" max="260" value="40">
+          </div>
+        </div>
+        <p id="advisoryNote" style="font-size:12px;color:var(--stone);margin-top:8px"></p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Interior and budget</legend>
+        <div class="fgrid" style="margin-top:10px">
+          <div><label class="f" for="f-kitchens"><span id="kitchensLabel">Kitchens</span></label><input id="f-kitchens" type="number" min="0" max="10" value="1"><p id="kitchensNote" style="font-size:11.5px;color:var(--stone);margin-top:4px"></p></div>
+          <div><label class="f" for="f-baths"><span id="bathsLabel">Bathrooms</span></label><input id="f-baths" type="number" min="0" max="20" value="2"><p id="bathsNote" style="font-size:11.5px;color:var(--stone);margin-top:4px"></p></div>
+          <div><label class="f" for="f-budget">Your budget £ (optional)</label><input id="f-budget" type="number" min="0" placeholder="e.g. 450000"></div>
+        </div>
+      </fieldset>
+    </form>
+
+    <div class="panel" aria-live="polite" id="resultPanel">
+      <p class="eyebrow" id="r-route"></p>
+      <p class="result-head" id="r-figure"></p>
+      <div id="r-band" hidden style="margin-top:10px;max-width:420px">
+        <div style="position:relative;height:8px;border-radius:2px;background:var(--line)">
+          <div style="position:absolute;top:0;bottom:0;left:15%;right:15%;border-radius:2px;background:rgba(140,109,69,.4)"></div>
+          <div style="position:absolute;top:0;bottom:0;left:50%;width:2px;transform:translateX(-50%);background:var(--navy)"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--stone);margin-top:3px">
+          <span>low</span><span style="font-weight:600;color:var(--ink)">working figure</span><span>high</span>
+        </div>
+      </div>
+      <p id="r-rate" style="font-size:13.5px;color:var(--stone)"></p>
+      <p id="r-perunit" style="display:none;font-size:14px;font-weight:600;color:var(--navy);margin-top:6px"></p>
+      <p id="r-owncost" style="display:none;margin-top:12px;border-left:2px solid var(--bronze);background:var(--clay);padding:10px 14px;font-size:13.5px;color:var(--ink-soft)">This build figure is <strong style="color:var(--ink)">your own cost</strong> — you contract the trades and suppliers directly and the money goes to them, not to us. The advisory support we charge for is shown separately below.</p>
+      <p id="r-coverage" style="display:none;margin-top:10px;font-size:13.5px;color:var(--stone)"></p>
+      <div id="r-anchors"></div>
+      <div id="r-confwrap" style="margin-top:20px;border-top:1px solid var(--line);padding-top:18px">
+        <p style="font-size:14px;font-weight:600" id="r-conf"></p>
+        <div class="meter" role="img" id="meterWrap"><i id="meterBar" style="width:0"></i></div>
+        <ul class="reasons" id="r-reasons"></ul>
+      </div>
+      <div id="r-budget" style="margin-top:14px;font-size:14px"></div>
+      <div id="r-warnings"></div>
+      <div id="r-advisory" style="display:none;margin-top:20px;border:1px solid var(--bronze);padding:20px 22px">
+        <p class="eyebrow">Advisory support &middot; the only part we charge</p>
+        <p id="r-adv-figure" style="font-family:var(--heading);font-weight:650;font-size:26px;margin-top:8px"></p>
+        <p id="r-adv-detail" style="font-size:13.5px;color:var(--stone);margin-top:6px"></p>
+        <ul id="r-adv-notes" class="reasons" style="margin-top:10px"></ul>
+        <p style="margin-top:14px;font-size:12px;color:var(--stone);border-left:2px solid var(--line-strong);background:var(--clay);padding:8px 12px">Advice is scoped and agreed in writing before it starts, and the hours flex with the stage of the build. The build figure above is not part of this cost.</p>
+      </div>
+      <details style="margin-top:20px">
+        <summary style="font-family:var(--heading);font-weight:650;cursor:pointer">How this estimate is built up</summary>
+        <table class="bd"><thead><tr><th>Allowance</th><th>Basis</th><th style="text-align:right">Range</th></tr></thead><tbody id="r-breakdown"></tbody></table>
+        <p style="font-size:11.5px;color:var(--stone);margin-top:8px">Percentages apply to the base figure and are added together — never compounded.</p>
+      </details>
+      <div class="threecol">
+        <div class="box"><h4>Assumptions</h4><ul id="r-assump"></ul></div>
+        <div class="box"><h4>Excluded from this estimate</h4><ul id="r-excl"></ul></div>
+        <div class="box"><h4>Most useful next information</h4><ul id="r-next"></ul></div>
+      </div>
+      <p class="note">This estimate is an early planning indication based on the information selected. It is <strong>not a quotation</strong>, tender, valuation, bill of quantities or contractual offer. Actual costs depend on site assessment, design information, ground conditions, access, location, specification, procurement, statutory requirements, market conditions and the agreed scope of work.</p>
+      <div style="margin-top:22px;display:flex;gap:12px;flex-wrap:wrap">
+        <button type="button" class="btn btn-ink" style="border:0;cursor:pointer" onclick="sendQuoteRequest()">Send for a formal quotation</button>
+        <a class="btn btn-bronze" href="contact.html">Or complete a full project brief</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section class="pad" id="projects" aria-labelledby="proj-h">
+  <div class="wrap">
+    <div class="s-head"><p class="eyebrow">Selected work</p><h2 id="proj-h" style="margin-top:12px">Projects shaped by their sites and their briefs</h2></div>
+    <div class="proj" id="projGrid"></div>
+  </div>
+</section>
+
+<!-- COMPLEX SITES -->
+<section class="pad dark" aria-labelledby="cx-h">
+  <div class="wrap">
+    <div class="s-head">
+      <p class="eyebrow light">Technically demanding work</p>
+      <h2 id="cx-h" style="margin-top:12px">Built around the realities of the site</h2>
+      <p class="intro">Restricted access, retaining structures, easements, sequencing and changing ground conditions can determine whether a project remains controlled. Our role is to identify those constraints early and manage them through the programme rather than allowing them to emerge as expensive surprises.</p>
+      <p style="margin-top:16px;font-size:14px;color:rgba(255,255,255,.6);max-width:640px">The contemporary hillside residence — approximately 200&nbsp;m² of timber-frame construction set five metres into a hillside with retaining works, complex access and easement considerations — is a working example of that approach.</p>
+    </div>
+  </div>
+</section>
+
+<!-- DIRECTOR -->
+<section class="pad" id="director" style="background:var(--surface)" aria-labelledby="dir-h">
+  <div class="wrap">
+    <div class="s-head">
+      <p class="eyebrow">Mathew Morris · Director</p>
+      <h2 id="dir-h" style="margin-top:12px">Practical site leadership supported by commercial awareness</h2>
+      <p class="intro">Mathew Morris has progressed through site supervision, construction management, concrete and civil-engineering work, surveying and company leadership. That combination supports a practical approach to buildability, programme control, cost awareness and site delivery.</p>
+    </div>
+    <ol class="gridcards" style="grid-template-columns:repeat(auto-fit,minmax(190px,1fr));list-style:none;padding:0">
+      <li class="cell"><span class="no">2022 – PRESENT</span><h3>Business owner</h3><p>Morris Anderson Construction</p></li>
+      <li class="cell"><span class="no">2020 – 2022</span><h3>Director</h3><p>Mordam Construction Ltd</p></li>
+      <li class="cell"><span class="no">2019 – 2020</span><h3>Trainee quantity surveyor</h3><p>Commercial and cost experience</p></li>
+      <li class="cell"><span class="no">2014 – 2019</span><h3>Management &amp; surveying</h3><p>Concrete and civil-engineering contractors</p></li>
+      <li class="cell"><span class="no">2012 – 2014</span><h3>Foreman</h3><p>A small but expanding construction group</p></li>
+    </ol>
+  </div>
+</section>
+
+<!-- FIRST 90 DAYS -->
+<section class="pad" id="ninety" aria-labelledby="n90-h" style="background:var(--surface)">
+  <div class="wrap">
+    <div class="s-head">
+      <p class="eyebrow">The First 90 Days</p>
+      <h2 id="n90-h" style="margin-top:12px">What a typical first ninety days looks like</h2>
+      <p class="intro">Three phases that map onto the opening stages of our process. Real programmes vary with the site, the planning position and the information available — this is the typical shape, not a promise of dates.</p>
+    </div>
+
+    <!-- Phase band graphic -->
+    <div role="img" aria-label="Timeline band: days one to fourteen Understand, days fifteen to forty-five Test, days forty-six to ninety Prepare" style="margin-top:40px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--stone)"><span>Day 1</span><span>Day 14</span><span>Day 45</span><span>Day 90</span></div>
+      <div style="display:flex;height:64px;margin-top:8px;border-radius:2px;overflow:hidden">
+        <div style="width:15.5%;background:var(--clay);display:flex;flex-direction:column;justify-content:center;padding:0 14px"><b style="font-size:11px;letter-spacing:.16em;color:var(--bronze)">01</b><span style="font-family:var(--heading);font-weight:600;font-size:13px">Understand</span></div>
+        <div style="width:34.5%;background:var(--line);display:flex;flex-direction:column;justify-content:center;padding:0 14px;border-left:2px solid var(--ground)"><b style="font-size:11px;letter-spacing:.16em;color:var(--bronze)">02</b><span style="font-family:var(--heading);font-weight:600;font-size:13px">Test</span></div>
+        <div style="width:50%;background:var(--navy);display:flex;flex-direction:column;justify-content:center;padding:0 14px;border-left:2px solid var(--ground)"><b style="font-size:11px;letter-spacing:.16em;color:#c5a97f">03</b><span style="font-family:var(--heading);font-weight:600;font-size:13px;color:#fff">Prepare</span></div>
+      </div>
+      <div style="display:grid;gap:14px;margin-top:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+        <p style="font-size:12.5px;color:var(--stone)"><b style="color:var(--ink)">Days 1–14 · Understand.</b> Site, brief and information reviewed; written summary and an honest recommendation.</p>
+        <p style="font-size:12.5px;color:var(--stone)"><b style="color:var(--ink)">Days 15–45 · Test.</b> Feasibility against planning, access, ground and services; indicative cost plan against budget.</p>
+        <p style="font-size:12.5px;color:var(--stone)"><b style="color:var(--ink)">Days 46–90 · Prepare.</b> Delivery strategy in writing; outline programme, procurement strategy, mobilisation readiness.</p>
+      </div>
+    </div>
+
+    <!-- Gantt chart -->
+    <div style="margin-top:36px;overflow-x:auto">
+      <div style="min-width:680px"><svg viewBox="-70 0 970 352" role="img" aria-label="Gantt chart of the first ninety days: Understand days one to fourteen, Test days fifteen to forty-five, Prepare days forty-six to ninety, with nine indicative activities" style="width:100%;height:auto;background:#fff;border:1px solid var(--line)">
+  <line x1="158" y1="34" x2="158" y2="322" stroke="#e6e2da" stroke-width="1"/><text x="158" y="24" font-size="11" text-anchor="middle" fill="#a39d92" font-family="system-ui,sans-serif">Day 1</text><line x1="262" y1="34" x2="262" y2="322" stroke="#e6e2da" stroke-width="1"/><text x="262" y="24" font-size="11" text-anchor="middle" fill="#a39d92" font-family="system-ui,sans-serif">Day 14</text><line x1="510" y1="34" x2="510" y2="322" stroke="#e6e2da" stroke-width="1"/><text x="510" y="24" font-size="11" text-anchor="middle" fill="#a39d92" font-family="system-ui,sans-serif">Day 45</text><line x1="870" y1="34" x2="870" y2="322" stroke="#e6e2da" stroke-width="1"/><text x="870" y="24" font-size="11" text-anchor="middle" fill="#a39d92" font-family="system-ui,sans-serif">Day 90</text><rect x="158" y="40" width="104" height="18" fill="#8c6d45" opacity="1" rx="1"/><text x="142" y="53" font-size="11.5" text-anchor="end" fill="#4b5157" font-family="system-ui,sans-serif">Initial review</text><rect x="174" y="72" width="144" height="18" fill="#8c6d45" opacity=".75" rx="1"/><text x="142" y="85" font-size="11.5" text-anchor="end" fill="#4b5157" font-family="system-ui,sans-serif">Site &amp; information gathering</text><rect x="270" y="104" width="240" height="18" fill="#6f6a61" opacity="1" rx="1"/><text x="142" y="117" font-size="11.5" text-anchor="end" fill="#4b5157" font-family="system-ui,sans-serif">Feasibility testing</text><rect x="390" y="136" width="120" height="18" fill="#6f6a61" opacity=".75" rx="1"/><text x="142" y="149" font-size="11.5" text-anchor="end" fill="#4b5157" font-family="system-ui,sans-serif">Indicative cost plan</text><rect x="470" y="168" width="80" height="18" fill="#6f6a61" opacity=".55" rx="1"/><text x="142" y="181" font-size="11.5" text-anchor="end" fill="#4b5157" font-family="system-ui,sans-serif">Delivery-route recommendation</text><rect x="518" y="200" width="112" height="18" fill="#1a1449" opacity="1" rx="1"/><text x="142" y="213" font-size="11.5" text-anchor="end" fill="#4b5157" font-family="system-ui,sans-serif">Delivery strategy agreed</text><rect x="550" y="232" width="320" height="18" fill="#1a1449" opacity=".8" rx="1"/><text x="142" y="245" font-size="11.5" text-anchor="end" fill="#4b5157" font-family="system-ui,sans-serif">Design coordination begun</text><rect x="630" y="264" width="240" height="18" fill="#1a1449" opacity=".65" rx="1"/><text x="142" y="277" font-size="11.5" text-anchor="end" fill="#4b5157" font-family="system-ui,sans-serif">Programme &amp; procurement strategy</text><rect x="790" y="296" width="80" height="18" fill="#1a1449" opacity=".5" rx="1"/><text x="142" y="309" font-size="11.5" text-anchor="end" fill="#4b5157" font-family="system-ui,sans-serif">Mobilisation readiness</text><rect x="158" y="330" width="104" height="8" fill="#efece6" stroke="#cfc9be" stroke-width=".5"/><rect x="270" y="330" width="240" height="8" fill="#cfc9be"/><rect x="518" y="330" width="352" height="8" fill="#1a1449"/>
+  <text x="150" y="349" font-size="10.5" fill="#6f6a61" font-family="system-ui,sans-serif">01 Understand</text>
+  <text x="270" y="349" font-size="10.5" fill="#6f6a61" font-family="system-ui,sans-serif">02 Test</text>
+  <text x="518" y="349" font-size="10.5" fill="#6f6a61" font-family="system-ui,sans-serif">03 Prepare</text>
+</svg></div>
+      <p style="margin-top:10px;font-size:11.5px;color:var(--stone-light)">Indicative activity chart — durations and overlaps are agreed per project once the site and design information are known.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="pad dark" id="cta" aria-labelledby="cta-h">
+  <div class="wrap">
+    <p class="eyebrow light">Next step</p>
+    <h2 id="cta-h" style="margin-top:12px;max-width:640px">Planning a serious build or development?</h2>
+    <p style="margin-top:16px;color:rgba(255,255,255,.7);max-width:640px;font-size:15.5px">Share the site, approximate floor area, planning position, intended use and target programme. We will review whether the project is suited to our delivery model and identify the most useful next conversation.</p>
+    <p style="margin-top:14px;color:rgba(255,255,255,.5);font-size:13.5px;max-width:560px">We are best suited to clients seeking an experienced construction and project-management partner rather than an isolated trade package.</p>
+    <div style="margin-top:30px"><a class="btn btn-white" href="contact.html">Submit a Project Brief</a></div>
+  </div>
+</section>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <span class="mark"><b style="color:#fff">Morris&nbsp;Anderson</b><span style="color:var(--stone-light)">Construction</span></span>
+        <p style="margin-top:18px;font-size:13.5px;color:rgba(255,255,255,.7);max-width:280px">From first assessment to final handover, one accountable construction partner.</p>
+      </div>
+      <div><h4>Services</h4><ul><li><a href="turnkey-builds.html">Turnkey Builds</a></li><li><a href="self-build.html">Self-Build Support</a></li><li><a href="development.html">Development &amp; Commercial</a></li><li><a href="information.html">Information &amp; Regulation</a></li></ul></div>
+      <div><h4>Company</h4><ul><li><a href="#projects">Projects</a></li><li><a href="#director">About</a></li><li><a href="#estimator">Cost Estimator</a></li>
+      <li><a href="portal.html">Client Portal</a></li><li><a href="contact.html">Contact</a></li><li><a href="helicopter.html">Admin Portal</a></li></ul></div>
+    </div>
+    <p class="small">© 2026 Morris Anderson Construction. All rights reserved. · Static preview — legal pages (privacy, cookies, terms, estimator disclaimer) are implemented in the application.</p>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   Estimator engine — faithful JS mirror of lib/estimator/engine.ts
+   (canonical version is the TypeScript module; keep both in step)
+   ============================================================ */
+const CONFIG = {
+  version: "2026-07.2(preview)",
+  areaLimits: { min: 20, max: 2000 },
+  baseRates: {
+    highEndTurnkey: { low: 2500, high: null, confirmed: true, enabled: true,
+      label: "High-end turnkey starting point",
+      scope: "Indicative starting point for a high-end masonry or timber-frame build on a straightforward site." },
+    costControlledSelfBuild: { low: 600, high: 800, confirmed: false, enabled: true,
+      label: "Cost-controlled self-build or selected-works route",
+      scope: "Provisional range requiring confirmation of the precise included construction scope and level of client involvement." },
+    managedSelfBuild: { low: 1600, high: 2300, confirmed: false, enabled: true,
+      label: "Managed self-build",
+      scope: "Provisional market-aligned range for a managed self-build programme on a straightforward site." },
+    extensionRenovation: { low: 1500, high: 2400, confirmed: false, enabled: true,
+      label: "Extension / major renovation",
+      scope: "Provisional market-aligned range per square metre of new or reworked space." },
+    commercialConversion: { low: 1900, high: 2800, confirmed: false, enabled: true,
+      label: "Commercial conversion",
+      scope: "Provisional market-aligned range per square metre of converted space." },
+    developerMultiUnit: { low: 1800, high: 2300, confirmed: false, enabled: true,
+      label: "Developer / multi-unit",
+      scope: "Provisional market-aligned range reflecting repetition efficiencies." },
+    advisorySelfBuild: { low: 1450, high: 2000, confirmed: false, enabled: true,
+      label: "Owner-managed self-build (your own build cost)",
+      scope: "Provisional range for a self-build the client runs themselves, contracting trades directly. This is the client's own build cost for planning context — not a Morris Anderson Construction price; advisory support is charged separately by the hour." }
+  },
+  buildDesign: {
+    bungalow:[8,15,"Single-storey design (bungalow)","Foundations and roof serve only one floor of accommodation, so single-storey space carries more substructure and roof per square metre than a two-storey equivalent."],
+    oneAndAHalfStorey:[1,5,"1.5-storey design (dormer / rooms in the roof)","Dormers, rooflights and the heavier roof structure offset most of the saving from shorter upper walls."],
+    flatsApartments:[6,15,"Flats or apartments (communal design)","Stair and service cores, corridors, acoustic separation and communal fire provision add cost that houses do not carry."]
+  },
+  advisoryRate: [75,95,"Advisory support (construction consultancy, per hour)"],
+  coverage: { warn: 50, severe: 85 },
+  site: {
+    sloping:[4,7,"Sloping site","Sloping ground typically increases foundation, drainage and setting-out costs."],
+    retainingLikely:[5,15,"Retaining structures likely","Retaining works add engineering, excavation and structural cost."],
+    restrictedAccess:[3,10,"Restricted access","Restricted access slows deliveries, limits plant choice and adds handling time."],
+    sharedNarrowAccess:[2,6,"Shared or narrow access","Shared or narrow access requires additional coordination."],
+    demolitionRequired:[2,8,"Demolition allowance","Significant demolition is priced separately after assessment."],
+    existingConversion:[5,15,"Working within an existing building","Conversion work carries opening-up risk new-build work does not."],
+    drainageChallenge:[2,6,"Known drainage challenge","Non-standard drainage adds design and installation cost."],
+    utilityChallenge:[2,6,"Known utility challenge","Difficult connections add cost; supplier quotations firm this up."],
+    floodGroundwater:[2,8,"Flood or groundwater concern","Water management adds engineering cost and needs early investigation."],
+    treesEcology:[1,5,"Significant trees or ecology","Protection measures and constraints add cost and time."],
+    easementRights:[1,4,"Easement or rights-of-way considerations","Easements constrain working methods and sequence."],
+    listedOrConservationArea:[5,15,"Listed building or conservation area","Slower consent, heritage-specialist input and materials that preserve rather than replace existing fabric — on top of any general existing-building risk."],
+    servicesNearby:[2,5,"Mains services nearby but not yet connected","Water and electricity are within reasonable reach but not yet on site."],
+    servicesNotOnSite:[4,12,"No mains services nearby — new connections likely","New supply infrastructure or a private supply/drainage solution is often needed on remote plots."]
+  },
+  complexity: {
+    complexFootprint:[3,8,"Complex footprint","Complex footprints increase foundation, walling and roofing quantities."],
+    complexRoof:[2,6,"Complex roof","Complex roof forms add structure, coverings and labour."],
+    extensiveGlazing:[3,10,"Extensive glazing","Large or structural glazing costs materially more than standard openings."],
+    balconiesTerraces:[2,6,"Balconies or terraces","External amenity structures add structure and waterproofing cost."],
+    retainingWork:[5,15,"Retaining work","Retaining works add engineering and structural cost."],
+    basement:[10,25,"Basement","Among the most expensive space to create: excavation, structure, waterproofing, risk."],
+    outbuildings:[2,6,"Outbuildings","Additional structures beyond the main envelope."],
+    garage:[2,5,"Garage","Garage construction beyond the main floor area."],
+    extensiveExternalWorks:[3,10,"Extensive external works","Drives, landscaping, drainage and boundaries beyond a standard allowance."]
+  },
+  spec: { bespoke:[0,10,"Bespoke specification"], exceptional:[10,25,"Exceptional / architecturally complex specification"] },
+  garageRates: {
+    single:[27000,42000,"Single garage (one space per structure)","Detached or attached single garage at standard specification, per space."],
+    double:[20000,35000,"Double garage (two spaces under one roof)","Two spaces sharing one structure — cheaper per space than two singles."],
+    sharedBlock:[12000,21000,"Shared garage block (three or more spaces)","Pooled garaging — the best per-space economies of scale."]
+  },
+  garageAreaRate:[1300,2100,"Garage construction (per m², size known)","Per square metre of garage floor area — used whenever the actual size is known."],
+  cellarRate:[3000,4600,"Cellar / basement construction (per m²)","Excavation, retaining structure, waterproofing and slab per square metre of cellar floor area."],
+  demolitionAreaRate:[80,140,"Demolition (per m², size known)","Strip-out, structure removal, waste disposal and site clearance per square metre demolished — used whenever the approximate area is known."],
+  contingency: { base:[5,10,"Risk and uncertainty allowance"], unknown:[12,18,"Risk allowance — ground conditions unknown"], conversion:[12,18,"Risk allowance — working with an existing building"] },
+  exclusions: ["Land purchase and acquisition costs","Professional and consultant fees, unless specifically agreed","Planning application and statutory fees","Planning obligations (e.g. Section 106, CIL)","Utility connection charges beyond normal allowances","Abnormal ground conditions and contamination remediation","Significant demolition beyond the stated allowance","Finance and legal costs","Loose furniture and appliances unless specified","VAT — treatment requires project-specific confirmation"],
+  assumptions: ["Site assumed to have normal ground conditions unless stated","Normal utility connections assumed unless a challenge is selected","No cellar or basement included unless a cellar area is entered","Current market conditions at the configuration's effective date","A continuous, reasonably efficient construction programme","Standard external-works allowance unless extensive works are selected"]
+};
+const ROUTE_LABELS = { highEndTurnkey:"High-end turnkey new build", managedSelfBuild:"Managed self-build", costControlledSelfBuild:"Guided or cost-controlled self-build", advisorySelfBuild:"Self-build with advisory support (hourly)", extensionRenovation:"Extension or major renovation", commercialConversion:"Commercial conversion", developerMultiUnit:"Developer or multi-unit project", unsure:"Not sure yet" };
+const BUILD_DESIGN_LABELS = { twoStorey:"Two-storey house", bungalow:"Bungalow (single-storey)", oneAndAHalfStorey:"1.5-storey (dormer)", threeStorey:"Three-storey house", flatsApartments:"Flats or apartments", notDecided:"Not decided yet" };
+const SITE_OPTS = { unknownConditions:"Conditions unknown", retainingLikely:"Retaining structures likely", restrictedAccess:"Restricted access", sharedNarrowAccess:"Shared or narrow access", demolitionRequired:"Existing building to demolish", existingConversion:"Existing building to convert", drainageChallenge:"Known drainage challenge", utilityChallenge:"Known utility challenge", possibleContamination:"Possible contamination", floodGroundwater:"Flood or groundwater concern", treesEcology:"Significant trees or ecology", easementRights:"Easement or rights-of-way issue", listedOrConservationArea:"Listed building or conservation area" };
+const CX_OPTS = { complexFootprint:"Complex footprint", complexRoof:"Complex roof", extensiveGlazing:"Extensive glazing", balconiesTerraces:"Balconies or terraces", retainingWork:"Retaining work", outbuildings:"Outbuildings", extensiveExternalWorks:"Extensive external works" };
+
+const gbp = n => "£" + Math.round(n).toLocaleString("en-GB");
+const roundD = v => { const s = Math.abs(v) >= 100000 ? 1000 : 500; return Math.round(v/s)*s; };
+const fmt = v => gbp(roundD(v));
+const range = (a,b) => fmt(a) + "–" + fmt(b);
+
+function effectiveStoreysOf(design){
+  if (design === "bungalow") return 1;
+  if (design === "oneAndAHalfStorey") return 1.5;
+  if (design === "threeStorey") return 3;
+  return 2; // twoStorey, flatsApartments, notDecided — the preview omits a separate storeys field
+}
+function calculate(sel){
+  const r = { mode:"assessment", lines:[], warnings:[], reasons:[], drivers:[], anchors:[],
+              assumptions:CONFIG.assumptions.slice(), exclusions:CONFIG.exclusions, next:["Site location and context"] };
+  if (!isFinite(sel.area) || sel.area <= 0){ r.mode="invalid"; return r; }
+  const dwellings = (sel.units && sel.units > 1) ? sel.units : 1;
+  const storeys = effectiveStoreysOf(sel.buildDesign);
+  const footprint = sel.area / storeys;
+  if (sel.plot && sel.plot > 0){
+    r.coverage = { footprint, plot: sel.plot, pct: (footprint/sel.plot)*100 };
+    if (footprint > sel.plot + 1e-9){
+      r.mode = "invalid";
+      r.invalidReason = storeys <= 1
+        ? `A single-storey building of ${Math.round(sel.area)} m² cannot fit on a ${Math.round(sel.plot)} m² plot — the ground floor alone would exceed the plot. Add storeys, reduce the floor area, or check the plot size.`
+        : `Spread over ${storeys} storeys, ${Math.round(sel.area)} m² of floor area needs a ground floor of about ${Math.round(footprint)} m² — more than the ${Math.round(sel.plot)} m² plot. Add storeys, reduce the floor area, or check the plot size.`;
+      return r;
+    }
+  }
+  let advisory = null;
+  if (sel.route === "advisorySelfBuild" && sel.advisoryHours > 0 && sel.advisoryWeeks > 0){
+    const totalHours = sel.advisoryHours * sel.advisoryWeeks;
+    const aRate = CONFIG.advisoryRate;
+    advisory = { hours: sel.advisoryHours, weeks: sel.advisoryWeeks, totalHours,
+      rateLow: aRate[0], rateHigh: aRate[1], totalLow: totalHours*aRate[0], totalHigh: totalHours*aRate[1],
+      notes: [
+        "You run the build and hold the contracts with your trades; Mathew Morris provides structured advice. This is consultancy, not a role inside your site team.",
+        "Charged by the hour and invoiced separately. The build figure remains your own cost, paid directly to your suppliers and trades."
+      ] };
+    if (sel.advisoryHours >= 10) advisory.notes.push("At this level of involvement a managed self-build route often serves better than advice alone — worth a conversation before committing either way.");
+  }
+  r.advisory = advisory;
+  if (sel.route === "advisorySelfBuild" && !advisory) r.warnings.push("Advisory support hours are not set — choose hours per week and a programme length to see the support cost alongside your own build figure.");
+  const outside = sel.area < CONFIG.areaLimits.min || sel.area > CONFIG.areaLimits.max;
+  const rate = CONFIG.baseRates[sel.route];
+  if (!rate || !rate.enabled){
+    for (const [id,a] of Object.entries(CONFIG.baseRates)) if (a.enabled)
+      r.anchors.push({ label:a.label, text:a.high!==null?`£${a.low.toLocaleString()}–£${a.high.toLocaleString()}/m²`:`from £${a.low.toLocaleString()}/m²`, scope:a.scope });
+    if (outside) r.warnings.push("This project is outside the estimator's normal range and will require individual assessment.");
+    // A stated budget still deserves a response rather than silence — mirrors
+    // the "insufficient information" fix in lib/estimator/engine.ts.
+    if (sel.budget && sel.budget > 0){
+      r.budget = { verdict: "Insufficient information", note: "There is not enough information to compare your budget with an indicative figure for this route." };
+    }
+    return r;
+  }
+  const fromMode = rate.high === null;
+  const baseLow = sel.area * rate.low, baseHigh = fromMode ? baseLow : sel.area * rate.high;
+  r.lines.push({ label:rate.label, why:rate.scope, pl:null, ph:null, lo:baseLow, hi:baseHigh, prov:!rate.confirmed });
+
+  const applied = [];
+  const add = (tbl,key) => { const a = tbl[key]; if (a) applied.push([key,a]); };
+  if (sel.spec==="bespoke") add(CONFIG.spec,"bespoke");
+  if (sel.spec==="exceptional") add(CONFIG.spec,"exceptional");
+  for (const c of sel.site){
+    if (c==="straightforward"||c==="unknownConditions"||c==="possibleContamination") continue;
+    if (c==="demolitionRequired" && sel.demolitionArea > 0) continue; // sized pricing below overrides the flat allowance
+    add(CONFIG.site,c);
+  }
+  if (sel.servicesOnSite === "nearby") add(CONFIG.site,"servicesNearby");
+  if (sel.servicesOnSite === "notNearby") add(CONFIG.site,"servicesNotOnSite");
+  if (sel.buildDesign === "bungalow") add(CONFIG.buildDesign,"bungalow");
+  if (sel.buildDesign === "oneAndAHalfStorey") add(CONFIG.buildDesign,"oneAndAHalfStorey");
+  if (sel.buildDesign === "flatsApartments") add(CONFIG.buildDesign,"flatsApartments");
+  for (const c of sel.cx){ if (c==="retainingWork" && sel.site.includes("retainingLikely")) continue; add(CONFIG.complexity,c); }
+  const extraKitchens = Math.max(0, sel.kitchens - 1) * dwellings;
+  if (extraKitchens > 0) applied.push(["kitchens",[1.5,2.5,
+    dwellings>1 ? `Additional kitchens — ${sel.kitchens-1} beyond 1/unit × ${dwellings} units (${extraKitchens} extra)` : `Additional kitchen${extraKitchens>1?"s":""} — ${extraKitchens} beyond the first`,
+    "Each kitchen beyond the first adds a significant fitted package.", extraKitchens]]);
+  const extraBaths = Math.max(0, sel.baths - 2) * dwellings;
+  if (extraBaths > 0) applied.push(["baths",[1,2,
+    dwellings>1 ? `Additional bathrooms — ${sel.baths-2} beyond 2/unit × ${dwellings} units (${extraBaths} extra)` : `Additional bathroom${extraBaths>1?"s":""} — ${extraBaths} beyond the second`,
+    "Each bathroom beyond the second adds a fitted package.", extraBaths]]);
+
+  let adjLo=0, adjHi=0;
+  for (const [,a] of applied){
+    const mult = a[4] || 1;
+    const lo = baseLow*a[0]/100*mult, hi = baseHigh*a[1]/100*mult;
+    adjLo+=lo; adjHi+=hi;
+    r.lines.push({ label:a[2], why:a[3]||"", pl:a[0], ph:a[1], lo, hi, prov:true });
+  }
+
+  // Terrain mix: sloping uplift applied to the non-level fraction of the site.
+  const nonLevel = Math.max(0, Math.min(100, sel.nonLevel || 0));
+  if (nonLevel > 0){
+    const sl = CONFIG.site.sloping, frac = nonLevel/100;
+    const unitsAffected = dwellings > 1 ? Math.max(1, Math.round(dwellings*frac)) : 0;
+    const lo = baseLow*sl[0]/100*frac, hi = baseHigh*sl[1]/100*frac;
+    adjLo+=lo; adjHi+=hi;
+    r.lines.push({ label: nonLevel>=100 ? sl[2] : `${sl[2]} — ${nonLevel}% of the site${dwellings>1?` (approx. ${unitsAffected} of ${dwellings} units)`:""}`,
+      why:sl[3], pl:sl[0], ph:sl[1], lo, hi, prov:true });
+  }
+
+  // Garage provision — per-structure model, monotonic by construction
+  // (mirrors lib/estimator/engine.ts garageStructureCost).
+  function garageStructureCost(k){
+    const R = CONFIG.garageRates;
+    if (k<=0) return null;
+    if (k===1) return { lo:R.single[0], hi:R.single[1], why:R.single[3] };
+    if (k===2) return { lo:2*R.double[0], hi:2*R.double[1], why:R.double[3] };
+    return { lo:Math.max(2*R.double[0], k*R.sharedBlock[0]),
+             hi:Math.max(2*R.double[1], k*R.sharedBlock[1]),
+             why:R.sharedBlock[3] };
+  }
+  if (sel.garageMode && sel.garageMode !== "none" && sel.garageArea > 0){
+    const gr = CONFIG.garageAreaRate;
+    const lo = sel.garageArea*gr[0], hi = sel.garageArea*gr[1];
+    adjLo+=lo; adjHi+=hi;
+    r.lines.push({ label:`Garage provision — ${Math.round(sel.garageArea)} m² (priced by size)`, why:gr[3], pl:null, ph:null, lo, hi, prov:true });
+  }
+  else if (sel.garageMode && sel.garageMode !== "none"){
+    let spaces=0, buildings=0, gLo=0, gHi=0, gWhy="", modeLabel="";
+    if (sel.garageMode==="perUnit"){
+      const per = Math.max(0, sel.garagePer||0);
+      if (per>0){
+        spaces=per*dwellings; buildings=dwellings;
+        const one = garageStructureCost(per);
+        gLo = one.lo*dwellings; gHi = one.hi*dwellings; gWhy = one.why;
+        modeLabel = dwellings>1 ? `${per} space${per>1?"s":""} per unit × ${dwellings} units (${spaces} spaces, ${buildings} buildings)` : `${per} space${per>1?"s":""}`;
+      }
+    } else {
+      spaces = Math.max(0, sel.garageTotal||0);
+      buildings = Math.max(1, Math.min(sel.garageBld||1, spaces||1));
+      if (spaces>0){
+        const bigger = spaces % buildings, perSmall = Math.floor(spaces/buildings);
+        for (let i=0;i<buildings;i++){
+          const one = garageStructureCost(perSmall + (i<bigger?1:0));
+          gLo += one.lo; gHi += one.hi; gWhy = one.why;
+        }
+        modeLabel = `${spaces} shared space${spaces>1?"s":""} across ${buildings} building${buildings>1?"s":""}`;
+      }
+    }
+    if (spaces>0){
+      adjLo+=gLo; adjHi+=gHi;
+      r.lines.push({ label:`Garage provision — ${modeLabel}`, why:gWhy, pl:null, ph:null, lo:gLo, hi:gHi, prov:true });
+    }
+  }
+
+  // Cellar priced per m² — size matters.
+  if (sel.cellar && sel.cellar > 0){
+    const c = CONFIG.cellarRate;
+    const lo = sel.cellar*c[0], hi = sel.cellar*c[1];
+    adjLo+=lo; adjHi+=hi;
+    r.lines.push({ label:`Cellar / basement — ${Math.round(sel.cellar)} m²`, why:c[3], pl:null, ph:null, lo, hi, prov:true });
+  }
+  // Demolition priced per m² — size beats the flat allowance above.
+  if (sel.demolitionArea && sel.demolitionArea > 0){
+    const d = CONFIG.demolitionAreaRate;
+    const lo = sel.demolitionArea*d[0], hi = sel.demolitionArea*d[1];
+    adjLo+=lo; adjHi+=hi;
+    r.lines.push({ label:`Demolition — ${Math.round(sel.demolitionArea)} m² (priced by size)`, why:d[3], pl:null, ph:null, lo, hi, prov:true });
+  }
+  const unknown = sel.site.includes("unknownConditions");
+  const conv = sel.site.includes("existingConversion") || sel.route==="commercialConversion" || sel.route==="extensionRenovation";
+  let cont;
+  if (unknown && conv){
+    // Combined case mirrors the app engine: max of lows; unknown high plus the conversion increment over base.
+    cont = [Math.max(CONFIG.contingency.unknown[0], CONFIG.contingency.conversion[0]),
+            CONFIG.contingency.unknown[1] + (CONFIG.contingency.conversion[1] - CONFIG.contingency.base[1]),
+            "Risk allowance — unknown ground and existing-building risk"];
+  } else if (unknown){ cont = CONFIG.contingency.unknown; }
+  else if (conv){ cont = CONFIG.contingency.conversion; }
+  else { cont = CONFIG.contingency.base; }
+  const rLo = baseLow*cont[0]/100, rHi = baseHigh*cont[1]/100;
+  r.lines.push({ label:cont[2], why:"An early-stage allowance for items that cannot be measured yet.", pl:cont[0], ph:cont[1], lo:rLo, hi:rHi, prov:true });
+
+  const totalLow = baseLow+adjLo+rLo, totalHigh = baseHigh+adjHi+rHi;
+  r.mode = fromMode ? "from" : "range";
+  r.totalLow = fromMode?null:totalLow; r.totalHigh = fromMode?null:totalHigh; r.totalFrom = fromMode?totalLow:null;
+  r.central = fromMode ? null : (totalLow+totalHigh)/2;
+  r.band = fromMode ? null : Math.round((totalHigh-totalLow)/(totalHigh+totalLow)*100);
+  r.rateLow = totalLow/sel.area; r.rateHigh = fromMode?null:totalHigh/sel.area;
+  r.envLo = fromMode ? adjLo+rLo : null; r.envHi = fromMode ? adjHi+rHi : null;
+
+  const pen = [];
+  if (unknown) pen.push([25,"Ground and site conditions are unknown"]);
+  if (sel.site.includes("restrictedAccess")||sel.site.includes("sharedNarrowAccess")) pen.push([8,"Site access is restricted"]);
+  if (sel.site.includes("retainingLikely")||sel.cx.includes("retainingWork")) pen.push([10,"Retaining structures are likely"]);
+  if (sel.cx.includes("basement") || (sel.cellar && sel.cellar>0)) pen.push([12,"A cellar or basement is proposed"]);
+  if (nonLevel > 0) pen.push([Math.max(1, Math.round(6*nonLevel/100)), nonLevel>=100 ? "The site is sloping throughout" : `Part of the site (${nonLevel}%) is not level`]);
+  // Matches lib/estimator/engine.ts: "conv" already covers a conversion
+  // construction method or route (commercialConversion/extensionRenovation),
+  // not just the site-condition checkbox — the risk-allowance escalation
+  // above and this confidence penalty must agree, or a clean-looking
+  // conversion-route selection could misleadingly read as high confidence.
+  if (conv) pen.push([12,"The project involves an existing building"]);
+  if (sel.site.includes("listedOrConservationArea")) pen.push([8,"Listed building or conservation area status adds consent and specification uncertainty"]);
+  if (sel.site.includes("demolitionRequired") || (sel.demolitionArea && sel.demolitionArea>0)) pen.push([6,"Demolition scope is not yet confirmed by survey"]);
+  if (sel.servicesOnSite === "notNearby") pen.push([8,"Mains services are not close to the site"]);
+  else if (sel.servicesOnSite === "nearby") pen.push([3,"Mains services need connecting"]);
+  if (sel.site.includes("possibleContamination")) pen.push([15,"Possible contamination (excluded from the estimate)"]);
+  if (sel.site.includes("floodGroundwater")) pen.push([10,"Flood or groundwater concern"]);
+  if (sel.site.includes("utilityChallenge")) pen.push([8,"Utility requirements are uncertain"]);
+  if (sel.site.includes("easementRights")) pen.push([5,"Easement or rights-of-way considerations"]);
+  if (!rate.confirmed) pen.push([20,"The applicable rate is provisional — its included scope requires confirmation"]);
+  if (outside) pen.push([25,"Project size is outside the estimator's normal range"]);
+  const score = Math.max(0, 100 - pen.reduce((s,x)=>s+x[0],0));
+  r.score = score; r.reasons = pen.map(x=>x[1]);
+  r.level = score>=80?"Higher confidence":score>=60?"Moderate confidence":score>=40?"Low confidence":"Individual assessment required";
+  r.meter = score>=80?88:score>=60?62:score>=40?38:16;
+
+  if (!rate.confirmed) r.warnings.push("The rate behind this estimate is provisional: the precise included scope must be assessed and agreed individually before it is relied on.");
+  if (outside) r.warnings.push("This project is outside the estimator's normal range and will require individual assessment.");
+  if (sel.site.includes("possibleContamination")) r.warnings.push("Possible contamination is excluded from this estimate and needs specialist investigation.");
+  if (unknown) r.warnings.push("Unknown site conditions materially reduce the reliability of any early figure — a site review is the fastest way to firm this up.");
+
+  r.assumptions.push(nonLevel<=0 ? "Site assumed level throughout (0% non-level)"
+    : nonLevel>=100 ? "Site assumed sloping throughout (100% non-level)"
+    : `${nonLevel}% of the site assumed non-level${dwellings>1?` — roughly ${Math.max(1,Math.round(dwellings*nonLevel/100))} of ${dwellings} units affected`:""}; the remainder assumed level`);
+  if (dwellings>1) r.assumptions.push(`Kitchen and bathroom counts applied per unit across ${dwellings} units`);
+  if (sel.cellar && sel.cellar>0) r.assumptions.push(`Cellar/basement of ${Math.round(sel.cellar)} m² priced per square metre, subject to ground investigation`);
+  if (sel.demolitionArea && sel.demolitionArea>0) r.assumptions.push(`Demolition of ${Math.round(sel.demolitionArea)} m² priced per square metre, subject to survey (asbestos, structure type, access)`);
+  if (dwellings>1 && sel.unitSize && Math.abs(dwellings*sel.unitSize - sel.area)/(dwellings*sel.unitSize) > 0.05)
+    r.warnings.push(`The total floor area used (${Math.round(sel.area)} m²) differs from units × average size (${Math.round(dwellings*sel.unitSize)} m²) — the total area figure is being used.`);
+  if (dwellings>1 && sel.kitchens > 4)
+    r.warnings.push(`${sel.kitchens} kitchens per unit is unusually high for a multi-unit scheme (× ${dwellings} units = ${sel.kitchens*dwellings} total) — check this is genuinely a per-unit figure and not a whole-scheme total.`);
+  if (dwellings>1 && sel.baths > 6)
+    r.warnings.push(`${sel.baths} bathrooms per unit is unusually high for a multi-unit scheme (× ${dwellings} units = ${sel.baths*dwellings} total) — check this is genuinely a per-unit figure and not a whole-scheme total.`);
+  if (r.coverage){
+    const pct = r.coverage.pct;
+    if (pct > CONFIG.coverage.severe){
+      r.warnings.push(`The ground floor (~${Math.round(r.coverage.footprint)} m²) would cover about ${Math.round(pct)}% of the ${Math.round(r.coverage.plot)} m² plot. UK planning authorities typically expect a dwelling to occupy roughly 30–50% of its plot once access, parking and garden are counted, and at this coverage boundary separation for fire spread (Building Regulations Part B) and level access, threshold and parking provision (Part M) become constraining — expect the design or the plot expectations to change. This is general planning guidance, not a ruling on this site.`);
+    } else if (pct > CONFIG.coverage.warn){
+      r.warnings.push(dwellings>1
+        ? `The combined ground floors (~${Math.round(r.coverage.footprint)} m²) would cover about ${Math.round(pct)}% of the ${Math.round(r.coverage.plot)} m² site before roads, parking, spacing between buildings and gardens — typical net site coverage for housing sits well below this, so the unit mix or the site expectations likely need revisiting. Planning approval is unlikely without design changes: typical suburban consents sit nearer 30–40% site coverage — this is general planning guidance, not a ruling.`
+        : `The ground floor (~${Math.round(r.coverage.footprint)} m²) would cover about ${Math.round(pct)}% of the ${Math.round(r.coverage.plot)} m² plot — above the roughly 30–50% site coverage UK planning authorities typically expect for housing once access, parking and amenity space are counted. Planning approval is unlikely without design changes: typical suburban consents sit nearer 30–40% site coverage. Worth a pre-application conversation before relying on this size — this is general planning guidance, not a ruling.`);
+    }
+    r.assumptions.push(`Ground-floor footprint taken as floor area ÷ ${storeys} storey${storeys===1?"":"s"} ≈ ${Math.round(r.coverage.footprint)} m² on a ${Math.round(r.coverage.plot)} m² plot (about ${Math.round(pct)}% coverage)`);
+    r.assumptions.push("Site coverage comments reflect general planning guidance, not a ruling on this plot — actual limits depend on the local plan, character area and case officer judgement");
+    if (pct > CONFIG.coverage.warn) r.next.push("Site plan with plot boundaries and dimensions");
+  }
+  if (sel.route === "advisorySelfBuild"){
+    r.assumptions.push("Build figures on this route are the client's own costs, contracted directly with their trades — Morris Anderson Construction charges only the advisory support, shown separately");
+    if (r.advisory) r.assumptions.push(`Advisory support: ${r.advisory.hours} hour${r.advisory.hours===1?"":"s"} a week over ~${r.advisory.weeks} weeks at £${r.advisory.rateLow}–£${r.advisory.rateHigh}/hour ≈ ${range(r.advisory.totalLow, r.advisory.totalHigh)}, charged separately from the build cost`);
+    if (r.advisory && r.advisory.hours >= 10) r.warnings.push("The advisory hours selected are close to hands-on management. Advisory support stays consultancy — for that level of involvement, compare the managed self-build route before deciding.");
+  }
+
+  r.drivers = r.lines.slice(1).sort((a,b)=>b.hi-a.hi).slice(0,5);
+
+  if (sel.units && sel.units > 1){
+    r.perUnit = { count: sel.units,
+      low: fromMode ? null : totalLow / sel.units,
+      high: fromMode ? null : totalHigh / sel.units,
+      from: fromMode ? totalLow / sel.units : null };
+  }
+
+  if (nonLevel>0||sel.site.includes("retainingLikely")||sel.cx.includes("retainingWork")) r.next.push("Topographical survey");
+  if (unknown||sel.site.includes("possibleContamination")||sel.cx.includes("basement")||(sel.cellar&&sel.cellar>0)) r.next.push("Ground investigation");
+  if (sel.site.includes("utilityChallenge")||sel.servicesOnSite==="notNearby") r.next.push("Utility supplier information");
+  if (sel.site.includes("demolitionRequired")||(sel.demolitionArea&&sel.demolitionArea>0)) r.next.push("Asbestos and demolition survey");
+  if (sel.site.includes("listedOrConservationArea")) r.next.push("Listed building consent / conservation area status");
+  r.next.push("Planning status","Outline specification");
+
+  if (sel.budget && sel.budget>0){
+    let verdict, note;
+    if (fromMode){
+      if (sel.budget >= totalLow){ verdict="Broadly aligned"; note="Your stated budget is at or above the indicative starting point. Alignment depends on specification, site conditions and the agreed scope."; }
+      else if (sel.budget >= totalLow*0.85){ verdict="Possibly aligned, with scope review"; note="Your stated budget sits slightly below the indicative starting point."; }
+      else { verdict="Material funding gap likely"; note="Your stated budget sits materially below the indicative starting point for this route."; }
+    } else {
+      if (sel.budget >= totalLow*0.95 && sel.budget <= totalHigh*1.1){ verdict="Broadly aligned"; note="Your stated budget is broadly aligned with the indicative range, subject to site assessment and scope confirmation."; }
+      else if (sel.budget > totalHigh*1.1){ verdict="Broadly aligned"; note="Your stated budget exceeds the indicative range, which may allow additional scope or specification."; }
+      else if (sel.budget >= totalLow*0.8){ verdict="Possibly aligned, with scope review"; note="Your stated budget is somewhat below the indicative range. A scope review may close the gap."; }
+      else { verdict="Material funding gap likely"; note="There is likely to be a material gap between your stated budget and the indicative range."; }
+    }
+    r.budget = { verdict, note };
+  }
+  return r;
+}
+
+/* ---------- UI wiring ---------- */
+const el = id => document.getElementById(id);
+function buildChecks(host, opts, name){
+  for (const [id,label] of Object.entries(opts)){
+    const l = document.createElement("label"); l.className = "chk";
+    l.innerHTML = `<input type="checkbox" value="${id}" name="${name}"><span>${label}</span>`;
+    l.querySelector("input").addEventListener("change", e => { l.classList.toggle("on", e.target.checked); recalc(); });
+    host.appendChild(l);
+  }
+}
+buildChecks(el("siteChecks"), SITE_OPTS, "site");
+buildChecks(el("cxChecks"), CX_OPTS, "cx");
+
+function unitsActive(){ return el("f-route").value === "developerMultiUnit"; }
+function unitsConsistent(){
+  if (!unitsActive()) return true;
+  var u = Number(el("f-units").value), sz = Number(el("f-unitsize").value), a = Number(el("f-area").value);
+  if (!u || !sz) return true;
+  var expected = u * sz;
+  return Math.abs(a - expected) / expected <= 0.2;
+}
+function syncUnitsError(){
+  var errEl = el("unitsErr");
+  if (!errEl) return;
+  var u = Number(el("f-units").value);
+  if (unitsActive() && u === 1){
+    errEl.textContent = "A multi-unit scheme needs 2 or more units — for a single build, choose a single-build route and the whole form prices one dwelling.";
+    errEl.style.display = "block";
+    return;
+  }
+  if (!unitsConsistent()){
+    var uu = Number(el("f-units").value), sz = Number(el("f-unitsize").value);
+    errEl.textContent = "The total floor area (" + el("f-area").value + " m²) does not match " + uu + " units × " + sz + " m² (" + (uu*sz) + " m²) — correct one of them before sending anything.";
+    errEl.style.display = "block";
+    return;
+  }
+  errEl.style.display = "none";
+}
+function syncUnits(){
+  el("unitsRow").hidden = !unitsActive();
+  if (unitsActive()){
+    var u = Number(el("f-units").value), sz = Number(el("f-unitsize").value);
+    if (u > 0 && sz > 0) el("f-area").value = Math.round(u * sz);
+  }
+}
+function syncAdvisory(){
+  const active = el("f-route").value === "advisorySelfBuild";
+  el("advisoryFieldset").hidden = !active;
+  const hrs = Number(el("f-advisory-hours").value)||0, wks = Number(el("f-advisory-weeks").value)||0;
+  const noteEl = el("advisoryNote");
+  if (active && hrs>0 && wks>0){
+    const aRate = CONFIG.advisoryRate;
+    noteEl.textContent = `${hrs} hrs × ${wks} weeks = ${Math.round(hrs*wks)} hours at £${aRate[0]}–£${aRate[1]}/hour ≈ ${range(hrs*wks*aRate[0], hrs*wks*aRate[1])} — charged separately from your own build cost.`;
+  } else { noteEl.textContent = ""; }
+}
+function syncPlotNote(){
+  const plot = Number(el("f-plot").value)||0, area = Number(el("f-area").value)||0;
+  const noteEl = el("plotNote");
+  if (plot>0 && area>0){
+    const storeys = effectiveStoreysOf(el("f-design").value);
+    const fp = area/storeys, pct = Math.round(fp/plot*100);
+    noteEl.textContent = `Over ${storeys} storey${storeys===1?"":"s"} the ground floor is roughly ${Math.round(fp)} m² — about ${pct}% of the plot. Housing plots typically carry 30–50% coverage once access, parking and garden are counted.`;
+  } else { noteEl.textContent = ""; }
+}
+function syncAll(){ syncUnits(); syncTerrain(); syncGarage(); syncRooms(); syncUnitsError(); syncAdvisory(); syncPlotNote(); }
+el("f-route").addEventListener("change", function(){ syncAll(); recalc(); });
+el("f-units").addEventListener("input", function(){ syncAll(); recalc(); });
+el("f-unitsize").addEventListener("input", function(){ syncUnits(); syncUnitsError(); recalc(); });
+el("f-area").addEventListener("input", function(){ syncUnitsError(); syncPlotNote(); recalc(); });
+el("f-terrain-mode").addEventListener("change", function(){ syncTerrain(); recalc(); });
+el("f-terrain").addEventListener("input", function(){ syncTerrain(); recalc(); });
+el("f-garage-mode").addEventListener("change", function(){ syncGarage(); recalc(); });
+el("f-garage-per").addEventListener("input", function(){ syncGarage(); recalc(); });
+el("f-garage-area").addEventListener("input", function(){
+  var a=Number(el("f-garage-area").value)||0;
+  el("garageAreaNote").textContent = a>0 ? ("≈ "+Math.round(a*10.7639).toLocaleString("en-GB")+" sq ft — sized pricing overrides per-space figures.") : "Leave 0 to price by spaces (single ≈ 18 m², double ≈ 36 m²).";
+  recalc();
+});
+el("f-kitchens").addEventListener("input", function(){ syncRooms(); recalc(); });
+el("f-baths").addEventListener("input", function(){ syncRooms(); recalc(); });
+el("f-design").addEventListener("change", function(){ syncPlotNote(); recalc(); });
+el("f-plot").addEventListener("input", function(){ syncPlotNote(); recalc(); });
+el("f-advisory-hours").addEventListener("input", function(){ syncAdvisory(); recalc(); });
+el("f-advisory-weeks").addEventListener("input", function(){ syncAdvisory(); recalc(); });
+syncAll();
+
+function selections(){
+  return {
+    route: el("f-route").value,
+    units: unitsActive() ? Number(el("f-units").value) || null : null,
+    area: Number(el("f-area").value),
+    spec: el("f-spec").value,
+    site: [...document.querySelectorAll('input[name=site]:checked')].map(i=>i.value),
+    cx: [...document.querySelectorAll('input[name=cx]:checked')].map(i=>i.value),
+    kitchens: Number(el("f-kitchens").value)||0,
+    baths: Number(el("f-baths").value)||0,
+    budget: Number(el("f-budget").value)||null,
+    unitSize: unitsActive() ? Number(el("f-unitsize").value)||null : null,
+    nonLevel: terrainValue(),
+    garageMode: el("f-garage-mode").value,
+    garagePer: Number(el("f-garage-per").value)||0,
+    garageTotal: Number(el("f-garage-total").value)||0,
+    garageBld: Number(el("f-garage-bld").value)||1,
+    garageArea: Number(el("f-garage-area").value)||0,
+    cellar: Number(el("f-cellar").value)||0,
+    demolitionArea: Number(el("f-demolition").value)||0,
+    servicesOnSite: el("f-services").value,
+    buildDesign: el("f-design").value,
+    plot: Number(el("f-plot").value)||0,
+    advisoryHours: Number(el("f-advisory-hours").value)||0,
+    advisoryWeeks: Number(el("f-advisory-weeks").value)||0
+  };
+}
+function terrainValue(){
+  const mode = Number(el("f-terrain-mode").value);
+  if (mode === 0) return 0;
+  if (mode === 100) return 100;
+  return Number(el("f-terrain").value)||50;
+}
+function syncTerrain(){
+  const mode = Number(el("f-terrain-mode").value);
+  const mixed = mode !== 0 && mode !== 100;
+  el("terrainSlideWrap").hidden = !mixed;
+  if (mixed){
+    const pct = Number(el("f-terrain").value)||50;
+    const u = unitsActive() ? Number(el("f-units").value)||0 : 0;
+    el("terrainLabel").textContent = "— " + pct + "% not level" +
+      (u>1 ? " (roughly " + Math.max(1, Math.round(u*pct/100)) + " of " + u + " units)" : "");
+  }
+}
+function syncGarage(){
+  const mode = el("f-garage-mode").value;
+  el("garagePerWrap").hidden = mode !== "perUnit";
+  el("garageTotalWrap").hidden = mode !== "sharedBlock";
+  el("garageAreaWrap").hidden = mode === "none";
+  el("garageBldWrap").hidden = mode !== "sharedBlock";
+  const u = unitsActive() ? Number(el("f-units").value)||0 : 0;
+  el("garagePerUnitOpt").textContent = u>1 ? "Spaces for every unit" : "A garage on the house";
+  el("garageBlockOpt").textContent = u>1 ? "A shared block for a set number of cars" : "A separate garage block";
+  el("garagePerLabel").textContent = u>1 ? "Garage spaces per unit" : "Garage spaces";
+  const per = Number(el("f-garage-per").value)||0;
+  el("garagePerNote").textContent = (u>1 && per>0 && mode==="perUnit") ? "= " + (per*u) + " spaces across " + u + " buildings" : "";
+}
+function syncRooms(){
+  const u = unitsActive() ? Number(el("f-units").value)||0 : 0;
+  el("kitchensLabel").textContent = u>1 ? "Kitchens per unit" : "Kitchens";
+  el("bathsLabel").textContent = u>1 ? "Bathrooms per unit" : "Bathrooms";
+  const k = Number(el("f-kitchens").value)||0, b = Number(el("f-baths").value)||0;
+  el("kitchensNote").textContent = u>1 ? "= " + (k*u) + " across " + u + " units" : "";
+  el("bathsNote").textContent = u>1 ? "= " + (b*u) + " across " + u + " units" : "";
+}
+function li(text){ return `<li>· ${text}</li>`; }
+function recalc(){
+  const sel = selections();
+  const r = calculate(sel);
+  el("r-route").textContent = ROUTE_LABELS[sel.route] + (isFinite(sel.area)&&sel.area>0 ? ` · ${sel.area.toLocaleString("en-GB")} m²` : "");
+  const fig = el("r-figure"), rateP = el("r-rate"), anchors = el("r-anchors");
+  anchors.innerHTML = "";
+  if (r.mode==="invalid"){ fig.textContent = "Enter a floor area above zero"; rateP.textContent=""; }
+  else if (r.mode==="assessment"){
+    fig.textContent = "Individual assessment required";
+    rateP.textContent = "No director-approved public rate is published for this route — the estimator will not invent a figure. Confirmed reference points:";
+    anchors.innerHTML = r.anchors.map(a=>`<p style="border-left:2px solid var(--bronze);padding-left:14px;margin-top:12px;font-size:13.5px"><strong>${a.label}:</strong> ${a.text}<br><span style="color:var(--stone);font-size:12px">${a.scope}</span></p>`).join("");
+  } else if (r.mode==="from"){
+    fig.textContent = "from " + fmt(r.totalFrom);
+    var baseLine = r.lines[0];
+    rateP.innerHTML = `Indicative starting point · indicative equivalent ${gbp(Math.round(r.rateLow/10)*10)}/m²<br><span style="display:inline-block;margin-top:6px;border-left:2px solid var(--line-strong);background:var(--clay);padding:6px 10px;color:var(--ink-soft)">How this figure is built: <b>${fmt(baseLine.lo)}</b> base rate + <b>${fmt(r.envLo)}</b> for your selected factors and risk = <b>from ${fmt(r.totalFrom)}</b>. The same factors reach ${fmt(r.envHi)} on their high case (≈ ${fmt(baseLine.lo + r.envHi)}) — every line is itemised below.</span>`;
+  } else {
+    fig.innerHTML = fmt(r.central) + ' <span style="font-size:20px;color:var(--bronze);vertical-align:middle">±' + r.band + '%</span>';
+    rateP.textContent = `Working figure to plan around · early-stage span ${range(r.totalLow, r.totalHigh)} · ${gbp(Math.round(r.rateLow/10)*10)}–${gbp(Math.round(r.rateHigh/10)*10)}/m² (≈ ${gbp(Math.round(r.rateLow/10.7639))}–${gbp(Math.round(r.rateHigh/10.7639))}/sq ft)`;
+  }
+  var bandEl = el("r-band");
+  if (bandEl){
+    if (r.mode==="range" && r.central !== null){
+      bandEl.hidden = false;
+    } else { bandEl.hidden = true; }
+  }
+  var perUnitEl = el("r-perunit");
+  if (perUnitEl){
+    if (r.perUnit){
+      perUnitEl.textContent = "Across " + r.perUnit.count + " units: " +
+        (r.perUnit.low !== null ? range(r.perUnit.low, r.perUnit.high) : "from " + fmt(r.perUnit.from)) + " per unit";
+      perUnitEl.style.display = "block";
+    } else { perUnitEl.style.display = "none"; }
+  }
+  const hasFig = r.mode==="from"||r.mode==="range";
+  var ownCostEl = el("r-owncost");
+  if (ownCostEl) ownCostEl.style.display = (hasFig && sel.route==="advisorySelfBuild") ? "block" : "none";
+  var covEl = el("r-coverage");
+  if (covEl){
+    // Mirrors components/estimator/Results.tsx: shown whenever a plot
+    // size gave a coverage figure, not only when a priced figure exists —
+    // an "individual assessment" route can still usefully show it.
+    if (r.mode!=="invalid" && r.coverage){
+      covEl.style.display = "block";
+      covEl.textContent = `Approximate ground floor ${Math.round(r.coverage.footprint)} m² on a ${Math.round(r.coverage.plot)} m² plot — about ${Math.round(r.coverage.pct)}% site coverage.`;
+    } else { covEl.style.display = "none"; }
+  }
+  el("r-confwrap").style.display = hasFig?"block":"none";
+  if (hasFig){
+    el("r-conf").textContent = "Estimate confidence: " + r.level;
+    el("meterBar").style.width = r.meter+"%";
+    el("meterWrap").setAttribute("aria-label","Estimate confidence: "+r.level);
+    el("r-reasons").innerHTML = r.reasons.length? r.reasons.map(x=>li(x)).join("") : li("Your selections leave few unknowns at this early stage.");
+  }
+  el("r-budget").innerHTML = r.budget? `<strong>${r.budget.verdict}.</strong> <span style="color:var(--stone)">${r.budget.note}</span>` : "";
+  el("r-warnings").innerHTML = (r.warnings||[]).map(w=>`<p class="warn">${w}</p>`).join("");
+  var advEl = el("r-advisory");
+  if (advEl){
+    if (r.advisory){
+      advEl.style.display = "block";
+      el("r-adv-figure").textContent = range(r.advisory.totalLow, r.advisory.totalHigh);
+      el("r-adv-detail").textContent = `${r.advisory.hours} hour${r.advisory.hours===1?"":"s"} a week × ${r.advisory.weeks} weeks = ${Math.round(r.advisory.totalHours)} hours at £${r.advisory.rateLow}–£${r.advisory.rateHigh} per hour, ex-VAT.`;
+      el("r-adv-notes").innerHTML = r.advisory.notes.map(li).join("");
+    } else { advEl.style.display = "none"; }
+  }
+  el("r-breakdown").innerHTML = r.lines.map(l=>`<tr><th scope="row" style="font-weight:600">${l.label}${l.prov?'<span class="tag">Provisional</span>':''}</th><td style="color:var(--stone);font-size:12px">${l.pl!==null?`+${l.pl}% to +${l.ph}% — `:""}${l.why}</td><td class="r">${l.lo===l.hi?fmt(l.lo):range(l.lo,l.hi)}</td></tr>`).join("");
+  el("r-assump").innerHTML = r.assumptions.map(li).join("");
+  el("r-excl").innerHTML = r.exclusions.map(li).join("");
+  el("r-next").innerHTML = [...new Set(r.next)].map(li).join("");
+}
+window.sendQuoteRequest = function(){
+  syncUnitsError();
+  if (unitsActive() && (Number(el("f-units").value) === 1 || !unitsConsistent())){
+    alert("Please fix the unit details first — the highlighted note under Number of units explains what does not add up.");
+    return;
+  }
+  const sel = selections();
+  const r = calculate(sel);
+  const L = [];
+  L.push("QUOTATION REQUEST — from the website estimator","");
+  L.push("Route: " + (ROUTE_LABELS[sel.route]||sel.route));
+  L.push("Floor area: " + sel.area + " m²" + (sel.units?" · " + sel.units + " units" + (sel.unitSize?" @ ~" + sel.unitSize + " m²":""):""));
+  L.push("Build design: " + (BUILD_DESIGN_LABELS[sel.buildDesign]||sel.buildDesign));
+  if (sel.plot>0) L.push("Plot size: " + sel.plot + " m²" + (r.coverage ? " (~" + Math.round(r.coverage.pct) + "% coverage)" : ""));
+  L.push("Specification: " + sel.spec);
+  L.push("Ground levels: " + (sel.nonLevel<=0?"level throughout":sel.nonLevel>=100?"sloping throughout":sel.nonLevel+"% not level"));
+  L.push("Mains services: " + (sel.servicesOnSite==="notNearby"?"not nearby — new connections likely":sel.servicesOnSite==="nearby"?"nearby, not yet connected":"on site or at the boundary"));
+  if (sel.garageMode && sel.garageMode!=="none"){
+    L.push("Garaging: " + (sel.garageMode==="perUnit"
+      ? (sel.garagePer+" space(s) " + (sel.units>1?("per unit across "+sel.units+" units"):"on the dwelling"))
+      : (sel.garageTotal+" shared space(s) across "+sel.garageBld+" building(s)")));
+  } else { L.push("Garaging: none requested"); }
+  L.push("Cellar: " + (sel.cellar>0? Math.round(sel.cellar)+" m²":"none"));
+  if (sel.demolitionArea>0) L.push("Demolition: " + Math.round(sel.demolitionArea) + " m² (sized pricing)");
+  L.push("Kitchens: " + sel.kitchens + (sel.units>1?" per unit ("+(sel.kitchens*sel.units)+" total)":""));
+  L.push("Bathrooms: " + sel.baths + (sel.units>1?" per unit ("+(sel.baths*sel.units)+" total)":""));
+  if (sel.site.length) L.push("Site conditions: " + sel.site.join(", "));
+  if (sel.cx.length) L.push("Form/complexity: " + sel.cx.join(", "));
+  if (sel.budget) L.push("Stated budget: £" + sel.budget.toLocaleString("en-GB"));
+  L.push("");
+  if (r.mode==="range"){ L.push("Estimator working figure: " + fmt(r.central) + " (±" + r.band + "%)"); L.push("Early-stage span: " + range(r.totalLow, r.totalHigh)); }
+  else if (r.mode==="from"){ L.push("Estimator starting point: from " + fmt(r.totalFrom)); }
+  else { L.push("This route needs individual assessment — no public rate is published for it; please price against the brief above."); }
+  if (r.level) L.push("Confidence: " + r.level);
+  if (r.advisory) L.push("Advisory support: " + r.advisory.hours + " hrs/week over ~" + r.advisory.weeks + " weeks ≈ " + range(r.advisory.totalLow, r.advisory.totalHigh) + " (charged separately from the build cost, which remains your own)");
+  L.push("","Please contact me to take this to a formal quotation.","(Sent from the website preview — figures are indicative, prepared without a site inspection.)");
+  var to = ["mathewmorris90","gmail.com"].join("@");
+  window.location.href = "mailto:" + to + "?subject=" + encodeURIComponent("Quotation request — " + (ROUTE_LABELS[sel.route]||sel.route) + " — " + sel.area + " m²") + "&body=" + encodeURIComponent(L.join("\n"));
+};
+document.querySelectorAll("#estForm select, #estForm input").forEach(i=>i.addEventListener("input", recalc));
+recalc();
+
+/* ---------- Featured project cards ---------- */
+const P = "#efece6", M = "#e0dbd2", D = "#cfc9be", B = "#8c6d45", I = "#22262a";
+const projArt = {
+  hillside: `<rect width="400" height="300" fill="${P}"/><rect y="175" width="400" height="125" fill="${M}"/><path d="M0 175 L170 175 L170 112 L285 112 L285 175 L400 175 M170 112 L228 70 L285 112" fill="none" stroke="${I}" stroke-width="2.5" opacity=".8"/><path d="M0 210 Q100 195 170 210 T400 232" fill="none" stroke="${B}" stroke-width="2"/>`,
+  bungalow: `<rect width="400" height="300" fill="${P}"/><rect y="195" width="400" height="105" fill="${M}"/><path d="M60 195 L60 142 L340 142 L340 195 M46 142 L200 97 L354 142" fill="none" stroke="${I}" stroke-width="2.5" opacity=".8"/><rect x="215" y="157" width="80" height="38" fill="${B}" opacity=".3"/>`,
+  cladding: (()=>{let s=`<rect width="400" height="300" fill="${P}"/>`;for(let i=0;i<8;i++)s+=`<rect y="${45+i*27}" width="400" height="18" fill="${i%2?D:M}"/>`;return s+`<path d="M0 45 L400 45 M0 250 L400 250" stroke="${B}" stroke-width="2" opacity=".7"/>`})(),
+  office: `<rect width="400" height="300" fill="${P}"/><rect x="46" y="75" width="308" height="150" fill="${M}"/><path d="M46 75 L354 75 L354 225 L46 225 Z M46 150 L354 150 M123 75 L123 225 M200 75 L200 225 M277 75 L277 225" fill="none" stroke="${I}" stroke-width="1.8" opacity=".5"/><rect x="46" y="225" width="308" height="8" fill="${B}" opacity=".5"/>`,
+  fire: (()=>{let s=`<rect width="400" height="300" fill="${P}"/>`;for(let i=0;i<3;i++)s+=`<rect x="${55+i*105}" y="80" width="70" height="155" fill="${M}"/><rect x="${55+i*105}" y="80" width="70" height="155" fill="none" stroke="${I}" stroke-width="2" opacity=".65"/><rect x="${110+i*105}" y="150" width="5" height="16" fill="${B}"/>`;return s})(),
+  balcony: `<rect width="400" height="300" fill="${P}"/><rect width="175" height="300" fill="${M}"/><path d="M175 120 L330 120 L330 128 L175 128 M182 128 L182 172 M212 128 L212 172 M242 128 L242 172 M272 128 L272 172 M302 128 L302 172" fill="none" stroke="${I}" stroke-width="2" opacity=".6"/><path d="M175 172 L330 172" stroke="${B}" stroke-width="3"/><path d="M330 128 L365 300 M175 172 L175 300" stroke="${I}" stroke-width="2" opacity=".45"/>`
+};
+const DETAIL_ART = {
+  structure: `<rect width="400" height="300" fill="${P}"/><rect y="210" width="400" height="90" fill="${M}"/>` + [0,1,2,3,4].map(i=>`<path d="M${55+i*70} 210 L${55+i*70} 75" stroke="${I}" stroke-width="4" opacity=".6" fill="none"/>`).join("") + `<path d="M35 75 L365 75 M35 142 L365 142" stroke="${I}" stroke-width="3" opacity=".65" fill="none"/><path d="M55 210 L125 142 M125 210 L195 142 M195 210 L265 142" stroke="${B}" stroke-width="2" opacity=".6" fill="none"/>`,
+  interior: `<rect width="400" height="300" fill="${P}"/><rect x="30" y="50" width="180" height="200" fill="${M}"/><rect x="235" y="50" width="135" height="90" fill="${D}"/><rect x="235" y="160" width="135" height="90" fill="${B}" opacity=".28"/><path d="M50 250 L50 120 M78 250 L78 120" stroke="${B}" stroke-width="3.5" opacity=".5" fill="none"/>`,
+  external: `<rect width="400" height="300" fill="${P}"/><rect y="180" width="400" height="120" fill="${M}"/><path d="M0 180 Q100 165 200 180 T400 172" stroke="${B}" stroke-width="2.5" opacity=".85" fill="none"/><rect x="55" y="90" width="62" height="90" fill="${D}"/><path d="M42 90 L86 62 L130 90 M55 90 L117 90" stroke="${I}" stroke-width="2.5" opacity=".7" fill="none"/>` + [0,1,2,3,4,5].map(i=>`<path d="M${175+i*32} 180 L${175+i*32} 152" stroke="${I}" stroke-width="3" opacity=".5" fill="none"/>`).join("") + `<path d="M175 152 L335 152" stroke="${B}" stroke-width="2.5" opacity=".7" fill="none"/>`
+};
+
+const projects = [
+  { art:"hillside", title:"Contemporary Hillside Residence", cat:"New Build / Timber Frame / Complex Site",
+    sum:"A contemporary ~200 m² timber-frame residence positioned into a hillside, requiring careful coordination of retaining works, restricted access and easement considerations.",
+    facts:{Client:"Private client", Size:"Approximately 200 m²"},
+    services:["Construction management","Timber-frame construction","Retaining and external structures","Programme and trade coordination"],
+    challenge:"The site slopes significantly, placing much of the building volume into the hillside. Retaining structures, restricted access and easement considerations all had to be resolved within one coordinated sequence rather than treated as isolated problems.",
+    approach:"The programme was built around the realities of the site: retaining and groundworks sequenced ahead of the frame, deliveries planned around the access constraints, and easement considerations tracked through each stage so they informed decisions rather than interrupting them.",
+    considerations:["Sequencing retaining structures ahead of superstructure work","Managing deliveries and plant within restricted access","Coordinating groundworks with the timber-frame programme","Keeping easement obligations visible throughout delivery"],
+    gallery:[["hillside","The residence set into the hillside"],["structure","Retaining and frame sequence"],["external","External works and site integration"],["interior","Interior spaces"]],
+    timeline:[["Feasibility & pre-construction",3,"Retaining design, access strategy and easements resolved on paper first"],["Groundworks & retaining",4,"Excavation into the hillside; retaining ahead of the frame"],["Timber frame & weathertight",3,"Frame erection sequenced around restricted deliveries"],["First & second fix",4,"Services, interiors and joinery"],["Completion & handover",2,"Inspections, external works, organised handover"]],
+    pricing:{route:"highEndTurnkey", area:200, note:"Based on a high-end turnkey build of this size on a straightforward site — hillside conditions such as retaining works and restricted access move the figure upward, exactly as this project required."} },
+  { art:"bungalow", title:"Bungalow Transformation and Extension", cat:"Renovation / Extension / High-End Residential",
+    sum:"A complete transformation of a single-storey bungalow, using carefully positioned extensions to increase the usable footprint without unnecessarily sacrificing outside space.",
+    facts:{Client:"Private client", Size:"Approximately 82 m²"},
+    services:["Renovation and extension","Construction management","Bespoke joinery and carpentry"],
+    challenge:"The brief asked for substantially more usable internal space without losing the garden that makes a bungalow plot worth having. Every extension had to earn its position.",
+    approach:"Extensions were placed where they added the most internal benefit for the least external cost, and the existing plan was reorganised around them. Finishes were kept deliberately calm — a neutral palette executed carefully rather than decoratively.",
+    considerations:["Balancing internal gain against usable garden space","Integrating new structure with the existing building","Maintaining a consistent, high standard of finish","Phasing work to keep the programme controlled"],
+    gallery:[["bungalow","The transformed single-storey home"],["interior","Neutral-tone interior finish"],["structure","New structure meeting old"],["external","Outside space, preserved"]],
+    timeline:[["Design & pre-construction",2,"Extension positioning and internal replanning"],["Structural openings & extensions",4,"New structure integrated with the existing building"],["Reconfiguration & first fix",3,"Layout rework, services and insulation"],["High-end finish",4,"Neutral-palette finishes, kitchen and bathrooms"],["Completion",1,"Snagging, externals and handover"]],
+    pricing:{route:"extensionRenovation", area:82, note:"Based on substantial renovation-and-extension work across the reworked floor area; complete transformations at a high-end finish sit towards the top of the range."} },
+  { art:"cladding", title:"Multi-Property Cladding Programme", cat:"Cladding / Multi-Site Delivery",
+    sum:"Approximately 1,000 m² of cladding delivered across five properties in Marlborough, requiring consistent installation and coordinated programme management.",
+    facts:{Client:"Self-build development client", Size:"~1,000 m² across five properties", Location:"Marlborough"},
+    services:["Cladding","Programme management","Multi-site coordination"],
+    challenge:"Multi-property work multiplies the coordination: materials, weather windows, scaffold and labour all have to be balanced across five buildings while the standard of installation stays identical on each.",
+    approach:"The five properties were treated as one programme with shared procurement and a consistent installation specification, so progress on each building supported rather than competed with the others.",
+    considerations:["Consistent installation quality across five buildings","Programme sequencing between properties","Material call-off and storage across a multi-site programme"],
+    gallery:[["cladding","Consistent installation across the programme"],["structure","Substructure and setting out"],["external","Multi-property coordination"]],
+    timeline:[["Programme & procurement",2,"Shared materials, scaffold strategy and sequence"],["Property-by-property installation",5,"Rolling delivery across the five buildings"],["Close-out",1,"Consistency checks and completion"]],
+    pricing:null },
+  { art:"office", title:"Commercial Office Conversion", cat:"Commercial Conversion / Asset Improvement",
+    sum:"Conversion of a former main office building into productive additional space intended to create a new revenue stream for the property.",
+    facts:{Client:"Commercial property client"},
+    services:["Commercial conversion","Construction management","Cost-aware delivery"],
+    challenge:"The building had stopped earning its footprint. The task was to convert it into space that generates revenue, without disrupting the wider operation of the site during the works.",
+    approach:"The conversion was planned around the commercial objective first — what the space needed to earn — with the construction scope, programme and specification shaped to serve that outcome.",
+    considerations:["Keeping the wider site operational during the works","Matching specification to the intended commercial use","Controlling cost against the projected return on the space"],
+    gallery:[["office","The converted office building"],["interior","Productive space, created"],["structure","Working within the existing structure"]],
+    timeline:[["Feasibility & commercial case",2,"Scope shaped around the revenue objective"],["Strip-out & alterations",3,"Working around the site's continuing operations"],["Fit-out",3,"Services and finishes to the intended use"],["Completion",1,"Handover into use"]],
+    pricing:{route:"commercialConversion", area:150, note:"Shown for a conversion of around 150 m²; the existing building's condition is the biggest single variable, which is why conversion estimates carry a wider risk allowance."} },
+  { art:"fire", title:"Bristol Apartment Fire-Door Programme", cat:"Compliance / Residential / Rapid Delivery",
+    sum:"A time-sensitive fire-door installation programme across occupied apartment buildings, coordinated for rapid delivery while minimising disruption.",
+    facts:{Client:"Private clients", Location:"Bristol"},
+    services:["Fire-door installation","Programme coordination"],
+    challenge:"Occupied buildings do not pause for construction. The programme had to move quickly while keeping access, noise and disruption acceptable for residents throughout.",
+    approach:"Work was sequenced block by block with clear resident communication, materials called off to match the installation rate, and each stage closed out fully before the team moved on.",
+    considerations:["Coordinating access within occupied apartments","Maintaining installation pace without compromising care","Minimising disruption to residents and building operations"],
+    gallery:[["fire","Installations across occupied blocks"],["interior","Completed doorset in place"]],
+    timeline:[["Survey & scheduling",1,"Door schedule, resident notice and access plan"],["Block-by-block installation",3,"Rapid sequence, each block closed out fully"],["Inspection & records",1,"Completion checks and documentation"]],
+    pricing:null },
+  { art:"balcony", title:"Hillside Balcony Structure", cat:"Structural / External Works",
+    sum:"Delivery of an approximately 50 m² balcony structure for a hillside property, requiring careful consideration of site conditions, access and integration with the existing building.",
+    facts:{Client:"Development client", Size:"Approximately 50 m²"},
+    services:["Retaining and external structures","Construction management"],
+    challenge:"Adding a substantial external structure to a hillside property concentrates every difficulty of the site — ground conditions, access and the interface with the existing building — into one relatively small footprint.",
+    approach:"The structure was planned around the constraints rather than in spite of them: access and lifting were resolved first, the interface with the existing building was detailed before work began, and the sequence kept the property usable.",
+    considerations:["Hillside ground and support conditions","Access for materials and plant","Structural connection to the existing building","Weathering and long-term durability"],
+    gallery:[["balcony","The balcony against the hillside"],["structure","Support structure"],["external","Site context and access"]],
+    timeline:[["Engineering & access planning",2,"Structural design, lifting and access resolved first"],["Groundwork & supports",2,"Foundations and support structure on the slope"],["Structure & decking",2,"Frame, deck and balustrade installation"],["Integration & completion",1,"Weathering details and tie-in to the existing building"]],
+    pricing:null }
+];
+
+function artFor(key){ return projArt[key] ? projArt[key] : DETAIL_ART[key]; }
+
+const SLUG = {0: "contemporary-hillside-residence", 1: "bungalow-transformation-extension", 2: "multi-property-cladding-programme", 3: "commercial-office-conversion", 4: "bristol-fire-door-programme", 5: "hillside-balcony-structure"};
+el("projGrid").innerHTML = projects.map((p,i)=>`
+  <a class="pcard" href="projects/${SLUG[i]}.html">
+    <span class="img"><svg viewBox="0 0 400 300" role="img" aria-label="${p.title}">${artFor(p.art)}</svg></span>
+    <span class="body"><span class="cat">${p.cat}</span><h3>${p.title}</h3><p>${p.sum}</p>
+    <span style="margin-top:14px;font-size:13.5px;font-weight:600;font-family:var(--heading)"><span style="border-bottom:1px solid var(--bronze);padding-bottom:2px">View project</span></span></span>
+  </a>`).join("");
+
+</script>
+</body>
+</html>

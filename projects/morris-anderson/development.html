@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Development & Commercial — Morris Anderson Construction</title>
+<meta name="description" content="Multi-unit and commercial delivery with Morris Anderson: unit-mix pricing, phased programmes and regulatory compliance at scale across single and multi-site builds.">
+<style>
+:root{--ground:#faf9f7;--surface:#fff;--ink:#22262a;--ink-soft:#4b5157;--stone:#6f6a61;--line:#e6e2da;--line-strong:#cfc9be;--bronze:#8c6d45;--navy:#1a1449;--navy-deep:#100c30;--charcoal:#1b1e21;--clay:#efece6;--heading:'Manrope','Segoe UI Semibold','Segoe UI',system-ui,sans-serif;--body:'Inter','Segoe UI',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0}body{background:var(--ground);color:var(--ink);font-family:var(--body);line-height:1.6}
+h1,h2,h3,h4{font-family:var(--heading);letter-spacing:-.015em;line-height:1.15;font-weight:650}
+.wrap{max-width:1020px;margin:0 auto;padding:0 24px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--bronze)}
+header.site{position:sticky;top:0;z-index:40;background:rgba(250,249,247,.95);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:64px;gap:24px;max-width:1120px;margin:0 auto;padding:0 24px}
+.nav ul{display:none;list-style:none;gap:clamp(16px,1.9vw,30px);padding:0;flex-wrap:nowrap}
+.nav ul a{font-size:13px;color:var(--ink-soft);text-decoration:none;white-space:nowrap}.nav ul a:hover{color:var(--navy)}
+.btn-ink{display:inline-block;background:var(--navy);color:#fff;border-radius:2px;font-family:var(--heading);font-weight:600;text-decoration:none}.btn-ink:hover{background:var(--navy-deep)}
+.menu-btn{display:flex;flex-direction:column;justify-content:center;gap:4px;width:42px;height:42px;padding:10px;border:1px solid var(--line-strong);background:var(--surface);border-radius:2px;cursor:pointer}
+.menu-btn span{display:block;height:2px;background:var(--ink);border-radius:1px}
+.m-panel{display:none;position:absolute;right:24px;top:60px;z-index:60;min-width:230px;background:var(--surface);border:1px solid var(--line);box-shadow:0 12px 32px rgba(20,18,40,.12);padding:8px 0}
+.m-panel a{display:block;padding:11px 20px;font-size:13.5px;color:var(--ink-soft);text-decoration:none;white-space:nowrap}
+.m-panel a:hover{background:var(--clay);color:var(--ink)}
+.nav .btn-ink{display:none}
+@media(min-width:1140px){.nav ul{display:flex}.menu-btn{display:none}.m-panel{display:none !important}.nav .btn-ink{display:inline-block}}
+.nav ul a.on{color:var(--navy);font-weight:600}
+.mark{display:flex;align-items:center;gap:10px;text-decoration:none}
+.mark img{height:30px}
+.mark b{font-family:var(--heading);font-size:15px;color:var(--navy);display:block}
+.mark .sub{margin-top:4px;font-size:9px;font-weight:600;letter-spacing:.34em;text-transform:uppercase;color:var(--bronze);display:block}
+.hero{position:relative;overflow:hidden;background:var(--surface);border-bottom:1px solid var(--line);padding:56px 0}
+.hero .wm{position:absolute;right:-30px;top:-20px;width:260px;opacity:.05;pointer-events:none}
+.hero h1{font-size:clamp(28px,4vw,44px);margin-top:14px;max-width:760px}
+.hero p.lead{margin-top:16px;color:var(--stone);max-width:680px;font-size:16px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px;padding:0;list-style:none}
+.tabs a{display:inline-block;border:1px solid var(--line);background:var(--surface);padding:8px 16px;font-size:13px;color:var(--ink-soft);text-decoration:none;border-radius:2px}
+.tabs a:hover{border-color:var(--ink)}
+section.blk{padding:56px 0;border-bottom:1px solid var(--line)}
+section.blk.alt{background:var(--surface)}
+.blk h2{font-size:clamp(22px,3vw,30px);margin-top:10px}
+.blk h3{font-size:19px;margin-top:30px}
+.blk p{margin-top:14px;color:var(--ink-soft);max-width:720px;font-size:15px}
+.blk ul.ticks{list-style:none;padding:0;margin-top:16px;max-width:720px}
+.blk ul.ticks li{position:relative;padding-left:26px;margin-top:10px;color:var(--ink-soft);font-size:15px}
+.blk ul.ticks li::before{content:"";position:absolute;left:0;top:11px;width:16px;height:1px;background:var(--bronze)}
+.cols{display:grid;gap:20px;margin-top:26px}
+@media(min-width:820px){.cols.c3{grid-template-columns:1fr 1fr 1fr}.cols.c2{grid-template-columns:1fr 1fr}}
+.card{background:var(--surface);border:1px solid var(--line);padding:24px}
+section.blk.alt .card{background:var(--ground)}
+.card h3,.card h4{margin-top:0;font-size:16px}
+.card p{font-size:13.5px;margin-top:8px}
+.card .tag{font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--bronze)}
+.card a.more{display:inline-block;margin-top:12px;font-size:13px;font-weight:600;color:var(--navy)}
+.steps{counter-reset:s;list-style:none;padding:0;margin-top:22px;max-width:720px}
+.steps li{counter-increment:s;position:relative;padding:16px 0 16px 56px;border-top:1px solid var(--line)}
+.steps li::before{content:counter(s,decimal-leading-zero);position:absolute;left:0;top:18px;font-family:var(--heading);font-weight:650;color:var(--bronze);font-size:15px}
+.steps b{display:block;font-family:var(--heading);font-size:15px;color:var(--ink)}
+.steps span{display:block;font-size:13.5px;color:var(--ink-soft);margin-top:2px}
+.notice{border-left:2px solid var(--bronze);background:var(--clay);padding:16px 20px;margin-top:22px;max-width:720px;font-size:13.5px;color:var(--ink-soft)}
+.cta{background:var(--navy);color:#fff;padding:52px 0}
+.cta h2{color:#fff;font-size:clamp(22px,3vw,30px)}
+.cta p{color:rgba(255,255,255,.75);margin-top:10px;max-width:640px;font-size:15px}
+.cta .btns{margin-top:24px;display:flex;gap:14px;flex-wrap:wrap}
+.cta a.b1{background:#fff;color:var(--navy);padding:13px 26px;font-family:var(--heading);font-weight:600;font-size:14px;text-decoration:none;border-radius:2px}
+.cta a.b2{border:1px solid rgba(255,255,255,.5);color:#fff;padding:13px 26px;font-family:var(--heading);font-weight:600;font-size:14px;text-decoration:none;border-radius:2px}
+footer{background:var(--charcoal);color:rgba(255,255,255,.55);padding:36px 0;font-size:12px}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+footer a{color:rgba(255,255,255,.8)}
+dl.facts{display:grid;gap:14px;margin-top:22px;max-width:760px}
+@media(min-width:720px){dl.facts{grid-template-columns:1fr 1fr}}
+dl.facts>div{background:var(--surface);border:1px solid var(--line);padding:16px 18px}
+section.blk.alt dl.facts>div{background:var(--ground)}
+dl.facts dt{font-family:var(--heading);font-weight:650;font-size:14px}
+dl.facts dd{margin:4px 0 0;font-size:13px;color:var(--ink-soft)}
+</style></head><body>
+<header class="site"><div class="nav">
+  <a href="index.html" class="mark"><img src="assets/ma-monogram.png" alt=""><span><b>Morris&nbsp;Anderson</b><span class="sub">Construction</span></span></a>
+  <ul><li><a href="index.html">Home</a></li><li><a href="turnkey-builds.html">Turnkey Builds</a></li><li><a href="self-build.html">Self-Build</a></li><li><a href="development.html" class="on">Development</a></li><li><a href="information.html">Information</a></li><li><a href="index.html#projects">Projects</a></li><li><a href="index.html#estimator">Estimator</a></li><li><a href="contact.html">Contact</a></li><li><a href="portal.html">Client Portal</a></li></ul>
+  <a class="btn-ink" href="contact.html" style="padding:10px 20px;font-size:13px;white-space:nowrap">Discuss a Project</a>
+  <button id="menuBtn" class="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="mPanel"><span></span><span></span><span></span></button><div id="mPanel" class="m-panel"><a href="index.html">Home</a><a href="turnkey-builds.html">Turnkey Builds</a><a href="self-build.html">Self-Build</a><a href="development.html">Development</a><a href="information.html">Information</a><a href="index.html#projects">Projects</a><a href="index.html#estimator">Estimator</a><a href="contact.html">Contact</a><a href="portal.html">Client Portal</a><a href="helicopter.html">Admin Portal</a></div>
+</div></header>
+<script>
+(function(){var b=document.getElementById('menuBtn'),p=document.getElementById('mPanel');
+if(!b||!p)return;
+b.addEventListener('click',function(){var open=p.style.display==='block';p.style.display=open?'none':'block';b.setAttribute('aria-expanded',String(!open));});
+document.addEventListener('click',function(e){if(!p.contains(e.target)&&e.target!==b&&!b.contains(e.target)){p.style.display='none';b.setAttribute('aria-expanded','false');}});
+})();
+</script>
+<section class="hero"><img class="wm" src="assets/ma-monogram.png" alt="" aria-hidden="true"><div class="wrap">
+<p class="eyebrow">Development &amp; Commercial</p>
+<h1>Multi-unit delivery, priced by the mix and run as one programme</h1>
+<p class="lead">Developments succeed on sequencing and procurement discipline across every plot at once. An international business with experience across large contractors, we manage teams across single and multi-site builds whilst adhering to the most stringent of building regulations.</p>
+<ul class="tabs"><li><a href="#scope">What we deliver</a></li><li><a href="#programme">The site-wide programme</a></li><li><a href="#projects">Notable projects</a></li><li><a href="#pricing">Unit-mix pricing</a></li></ul>
+</div></section>
+<main>
+<section class="blk" id="scope"><div class="wrap">
+  <p class="eyebrow">Scope</p><h2>From land appraisal to unit handover</h2>
+  <dl class="facts">
+    <div><dt>Residential development</dt><dd>Multi-unit new build — site appraisal, delivery strategy, phased construction and plot-by-plot completion.</dd></div>
+    <div><dt>Commercial conversion</dt><dd>Office and commercial stock converted to residential or re-purposed — planning route, structure and services rethought together.</dd></div>
+    <div><dt>Compliance programmes</dt><dd>Portfolio work across occupied buildings — fire-door programmes, cladding remediation — delivered building by building with tenants in place.</dd></div>
+    <div><dt>Commercial projects</dt><dd>Workspace, hospitality fit-out and structural alteration for operating businesses, programmed around trading hours.</dd></div>
+  </dl>
+</div></section>
+<section class="blk alt" id="programme"><div class="wrap">
+  <p class="eyebrow">Method</p><h2>One levelled programme across every plot</h2>
+  <p>On a multi-unit site the expensive failures are rarely inside a single plot — they are between plots: a groundworks gang idle on plot 3 because the frame on plot 2 slipped, deliveries clashing, inspections booked against the wrong sequence. We run the whole site as one resource-levelled programme, so each trade flows plot to plot without dead time, and a delay anywhere shows its knock-on effect everywhere — immediately, with the reason attached.</p>
+  <ul class="ticks">
+    <li>Phased releases so early units complete and sell while later phases build</li>
+    <li>Procurement across the whole site — material packages bought once, at scale, delivered per phase</li>
+    <li>Statutory inspections choreographed per plot against the live sequence</li>
+    <li>Developer clients see the same live portfolio view we run the site from</li>
+  </ul>
+</div></section>
+<section class="blk" id="projects"><div class="wrap">
+  <p class="eyebrow">Notable projects</p><h2>Delivery at portfolio scale</h2>
+  <div class="cols c3">
+    <div class="card"><span class="tag">Portfolio &middot; Occupied</span><h3>Multi-Property Cladding Programme</h3><p>Remediation across multiple occupied properties — one programme, building-by-building delivery, residents in place throughout.</p><a class="more" href="projects/multi-property-cladding-programme.html">View the project &rarr;</a></div>
+    <div class="card"><span class="tag">Compliance &middot; Bristol</span><h3>Bristol Fire-Door Programme</h3><p>A regulated fire-door programme across an apartment portfolio — certification-led, minimally disruptive, fully evidenced.</p><a class="more" href="projects/bristol-fire-door-programme.html">View the project &rarr;</a></div>
+    <div class="card"><span class="tag">Conversion</span><h3>Commercial Office Conversion</h3><p>Commercial stock converted to residential use — planning, structure and services re-thought as one problem.</p><a class="more" href="projects/commercial-office-conversion.html">View the project &rarr;</a></div>
+  </div>
+</div></section>
+<section class="blk alt" id="pricing"><div class="wrap">
+  <p class="eyebrow">Pricing</p><h2>Priced by unit numbers and unit mix</h2>
+  <p>Development pricing turns on the numbers: how many units, what sizes, what specification band. The <a href="index.html#estimator" style="text-decoration:underline;color:var(--navy)">estimator&rsquo;s developer route</a> asks for unit count and unit sizes and prices the scheme per unit and in total — indicative, absent inspection, but a serious starting point. Send the breakdown through as a quote request and it arrives with us ready to discuss.</p>
+</div></section>
+<section class="cta"><div class="wrap">
+  <h2>Talk the project through before anything is committed</h2>
+  <p>An international construction business with experience across large contractors and bespoke projects — expertly placed to manage teams across single and multi-site builds whilst adhering to the most stringent of building regulations.</p>
+  <div class="btns"><a class="b1" href="contact.html">Submit a Project Brief</a><a class="b2" href="index.html#estimator">Get an Indicative Estimate</a></div>
+</div></section>
+</main>
+<footer><div class="wrap" style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap"><p>&copy; 2026 Morris Anderson Construction. Director: Mathew Morris.</p><p><a href="index.html">Home</a> &middot; <a href="turnkey-builds.html">Turnkey</a> &middot; <a href="self-build.html">Self-Build</a> &middot; <a href="development.html">Development</a> &middot; <a href="information.html">Information</a> &middot; <a href="contact.html">Contact</a> &middot; <a href="portal.html">Client Portal</a> &middot; <a href="helicopter.html" style="opacity:.75">Admin portal</a></p></div></footer>
+</body></html>

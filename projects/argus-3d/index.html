@@ -1,0 +1,2112 @@
+<!doctype html>
+<!-- CHANGELOG
+  2026-07-27 (verisimilitude rework: real miss physics, visible deflection, fragment retargeting, target cam,
+              apparent-size Moon/Mars, camera Earth-clip fix, compact view, demo-grade impact FX):
+   1) SHOT OBEYS THE REAL BORE. beginShot() freezes a shotPlan {muzzle, aim, offDeg, willHit}: if the bore is
+      more than ±1.5° off the target (auto-aim HELD while the body drifts), the shot now genuinely MISSES —
+      it flies straight down the bore past the body, with a MISS readout (off-bore angle + closest approach)
+      and NO impact. Only within the cone does clampToCone bend it onto the surface. Salvo misses bank no Δv.
+   2) DEFLECTION IS VISIBLE. Salvo nudge raised 8.5→26u and ANIMATED during recharge (the body glides off its
+      track, it doesn't teleport). Persistent salvo overlay: red dashed ORIGINAL Earth-bound track anchored at
+      the salvo-start point, a grey ghost marker on that track, and a gold tether line to the real (deflected)
+      body; the salvo panel reports the growing off-track displacement, labelled EXAGGERATED for visibility
+      (real per-shot Δv stays honest in the readout).
+   3) FRAGMENT RETARGETING. Break-up now spawns TRACKED fragments (frags[]), not cosmetic chunks: they damp to
+      slow drift and remain clickable-scale bodies. currentTarget() returns the largest surviving fragment once
+      the parent body is gone; auto-aim slews onto it and remaining salvo shots engage fragments one by one
+      ("retargeting fragment n — ~Xm"), each hit neutralising one with a scaled impact. All fragments gone →
+      salvo stands down early. prepNextShot no longer resurrects a destroyed body mid-salvo.
+   4) TARGET CAM. A picture-in-picture inset (scissor viewport, top-right) tracks the current target with its
+      own camera, so impacts/fragments stay legible with the asteroid pushed ~2× farther out (400,45,-545 →
+      (760,88,-1035), ~1.3k units). Toggleable (◉ Target cam); hidden on mobile + in projectile mode.
+   5) MOON/MARS = APPARENT sizes from Earth's vicinity (the user is right: the Moon ~400,000 km away should
+      LOOK far larger than Mars tens of millions of km away). Moon radius 3.4→7.0 nearer (210,-6,-360); Mars
+      9.5→4.5 farther (455,-36,-400) as a small red point. Labels updated to explain apparent vs physical size.
+   6) EARTH-CLIP FIX. The camera could orbit/lerp INSIDE the Earth sphere (station floats only ~28u above the
+      280u-radius surface), swallowing the vessel. Hard clamp in loop(): camera is pushed radially outside
+      R=302 (sphere 280 + atmo shell) every frame, covering user orbit AND cinematic paths.
+   7) COMPACT VIEW + layout. #scene height is now responsive (min(600px, calc(100vh - 300px), floor 430px) so
+      Launch is pressable without scrolling; explicit ⤡ Compact toggle (persisted) forces 440px.
+   8) IMPACT FX to demo grade: two-layer flash (white core + coloured halo), vapour plume for EVERY regime
+      (emphasis ∝ velocity per the science audit), two-population ejecta (fast hot additive + slow lingering
+      dust ∝ momentum), second slow surface dust ring, fracture-glow on fragments (emissive decay), longer
+      eased decay tails. Fireball sprite-sheet include removed (retired asset — no chemical fireballs in vacuum).
+  2026-07-27 (SALVO recharge cadence + minimizable force legend + unmistakable Moon/Mars sizing — additive UI/JS
+              + Moon/Mars materials only; auto-aim/geometry, impact FX, camera, ±1.5° cone, break-up thresholds,
+              family/target selectors and all clickable ids untouched):
+   1) MULTI-FIRE SALVO with RECHARGE DELAY (tied to electricity). New "▶▶ Fire salvo" button beside Launch fires
+      4 shots, RECHARGING the pulse buffer between each. New centred #salvopanel shows the growing shot number
+      (Shot k / 4), the cumulative Δv (banked per shot from the existing deflection() model) and, between shots,
+      the recharge readout: "Recharging pulse buffer: 428.571 GJ ÷ 10 MW ≈ 11.9 h to next shot (ideal; longer in
+      practice) — conservative cadence ≈ 1 shot/day" with a sped-up countdown/progress bar (RECHARGE_H computed
+      = 428.571/(10·3.6) = 11.9 h, from Paper II §8 VERIFIED). Each shot nudges the body further OFF its
+      Earth-bound track (SALVO_NUDGE_U ⟂ the Earth line; natural drift frozen during a salvo). Single Launch is
+      unchanged — beginShot() is shared; resetFire()/Stop cancels a salvo. loop() gains an else-if stepRecharge();
+      stepFire()'s end branch routes to endShotInSalvo() only when salvoActive.
+   2) FORCE LEGEND is MINIMIZABLE. #forcelegend now has a clickable header (⚑ Forces + ▾/▸ #legendToggle) over a
+      collapsible #forcelegendBody; clicking either collapses it to a compact chip and back (in-memory legendMin).
+      updateForces() still owns auto show/hide with 'Show forces'; minimize only hides the body, so forces stay on.
+   3) MOON vs MARS made UNMISTAKABLE. Mars radius 7→9.5 and moved nearer (395,-31,-345) with a warmer red tint
+      (0xd2673f over the mars texture) = clearly the LARGER, reddish body; Moon radius 3.2→3.4, moved to
+      (250,-16,-430), kept cool grey = clearly SMALLER. Measured on-screen apparent radii give Moon:Mars ≈ 0.38–0.40
+      (was ~0.55); both sit comfortably in the default frame. Impact FX / camera / break-up / family / Earth+
+      asteroid / cone untouched.
+  2026-07-27 (comprehensive aiming/geometry fix — auto-aim slew + on-axis shot + forces follow the structure):
+   (a) IMPROBABLE ANGLE fixed: the shell no longer flies ~55° off the bore. A geomagnetic AUTO-AIM (default ON)
+       continuously & SLOWLY slerps the WHOLE structure (sysRoot) so the bore (local +x) points at the asteroid;
+       the launched projectile now LEAVES THE MUZZLE along the live bore world-direction and flies essentially
+       straight to the target (still inside the ±1.5° exit cone). Coast path, ghost line, cone and the impact
+       hemisphere are all recomputed from boreDirWorld(); during coast the projectile position is mapped through
+       sysRoot.worldToLocal (it is a child of the slewed structure) and a world tracer follows it.
+   (b) AUTO-AIM added (previously only a manual tilt): computeAimQ()/updateAutoAim() track the asteroid every
+       frame; the structure starts already aimed and re-points as the asteroid drifts. On Launch the aim snaps
+       exactly onto the asteroid so the shot is on-axis, then auto-aim pauses for the shot and resumes on reset.
+   (c) HOLD freezes it: the slew button (id slewBtn) is repurposed to TOGGLE auto-aim — 'Auto-aim: ON' ⇄
+       'Hold aim (frozen)'. When held, the structure is frozen and the force vectors are static & correctly
+       aligned (no drift/errors). Auto-aim also pauses during a launch.
+   (d) ASTEROID moved FAR down-range to (400,45,-545) (~680u, was ~290u) roughly along the bore's forward
+       direction, deep in space, with a slow velocity TOWARD Earth (12,-300,-70) that loops. The 30/100/300
+       selector still rescales it.
+   FORCES FOLLOW THE STRUCTURE: the bore-relative arrows (accelerating Lorentz, drive-cell field, vector-control
+   exit trim) now live in boreForceGroup parented to sysRoot, and the commanded dipole m rotates with it; the
+   geomagnetic field B stays INERTIAL (world-fixed) and τ = m×B is recomputed each frame (⊥ B, under-actuated).
+   Camera-follow-to-impact, the ±1.5° cone, the deflection/shots panel, the hypervelocity impact, break-up
+   thresholds, family/target selectors and all clickable ids are unchanged.
+  2026-07-27 (light-theme readability of canvas overlays — CSS/inline only; no geometry/logic change):
+   The in-canvas overlay UI (mode buttons .modes, HUD chips .hud .chip, launch .controls — fire/speed/
+   #forceBtn/◐ magnetic-slew/.rd read-outs #vel/#phase/#slewRd, the .forcelegend, the .scaleinset, and the
+   .shotpanel deflection panel) used themed vars (--bg2/--ink2/--muted/--accent…) that flip to cream/dark
+   ink in light theme. But these ALWAYS sit over the permanently-dark 3D canvas, so in light theme they
+   became light-on-light / low-contrast and were unreadable. FIX: a scoped `html[data-theme="light"] …`
+   block pins EVERY canvas overlay to the dark-theme palette (dark translucent glass color-mix(#0e1420…) +
+   #e9eef7/#aab7cc/#93a2ba text), while keeping accent/active states legible (teal .on mode + Show-forces
+   button, gold fire button + gold/#vel & teal/#phase read-outs, orange slew). Also pinned two .forcelegend
+   muted spans and the .sp-dv Δv <b> from var(--muted)/var(--accent-ink) to fixed #7d8ba3/#84d6ca (identical
+   in dark, readable in light). Dark theme is untouched (the override only applies under [data-theme=light]);
+   page/panel chrome (.top/.panel/.spec/.famsel/.matchbox/.foot) deliberately NOT changed (correctly themed
+   on the light page). No JS/geometry/launch/camera/impact logic touched.
+  2026-07-27 (geomagnetic attitude control — additive; companion "Geomagnetic Attitude Control" paper):
+   1) ATTITUDE subsystem added: a large conductive MAGNETORQUER loop (3-turn copper rectangle spanning the
+      barrel/truss, clickable pick id 'attitude') — the commanded magnetic dipole m. New SUBSYS entry + panel
+      role explaining τ = m×B geomagnetic slewing (propellantless, SLOW, UNDER-ACTUATED: torque ∥ B is
+      identically zero), coarse whole-apparatus pointing complementary to the ±1.5° vector-control exit trim.
+   2) SHOW FORCES now also draws three labelled geomagnetic vectors at the structure: the external field B
+      (long violet arrow through the structure, fixed/inertial), the commanded dipole m (copper arrow along
+      the loop normal, rotates with the structure) and the slew torque τ = m×B (lime curved arrow about the
+      perpendicular axis, recomputed each frame so τ⊥B always holds). New legend entries. Existing
+      Lorentz/coil/vector-control arrows + ±1.5° cone untouched.
+   3) "◐ Magnetic slew" button slowly re-points the WHOLE structure a few degrees about the τ axis over
+      ~2.2 s (visibly slow; readout notes it is illustrative/sped-up — hours-to-days in reality — and
+      magnetic-only). Disabled + reset to identity during a launch so it never fights the launch animation.
+      Impact FX / launch camera / break-up / family / Earth+asteroid / ±1.5° cone unchanged.
+  2026-07-27 (station realism upgrade + Moon/Mars differentiation — geometry/materials only):
+   1) STATION rebuilt toward the engineered mass-driver mock-ups (buildSystem, procedural r128 only):
+      - Driver: dropped 44 near-touching rings ("corrugated hose") → 24 discrete OCTAGONAL drive-module
+        casings with real ~40% bore gaps, end chamfer rings, 3 external truss rails (30/90/150°) + periodic
+        ring frames = a barrel-on-truss silhouette. One recessed emissive coil per module sits in each
+        exposed gap and still carries the travelling wave (cellRings, now 24 elements — launch anim unchanged).
+      - Breech: plain drum → large injector THROAT ring + 3-step breech housing + emissive aperture + 6 feed
+        conduits. Solar: flat boards → 3×2 gridded PV sub-panels on a gimballed yoke+boom with frame spars.
+        Radiators: muddy brown boards → pale-grey finned banks on standoff spars. Truss: single stick →
+        triangulated lattice (3 longerons + transverse frames + zig-zag diagonals). Buffer/converters now sit
+        on hung truss shelves (kept gold/purple legend hues). New metal() Phong helper for brushed metals;
+        shared geometries/materials reused for performance. All subsystem userData.pick/label ids intact
+        (driver, breech, vector, solar, buffer, converter, radiator, truss, projectile, target).
+   2) MOON vs MARS: Moon was same size as Mars → Moon radius 4.5→3.2 and moved to (159,-11,-440) so it reads
+      as the nearer, clearly SMALLER grey body (~half Mars's apparent size, matching real Ø ratio). Mars
+      radius 6→7 at (418,-35,-363). Both repositioned into the DEFAULT view frustum (were off-frame: Mars
+      above the top edge, Moon far left). Muted, distinct: Moon grey/cratered (BODY_TEX.rock), Mars reddish
+      (BODY_TEX.mars); labels kept. Impact FX / camera / break-up / family / Earth+asteroid / cone untouched.
+  2026-07-27 (cinematic camera + ±1.5° exit-steering cone):
+   1) Camera now TRACKS the projectile through coast (chase framing keeps the tiny tracer centred as it
+      crosses to the far, off-axis target), then eases onto the muzzle-facing surface impact point and
+      closes to Z_IMPACT=30u so the plasma flash / shock ring / crater fill a sensible fraction of the
+      frame; holds ~1/3 of T_HOLD close, then eases back (Z_REVEAL=108u) to reveal the deflected body /
+      debris. Retuned follow distances (Z_CHASE/Z_IMPACT/Z_REVEAL) + per-phase offset dir (cineDir);
+      smooth at 0.5× and 0.1×. Only cineFocus/cineZoom/cineDir + stepFire()/loop() cine block touched.
+   2) Exit steering capped to a ±1.5° cone: the driver is coarse-aimed down-range and the vector-control
+      only trims the exit ≤1.5° (clampToCone + control point on the aim axis => bezier stays inside the
+      cone; ghost line = un-trimmed aim). Show-forces now draws the reachable ±1.5° cone from the muzzle
+      (faint surface + 4 edge lines + footprint ring), labelled "±1.5° cone → reachable radius ≈
+      range·tan1.5°" with a live footprint-vs-target ratio, plus a note that cone × range sets the impact
+      footprint. Impact-effect internals / break-up / family / Earth+asteroid placement unchanged.
+  2026-07-26 (scale + asteroid revision):
+   1) Earth scale: radius 88 -> 280 units, centre pushed down/back to (12,-300,-70); atmosphere 91 -> 290.
+      Reads as a vast curved planet limb below the tiny 22-unit structure (true ratio ~1,820:1). No numeric
+      orbit altitude claimed. Scale-inset now states "Earth 12,742 km (approx 1,820x the structure)".
+      Default system view re-aimed (yaw/pitch/dist) to look down-range so Earth limb fills the lower frame.
+   2) Demonstration asteroid moved FAR into deep space (~390 units from Earth, ~290 from the structure) as a
+      small distant body; given a slow Earth-bound drift (drifts toward Earth over time, loops). Target-size
+      selector (30/100/300 m) still rescales the far body.
+   3) Show forces: added the asteroid's Earth-bound projected track (red) and the deflected/missing track
+      (green, splitting at the intercept), plus a dark-glass "DEFLECTION" HTML panel giving per-shot Dv from
+      deflection() and an illustrative shot-count N (notional 1-yr warning / 0.5-AU dart response time).
+      Launch / impact / force-toggle logic unchanged; illustrative, non-operational framing intact.
+-->
+<html lang="en-GB" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230e7b6f'/%3E%3Ctext x='16' y='22' font-family='Georgia,serif' font-size='15' font-weight='700' text-anchor='middle' fill='white'%3ECF%3C/text%3E%3C/svg%3E">
+<title>ARGUS-PD launch architecture — 3D · Christopher I. V. Farmer</title>
+<style>
+  :root{
+    --bg:#0b0f17; --bg2:#0e1420; --surface:#131b2a; --surface2:#182133;
+    --ink:#e9eef7; --ink2:#aab7cc; --muted:#7d8ba3; --line:#233145; --line2:#2c3d54;
+    --accent:#43b3a6; --accent-ink:#84d6ca; --gold:#d4b24c; --good:#43c59e; --bad:#e2683c;
+    --shadow:0 18px 50px -20px rgba(0,0,0,.7); --radius:14px;
+    --fd:'Zilla Slab',Georgia,serif; --fb:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif; --fm:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  }
+  html[data-theme="light"]{
+    --bg:#f4f1ec; --bg2:#ebe6dd; --surface:#fff; --surface2:#faf7f2;
+    --ink:#221e18; --ink2:#4c473e; --muted:#675f54; --line:#e7e1d6; --line2:#d9d2c5;
+    --accent:#0d5f57; --accent-ink:#0a463f; --gold:#836819; --good:#0e7a52; --bad:#b1431d;
+    --shadow:0 18px 44px -24px rgba(15,30,60,.35);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1100px 700px at 80% -8%,rgba(67,179,166,.10),transparent 60%),var(--bg);
+    color:var(--ink);font-family:var(--fb);line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent-ink);text-decoration:none}
+  h1,h2,h3{font-family:var(--fd);font-weight:600;line-height:1.15;margin:0}
+  .top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    padding:12px clamp(16px,4vw,32px);background:color-mix(in oklab,var(--bg),transparent 8%);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:11px;color:var(--ink);min-width:0}
+  .crest{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(145deg,#0e7b6f,#0b655b);color:#fff;font-family:var(--fd);font-weight:700;font-size:14px}
+  .brand .nm{font-family:var(--fd);font-weight:700;font-size:14px;line-height:1.05}
+  .brand .rl{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:8px 13px;border-radius:9px;font-weight:600;font-size:12.5px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer;font-family:var(--fb)}
+  .btn:hover{border-color:var(--accent)}
+  .wrap{max-width:1180px;margin:0 auto;padding:clamp(20px,4vw,34px) clamp(16px,4vw,32px) 60px}
+  .eyebrow{font-family:var(--fm);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+  h1.title{font-size:clamp(24px,3.6vw,34px);letter-spacing:-.015em;margin-bottom:8px}
+  .lede{color:var(--ink2);font-size:15px;max-width:75ch}
+  .note{margin:16px 0 0;padding:11px 15px;border:1px solid var(--line2);border-left:3px solid var(--gold);border-radius:10px;background:var(--surface);color:var(--ink2);font-size:13px}
+  /* align-items:start — the viewbox must HUG the canvas, not stretch to the tall subsystem panel.
+     (Stretching left a huge black void below the canvas with the controls/scale-inset floating in it.) */
+  .stage{display:grid;grid-template-columns:1fr 322px;gap:20px;margin-top:22px;align-items:start}
+  @media(max-width:900px){.stage{grid-template-columns:1fr}}
+  .panel{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+  .viewbox{position:relative;background:#04060c;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  /* FIXED heights only (vh-calc heights caused buffer/CSS mismatches on some window sizes);
+     a ResizeObserver keeps the WebGL buffer glued to the CSS box in all cases */
+  #scene{width:100%;height:600px;display:block;touch-action:none;cursor:grab}
+  .viewbox.compact #scene{height:440px}
+  #scene:active{cursor:grabbing}
+  /* TARGET CAM — picture-in-picture frame over the scissor viewport (top-right, below HUD chips) */
+  .tgtcam{position:absolute;top:70px;right:12px;width:264px;height:176px;z-index:2;pointer-events:auto;
+    border:1px solid var(--line2);border-radius:4px;box-shadow:0 10px 30px -18px rgba(0,0,0,.8)}
+  .tgtcam .tc-lab{position:absolute;top:6px;left:8px;font-family:var(--fm);font-size:9.5px;letter-spacing:.08em;
+    color:#84d6ca;background:color-mix(in oklab,#0e1420,transparent 22%);padding:3px 7px;border-radius:5px}
+  .tgtcam.big{width:420px;height:264px} /* surface view earns more pixels */
+  .tgtcam .tc-btn{position:absolute;bottom:6px;right:8px;pointer-events:auto;cursor:pointer;font-family:var(--fm);font-size:9.5px;
+    color:#aab7cc;background:color-mix(in oklab,#0e1420,transparent 18%);border:1px solid var(--line2);border-radius:5px;padding:3px 8px}
+  .tgtcam .tc-btn:hover{border-color:var(--accent);color:#e9eef7}
+  .tgtcam.big .tc-btn{bottom:auto;top:6px;right:8px}
+  .tgtcam .tc-cap{position:absolute;bottom:6px;left:8px;right:96px;font-family:var(--fm);font-size:9px;line-height:1.35;
+    color:#cfe0dc;background:color-mix(in oklab,#0e1420,transparent 22%);padding:3px 7px;border-radius:5px}
+  .tgtcam.big .tc-cap{right:8px}
+  @media(max-width:900px){.tgtcam{display:none}}
+  html[data-theme="light"] .tgtcam{border-color:#2c3d54}
+  html[data-theme="light"] .tgtcam .tc-btn{border-color:#2c3d54;color:#aab7cc;background:color-mix(in oklab,#0e1420,transparent 18%)}
+  /* ---- FLOATING PANELS: every informative overlay is draggable and minimizable so it never blocks the view ---- */
+  .floating{cursor:grab;user-select:none;touch-action:none}
+  .floating:active{cursor:grabbing}
+  .fp-min{position:absolute;top:5px;right:6px;z-index:3;font-family:var(--fm);font-size:10px;line-height:1;padding:2px 7px;border-radius:5px;
+    border:1px solid var(--line2);background:color-mix(in oklab,#0e1420,transparent 30%);color:#aab7cc;cursor:pointer}
+  .fp-min:hover{border-color:var(--accent);color:#e9eef7}
+  .fp-chip{display:none;font-family:var(--fm);font-size:10px;letter-spacing:.06em;color:#aab7cc;white-space:nowrap}
+  .fp-collapsed>*:not(.fp-min):not(.fp-chip){display:none!important}
+  .fp-collapsed .fp-chip{display:inline-block;padding-right:26px}
+  .fp-collapsed{width:auto!important;min-width:0!important;padding:7px 10px!important}
+  .modes{position:absolute;top:12px;left:12px;display:flex;gap:6px;z-index:3}
+  .modes button{font-family:var(--fm);font-size:11px;padding:7px 11px;border-radius:8px;border:1px solid var(--line2);background:color-mix(in oklab,var(--bg2),transparent 15%);color:var(--ink2);cursor:pointer;backdrop-filter:blur(6px)}
+  .modes button.on{border-color:var(--accent);color:var(--ink);background:color-mix(in oklab,var(--accent) 18%,transparent)}
+  /* max-width keeps the wrapping control row from running UNDER the right-side scale inset */
+  .controls{position:absolute;bottom:12px;left:12px;display:flex;gap:8px;align-items:center;z-index:5;flex-wrap:wrap;max-width:calc(100% - 248px)}
+  @media(max-width:900px){.controls{max-width:calc(100% - 24px)}}
+  .controls button{font-family:var(--fb);font-weight:600;font-size:13px;padding:9px 15px;border-radius:9px;border:1px solid var(--gold);background:color-mix(in oklab,var(--gold) 22%,transparent);color:var(--ink);cursor:pointer;backdrop-filter:blur(6px)}
+  .controls .rd{font-family:var(--fm);font-size:12px;color:var(--gold);background:color-mix(in oklab,var(--bg2),transparent 10%);padding:8px 11px;border-radius:8px;border:1px solid var(--line2);backdrop-filter:blur(6px)}
+  .controls .rd.teal{color:var(--accent-ink)}
+  .speed{display:inline-flex;gap:3px;background:color-mix(in oklab,var(--bg2),transparent 10%);border:1px solid var(--line2);border-radius:8px;padding:3px;backdrop-filter:blur(6px)}
+  .speed button{font-family:var(--fm);font-size:11px;padding:5px 8px;border-radius:6px;border:0;background:transparent;color:var(--muted);cursor:pointer}
+  .speed button.on{background:color-mix(in oklab,var(--accent) 22%,transparent);color:var(--ink)}
+  .hud{position:absolute;top:12px;right:12px;text-align:right;z-index:3;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+  .hud .chip{font-family:var(--fm);font-size:10.5px;color:var(--muted);background:color-mix(in oklab,var(--bg2),transparent 20%);padding:6px 10px;border-radius:7px}
+  #forceBtn.on{background:color-mix(in oklab,var(--accent) 34%,transparent)!important;color:var(--ink)}
+  .scaleinset{position:absolute;bottom:64px;right:12px;z-index:3;width:210px;padding:9px 11px;border-radius:9px;border:1px solid var(--line2);
+    background:color-mix(in oklab,var(--bg2),transparent 8%);backdrop-filter:blur(6px);font-family:var(--fm);font-size:10px;color:var(--ink2)}
+  .scaleinset .si-t{color:var(--muted);letter-spacing:.1em;margin-bottom:6px}
+  .scaleinset .si-row{display:flex;align-items:center;gap:7px;margin:3px 0;white-space:nowrap}
+  .scaleinset .si-bar{display:inline-block;height:5px;border-radius:3px;background:var(--accent);flex:0 0 auto}
+  .scaleinset .si-bar2{height:5px;border-radius:3px;background:var(--accent);width:100%;margin:1px 0 4px}
+  .scaleinset .si-cap{white-space:normal;line-height:1.3;margin:3px 0 1px}
+  .scaleinset .si-earth{color:var(--accent-ink)}
+  @media(max-width:900px){.scaleinset{display:none}}
+  .viewbox.compact .scaleinset{display:none} /* no room below the target cam at 440px */
+  .forcelegend{position:absolute;top:56px;left:12px;z-index:3;display:flex;flex-direction:column;gap:4px;padding:9px 11px;border-radius:9px;
+    border:1px solid var(--line2);background:color-mix(in oklab,var(--bg2),transparent 8%);backdrop-filter:blur(6px);font-size:11px;color:var(--ink2)}
+  .forcelegend span{display:inline-flex;align-items:center;gap:7px}
+  .forcelegend i{width:14px;height:4px;border-radius:2px;display:inline-block;flex:0 0 auto}
+  /* minimize/expand toggle for the force legend (collapses to a compact ⚑ Forces chip) */
+  .forcelegend .fl-head{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;font-weight:600;color:var(--ink);font-family:var(--fm);letter-spacing:.02em}
+  .forcelegend .fl-flag{display:inline-flex;align-items:center;gap:6px;font-size:11px}
+  .forcelegend .fl-tog{font-family:var(--fm);font-size:12px;line-height:1;padding:1px 7px;border-radius:6px;border:1px solid var(--line2);background:color-mix(in oklab,var(--bg2),transparent 30%);color:var(--ink2);cursor:pointer}
+  .forcelegend .fl-tog:hover{border-color:var(--accent);color:var(--ink)}
+  .forcelegend .fl-body{display:flex;flex-direction:column;gap:4px;margin-top:7px}
+  .forcelegend.min .fl-body{display:none}
+  .forcelegend.min{gap:0;padding:7px 10px}
+  /* SALVO — multi-shot campaign readout (recharge countdown + cumulative deflection) */
+  .salvopanel{position:absolute;top:48px;left:50%;transform:translateX(-50%);z-index:4;width:352px;max-width:calc(100% - 24px);
+    padding:10px 13px;border-radius:10px;border:1px solid var(--line2);background:color-mix(in oklab,var(--bg2),transparent 4%);
+    backdrop-filter:blur(8px);font-family:var(--fm);font-size:10.5px;color:var(--ink2);line-height:1.5;box-shadow:var(--shadow)}
+  .salvopanel .sv-t{color:var(--gold);letter-spacing:.06em;margin-bottom:5px;font-size:9.5px;text-transform:uppercase}
+  .salvopanel .sv-n{color:var(--ink);font-size:13px;font-weight:600;margin-bottom:2px}
+  .salvopanel .sv-dv{color:var(--ink2);margin-bottom:5px}
+  .salvopanel .sv-dv b{color:var(--gold)}
+  .salvopanel .sv-rc{color:var(--muted);font-size:9.8px;line-height:1.45}
+  .salvopanel .sv-rc b{color:var(--accent-ink)}
+  .salvopanel .sv-cd{display:block;margin-top:4px;color:#84d6ca;font-size:9.5px;letter-spacing:.04em}
+  .shotpanel{position:absolute;bottom:118px;left:12px;z-index:3;width:252px;padding:10px 12px;border-radius:10px;
+    border:1px solid var(--line2);background:color-mix(in oklab,var(--bg2),transparent 6%);backdrop-filter:blur(8px);
+    font-family:var(--fm);font-size:10.5px;color:var(--ink2);line-height:1.5;box-shadow:var(--shadow)}
+  .shotpanel .sp-t{color:var(--accent-ink);letter-spacing:.06em;margin-bottom:6px;font-size:9.5px;text-transform:uppercase}
+  .shotpanel .sp-n{color:var(--ink);font-size:12.5px;font-weight:600;margin-bottom:2px}
+  .shotpanel .sp-dv{color:var(--ink2);margin-bottom:6px}
+  .shotpanel .sp-note{color:var(--muted);font-size:9.5px;line-height:1.45}
+  @media(max-width:900px){.shotpanel{display:none!important}}
+  .panel h3{font-size:15px;margin-bottom:2px}
+  .sub{color:var(--muted);font-size:12px;margin-bottom:12px}
+  .famsel{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+  .famsel button{font-family:var(--fm);font-size:11px;padding:6px 9px;border-radius:7px;border:1px solid var(--line2);background:var(--bg2);color:var(--ink2);cursor:pointer}
+  .famsel button.on{border-color:var(--gold);color:var(--ink);background:color-mix(in oklab,var(--gold) 15%,transparent)}
+  .matchbox{margin:4px 0 10px;padding:10px 12px;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;background:var(--bg2);font-size:12px;color:var(--ink2);line-height:1.5}
+  .matchbox b{color:var(--ink)}
+  .matchbox .dv{font-family:var(--fm);color:var(--accent-ink);font-weight:600}
+  .matchbox .best{font-family:var(--fm);font-size:11px;color:var(--gold);margin-top:5px;display:block}
+  .parts{display:flex;flex-direction:column;gap:6px}
+  .part{display:flex;align-items:center;gap:10px;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--bg2);cursor:pointer;transition:.14s}
+  .part:hover{border-color:var(--line2)}
+  .part.on{border-color:var(--accent);background:color-mix(in oklab,var(--accent) 12%,transparent)}
+  .part .sw{width:13px;height:13px;border-radius:4px;flex:0 0 auto}
+  .part .pn{flex:1;font-size:13px;color:var(--ink)}
+  .part .pm{font-family:var(--fm);font-size:11px;color:var(--muted)}
+  .spec{margin-top:12px;padding:13px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg2);min-height:92px}
+  .spec .st{font-weight:600;font-size:14px;color:var(--ink);display:flex;align-items:center;gap:8px}
+  .spec .sr{font-family:var(--fm);font-size:11.5px;color:var(--accent-ink);margin-top:4px}
+  .spec .sd{font-size:12.5px;color:var(--ink2);margin-top:8px}
+  .foot{margin-top:22px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:14px}
+  .prov{font-family:var(--fm)}
+  /* ---- canvas-overlay UI: FIXED dark-glass in LIGHT theme --------------------------------
+     These controls float over the permanently-dark 3D canvas (space). In light theme the
+     themed vars (--bg2/--ink2/--muted/--accent…) flip to cream/dark ink, so the overlays go
+     light-on-light / low-contrast over the dark canvas and become unreadable. So when the
+     PAGE is light we pin every canvas overlay to the dark-theme palette (dark translucent
+     glass + light text), matching how they already render in dark theme. Dark theme is
+     untouched (these rules don't apply there). Page/panel chrome (.top/.panel/.spec/.famsel/
+     .matchbox/.foot) is intentionally excluded — it sits on the light page & is themed right. */
+  html[data-theme="light"] .modes button{background:color-mix(in oklab,#0e1420,transparent 15%);color:#aab7cc;border-color:#2c3d54}
+  html[data-theme="light"] .modes button.on{border-color:#43b3a6;color:#e9eef7;background:color-mix(in oklab,#43b3a6 18%,transparent)}
+  html[data-theme="light"] .hud .chip{color:#93a2ba;background:color-mix(in oklab,#0e1420,transparent 18%)}
+  html[data-theme="light"] .controls button{border-color:#d4b24c;background:color-mix(in oklab,#d4b24c 22%,transparent);color:#e9eef7}
+  html[data-theme="light"] #forceBtn{border-color:#43b3a6!important;background:color-mix(in oklab,#43b3a6 16%,transparent)!important;color:#e9eef7}
+  html[data-theme="light"] #forceBtn.on{background:color-mix(in oklab,#43b3a6 34%,transparent)!important;color:#e9eef7}
+  html[data-theme="light"] .controls .rd{color:#d4b24c;background:color-mix(in oklab,#0e1420,transparent 10%);border-color:#2c3d54}
+  html[data-theme="light"] .controls .rd.teal{color:#84d6ca}
+  html[data-theme="light"] .speed{background:color-mix(in oklab,#0e1420,transparent 10%);border-color:#2c3d54}
+  html[data-theme="light"] .speed button{color:#93a2ba}
+  html[data-theme="light"] .speed button.on{background:color-mix(in oklab,#43b3a6 22%,transparent);color:#e9eef7}
+  html[data-theme="light"] .scaleinset{border-color:#2c3d54;background:color-mix(in oklab,#0e1420,transparent 8%);color:#aab7cc}
+  html[data-theme="light"] .scaleinset .si-t{color:#93a2ba}
+  html[data-theme="light"] .scaleinset .si-bar,
+  html[data-theme="light"] .scaleinset .si-bar2{background:#43b3a6}
+  html[data-theme="light"] .scaleinset .si-earth{color:#84d6ca}
+  html[data-theme="light"] .forcelegend{border-color:#2c3d54;background:color-mix(in oklab,#0e1420,transparent 8%);color:#aab7cc}
+  html[data-theme="light"] .forcelegend .fl-head{color:#e9eef7}
+  html[data-theme="light"] .forcelegend .fl-tog{border-color:#2c3d54;background:color-mix(in oklab,#0e1420,transparent 30%);color:#aab7cc}
+  html[data-theme="light"] .salvopanel{border-color:#2c3d54;background:color-mix(in oklab,#0e1420,transparent 4%);color:#aab7cc}
+  html[data-theme="light"] .salvopanel .sv-t{color:#d4b24c}
+  html[data-theme="light"] .salvopanel .sv-n{color:#e9eef7}
+  html[data-theme="light"] .salvopanel .sv-dv{color:#aab7cc}
+  html[data-theme="light"] .salvopanel .sv-dv b{color:#d4b24c}
+  html[data-theme="light"] .salvopanel .sv-rc{color:#93a2ba}
+  html[data-theme="light"] .salvopanel .sv-rc b{color:#84d6ca}
+  html[data-theme="light"] .salvopanel .sv-cd{color:#84d6ca}
+  html[data-theme="light"] .shotpanel{border-color:#2c3d54;background:color-mix(in oklab,#0e1420,transparent 6%);color:#aab7cc}
+  html[data-theme="light"] .shotpanel .sp-t{color:#84d6ca}
+  html[data-theme="light"] .shotpanel .sp-n{color:#e9eef7}
+  html[data-theme="light"] .shotpanel .sp-dv{color:#aab7cc}
+  html[data-theme="light"] .shotpanel .sp-note{color:#93a2ba}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top" style="margin:calc(-1 * clamp(20px,4vw,34px)) calc(-1 * clamp(16px,4vw,32px)) 0;border-radius:0">
+      <a class="brand" href="../../publications/index.html"><span class="crest">CF</span><span><span class="nm">Christopher Farmer</span><br><span class="rl">ARGUS-PD Launch Architecture · 3D</span></span></a>
+      <div style="display:flex;gap:8px">
+        <a class="btn" href="../../publications/index.html">&#8592; Publications</a>
+        <button class="btn" id="theme" aria-label="Toggle theme">&#9789;</button>
+      </div>
+    </div>
+
+    <div style="margin-top:28px">
+      <div class="eyebrow">Interactive 3D · conceptual system architecture</div>
+      <h1 class="title">The launch architecture in orbit</h1>
+      <p class="lede">A conceptual 3D view of the ARGUS-PD/POD-7K research architecture as an integrated orbital demonstrator: the seven-kilometre driver — <b>1,000 × 7 m cells at 150 MJ each</b> — energised as a travelling wave, its solar generation and pulse-energy buffer, converters, radiators, magnetic vector control, and the modular projectile whose deposited mass budget the papers screen. Pick a family member, drag to orbit, click any subsystem to label it, and run the launch to watch the cell wave sweep the projectile down the bore and coast to a demonstration target. Every subsystem traces to Paper II, the projectile budget to Paper I, and the attitude loop to the geomagnetic companion paper.</p>
+      <div class="note"><b>Illustrative &amp; conceptual — not to scale, not a buildable design.</b> A hypothetical planetary-defence research demonstrator in orbit (the series declares no operational altitude; geometry and placement are schematic). Only the projectile <i>mass allocations</i> (deposited budget, total 0.300&nbsp;kg reference) and the 1,000-cell / 32-face / 0.505&nbsp;m-collar figures are quantitative. No operational targeting, fire-control, pulsed-power, coil, capacitor or rail engineering is shown or implied — the on-screen auto-aim and lead-corrected shots are game-style illustration of the papers&#8217; pointing hierarchy, not a firing solution.</div>
+    </div>
+
+    <div class="stage">
+      <div class="viewbox">
+        <canvas id="scene"></canvas>
+        <div class="modes">
+          <button data-mode="system" class="on">Full system</button>
+          <button data-mode="projectile">Projectile (exploded)</button>
+          <button id="camBtn" class="on" title="Toggle the picture-in-picture target camera (tracks the asteroid / current fragment so distant impacts stay legible)">◉ Target cam</button>
+          <button id="fitBtn" title="Compact view: shrink the 3D viewport so the launch controls fit on screen without scrolling">⤡ Compact</button>
+        </div>
+        <div class="tgtcam" id="tgtcamFrame" style="display:none">
+          <span class="tc-lab" id="tgtcamLab">◉ TARGET CAM</span>
+          <button class="tc-btn" id="tgtcamMode" title="Switch between the orbital close-up and a parallel ground-level simulation of the impact on the surface">⛰ Surface view</button>
+          <span class="tc-cap" id="tgtcamCap" style="display:none"></span>
+        </div>
+        <div class="hud">
+          <span class="chip" id="orbitChip">orbital demonstrator · illustrative</span>
+          <span class="chip">drag · scroll · click a part</span>
+        </div>
+        <div class="controls">
+          <button id="fireBtn">▶ Launch sequence</button>
+          <button id="resetBtn" title="Restore the scene: intact body back on its Earth-bound track, scars and fragments cleared" style="border-color:var(--line2);background:color-mix(in oklab,var(--bg2),transparent 10%)">↺ Reset</button>
+          <button id="salvoBtn" title="Multi-shot salvo: fire, then RECHARGE the pulse buffer before each next shot. The readout states the real recharge time (428.571 GJ ÷ 10 MW ≈ 11.9 h ideal) and the conservative ≈ 1 shot/day cadence — sped up in this demo. Cumulative deflection grows across the salvo.">▶▶ Fire salvo</button>
+          <span class="speed" id="speedSel"><button data-s="0.1">0.1×</button><button data-s="0.25">0.25×</button><button data-s="0.5" class="on">0.5×</button><button data-s="1">1×</button></span>
+          <button id="forceBtn" style="border-color:var(--accent);background:color-mix(in oklab,var(--accent) 16%,transparent)">⇢ Show forces</button>
+          <button id="slewBtn" style="border-color:#cf8a44;background:color-mix(in oklab,#cf8a44 20%,transparent)" title="Magnetorquer auto-aim: the whole apparatus slowly slews (τ = m × B) so the bore tracks the asteroid. Click to HOLD (freeze) the structure so the force vectors stay aligned.">◐ Auto-aim: ON</button>
+          <span class="rd" id="vel">0 km/s</span>
+          <span class="rd teal" id="phase">ready</span>
+          <span class="rd" id="slewRd" style="color:#e6a866">◐ auto-aim ON · slewing bore onto asteroid</span>
+        </div>
+        <div class="forcelegend" id="forcelegend" style="display:none">
+          <div class="fl-head" id="forcelegendHead" title="Minimize force legend"><span class="fl-flag">⚑ Forces</span><button class="fl-tog" id="legendToggle" aria-label="Minimize or expand the force legend">▾</button></div>
+          <div class="fl-body" id="forcelegendBody">
+          <span><i style="background:#ffcf5a"></i> accelerating Lorentz force (down the bore)</span>
+          <span><i style="background:#5aa0e0"></i> drive-cell field forces</span>
+          <span><i style="background:#43c59e"></i> vector-control steering force (exit trim)</span>
+          <span><i style="background:#b06cff"></i> geomagnetic field B (Earth's field · external/inertial)</span>
+          <span><i style="background:#e8913f"></i> commanded dipole m (magnetorquer loop axis)</span>
+          <span><i style="background:#8ee06a"></i> slew torque τ = m × B (under-actuated: ⟂ B · slow)</span>
+          <span><i style="background:#e2683c"></i> asteroid's Earth-bound track</span>
+          <span><i style="background:#43c59e"></i> deflected track — misses Earth</span>
+          <span><i style="background:#9fd0ff"></i> vector-control authority: ±1.5° exit-steering cone</span>
+          <span id="coneReach" style="color:#7d8ba3;font-size:10px;padding-left:21px">reachable radius ≈ range·tan1.5°</span>
+          <span style="color:#7d8ba3;font-size:10px;max-width:230px">Cone × range sets the reachable impact footprint (illustrative control-authority envelope — not fire-control).</span>
+          </div>
+        </div>
+        <div class="salvopanel" id="salvopanel" style="display:none">
+          <div class="sv-t">Salvo — multi-shot deflection campaign (illustrative)</div>
+          <div class="sv-n" id="sv-n">Shot 1 / 4</div>
+          <div class="sv-dv" id="sv-dv">cumulative Δv ≈ —</div>
+          <div class="sv-rc" id="sv-rc"></div>
+        </div>
+        <div class="scaleinset" id="scaleinset" aria-hidden="true">
+          <div class="si-t">SCALE (illustrative)</div>
+          <div class="si-cap si-earth">Earth 12,742 km — ≈1,820× the structure (off scale ↑)</div>
+          <div class="si-cap">Driver 7,000 m (reference)</div>
+          <div class="si-bar2"></div>
+          <div class="si-row"><span class="si-bar" style="width:1.6%"></span><span>ISS ~110 m</span></div>
+          <div class="si-row"><span class="si-bar" style="width:1.4%"></span><span>target ~100 m</span></div>
+          <div class="si-row"><span class="si-bar" style="width:0.4%;min-width:2px"></span><span>projectile 0.5 m</span></div>
+        </div>
+        <div class="shotpanel" id="shotpanel" style="display:none">
+          <div class="sp-t">Deflection — planetary defence (illustrative)</div>
+          <div class="sp-n" id="sp-n">≈ — flight windows in a notional 1-yr warning</div>
+          <div class="sp-dv" id="sp-dv">each imparts Δv ≈ —</div>
+          <div class="sp-note">Repeated small nudges walk it off an Earth-bound track — not one Hollywood hit.<br><span id="sp-resp"></span> Illustrative — not operational.</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3 id="listTitle">Subsystems</h3>
+        <div class="sub" id="listSub">Click to inspect · grounded in Paper II</div>
+        <div class="sub" id="famLab" style="margin:2px 0 5px">Projectile (iso-energy family)</div>
+        <div class="famsel" id="famsel"></div>
+        <div class="sub" id="tgtLab" style="margin:8px 0 5px">Target body</div>
+        <div class="famsel" id="tgtsel"></div>
+        <div class="matchbox" id="matchbox"></div>
+        <div class="parts" id="parts"></div>
+        <div class="spec" id="spec"><div class="sd" style="color:var(--muted)">Select a subsystem to see its role and provenance.</div></div>
+      </div>
+    </div>
+
+    <div class="foot">
+      Provenance: driver = 1,000 × 7 m cells, 150 MJ/cell (Paper II §2.3); projectile = 32-gon core (vertex Ø 0.050 m, 0.150 kg diamond-equivalent) with a 0.200 m² coupling collar (0.505 m equivalent Ø, 0.090 kg, 0.45 kg/m², ~21.4 MN) — a ~10:1 collar:core diameter ratio (Paper I §2). Deposited budget total 0.300 kg. Subsystems from Paper II's integrated architecture (solar generation &amp; long-duration buffer; fast-pulse store discharging 428.571 GJ admitted energy through the ~14 ms launch, of which ~150 GJ becomes projectile kinetic energy at the assumed 35% efficiency; converters; radiators). Family: iso-energy 150 GJ set (reference_family.csv); members are illustrative material tiers — the 0.150&nbsp;kg diamond-equivalent core is the Paper I reference (diamond's density caps its mass at this geometry), heavier members are dense-metal (tungsten-class) penetrators of broadly similar size, since the papers fix mass and velocity but not material. Impact per Paper I §8 — delivered energy is calculable; useful deflection is not. Earth imagery: NASA Earth Observatory (public domain); Mars &amp; Sun textures courtesy PlanetPixelEmporium (James Hastings-Trew); asteroid + surface-view regolith map from three.js examples (NASA/USGS); smoke/vapour particle sprites from OpenGameArt.org (CC0/public domain); station surface textures (photovoltaic cells, metal plates, brushed metal) and the cracked-ground texture used by the stage-2 destruction from ambientCG.com (CC0). The ⛰ surface view is an illustrative phenomenological staging of hypervelocity impact regimes (surface energy coupling vs deep momentum coupling) — not a hydrocode result. Schematic and not to scale.
+    </div>
+  </div>
+
+<script src="three.min.js"></script>
+<script src="../_assets/earth/earth-textures.js"></script>
+<script src="../_assets/earth/bodies-textures.js"></script>
+<script src="../_assets/earth/surface-assets.js"></script>
+<script src="../_assets/earth/struct-textures.js"></script>
+<script>
+// ---- deposited projectile budget (kg) + roles ----
+const PARTS=[
+  {id:'guidance', name:'Guidance & telemetry', kg:0.010, color:0x5ac8fa,
+   role:'Nose module: attitude sensing, telemetry and release logic on a thin, spatially graded boron-doped-diamond (BDD) surface where electronic function is required — not a doped monolith (Paper I §5.1).'},
+  {id:'skin', name:'Functional skin', kg:0.015, color:0x9fb3c8,
+   role:'Thin graded surface over the core. Survivability is treated by development-gate testing (P1), not a fixed velocity cap; a small carbon-rich body is an atmospheric-ablation/safety consideration on re-entry, not a launch limit (Paper I §8).'},
+  {id:'core', name:'Core mass (32-gon)', kg:0.150, color:0xd4b24c,
+   role:'A 32-faceted diamond-equivalent core — vertex Ø 0.050 m, ~21.9 mm long at 0.150 kg. The 32 faces are an interface standard (datums, sector boundaries, load flats), retained only if tests show an advantage (Paper I §2.2, §5.2).'},
+  {id:'collar', name:'Coupling collar (0.505 m)', kg:0.090, color:0x43b3a6,
+   role:'The electromagnetically active interface: 0.200 m² active area = 0.505 m equivalent Ø, ~10× the core, as a thin membrane/mesh field structure transferring ~21.4 MN. Areal density 0.45 kg/m²; its load path is development-gate P2.'},
+  {id:'spreader', name:'Load spreader', kg:0.020, color:0xb08cff,
+   role:'Distributes launch force from the collar into the body so the small core is not point-loaded (Paper I §5.1).'},
+  {id:'release', name:'Release interface', kg:0.010, color:0xe2683c,
+   role:'Tail interface that separates the projectile from the driver at the muzzle without a hazardous fragment field (Paper I §5.1).'},
+  {id:'other', name:'Other moving mass', kg:0.005, color:0x7d8ba3,
+   role:'Fasteners, potting and unallocated margin — kept explicit so the reference budget closes at exactly 0.300 kg.'},
+];
+const TOTAL=0.300;
+// iso-energy family (deposited reference_family.csv), 150 GJ each.
+// MATERIAL matters, not just mass: diamond has a fixed density (~3,510 kg/m³), so at the fixed core geometry
+// the 0.150 kg diamond-equivalent core (Paper I reference) is already near the diamond maximum. The heavier
+// members are therefore DENSE-METAL PENETRATORS (tungsten ~19,300 kg/m³ class) of broadly similar size —
+// the family swaps core MATERIAL/density, not scale. Dense penetrators couple momentum DEEP into the bulk
+// (that is why they can disrupt a body); the light diamond-equivalent dart deposits its energy at the
+// surface (vaporisation pit, body intact). Papers fix mass & velocity; material tiers are illustrative.
+const FAMILY=[
+  {id:'R-DART',kg:0.30,  v:1000000,mat:'diamond-equivalent core (Paper I reference)',matShort:'diamond-equiv.',col:0xd4b24c,pen:'surface energy deposition'},
+  {id:'Q-DART',kg:1.20,  v:500000, mat:'dense-alloy core (steel-class)',              matShort:'dense alloy',  col:0x9aa4b2,pen:'shallow penetration'},
+  {id:'V-DART',kg:3.3333,v:300000, mat:'dense-alloy core (heavy composite)',          matShort:'heavy alloy',  col:0x7e8a9a,pen:'moderate penetration'},
+  {id:'M-DART',kg:13.333,v:150000, mat:'tungsten-class penetrator',                   matShort:'tungsten-class',col:0x565e6c,pen:'deep penetration'},
+  {id:'T-DART',kg:30.0,  v:100000, mat:'tungsten-class heavy penetrator',             matShort:'tungsten-class',col:0x3f4653,pen:'deepest penetration — bulk coupling'},
+];
+let famIdx=0;
+// demonstration targets — illustrative rubble-pile bodies (bulk density ~2000 kg/m³)
+const TARGETS=[
+  {id:'30 m',   d:30,  mass:2.83e7,  vscale:0.55},
+  {id:'100 m',  d:100, mass:1.05e9,  vscale:1.6},
+  {id:'300 m',  d:300, mass:2.83e10, vscale:3.4},
+];
+let targetIdx=1;
+const Q_STAR=120; // illustrative catastrophic-disruption specific energy (J/kg) for a small rubble pile (100–1000 band, weak end)
+const KE_SHOT=1.5e11; // 150 GJ iso-energy (deposited)
+// planetary-defence framing (illustrative): a dart's "response time" = time to cross 0.5 AU at its own speed;
+// a notional warning window sets how many shots you get before closest approach. No operational claim.
+const AU=1.495978707e11, HALF_AU=0.5*AU, WARNING_S=3.156e7; // 0.5 AU (m); notional ~1-yr warning window
+const SUBSYS=[
+  {id:'driver', name:'Driver — 1,000 × 7 m cells', color:0x4ea3ff, role:'The staged electromagnetic driver along the 7,000 m bore, partitioned into 1,000 equal 7 m cells at 150 MJ each (Paper II §2.3). Two candidate topologies — switched inductive travelling cells and linear-synchronous — both energise sequentially as a travelling wave, shown sweeping with the projectile on launch. The papers screen aggregate energy and field, not stage-level coil design.'},
+  {id:'breech', name:'Injector / breech', color:0x6f8bb0, role:'Where a projectile enters the bore at low speed before the cell wave acts on it.'},
+  {id:'vector', name:'Magnetic vector control', color:0x43c59e, role:'Steering coils at the muzzle that trim the release vector and hold centre-of-force near centre-of-mass. The papers treat pointing as a control demonstration — not targeting. The ±1.5° exit-steering cone drawn in this demo is an illustrative authority envelope of its own: the papers quantify no trim authority (release-state correction is the bounded third tier of Paper II §5.3\'s pointing hierarchy).'},
+  {id:'attitude', name:'Geomagnetic attitude control', color:0xd98a3e, role:'A large commanded magnetic dipole m — a distributed magnetorquer loop (the companion paper screens ~10⁷ A·m² illustrative dipoles) — reacts against Earth\'s field B to make torque τ = m × B. It is UNDER-ACTUATED: the torque component parallel to B is identically zero, so only axes perpendicular to B can be driven at any instant (rank two; periodic field change restores controllability over an orbit). Propellantless but SLOW — a 7-minute 90° rest-to-rest slew of even the companion paper\'s 1 km reference platform would need ~3×10⁵ N·m and is EXCLUDED for magnetic-only actuation (a 7 km structure only more so); realistic magnetic-only slews are hours-to-days (companion Geomagnetic Attitude Control paper, §5). It coarsely points the WHOLE apparatus, complementary to the ±1.5° magnetic vector-control that does the fine exit trim.'},
+  {id:'solar', name:'Solar generation array', color:0xffd27f, role:'Photovoltaic arrays. Solar charging makes post-deployment operations renewable in the narrow electricity-accounting sense — at 10 MW net charging the ideal recharge is ≈ 11.9 h per 428.571 GJ shot; it cannot directly supply the ~14 ms pulse (Paper II §8).'},
+  {id:'buffer', name:'Pulse-energy buffer', color:0xd4b24c, role:'Fast-pulse store for the shot: holds the admitted energy — 428.571 GJ at the assumed 35% efficiency (514.286 GJ nameplate with 20% reserve) — and discharges through the ~14 ms launch, of which ~150 GJ arrives as projectile kinetic energy. The solar array recharges it over hours (Paper II pulse-energy architecture).'},
+  {id:'converter', name:'Power converters', color:0xb08cff, role:'Condition solar and buffer energy into the pulse-forming network between shots.'},
+  {id:'radiator', name:'Radiators', color:0xe07a5a, role:'Reject waste heat from the pulse and from solar input (Paper II §4.4 radiator duty: ~3.2 MW average cadence-level rejection in the conservative no-recovery, ≈1-shot-per-day case — the local millisecond pulse heating must close separately).'},
+  {id:'truss', name:'Structural truss & arms', color:0x8aa0bf, role:'The fixed 7,000 m backbone and deployable arms carrying the subsystems. Length is Paper II’s one fixed parameter.'},
+  {id:'projectile', name:'Projectile (0.300 kg)', color:0xd4b24c, role:'The modular screening projectile. Switch to the exploded view to inspect its deposited mass budget and the collar-to-core geometry.'},
+  {id:'target', name:'Demonstration target', color:0x9a8b78, role:'A notional deflection-demonstration body far down-range. Per Paper I §8, delivered kinetic energy is calculable but useful deflection is not — the impact campaign (gate P6) must bracket momentum transfer, ejecta, fragmentation and target-structure uncertainty.'},
+];
+
+let renderer,scene,camera,raf,yaw=-0.62,pitch=0.22,dist=32,dragging=false,lx,ly;
+let sysRoot,projGroup,earth,sun,moon,mars,asteroid,projMeshes={},boreProjectile,cellRings=[],vectorRing,mode='system',emphasised=null;
+let GLOW_TEX=null;
+function glowTexture(){ // soft radial glow (no square) for the Sun and impact plasma
+  if(GLOW_TEX)return GLOW_TEX;
+  const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');
+  const gr=g.createRadialGradient(64,64,0,64,64,64);
+  gr.addColorStop(0,'rgba(255,248,220,1)');gr.addColorStop(0.25,'rgba(255,232,170,0.75)');
+  gr.addColorStop(0.55,'rgba(255,210,120,0.28)');gr.addColorStop(1,'rgba(255,200,110,0)');
+  g.fillStyle=gr;g.beginPath();g.arc(64,64,64,0,7);g.fill();
+  GLOW_TEX=new THREE.CanvasTexture(c);return GLOW_TEX;
+}
+let firing=false,fireT=0,phase='ready',speed=0.5,impactFlash=null,impacted=false,dragMoved=false;
+// ---- SALVO (multi-shot campaign): fire N shots, RECHARGING the pulse buffer between each. Recharge time is
+//      tied to electricity per Paper II §8 (VERIFIED): a 428.571 GJ pulse ÷ 10 MW net charging ≈ 11.9 h ideal
+//      (longer in practice; conservative thermal cadence ≈ 1 shot/day). Sped-up here; the READOUT states the
+//      real figures. Cumulative deflection (Δv per shot from deflection()) grows across the salvo. ----
+const PULSE_GJ=428.571, NET_MW=10;                 // Paper II §8 (VERIFIED): pulse energy vs net charging power
+const RECHARGE_H=PULSE_GJ/(NET_MW*3.6);            // 428.571 / 36 = 11.9 h ideal (10 MW = 36 GJ per hour)
+const SALVO_TOTAL_DEFAULT=4, SALVO_RECHARGE_DUR=2.6, SALVO_NUDGE_U=26; // demo secs/recharge (sped-up) + per-shot off-track nudge (units, EXAGGERATED for visibility — readout says so)
+let salvoActive=false,salvoTotal=SALVO_TOTAL_DEFAULT,salvoShot=0,salvoLanded=0,salvoCumDv=0,salvoDone=false;
+let recharging=false,rechargeT=0;
+let asteroidHome=null,cineFocus=new THREE.Vector3(120,18,-160),cineZoom=110;
+let asteroidVel=new THREE.Vector3(),asteroidTravel=0;const DRIFT_UPS=3.0; // Earth-bound drift in units/SIM-second — NEVER pauses (real bodies don't stop for a launch); shots correct with exact linear lead
+let forceGroup=null,boreForceGroup=null,showForces=false,accelArrow=null,vecArrow=null,coilArrows=[];
+// ---- geomagnetic attitude control (companion "Geomagnetic Attitude Control" paper): a commanded magnetic
+//      dipole m (magnetorquer loop) reacts against Earth's field B to make torque τ = m×B — propellantless,
+//      SLOW (hours–days) and UNDER-ACTUATED (τ⊥B; the component ∥ B is identically zero). Illustrative. ----
+let torquerLoop=null,bArrow=null,mArrow=null,tauGroup=null,tauCurve=null,tauHead=null;
+const B_DIR=new THREE.Vector3(0.82,0.34,0.46).normalize();   // external geomagnetic field (fixed/inertial)
+const M_LOCAL=new THREE.Vector3(0,1,0);                       // commanded dipole = magnetorquer loop normal (structure-local)
+let autoAim=true; // geomagnetic auto-aim (default ON): slowly slew the bore onto the asteroid; Hold freezes it
+let tracer=null,ghostLine=null,approachLine=null,deflectLine=null,interceptMark=null;
+// ---- SHOT PLAN: frozen at beginShot() from the REAL bore. If the bore is >±1.5° off the target (auto-aim
+//      held while the body drifts) the shot genuinely MISSES — it flies straight past; no impact, no Δv. ----
+let shotPlan=null;
+// ---- TRACKED FRAGMENTS after break-up: real targetable bodies (not cosmetic FX). Remaining salvo shots
+//      retarget the largest surviving fragment. ----
+let frags=[],bodyBroken=false;
+// ---- TWO-STAGE DISRUPTION: the strike that meets the criterion leaves the body CRITICALLY FRACTURED
+//      (whole, glowing cracks, "about to break"); the NEXT landed strike disperses it. ----
+let bodyFractured=false;
+let surfFract=null; // persisted fault/plate state so the surface DISPERSE run continues from the fracture state
+// ---- salvo deflection visuals: the ORIGINAL Earth-bound track stays anchored where the salvo began, a grey
+//      ghost (the un-deflected twin) DRIFTS along it, a gold tether shows the growing pure-deflection gap. ----
+let salvoOrigin=null,origTrackLine=null,ghostMark=null,tetherLine=null,offTrackU=0;
+let ghostPos=new THREE.Vector3();            // where the body WOULD be with no shots (drifts down the original track)
+let nudgeDirV=null,nudgePrev=0;              // incremental recharge-phase nudge (adds ON TOP of the ongoing drift)
+let salvoEnded=false;                        // a salvo finished (soft stop): keep tally + tracks until ↺ Reset
+let scars=[];                                // persistent craters/hot rims — damage ACCUMULATES until ↺ Reset
+// ---- TARGET CAM: picture-in-picture inset tracking the current target ----
+let tgtCam=null,insetOn=true;const INSET={w:264,h:176,pad:12,top:70},INSET_BIG={w:420,h:264};
+let camView='orbit';                 // 'orbit' close-up | 'surface' parallel ground-level simulation
+// ---- SURFACE VIEW state (parallel scene; built lazily) ----
+let surfScene=null,surfCam=null,surfTerrain=null,surfBase=null,surfRun=null,surfSmokes=[],surfShock=null,surfDome=null,surfGlass=null,surfStreak=null,surfEjecta=null,surfRod=null;
+let surfSlabs=[],surfFiss=[]; // module-level so ↺ Reset can ALWAYS clean them (they leaked when surfRun was nulled first)
+let surfOX=null,surfOZ=null;  // original terrain x/z (fault plates displace vertices horizontally too)
+// ---- actual-path trail (shows the asteroid's course visibly BENDING off the original track) ----
+let pathTrail=null,trailPts=[],trailTick=0;
+let landedHits=0;                    // landed main-body strikes — drives cumulative damage + fatigue fracture
+// current engagement target: the asteroid until it breaks up, then the largest surviving fragment
+function currentTarget(){
+  if(!bodyBroken)return (asteroid&&asteroid.visible)?{obj:asteroid,r:7*asteroid.scale.x}:null;
+  let best=null;frags.forEach(f=>{if(!best||f.r>best.r)best=f;});
+  return best?{obj:best.mesh,r:best.r,frag:best}:null;
+}
+const cv=document.getElementById('scene');
+const THREE_OK=!!window.THREE;
+const LEN=22, RB=0.95; // schematic bore length & radius (units)
+const BORE_LOCAL=new THREE.Vector3(1,0,0), MUZZLE_LOCAL=new THREE.Vector3(LEN/2+0.6,0,0); // bore axis + muzzle (structure-local)
+
+// ---- flight / impact geometry (shared by the camera + the steering-cone visual) ----
+const IMPACT_PT_DIR=new THREE.Vector3(-1,0.06,0.06).normalize(); // muzzle-facing surface impact point (matches triggerImpact)
+const CONE_DEG=1.5;              // vector-control EXIT-STEERING authority: ± degrees off the bore/aim axis
+// cinematic follow tunables (retuned for the far, off-axis target)
+const CAM_CHASE_DIR=new THREE.Vector3(-0.26,0.34,0.9);   // chase offset while tracking the flying projectile
+const CAM_IMPACT_DIR=new THREE.Vector3(-0.62,0.34,0.72); // 3/4 view of the impact face for the surface hit
+const CAM_REVEAL_DIR=new THREE.Vector3(-0.4,0.46,0.86);  // pulled-back aftermath view
+const Z_CHASE=42, Z_IMPACT=30, Z_REVEAL=108;             // follow distances (projectile visible en route; impact fills a sensible fraction)
+let cineDir=new THREE.Vector3(-0.26,0.34,0.9);           // per-phase camera offset direction (set by stepFire)
+let coneGroup=null,coneSurface=null,coneRing=null,coneEdges=[]; // ±1.5° reachable-cone visual (Show forces)
+function smoothstep(a,b,x){x=Math.max(0,Math.min(1,(x-a)/(b-a)));return x*x*(3-2*x);}
+// clamp a target point so (pt-apex) never lies more than degMax off the axis (the exit-steering cone)
+function clampToCone(apex,axis,pt,degMax){const v=pt.clone().sub(apex);const along=v.dot(axis);if(along<=0)return pt.clone();
+  const axialPt=axis.clone().multiplyScalar(along),perp=v.clone().sub(axialPt),pl=perp.length(),maxP=along*Math.tan(degMax*Math.PI/180);
+  if(pl<=maxP||pl<1e-9)return pt.clone();return apex.clone().add(axialPt).add(perp.multiplyScalar(maxP/pl));}
+
+function mat(color,opts){return new THREE.MeshPhongMaterial(Object.assign({color,shininess:42,specular:0x2a3547},opts||{}));}
+function metal(color,opts){return new THREE.MeshPhongMaterial(Object.assign({color,shininess:72,specular:0x59657a},opts||{}));}
+function label(m,id,name,role,read){m.userData={pick:id,name,role,read};return m;}
+
+// ---- 32-gon prism geometry for the core ----
+function gonPrism(radius,height,faces){return new THREE.CylinderGeometry(radius,radius,height,faces);}
+
+function buildBoreProjectile(scale){
+  // ACCURATE proportion: large thin collar (spans most of the bore) + small 32-gon core at centre.
+  // The family swaps core MATERIAL/density, not scale: heavier members render at broadly the SAME size in a
+  // progressively darker, denser metal (diamond gold-crystal → steel grey → tungsten gunmetal). Diamond's
+  // fixed density caps the diamond core at the 0.150 kg Paper I reference — a 30 kg "bigger diamond" is not a thing.
+  const g=new THREE.Group();const S=scale,F=FAMILY[famIdx];
+  const collarR=0.82*RB, coreR=0.081*RB*(1+0.16*Math.min(2,Math.log10(F.kg/0.3+1))); // near-constant size across the family
+  // collar: large thin disc/membrane with 32 sector lines
+  const collar=new THREE.Mesh(new THREE.CylinderGeometry(collarR,collarR,0.10*S,32),mat(0x43b3a6,{transparent:true,opacity:0.5,emissive:0x0c2a26,emissiveIntensity:0.5,side:THREE.DoubleSide}));
+  collar.rotation.z=Math.PI/2;label(collar,'collar','Coupling collar (0.505 m)',PARTS[3].role,'0.505 m Ø · 0.090 kg');g.add(collar);
+  const rim=new THREE.Mesh(new THREE.TorusGeometry(collarR,0.05*S,10,32),mat(0x2f8f78,{emissive:0x0c2a26,emissiveIntensity:0.6}));rim.rotation.y=Math.PI/2;g.add(rim);
+  // small 32-gon core at centre — material colour/finish per family member
+  const coreLen=1.0*S*(0.85+0.1*Math.min(2,Math.log10(F.kg/0.3+1)));
+  const isDiamond=famIdx===0;
+  const core=new THREE.Mesh(gonPrism(coreR,coreLen,32),
+    isDiamond?mat(F.col,{shininess:90,specular:0x5a4a1a}):metal(F.col,{shininess:96,specular:0x7d8798}));
+  core.rotation.z=Math.PI/2;
+  label(core,'core','Core mass (32-gon)',PARTS[2].role+' THIS member: '+F.mat+' — the family varies core material/density at broadly fixed geometry (illustrative; the papers fix mass & velocity).', '32-gon · '+F.matShort+' · '+F.kg+' kg');g.add(core);
+  // guidance nose
+  const nose=new THREE.Mesh(new THREE.ConeGeometry(coreR*1.05,0.7*S,32),mat(0x5ac8fa));nose.rotation.z=-Math.PI/2;nose.position.x=coreLen/2+0.3*S;label(nose,'guidance','Guidance & telemetry',PARTS[0].role,'graded BDD surface');g.add(nose);
+  // release tail
+  const tail=new THREE.Mesh(new THREE.CylinderGeometry(coreR*0.9,coreR*0.7,0.4*S,20),mat(0xe2683c));tail.rotation.z=Math.PI/2;tail.position.x=-coreLen/2-0.2*S;label(tail,'release','Release interface',PARTS[5].role,'clean separation');g.add(tail);
+  return g;
+}
+function buildExplodedProjectile(scale){
+  const g=new THREE.Group();const S=scale;
+  projMeshes={};
+  const coreR=0.26*S,collarR=2.6*S; // collar ~10× core diameter (Paper I §2)
+  const items=[
+    ['guidance','cone',{r:coreR*0.9,h:1.2*S},3.4*S],
+    ['skin','shell',{r:coreR*1.15,h:2.2*S},1.7*S],
+    ['core','gon',{r:coreR,h:2.0*S},1.4*S],
+    ['collar','disc',{r:collarR,h:0.16*S},0.2*S],
+    ['spreader','disc',{r:coreR*1.5,h:0.16*S},-0.7*S],
+    ['release','cyl',{r:coreR*0.9,h:0.5*S},-1.7*S],
+    ['other','dots',{r:coreR*0.7},0.0],
+  ];
+  items.forEach(([id,kind,dim,xExp])=>{
+    const p=PARTS.find(x=>x.id===id);let m;
+    if(kind==='cone')m=new THREE.Mesh(new THREE.ConeGeometry(dim.r,dim.h,32),mat(p.color));
+    else if(kind==='shell')m=new THREE.Mesh(new THREE.CylinderGeometry(dim.r,dim.r,dim.h,32,1,true),mat(p.color,{transparent:true,opacity:0.28,side:THREE.DoubleSide}));
+    else if(kind==='gon')m=new THREE.Mesh(gonPrism(dim.r,dim.h,32),mat(p.color,{shininess:90,specular:0x5a4a1a}));
+    else if(kind==='disc')m=new THREE.Mesh(new THREE.CylinderGeometry(dim.r,dim.r,dim.h,id==='collar'?32:24),mat(p.color,id==='collar'?{transparent:true,opacity:0.55,emissive:0x0c2a26,emissiveIntensity:0.5,side:THREE.DoubleSide}:{}));
+    else if(kind==='cyl')m=new THREE.Mesh(new THREE.CylinderGeometry(dim.r,dim.r,dim.h,24),mat(p.color));
+    else{m=new THREE.Group();for(let i=0;i<6;i++){const d=new THREE.Mesh(new THREE.SphereGeometry(0.09*S,8,8),mat(p.color));const a=i/6*Math.PI*2;d.position.set(0,Math.cos(a)*0.6*S,Math.sin(a)*0.6*S);m.add(d);}}
+    m.rotation.z=(kind==='cone')?-Math.PI/2:Math.PI/2;
+    m.userData={pick:id,name:p.name,role:p.role,expX:xExp};
+    if(id==='collar'){const rim=new THREE.Mesh(new THREE.TorusGeometry(dim.r,0.06*S,10,32),mat(0x2f8f78,{emissive:0x0c2a26,emissiveIntensity:0.6}));rim.rotation.y=Math.PI/2;rim.position.x=xExp;g.add(rim);}
+    projMeshes[id]=m;g.add(m);
+  });
+  applyExploded(g,1);
+  return g;
+}
+function applyExploded(g,f){PARTS.forEach(p=>{const m=projMeshes[p.id];if(m&&m.parent===g)m.position.x=(m.userData.expX||0)*f;});}
+
+function buildSystem(){
+  const g=new THREE.Group();
+  // ---- REAL surface textures (ambientCG CC0, bundled): PV cell grid for the solar wings, riveted metal
+  //      plates for casings/banks, brushed metal for fins — so the hardware reads as hardware. ----
+  const ST=window.STRUCT_TEX||{},ldT=new THREE.TextureLoader();
+  const texRep=(src,rx,ry)=>{if(!src)return null;const t=ldT.load(src);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rx,ry);return t;};
+  const TX_SOLAR=texRep(ST.solar,1,1),TX_PLATE=texRep(ST.plates,1.6,1),TX_METAL=texRep(ST.metal,2,1);
+  // shared unit box for all lattice struts (scaled per strut → one geometry for the whole truss)
+  const UNIT_BOX=new THREE.BoxGeometry(1,1,1),_xax=new THREE.Vector3(1,0,0);
+  const strut=(a,b,thick,material)=>{const d=b.clone().sub(a),len=d.length();const m=new THREE.Mesh(UNIT_BOX,material);
+    m.scale.set(len||0.001,thick,thick);m.position.copy(a).add(b).multiplyScalar(0.5);
+    if(len>1e-6)m.quaternion.setFromUnitVectors(_xax,d.clone().normalize());return m;};
+  // ---- shared structural materials (reused across many meshes for performance) ----
+  const matLong=metal(0x435066),matBrace=metal(0x2f3d54),matRail=metal(0x4a5c73);
+  const matModA=metal(0x46596f),matModB=metal(0x3b4d63),matChamfer=metal(0x5b7188),matFrame=metal(0x3a4a60);
+
+  // ---- structural truss backbone: a triangulated lattice (3 longerons + transverse triangle frames +
+  //      zig-zag diagonals) — gives the spine real mechanical mass, ties the barrel rails + module shelves ----
+  const truss=new THREE.Group();
+  const yT=-RB-0.35,yB=-RB-1.05,zL=-0.36,zR=0.36,x0=-LEN/2-0.6,x1=LEN/2+0.6;
+  [[yT,zL],[yT,zR],[yB,0]].forEach(([yy,zz])=>truss.add(strut(new THREE.Vector3(x0,yy,zz),new THREE.Vector3(x1,yy,zz),0.11,matLong)));
+  const nF=12,seg=(x1-x0)/nF;
+  for(let i=0;i<=nF;i++){const x=x0+i*seg;
+    const TL=new THREE.Vector3(x,yT,zL),TR=new THREE.Vector3(x,yT,zR),BC=new THREE.Vector3(x,yB,0);
+    truss.add(strut(TL,TR,0.05,matBrace));truss.add(strut(TL,BC,0.05,matBrace));truss.add(strut(TR,BC,0.05,matBrace));
+    if(i<nF){const xn=x+seg,dir=(i%2)?1:-1;
+      truss.add(strut(new THREE.Vector3(x,yT,dir>0?zL:zR),new THREE.Vector3(xn,yB,0),0.045,matBrace));
+      truss.add(strut(new THREE.Vector3(x,yB,0),new THREE.Vector3(xn,yT,dir>0?zR:zL),0.045,matBrace));}
+  }
+  label(truss,'truss','Structural truss & arms',SUBSYS.find(s=>s.id==='truss').role,'7,000 m fixed backbone');g.add(truss);
+
+  // ---- driver: a SEGMENTED electromagnetic linear accelerator — discrete octagonal drive-module casings
+  //      (~24 stations) with visible bore gaps, external truss rails + ring frames, and recessed emissive
+  //      coils in the exposed gaps that carry the travelling wave (cellRings). NOT a corrugated hose. ----
+  cellRings=[];const NST=24,gap=(LEN-1.8)/(NST-1);
+  const driver=new THREE.Group();
+  const bore=new THREE.Mesh(new THREE.CylinderGeometry(RB*0.46,RB*0.46,LEN-0.2,24),mat(0x141d2b,{shininess:70,specular:0x33465e}));
+  bore.rotation.z=Math.PI/2;driver.add(bore);
+  // shared geometries for the repeated drive modules — riveted-plate skins so the drums read as machined casings
+  if(TX_PLATE){matModA.map=texRep(ST.plates,1,1);matModA.color.setHex(0x8e9cae);matModA.needsUpdate=true;
+    matModB.map=texRep(ST.plates,1,1);matModB.color.setHex(0x76869a);matModB.needsUpdate=true;}
+  const casingGeo=new THREE.CylinderGeometry(RB*0.84,RB*0.84,gap*0.55,8);  // 8-sided drive-module drum (~45% bore gap)
+  const chamferGeo=new THREE.TorusGeometry(RB*0.9,0.03,8,16);              // end chamfer rings
+  const coilGeo=new THREE.TorusGeometry(RB*0.74,0.05,8,20);                // recessed emissive coil (sits in the gap)
+  for(let i=0;i<NST;i++){
+    const x=-LEN/2+0.9+i*gap;
+    const casing=new THREE.Mesh(casingGeo,i%2?matModA:matModB);casing.rotation.z=Math.PI/2;casing.position.x=x;driver.add(casing);
+    const c1=new THREE.Mesh(chamferGeo,matChamfer);c1.rotation.y=Math.PI/2;c1.position.x=x-gap*0.28;driver.add(c1);
+    const c2=new THREE.Mesh(chamferGeo,matChamfer);c2.rotation.y=Math.PI/2;c2.position.x=x+gap*0.28;driver.add(c2);
+    // recessed emissive coil sitting in the exposed bore gap ahead of the casing (lights in the wave)
+    const coil=new THREE.Mesh(coilGeo,new THREE.MeshPhongMaterial({color:0x2c5480,emissive:0x0a1e33,emissiveIntensity:0.3,shininess:60,specular:0x24405e}));
+    coil.rotation.y=Math.PI/2;coil.position.x=x+gap*0.5;driver.add(coil);cellRings.push(coil);
+  }
+  // external longitudinal truss rails on the upper barrel (30°/90°/150°) + periodic ring frames tying them
+  const railGeo=new THREE.BoxGeometry(LEN-0.4,0.06,0.06);
+  [30,90,150].forEach(deg=>{const a=deg*Math.PI/180;const rl=new THREE.Mesh(railGeo,matRail);rl.position.set(0,Math.sin(a)*RB*1.05,Math.cos(a)*RB*1.05);driver.add(rl);});
+  const ringFrameGeo=new THREE.TorusGeometry(RB*1.05,0.04,6,22);
+  for(let i=0;i<NST;i+=4){const rf=new THREE.Mesh(ringFrameGeo,matRail);rf.rotation.y=Math.PI/2;rf.position.x=-LEN/2+0.9+i*gap;driver.add(rf);}
+  // power conduits running the length
+  [0.62,-0.62].forEach(sz=>{const c=new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,LEN-1.2,8),matFrame);c.rotation.z=Math.PI/2;c.position.set(0,-RB*0.72,sz);driver.add(c);});
+  label(driver,'driver','Driver — 1,000 × 7 m cells',SUBSYS.find(s=>s.id==='driver').role,'1,000 × 7 m · 150 MJ/cell');g.add(driver);
+
+  // ---- injector / breech: a large injector throat ring + stepped breech housing + feed conduits ----
+  const breech=new THREE.Group();const bx0=-LEN/2+0.1;
+  const stepMat=metal(0x46587a);
+  [[RB+0.7,0.6,bx0-0.3],[RB+0.46,0.55,bx0-0.78],[RB+0.26,0.5,bx0-1.2]].forEach(([r,l,xx])=>{
+    const c=new THREE.Mesh(new THREE.CylinderGeometry(r,r,l,26),stepMat);c.rotation.z=Math.PI/2;c.position.x=xx;breech.add(c);});
+  const throat=new THREE.Mesh(new THREE.TorusGeometry(RB+0.85,0.28,16,40),metal(0x5b6e8c));throat.rotation.y=Math.PI/2;throat.position.x=bx0+0.14;breech.add(throat);
+  const aper=new THREE.Mesh(new THREE.TorusGeometry(RB+0.5,0.07,10,32),mat(0x1c4a78,{emissive:0x123a5a,emissiveIntensity:0.6}));aper.rotation.y=Math.PI/2;aper.position.x=bx0+0.16;breech.add(aper);
+  const feedMat=metal(0x3a4a60);
+  for(let k=0;k<6;k++){const a=k/6*Math.PI*2;const cd=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,1.5,8),feedMat);cd.rotation.z=Math.PI/2;cd.position.set(bx0-0.6,Math.sin(a)*(RB+0.5),Math.cos(a)*(RB+0.5));breech.add(cd);}
+  label(breech,'breech','Injector / breech',SUBSYS.find(s=>s.id==='breech').role,'low-speed injection');g.add(breech);
+
+  // muzzle
+  const muzzle=new THREE.Mesh(new THREE.CylinderGeometry(RB+0.22,RB+0.4,0.9,28),metal(0x5b6e8c));muzzle.rotation.z=Math.PI/2;muzzle.position.x=LEN/2-0.1;g.add(muzzle);
+  // vector-control gimbal
+  vectorRing=new THREE.Group();
+  const vr=new THREE.Mesh(new THREE.TorusGeometry(RB+0.55,0.09,12,36),mat(0x43c59e,{emissive:0x0c3a30,emissiveIntensity:0.6}));vr.rotation.y=Math.PI/2;vectorRing.add(vr);
+  const vr2=new THREE.Mesh(new THREE.TorusGeometry(RB+0.34,0.06,10,30),mat(0x2f8f78,{emissive:0x0c3a30,emissiveIntensity:0.5}));vr2.rotation.y=Math.PI/2;vectorRing.add(vr2);
+  vectorRing.position.x=LEN/2+0.6;label(vectorRing,'vector','Magnetic vector control',SUBSYS.find(s=>s.id==='vector').role,'release-vector trim');g.add(vectorRing);
+
+  // ---- geomagnetic attitude control: a large conductive MAGNETORQUER loop (multi-turn copper rectangle
+  //      spanning the barrel/truss). Its normal is the commanded magnetic dipole m; against Earth's field B
+  //      it makes torque τ = m×B to SLOWLY, propellantlessly slew the WHOLE apparatus (under-actuated: τ⊥B).
+  //      Illustrative — the companion paper screens ~10⁷ A·m² distributed loops. Clickable id 'attitude'. ----
+  torquerLoop=new THREE.Group();
+  const torqMat=new THREE.MeshPhongMaterial({color:0xc47a34,emissive:0x3a1e08,emissiveIntensity:0.4,shininess:80,specular:0x6a4a2a});
+  const standoffMat=metal(0x50607a);
+  const Lx=LEN/2+1.0,Lz=2.5,wireR=0.085,nTurn=3,turnGap=0.18,_yA=new THREE.Vector3(0,1,0);
+  const wseg=(a,b,material)=>{const d=b.clone().sub(a),len=d.length();const m=new THREE.Mesh(new THREE.CylinderGeometry(wireR,wireR,len||0.001,10),material);
+    m.position.copy(a).add(b).multiplyScalar(0.5);if(len>1e-6)m.quaternion.setFromUnitVectors(_yA,d.clone().normalize());return m;};
+  for(let t=0;t<nTurn;t++){const yy=(t-(nTurn-1)/2)*turnGap;
+    const cn=[new THREE.Vector3(-Lx,yy,-Lz),new THREE.Vector3(Lx,yy,-Lz),new THREE.Vector3(Lx,yy,Lz),new THREE.Vector3(-Lx,yy,Lz)];
+    for(let k=0;k<4;k++){torquerLoop.add(wseg(cn[k],cn[(k+1)%4],torqMat));
+      const j=new THREE.Mesh(new THREE.SphereGeometry(wireR*1.3,8,8),torqMat);j.position.copy(cn[k]);torquerLoop.add(j);}
+  }
+  // current feed / junction box on one short side + radial standoffs tying the loop to the barrel
+  const feed=new THREE.Mesh(new THREE.BoxGeometry(0.55,0.5,0.6),metal(0x7a5326));feed.position.set(-Lx,0,0);torquerLoop.add(feed);
+  [-Lz,Lz].forEach(sz=>[-Lx*0.55,0,Lx*0.55].forEach(sx=>torquerLoop.add(wseg(new THREE.Vector3(sx,0,sz),new THREE.Vector3(sx,0,Math.sign(sz)*RB*0.95),standoffMat))));
+  label(torquerLoop,'attitude','Geomagnetic attitude control',SUBSYS.find(s=>s.id==='attitude').role,'magnetorquer dipole m · τ = m×B · slow · under-actuated');g.add(torquerLoop);
+
+  // ---- solar arrays: gridded multi-panel wings (3×2 sub-panels) on a gimballed yoke + boom; each wing is
+  //      tilted to face the sun (sun-tracking) so the grid reads as PV, not an edge-on board ----
+  const solar=new THREE.Group();
+  const pvMat=TX_SOLAR
+    ?new THREE.MeshPhongMaterial({map:TX_SOLAR,color:0xdfe8f5,emissive:0x0a1f3d,emissiveIntensity:0.22,shininess:96,specular:0x4a86c8})
+    :new THREE.MeshPhongMaterial({color:0x14335e,emissive:0x0a1f3d,emissiveIntensity:0.45,shininess:96,specular:0x4a86c8});
+  const pvGeo=new THREE.BoxGeometry(1.7,0.04,1.15),backGeo=new THREE.BoxGeometry(5.5,0.04,2.6),solFrameMat=metal(0x33465e);
+  const hubX=-LEN*0.34;
+  [1,-1].forEach(sy=>{
+    const yoke=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.22,0.6,14),metal(0x556070));yoke.position.set(hubX,sy*1.0,0);solar.add(yoke);
+    const boom=new THREE.Mesh(new THREE.BoxGeometry(0.14,2.6,0.14),metal(0x51617d));boom.position.set(hubX,sy*2.5,0);solar.add(boom);
+    const wing=new THREE.Group();
+    wing.add(new THREE.Mesh(backGeo,solFrameMat));
+    for(let cxi=-1;cxi<=1;cxi++)for(let rzi=-1;rzi<=1;rzi+=2){const p=new THREE.Mesh(pvGeo,pvMat);p.position.set(cxi*1.78,0.045,rzi*0.615);wing.add(p);}
+    [-1.19,1.19].forEach(z=>{const sp=new THREE.Mesh(new THREE.BoxGeometry(5.5,0.05,0.05),solFrameMat);sp.position.set(0,0.06,z);wing.add(sp);});
+    [-1.78,0,1.78].forEach(cx=>{const sp=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.06,2.5),solFrameMat);sp.position.set(cx,0.06,0);wing.add(sp);});
+    wing.position.set(hubX,sy*4.15,0);wing.rotation.set(1.28,-0.42,0);solar.add(wing); // tilt broad face toward sun/viewer
+  });
+  label(solar,'solar','Solar generation array',SUBSYS.find(s=>s.id==='solar').role,'renewable recharge');g.add(solar);
+
+  // ---- pulse-energy buffer: capacitor bank mounted on a hung truss shelf (kept gold) ----
+  const buffer=new THREE.Group();
+  // capacitor drums: riveted-metal texture with a warm band so they read as pulse capacitors, not gold pills
+  const capGeo=new THREE.CylinderGeometry(0.34,0.34,1.1,16),
+        capMat=TX_PLATE?new THREE.MeshPhongMaterial({map:TX_PLATE,color:0xd9c184,emissive:0x3a2e08,emissiveIntensity:0.22,shininess:60,specular:0x59657a})
+                       :mat(0xcaa23e,{emissive:0x3a2e08,emissiveIntensity:0.35}),
+        capBandMat=mat(0x2b2317,{emissive:0xcaa23e,emissiveIntensity:0.35});
+  const shelf=new THREE.Mesh(new THREE.BoxGeometry(4.0,0.12,2.4),TX_PLATE?new THREE.MeshPhongMaterial({map:TX_PLATE,color:0x9aa6b8,shininess:50,specular:0x59657a}):metal(0x3a4152));shelf.position.set(-1.1,-RB-1.4,0);buffer.add(shelf);
+  [-2.9,0.7].forEach(xx=>{const hang=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.9,0.08),matBrace);hang.position.set(xx,-RB-0.98,0);buffer.add(hang);});
+  for(let i=0;i<6;i++){const cap=new THREE.Mesh(capGeo,capMat);cap.position.set(-2.6+(i%3)*1.0,-RB-2.05,-0.7+Math.floor(i/3)*1.4);buffer.add(cap);
+    const band=new THREE.Mesh(new THREE.CylinderGeometry(0.355,0.355,0.14,16),capBandMat);band.position.copy(cap.position);band.position.y+=0.30;buffer.add(band);}
+  const bxb=new THREE.Mesh(new THREE.BoxGeometry(3.7,0.2,2.5),TX_PLATE?new THREE.MeshPhongMaterial({map:TX_PLATE,color:0xb0a37c,shininess:40}):mat(0x3a3320));bxb.position.set(-1.6,-RB-2.7,0);buffer.add(bxb);
+  [-1,1].forEach(s=>{const cd=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,1.2,8),metal(0x2a3547));cd.rotation.x=Math.PI/2;cd.position.set(-1.6+s*1.3,-RB-1.6,1.0);buffer.add(cd);});
+  label(buffer,'buffer','Pulse-energy buffer',SUBSYS.find(s=>s.id==='buffer').role,'428.571 GJ admitted · ~14 ms');g.add(buffer);
+
+  // ---- power converters: modules mounted on a shelf, lightly greebled (kept purple) ----
+  const conv=new THREE.Group();
+  const convGeo=new THREE.BoxGeometry(0.8,0.8,0.8),
+        convMat=TX_PLATE?new THREE.MeshPhongMaterial({map:TX_PLATE,color:0xb39fe0,emissive:0x1b1330,emissiveIntensity:0.22,shininess:50,specular:0x59657a})
+                        :mat(0x8f76c9,{emissive:0x1b1330,emissiveIntensity:0.35});
+  const shelfC=new THREE.Mesh(new THREE.BoxGeometry(3.6,0.12,1.4),metal(0x3a4152));shelfC.position.set(3.0,-RB-1.25,0.4);conv.add(shelfC);
+  for(let i=0;i<3;i++){const m=new THREE.Mesh(convGeo,convMat);m.position.set(2.0+i*1.0,-RB-1.7,0.4);conv.add(m);
+    const top=new THREE.Mesh(new THREE.BoxGeometry(0.7,0.1,0.7),mat(0x6f5aa0));top.position.set(2.0+i*1.0,-RB-1.2,0.4);conv.add(top);}
+  label(conv,'converter','Power converters',SUBSYS.find(s=>s.id==='converter').role,'pulse-forming network');g.add(conv);
+
+  // ---- radiators: pale-grey finned banks (parallel fins on a standoff spar, edge-on + splayed) ----
+  const rad=new THREE.Group();
+  const radMat=TX_METAL?new THREE.MeshPhongMaterial({map:TX_METAL,color:0xd3d8e0,emissive:0x1a0f0c,emissiveIntensity:0.10,shininess:26,specular:0x6a7280})
+                       :new THREE.MeshPhongMaterial({color:0xb9bec7,emissive:0x1a0f0c,emissiveIntensity:0.12,shininess:12});
+  const finGeo=new THREE.BoxGeometry(4.2,0.05,1.5),ridgeGeo=new THREE.BoxGeometry(4.24,0.06,0.03),ridgeMat=mat(0x8a9098,{shininess:20});
+  const radSparGeo=new THREE.BoxGeometry(0.12,1.1,0.12),radSparMat=metal(0x6a7280);
+  [1,-1].forEach(sy=>{
+    const spar=new THREE.Mesh(radSparGeo,radSparMat);spar.position.set(LEN*0.24,sy*1.3,0);spar.rotation.z=sy*0.42;rad.add(spar);
+    for(let f=0;f<4;f++){const fg=new THREE.Group();
+      fg.add(new THREE.Mesh(finGeo,radMat));
+      const ridge=new THREE.Mesh(ridgeGeo,ridgeMat);ridge.position.y=0.05;fg.add(ridge);
+      fg.position.set(LEN*0.24,sy*2.05,-0.9+f*0.6);fg.rotation.z=sy*0.45;rad.add(fg);}
+  });
+  label(rad,'radiator','Radiators',SUBSYS.find(s=>s.id==='radiator').role,'waste-heat rejection');g.add(rad);
+
+  // projectile in the bore at the breech
+  boreProjectile=buildBoreProjectile(1.0);boreProjectile.position.x=-LEN/2+0.9;g.add(boreProjectile);
+  return g;
+}
+
+function buildAsteroid(){
+  // deformed sphere (proper UVs for the rock texture) with irregular silhouette
+  const geo=new THREE.SphereGeometry(7,48,36),p=geo.attributes.position;
+  for(let i=0;i<p.count;i++){const v=new THREE.Vector3().fromBufferAttribute(p,i);
+    const n=0.9+0.075*Math.sin(v.x*0.8)*Math.cos(v.y*1.0)+0.055*Math.sin(v.z*1.3+1)+0.045*Math.cos(v.x*1.6+v.y*0.8);
+    v.multiplyScalar(n);p.setXYZ(i,v.x,v.y,v.z);}
+  geo.computeVertexNormals();
+  const B=window.BODY_TEX||{},ld=new THREE.TextureLoader();
+  const m=B.rock
+    ? new THREE.MeshPhongMaterial({map:ld.load(B.rock),bumpMap:ld.load(B.rock),bumpScale:0.5,color:0xa89a86,shininess:3})
+    : new THREE.MeshPhongMaterial({color:0x6b6357,emissive:0x140f0a,emissiveIntensity:0.25,shininess:6,flatShading:true});
+  return new THREE.Mesh(geo,m);
+}
+
+function initThree(){
+  renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:false});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setClearColor(0x04060c,1);
+  scene=new THREE.Scene();
+  camera=new THREE.PerspectiveCamera(46,1,0.1,20000);
+  scene.add(new THREE.AmbientLight(0xffffff,0.42));
+  const sunLight=new THREE.DirectionalLight(0xfff3e0,1.5);sunLight.position.set(120,60,90);scene.add(sunLight);
+  const fill=new THREE.DirectionalLight(0x5a86c0,0.35);fill.position.set(-40,-10,-30);scene.add(fill);
+  // starfield
+  const sg=new THREE.BufferGeometry(),pos=[];for(let i=0;i<2200;i++){const r=4000,u=Math.random()*2-1,th=Math.random()*Math.PI*2,s=Math.sqrt(1-u*u);pos.push(r*s*Math.cos(th),r*s*Math.sin(th),r*u);}
+  sg.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  scene.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0xbcd0ea,size:1.5,sizeAttenuation:false,transparent:true,opacity:0.85})));
+  // Sun (far, bright, textured, with glow)
+  const B=window.BODY_TEX||{},ldb=new THREE.TextureLoader();
+  sun=new THREE.Mesh(new THREE.SphereGeometry(15,40,40),B.sun?new THREE.MeshBasicMaterial({map:ldb.load(B.sun),color:0xfff4e2}):new THREE.MeshBasicMaterial({color:0xfff2cc}));
+  sun.position.set(-780,40,-520);scene.add(sun);
+  // soft radial glow sprite (additive) — restrained, not cartoonish
+  const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTexture(),color:0xfff3d8,transparent:true,opacity:0.5,blending:THREE.AdditiveBlending,depthWrite:false}));
+  glow.scale.set(85,85,1);glow.position.copy(sun.position);scene.add(glow);
+  label(sun,'sun','The Sun','Distant primary — the demonstrator is solar-powered (Paper II solar generation & buffer). Illustrative position and scale.','solar primary');
+  // ---- APPARENT sizes from Earth's vicinity (the honest frame for a scene set in Earth orbit):
+  //      the Moon (~384,000 km away, Ø 3,474 km) LOOKS far larger than Mars (tens of millions of km away,
+  //      Ø 6,779 km). Mars is physically ~2× the Moon but appears as a small red point from here. So the
+  //      Moon is the LARGE grey disc; Mars the small distant red dot. ----
+  moon=new THREE.Mesh(new THREE.SphereGeometry(7.0,40,40),B.rock?new THREE.MeshPhongMaterial({map:ldb.load(B.rock),bumpMap:ldb.load(B.rock),bumpScale:0.22,color:0x8f8b84,shininess:1}):new THREE.MeshPhongMaterial({color:0x8f8b84,shininess:1}));
+  moon.position.set(210,-6,-360);label(moon,'moon','The Moon','The LARGE grey disc — from Earth\'s vicinity the Moon (~384,000 km away) appears far bigger than Mars, which is tens of millions of km distant. (Physically Mars is ~2× the Moon\'s diameter — what you see here is apparent size, the honest view from Earth orbit.) Illustrative position.','nearby body · large apparent disc');scene.add(moon);
+  mars=new THREE.Mesh(new THREE.SphereGeometry(4.5,32,32),B.mars?new THREE.MeshPhongMaterial({map:ldb.load(B.mars),shininess:2,color:0xd2673f}):new THREE.MeshPhongMaterial({color:0xb0492c,shininess:2}));
+  mars.position.set(390,-10,-480);scene.add(mars); // kept clear of the target-cam inset corner in the default view
+  label(mars,'mars','Mars','The small red point — from Earth\'s vicinity Mars appears far smaller than the Moon despite being physically ~2× its diameter (it is tens of millions of km away). Apparent sizes; illustrative. The planetary-defence context is interplanetary; the series specifies no operational orbit.','distant body · small red point');
+  // Earth below (illustrative altitude — series declares none)
+  const T=window.EARTH_TEX||{},ld=new THREE.TextureLoader();
+  const em=new THREE.MeshPhongMaterial({map:T.day?ld.load(T.day):null,bumpMap:T.bump?ld.load(T.bump):null,bumpScale:0.4,specularMap:T.specular?ld.load(T.specular):null,specular:0x2a4a66,shininess:14,color:T.day?0xffffff:0x24507e});
+  // Earth reads as an ENORMOUS planet: the 7,000 m structure vs Earth's 12,742 km diameter is ~1:1,820, so
+  // the ~22-unit structure floats as a tiny thing above a vast curved limb. Radius 280 units, centre pushed
+  // far down/back so the curvature fills the lower frame. (Series declares no operational altitude — none claimed.)
+  earth=new THREE.Mesh(new THREE.SphereGeometry(280,96,96),em);earth.position.set(12,-300,-70);earth.rotation.z=0.34;earth.rotation.y=-0.6;label(earth,'earth','Earth','Home body far below the demonstrator — Earth is ≈1,820× the 7,000 m structure, so it fills the frame as a vast curved limb. The series declares no operational altitude; placement is illustrative. Imagery: NASA Earth Observatory (public domain).','illustrative — no stated altitude');scene.add(earth);
+  const atmo=new THREE.Mesh(new THREE.SphereGeometry(290,64,64),new THREE.MeshBasicMaterial({color:0x5aa9ff,transparent:true,opacity:0.16,side:THREE.BackSide}));atmo.position.copy(earth.position);scene.add(atmo);
+  // demonstration target asteroid — FAR out in deep space, well down-range and away from Earth: the whole
+  // point is to intercept it far out with many shots, not as an extinction-level near-miss. Small distant body.
+  asteroid=buildAsteroid();asteroid.scale.setScalar(TARGETS[targetIdx].vscale);asteroid.position.set(760,88,-1035);asteroidHome=asteroid.position.clone();label(asteroid,'target','Demonstration target',SUBSYS.find(s=>s.id==='target').role,'deep space · '+TARGETS[targetIdx].id+' class · Earth-bound');scene.add(asteroid);
+  asteroidVel.copy(earth.position).sub(asteroid.position).normalize(); // heads slowly toward Earth (12,-300,-70)
+
+  sysRoot=buildSystem();scene.add(sysRoot);
+  projGroup=buildExplodedProjectile(1.4);projGroup.visible=false;scene.add(projGroup);
+  tgtCam=new THREE.PerspectiveCamera(40,INSET.w/INSET.h,0.1,20000); // picture-in-picture target camera
+  buildForces();
+  sysRoot.quaternion.copy(computeAimQ()); // start already aimed at the asteroid; auto-aim keeps tracking as it drifts
+  // visible tiny tracer for the coasting projectile (a 0.5 m speck would be sub-pixel otherwise)
+  tracer=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTexture(),color:0xffe6b0,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));
+  tracer.scale.set(1.2,1.2,1);tracer.visible=false;scene.add(tracer);
+  // ghost 'unsteered' trajectory (straight down the bore axis) — the vector-control steers off it
+  const gp=[new THREE.Vector3(LEN/2+0.6,0,0),new THREE.Vector3(240,0,0)];
+  ghostLine=new THREE.Line(new THREE.BufferGeometry().setFromPoints(gp),new THREE.LineDashedMaterial({color:0x8fa6c6,transparent:true,opacity:0.55,dashSize:1.4,gapSize:1.0}));
+  ghostLine.computeLineDistances();ghostLine.visible=false;scene.add(ghostLine);
+  // Show-forces planetary-defence overlay: the asteroid's Earth-bound projected track (red) and the deflected
+  // track (green, dashed) that splits off at the intercept and misses Earth. Positions refreshed each frame.
+  approachLine=new THREE.ArrowHelper(new THREE.Vector3(0,-1,0),new THREE.Vector3(),150,0xe2683c,15,9);
+  approachLine.visible=false;scene.add(approachLine);
+  deflectLine=new THREE.ArrowHelper(new THREE.Vector3(0,-1,0),new THREE.Vector3(),140,0x43c59e,15,9);
+  deflectLine.visible=false;scene.add(deflectLine);
+  interceptMark=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTexture(),color:0xffcf5a,transparent:true,opacity:0.85,blending:THREE.AdditiveBlending,depthWrite:false}));
+  interceptMark.scale.set(13,13,1);interceptMark.visible=false;scene.add(interceptMark);
+  resize();loop();
+}
+let cine=0, camLook=new THREE.Vector3(0,-1.5,0);
+function loop(){raf=requestAnimationFrame(loop);
+  // cinematic factor ramps up in coast/impact, down otherwise
+  const cineGoal=(firing&&(phase==='coast'||phase==='impact'))?1:0;
+  cine+=(cineGoal-cine)*0.06;
+  const homePos=new THREE.Vector3(dist*Math.cos(pitch)*Math.sin(yaw),dist*Math.sin(pitch),dist*Math.cos(pitch)*Math.cos(yaw));
+  const homeLook=new THREE.Vector3(0,-1.5,0);
+  let tPos=homePos,tLook=homeLook;
+  if(cine>0.01){
+    // cinematic: camera = focus + per-phase offset direction × distance (set each frame by stepFire)
+    const cinePos=cineFocus.clone().add(cineDir.clone().normalize().multiplyScalar(cineZoom));
+    tPos=homePos.clone().lerp(cinePos,cine); tLook=homeLook.clone().lerp(cineFocus,cine);
+  }
+  if(cine>0.01){ camera.position.lerp(tPos,0.10); camLook.lerp(tLook,0.10); }
+  else { camera.position.copy(homePos); camLook.copy(homeLook); }
+  // ---- EARTH-CLIP GUARD: the station floats only ~28u above the 280u Earth sphere, so user orbit (pitch
+  //      down) or cinematic lerps could put the camera INSIDE the planet, visually swallowing the vessel.
+  //      Hard clamp: keep the camera radially outside the atmosphere shell every frame. ----
+  if(earth){const _ec=earth.position,_cd=camera.position.distanceTo(_ec);
+    if(_cd<302)camera.position.sub(_ec).setLength(302).add(_ec);}
+  camera.lookAt(camLook);
+  if(earth)earth.rotation.y+=0.0004;
+  // ---- the asteroid NEVER stops: it tumbles and drifts Earth-ward through launches, salvos and holds
+  //      (sim-time step ∝ speed; the shot plan lead-corrects, so hits still land) ----
+  if(asteroid&&asteroid.visible){
+    asteroid.rotation.x+=0.0016*speed;asteroid.rotation.y+=0.0011*speed;
+    const dstep=DRIFT_UPS*0.016*speed;
+    asteroid.position.addScaledVector(asteroidVel,dstep);asteroidTravel+=dstep;
+    if(salvoActive&&salvoOrigin)ghostPos.addScaledVector(asteroidVel,dstep); // the un-deflected twin drifts down the ORIGINAL track
+    // loop back to keep it far out — but only in the pristine idle scene (never mid-engagement / with damage on the body)
+    if(asteroidTravel>420&&!firing&&!salvoActive&&!recharging&&!salvoEnded&&scars.length===0){asteroid.position.copy(asteroidHome);asteroidTravel=0;}
+  }
+  if(mars)mars.rotation.y+=0.0006;
+  // tracked fragments: rapid initial separation damping to a slow drift; fracture-face glow cools
+  frags.forEach(f=>{f.mesh.position.addScaledVector(f.vel,0.016*speed);f.vel.multiplyScalar(0.988);
+    f.mesh.rotation.x+=f.spin.x;f.mesh.rotation.y+=f.spin.y;f.mesh.rotation.z+=f.spin.z;
+    if(f.mesh.material.emissiveIntensity>0.05)f.mesh.material.emissiveIntensity*=0.99;});
+  if(autoAim&&mode==='system')updateAutoAim(0.02); // geomagnetic auto-aim: the SHIP keeps slewing too — even during a launch (the plan freezes at muzzle exit)
+  if(firing)stepFire();
+  else if(recharging)stepRecharge();
+  animateImpact();
+  stepSurface(); // parallel ground-level simulation advances alongside the orbital scene
+  // actual-path trail: the asteroid's real course, visibly BENDING away from the original track
+  if((salvoActive||salvoEnded)&&asteroid&&asteroid.visible&&!bodyBroken){
+    if(++trailTick%5===0){trailPts.push(asteroid.position.clone());if(trailPts.length>90)trailPts.shift();
+      if(pathTrail&&trailPts.length>1){pathTrail.geometry.setFromPoints(trailPts);pathTrail.visible=true;}}
+  }
+  updateForces();
+  updateGeomag();
+  updateTrajectory();
+  updateSalvoTrack();
+  renderer.setScissorTest(false);renderer.setViewport(0,0,cv.clientWidth,cv.clientHeight||600);
+  renderer.render(scene,camera);
+  renderTargetCam();
+}
+function resize(){if(!renderer)return;const w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+// keep the WebGL buffer glued to the CSS box whatever changes it (compact toggle, window, zoom) —
+// this kills the black-canvas class of bugs at the root
+if(window.ResizeObserver){try{new ResizeObserver(()=>resize()).observe(cv);}catch(e){}}
+// ---- TARGET CAM: picture-in-picture scissor viewport (top-right) tracking the current target so distant
+//      impacts / fragments stay legible with the asteroid genuinely far out. Leak-proof: viewport/scissor
+//      state is restored in FINALLY even on exception; repeated failures self-disable the inset. ----
+// ================= SURFACE VIEW — parallel ground-level impact simulation ==========================
+// A SECOND scene: regolith terrain (NASA/USGS lunar map), per-regime physics staging grounded in
+// hypervelocity-impact phenomenology: at 100–1000 km/s specific energy is 5×10⁹–5×10¹¹ J/kg — far above
+// silicate vaporisation (~10⁷ J/kg); shocked material reaches keV-scale temperatures (millions of K, fully
+// ionised plasma). The LIGHT FAST diamond dart cannot penetrate: energy couples AT the surface — flash dome,
+// ground shock racing outward, silicate+carbon vapour (volatiles, if present, flash to steam), surface waves
+// rippling the regolith, a broad shallow glassy scar. The DENSE tungsten-class rod penetrates: excavation
+// flow opens a deep crater with rim uplift, ejecta curtain, strong momentum-coupled seismic shaking with
+// aftershocks. Smoke/vapour sprites: OpenGameArt CC0. Illustrative — not a hydrocode.
+function buildSurface(){
+  if(surfScene)return;
+  surfScene=new THREE.Scene();
+  surfCam=new THREE.PerspectiveCamera(52,INSET_BIG.w/INSET_BIG.h,0.1,4000);
+  surfCam.position.set(0,4.2,30);surfCam.lookAt(0,1.2,0);
+  surfScene.add(new THREE.AmbientLight(0xffffff,0.5));
+  const dl=new THREE.DirectionalLight(0xfff2dd,1.1);dl.position.set(-60,80,40);surfScene.add(dl);
+  const sg=new THREE.BufferGeometry(),sp=[];
+  for(let i=0;i<420;i++){const a=Math.random()*Math.PI*2,e=Math.random()*0.5+0.06,r=1500;sp.push(r*Math.cos(e)*Math.cos(a),r*Math.sin(e),r*Math.cos(e)*Math.sin(a));}
+  sg.setAttribute('position',new THREE.Float32BufferAttribute(sp,3));
+  surfScene.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0xbcd0ea,size:1.4,sizeAttenuation:false,transparent:true,opacity:0.8})));
+  // regolith terrain — displaced plane; base heights kept so deformation is reversible on Reset
+  const B=window.BODY_TEX||{},ld=new THREE.TextureLoader();
+  const g=new THREE.PlaneGeometry(150,150,104,104);g.rotateX(-Math.PI/2);
+  const p=g.attributes.position;surfBase=new Float32Array(p.count);
+  surfOX=new Float32Array(p.count);surfOZ=new Float32Array(p.count); // original x/z — fault plates displace them; Reset restores
+  for(let i=0;i<p.count;i++){const x=p.getX(i),z=p.getZ(i);
+    const h=0.5*Math.sin(x*0.11)*Math.cos(z*0.13)+0.3*Math.sin(x*0.31+1.7)*Math.sin(z*0.27)+0.12*Math.sin(x*0.83)*Math.cos(z*0.71+0.4);
+    p.setY(i,h);surfBase[i]=h;surfOX[i]=x;surfOZ[i]=z;}
+  g.computeVertexNormals();
+  let tm;
+  if(B.rock){const t=ld.load(B.rock);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(5,5);
+    tm=new THREE.MeshPhongMaterial({map:t,bumpMap:t,bumpScale:0.6,color:0x9a9186,shininess:4});
+    surfTerrain=new THREE.Mesh(g,tm);surfTerrain.userData.rockTex=t;}
+  else{tm=new THREE.MeshPhongMaterial({color:0x77706a,shininess:4});surfTerrain=new THREE.Mesh(g,tm);}
+  surfScene.add(surfTerrain);
+  // glassy melt sheet (diamond outcome)
+  surfGlass=new THREE.Mesh(new THREE.CircleGeometry(1,48),new THREE.MeshPhongMaterial({color:0xcfd8d2,emissive:0xff9040,emissiveIntensity:0.55,shininess:130,specular:0xbbccdd,transparent:true,opacity:0.88}));
+  surfGlass.rotation.x=-Math.PI/2;surfGlass.position.y=0.07;surfGlass.visible=false;surfScene.add(surfGlass);
+  // flash dome (hemisphere), ground shock ring, incoming streak
+  surfDome=new THREE.Mesh(new THREE.SphereGeometry(1,28,18,0,Math.PI*2,0,Math.PI/2),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));
+  surfScene.add(surfDome);
+  surfShock=new THREE.Mesh(new THREE.RingGeometry(0.95,1,64),new THREE.MeshBasicMaterial({color:0xffd9a0,transparent:true,opacity:0,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false}));
+  surfShock.rotation.x=-Math.PI/2;surfShock.position.y=0.12;surfScene.add(surfShock);
+  surfStreak=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.16,60,8,1,true),new THREE.MeshBasicMaterial({color:0xdfefff,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));
+  surfStreak.position.set(2,30,-3);surfStreak.rotation.z=0.16;surfScene.add(surfStreak);
+  // the visible tungsten rod that BURIES itself (penetrator regime only)
+  surfRod=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.16,4.2,10),new THREE.MeshPhongMaterial({color:0x3f4653,shininess:90,specular:0x7d8798}));
+  surfRod.visible=false;surfScene.add(surfRod);
+  // ejecta fountain
+  const eN=520,ep=new Float32Array(eN*3);
+  const eg=new THREE.BufferGeometry();eg.setAttribute('position',new THREE.BufferAttribute(ep,3));
+  surfEjecta={vel:new Float32Array(eN*3),alive:0,
+    pts:new THREE.Points(eg,new THREE.PointsMaterial({color:0xd8c8ac,size:0.7,map:glowTexture(),alphaTest:0.05,transparent:true,opacity:0,depthWrite:false}))};
+  surfScene.add(surfEjecta.pts);
+  // smoke / vapour / steam billboards — CC0 sprites (OpenGameArt), tinted per regime at runtime
+  const S=window.SURFACE_TEX||{};
+  const t1=S.smoke1?ld.load(S.smoke1):null,t2=S.smoke2?ld.load(S.smoke2):null;
+  for(let i=0;i<26;i++){
+    const spm=new THREE.Sprite(new THREE.SpriteMaterial({map:(i%2?t2:t1)||glowTexture(),transparent:true,opacity:0,depthWrite:false}));
+    spm.visible=false;surfScene.add(spm);surfSmokes.push(spm);
+  }
+}
+function surfCaption(txt){const el=document.getElementById('tgtcamCap');if(el){el.style.display=camView==='surface'?'block':'none';el.textContent=txt;}}
+function clearSurfaceExtras(){ // remove disruption debris + fissure glows and RESTORE the terrain — safe to call any time
+  if(!surfScene)return;
+  surfSlabs.forEach(s=>{surfScene.remove(s);if(s.geometry)s.geometry.dispose();});surfSlabs=[];
+  surfFiss.forEach(s=>surfScene.remove(s));surfFiss=[];
+  if(surfTerrain){surfTerrain.visible=true;
+    if(surfTerrain.userData.rockTex){surfTerrain.material.map=surfTerrain.userData.rockTex; // back from cracked to intact regolith
+      surfTerrain.material.bumpMap=surfTerrain.userData.rockTex;
+      surfTerrain.material.color.setHex(0x9a9186);surfTerrain.material.needsUpdate=true;}
+    if(surfOX){const p=surfTerrain.geometry.attributes.position;
+      for(let i=0;i<p.count;i++){p.setX(i,surfOX[i]);p.setY(i,surfBase[i]);p.setZ(i,surfOZ[i]);}
+      p.needsUpdate=true;surfTerrain.geometry.computeVertexNormals();}}
+  if(surfCam){surfCam.position.set(0,4.2,30);surfCam.rotation.set(0,0,0);surfCam.lookAt(0,1.4,0);}
+}
+function startSurfaceRun(mode){ // 'normal' | 'fracture' (stage 1: about to break) | 'disperse' (stage 2: gives way)
+  buildSurface();
+  mode=mode||'normal';
+  const continuing=(mode==='disperse'&&surfFract);              // stage 2 CONTINUES from the fractured state
+  if(!continuing)clearSurfaceExtras();
+  else{surfSlabs.forEach(s=>{surfScene.remove(s);if(s.geometry)s.geometry.dispose();});surfSlabs=[];} // keep terrain state, drop old rocks
+  const fam=FAMILY[famIdx],velN=fam.v/1e6,momN=(fam.kg*fam.v)/3e6;
+  const pen=momN>=0.5;
+  surfRun={t:0,velN,momN,pen,mat:fam.matShort,disrupt:mode!=='normal',final:mode==='disperse',
+    slabbed:false,rocked:false,
+    craterR:pen?(7+8*momN):(4.5+2*velN),depth:pen?(3.4+2.6*momN):0.55,done:false};
+  if(mode==='fracture'||(mode==='disperse'&&!surfFract)){
+    // ---- SEISMIC FAULT MODEL: three fault lines split the ground into plates; each plate slowly TILTS,
+    //      SUBSIDES and DRIFTS apart — the ground splits like a ball of sand, it does not shatter. ----
+    const faults=[];for(let k=0;k<3;k++){const a=k*1.05+Math.random()*0.7;
+      faults.push({nx:-Math.sin(a),nz:Math.cos(a),off:(Math.random()-0.5)*10});}
+    const plates=[];for(let m2=0;m2<8;m2++){const a=Math.random()*6.283;
+      plates.push({dx:Math.cos(a)*(0.35+Math.random()*0.5),dz:Math.sin(a)*(0.35+Math.random()*0.45)-0.15,
+        su:0.30+Math.random()*0.55,gx:(Math.random()-0.5)*0.014,gz:(Math.random()-0.5)*0.014,
+        drop:Math.random()<0.5});                                // half the plates FALL AWAY at dispersal
+    }
+    const p0=surfTerrain.geometry.attributes.position,pid=new Uint8Array(p0.count);
+    for(let i=0;i<p0.count;i++){let id=0;
+      for(let k=0;k<3;k++){if(surfOX[i]*faults[k].nx+surfOZ[i]*faults[k].nz+faults[k].off>0)id|=(1<<k);}
+      pid[i]=id;}
+    surfFract={faults,plates,pid,tfReached:0};
+  }
+  if(surfRun.disrupt&&surfFract){surfRun.faults=surfFract.faults;surfRun.plates=surfFract.plates;surfRun.pid=surfFract.pid;}
+  // STAGE 2 continues from the SETTLED fracture: freeze the current (subsided, split) heights as this run's
+  // datum so the prompt-impact terrain reshaping builds ON the fractured ground instead of snapping it flat.
+  if(continuing){const hp=surfTerrain.geometry.attributes.position,hy=new Float32Array(hp.count);
+    for(let i=0;i<hp.count;i++)hy[i]=hp.getY(i);surfRun.holdY=hy;}
+  // the fractured ground WEARS its damage: swap to the cracked-earth texture (ambientCG Ground031, CC0)
+  const STX=window.STRUCT_TEX||{};
+  if(surfRun.disrupt&&STX.cracked&&surfTerrain.material.map!==surfTerrain.userData.crackedTex){
+    if(!surfTerrain.userData.crackedTex){const ct=new THREE.TextureLoader().load(STX.cracked);
+      ct.wrapS=ct.wrapT=THREE.RepeatWrapping;ct.repeat.set(4,4);surfTerrain.userData.crackedTex=ct;}
+    surfTerrain.material.map=surfTerrain.userData.crackedTex;
+    surfTerrain.material.bumpMap=surfTerrain.userData.crackedTex;
+    surfTerrain.material.color.setHex(0x8f887f);surfTerrain.material.needsUpdate=true;
+  }
+  surfTerrain.visible=true;
+  if(!continuing){
+    const p=surfTerrain.geometry.attributes.position;
+    for(let i=0;i<p.count;i++){p.setX(i,surfOX[i]);p.setY(i,surfBase[i]);p.setZ(i,surfOZ[i]);}
+    p.needsUpdate=true;surfTerrain.geometry.computeVertexNormals();
+  }
+  surfGlass.visible=false;surfGlass.material.emissiveIntensity=0.55;
+  if(surfRod)surfRod.visible=false;
+  surfCam.rotation.set(0,0,0);
+  surfSmokes.forEach(s=>{s.visible=false;s.material.opacity=0;s.userData={};});
+  surfEjecta.alive=0;surfEjecta.pts.material.opacity=0;
+}
+function stepSurface(){
+  const R=surfRun;if(!R||!surfScene)return;
+  if(!R.done)R.t+=0.016*speed;
+  const t=R.t,cr=R.craterR;
+  // incoming streak — a sub-second bright line from the sky; the tungsten ROD is visible as it plunges in
+  surfStreak.material.opacity=(t<0.14)?0.9*(1-t/0.14):0;
+  if(R.pen&&surfRod){
+    if(t<0.14){surfRod.visible=true;const k=t/0.14;
+      surfRod.position.set(2*(1-k),30*(1-k)+0.8,-3*(1-k));surfRod.rotation.z=0.16;}
+    else surfRod.visible=false; // BURIED — it is now under the ground
+  }
+  // flash dome: diamond = instant huge surface flash · penetrator = weak prompt flash, then a VENT PULSE
+  // when the heave fails and the buried energy escapes
+  const ds=Math.min(t/0.55,1);
+  const domeOp=R.pen?(Math.max(0,0.35-t*1.4)+0.75*Math.exp(-Math.pow((t-1.15)/0.28,2)))
+                    :Math.max(0,0.95-t*0.9);
+  surfDome.scale.setScalar(0.5+(R.pen?(t>0.9?8:2.5):10)*ds);
+  surfDome.material.opacity=domeOp;
+  surfDome.material.color.setHex(R.velN>=0.45?0xeaf4ff:0xffd9a0);
+  // ground shock ring — surface-coupled dart drives it at once; penetrator's big pulse comes from the vent
+  const shockT=R.pen?Math.max(0,t-1.0):t;
+  const sr=2+(R.pen?26:46)*smoothstep(0,2.4,shockT);
+  surfShock.scale.set(sr,sr,1);
+  surfShock.material.opacity=Math.max(0,0.8-shockT*0.42);
+  // ---- terrain ----
+  const p=surfTerrain.geometry.attributes.position;
+  if(R.disrupt&&t>1.6){
+    // === SEISMIC TWO-STAGE FAILURE ===
+    // FRACTURE (stage 1): the fault lines let go GENTLY — plates shift, tilt and settle a little, the ground
+    //   is left cracked and unstable ("about to break"); state is kept for stage 2.
+    // DISPERSE (stage 2, next strike): the fractured plates GIVE WAY — a crater opens at the strike point,
+    //   half the plates fall away steeply, chunks detach, and the surface comes apart for good.
+    const tfR=(t-1.6)*(R.final?1.6:1);                            // stage 2 moves with more violence
+    const tf=Math.min((surfFract?surfFract.tfReached:0)*(R.final?1:0)+tfR,R.final?16:4.2); // fracture CAPS at a shifted-but-held state
+    if(surfFract&&!R.final)surfFract.tfReached=Math.min(tf,4.2);  // remember how far stage 1 got
+    if(!R.slabbed){R.slabbed=true;surfGlass.visible=false;
+      // dust rises FROM the fault lines themselves
+      let si=0;
+      R.faults.forEach(f3=>{const tx=-f3.nz,tz=f3.nx;             // tangent of the fault line
+        for(let q=-2;q<=2;q++){const s2=surfSmokes[si++];if(!s2)return;
+          const d0=q*14+(Math.random()-0.5)*5,px=tx*d0-f3.nx*f3.off,pz=tz*d0-f3.nz*f3.off;
+          s2.visible=true;s2.position.set(px,0.7,Math.min(pz,10));
+          s2.userData={vy:0.55+Math.random()*0.5,grow:1.1+Math.random()*0.7,rot:(Math.random()-0.5)*0.015};
+          s2.material.color.setHex(0x9a9186);s2.material.opacity=0.45;s2.scale.setScalar(2.5+Math.random()*2.5);}});
+    }
+    // plate motion: subsidence + rigid tilt + drift. In stage 2, 'drop' plates take a hard accelerating fall
+    // and a central crater opens at the new strike point.
+    const digF=R.final?Math.min(1,tfR*0.5):0,crF=16;
+    for(let i=0;i<p.count;i++){const pl=R.plates[R.pid[i]],x0=surfOX[i],z0=surfOZ[i];
+      let dy=-pl.su*(0.30*tf+0.085*tf*tf)+(pl.gx*x0+pl.gz*z0)*tf;
+      if(R.final&&pl.drop)dy-=1.4*tfR*tfR;                        // these plates FALL AWAY
+      if(R.final){const r0=Math.hypot(x0,z0);
+        if(r0<crF)dy-=5.5*digF*Math.pow(Math.cos(Math.min(1,r0/crF)*Math.PI/2),1.2);} // the strike craters the fractured ground
+      p.setX(i,x0+pl.dx*tf);p.setZ(i,z0+pl.dz*tf);p.setY(i,surfBase[i]+dy);}
+    p.needsUpdate=true;surfTerrain.geometry.computeVertexNormals();
+    // the fissure glows fade as the cracks become REAL gaps
+    surfFiss.forEach(f2=>f2.material.opacity=Math.max(0,0.85-tf*0.7));
+    // detached debris: stage 1 sheds nothing; stage 2 sheds tumbling chunks that fall away with the plates
+    if(R.final&&tfR>1.0&&!R.rocked){R.rocked=true;
+      for(let k=0;k<9;k++){const r=1.4+Math.random()*2.6;
+        const g2=new THREE.SphereGeometry(r,12,10),pp=g2.attributes.position;
+        for(let i2=0;i2<pp.count;i2++){const v=new THREE.Vector3().fromBufferAttribute(pp,i2);
+          v.multiplyScalar(0.8+0.2*Math.sin(v.x*1.3+v.y*1.7+v.z));pp.setXYZ(i2,v.x,v.y,v.z);}
+        g2.computeVertexNormals();
+        const ch=new THREE.Mesh(g2,surfTerrain.material);
+        ch.position.set((Math.random()-0.5)*40,-1,(Math.random()-0.5)*22-8);
+        ch.userData={v:new THREE.Vector3((Math.random()-0.5)*0.5,(Math.random()<0.6?-1:1)*(0.5+Math.random()*0.8),(Math.random()-0.4)*0.3),
+          spin:new THREE.Vector3((Math.random()-0.5)*0.02,(Math.random()-0.5)*0.02,(Math.random()-0.5)*0.02)};
+        surfScene.add(ch);surfSlabs.push(ch);}
+    }
+    const dt2=0.016*speed;
+    surfSlabs.forEach(s2=>{s2.position.addScaledVector(s2.userData.v,dt2);
+      s2.rotation.x+=s2.userData.spin.x;s2.rotation.y+=s2.userData.spin.y;s2.rotation.z+=s2.userData.spin.z;});
+    // (camera settle/roll handled in the central shake block below — lookAt there would wipe it here)
+  } else if(t<6.0){ // stop touching vertices once settled
+    if(R.disrupt&&t>0.5&&surfFiss.length===0&&!R.slabbed){
+      // glowing fissures radiate outward before the body fails
+      for(let k=0;k<7;k++){const a=k/7*Math.PI*2+Math.random()*0.4,L=26+Math.random()*22;
+        const f2=new THREE.Mesh(new THREE.PlaneGeometry(L,0.7+Math.random()*0.5),
+          new THREE.MeshBasicMaterial({color:0xff8a3a,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+        f2.rotation.x=-Math.PI/2;f2.rotation.z=a;
+        f2.position.set(Math.cos(a)*L*0.45,0.15,Math.sin(a)*L*0.45);
+        surfScene.add(f2);surfFiss.push(f2);}
+    }
+    surfFiss.forEach(f2=>f2.material.opacity=Math.min(0.85,Math.max(0,(t-0.5)*1.3)));
+    const gl=R.disrupt?0.45*Math.max(0,t-0.35):0; // pre-failure global undulation — the whole ground trembles
+    if(R.pen){
+      // BURIAL SEQUENCE: narrow entry pit at once → the ground HEAVES upward over the buried rod →
+      // the heave fails → excavation flow opens the deep crater with rim uplift
+      const entry=1.7*smoothstep(0.10,0.45,t);
+      const heave=(1.5+0.9*R.momN)*smoothstep(0.18,0.85,t)*(1-smoothstep(0.95,1.6,t));
+      const dig=smoothstep(1.0,2.6,t),rimW=cr*0.3,rim=0.4+0.5*R.momN;
+      const B=R.holdY||surfBase;                       // stage 2 builds on the held fracture state
+      for(let i=0;i<p.count;i++){const x=p.getX(i),z=p.getZ(i),r=Math.hypot(x,z);
+        let y=B[i];
+        y+=heave*Math.exp(-Math.pow(r/(cr*0.75),2));
+        if(r<1.1)y-=entry*(1-r/1.1);
+        if(r<cr)y-=R.depth*dig*Math.pow(Math.cos(Math.min(1,r/cr)*Math.PI/2),1.15);
+        else if(r<cr+rimW)y+=rim*dig*Math.cos((r-cr)/rimW*Math.PI/2);
+        if(gl)y+=gl*Math.sin(x*0.25+t*3)*Math.sin(z*0.22+t*2.6)*0.4;
+        p.setY(i,y);}
+    }else{ // surface-coupled: travelling ground wave ripples outward; shallow dish + glass sheet remain
+      const w=Math.max(0,t-0.1),spd=15,lam=7.5,amp=Math.max(0,0.9*Math.exp(-w*0.5));
+      const dishD=0.5*smoothstep(0.4,2.2,t),B=R.holdY||surfBase; // stage 2 builds on the held fracture state
+      for(let i=0;i<p.count;i++){const x=p.getX(i),z=p.getZ(i),r=Math.hypot(x,z);
+        const ring=amp*Math.sin((r-spd*w)*(6.283/lam))*Math.exp(-Math.pow((r-spd*w)/6,2));
+        const dish=(r<cr)?-dishD*Math.cos(Math.min(1,r/cr)*Math.PI/2):0;
+        let y=B[i]+ring+dish;
+        if(gl)y+=gl*Math.sin(x*0.25+t*3)*Math.sin(z*0.22+t*2.6)*0.4;
+        p.setY(i,y);}
+      if(t>1.6&&!surfGlass.visible&&!R.disrupt){surfGlass.visible=true;surfGlass.scale.setScalar(cr*0.85);}
+    }
+    p.needsUpdate=true;surfTerrain.geometry.computeVertexNormals();
+  }
+  if(surfGlass.visible)surfGlass.material.emissiveIntensity=Math.max(0.06,0.55*Math.exp(-(t-1.6)*0.5)); // melt sheet cools
+  // ---- ejecta fountain (ballistic, simple gravity) ----
+  const E=surfEjecta,ea=E.pts.geometry.attributes.position;
+  if(t>0.15&&E.alive===0){E.alive=1;
+    for(let i=0;i<ea.count;i++){const a=Math.random()*6.283,el=(R.pen?0.9:0.5)+Math.random()*0.9;
+      const v=(R.pen?9+9*R.momN:6+8*R.velN)*(0.35+Math.random());
+      E.vel[i*3]=Math.cos(a)*Math.cos(el)*v;E.vel[i*3+1]=Math.sin(el)*v;E.vel[i*3+2]=Math.sin(a)*Math.cos(el)*v;
+      ea.setXYZ(i,0,0.4,0);}
+    E.pts.material.opacity=0.85;E.pts.material.color.setHex(R.pen?0xC9B8A0:0xEFE6D8);}
+  if(E.alive){const dt=0.016*speed;
+    for(let i=0;i<ea.count;i++){E.vel[i*3+1]-=6*dt;
+      ea.setXYZ(i,ea.getX(i)+E.vel[i*3]*dt,Math.max(0,ea.getY(i)+E.vel[i*3+1]*dt),ea.getZ(i)+E.vel[i*3+2]*dt);}
+    ea.needsUpdate=true;E.pts.material.opacity=Math.max(0,0.85-t*0.16);}
+  // ---- vapour / steam / dust column (CC0 smoke sprites) ----
+  surfSmokes.forEach((s,i)=>{
+    const born=0.2+i*0.12;if(t<born)return;
+    if(!s.visible){s.visible=true;const a=Math.random()*6.283,rr=Math.random()*(R.pen?3:5);
+      s.position.set(Math.cos(a)*rr,0.6,Math.sin(a)*rr);
+      s.userData={vy:(R.pen?1.6:2.6)*(0.7+Math.random()*0.6),grow:(R.pen?1.7:2.4)*(0.8+Math.random()*0.5),rot:(Math.random()-0.5)*0.02};
+      s.material.rotation=Math.random()*6.28;
+      // diamond: white-blue plasma/vapour → whitening steam-like plume; tungsten: grey-brown dust
+      s.material.color.setHex(R.pen?0x9a8f80:(i<8?0xcfe4ff:0xffffff));
+      s.scale.setScalar(2+Math.random()*2);}
+    const age=t-born,dt=0.016*speed;
+    s.position.y+=s.userData.vy*dt;s.material.rotation+=s.userData.rot;
+    s.scale.setScalar(s.scale.x+s.userData.grow*dt);
+    s.material.opacity=Math.max(0,(R.pen?0.5:0.55)*Math.exp(-age*0.30));
+  });
+  // ---- seismic camera: diamond = sharp brief jolt · tungsten = strong, long, aftershocks · disruption =
+  //      sustained deep rumble while the camera's OWN plate slowly settles, sinks and rolls with the collapse ----
+  const baseAmp=R.pen?(0.5+0.6*R.momN):(0.30+0.22*R.velN);
+  let amp=baseAmp*Math.exp(-t*(R.pen?0.38:1.2));
+  if(R.pen)amp+=0.16*Math.exp(-Math.pow((t-3.4)/0.5,2))+0.10*Math.exp(-Math.pow((t-5.2)/0.5,2));
+  const tf2=R.disrupt?Math.min(Math.max(0,t-1.6),9):0;
+  if(R.disrupt)amp=Math.max(amp,(R.final?0.3:0.18)*Math.exp(-tf2*0.18)); // deep rumble — harder in the final give-way
+  const camY=(tf2>0)?Math.max(R.final?1.7:3.1,4.2-(R.final?0.075:0.03)*tf2*tf2):4.2; // stage 1 settles a little; stage 2 falls away
+  surfCam.position.set(Math.sin(t*37)*amp*0.55,camY+Math.sin(t*29)*amp*0.4,30+Math.sin(t*23)*amp*0.5);
+  surfCam.lookAt(0,(tf2>0)?Math.max(-1.6,1.4-0.3*tf2):1.4,0);
+  if(tf2>0)surfCam.rotateZ(0.03*Math.min(tf2,6));                // slow roll — footing going with the plate (after lookAt)
+  // ---- phase captions (the science, honestly labelled) ----
+  let cap;
+  if(R.disrupt&&!R.final){ // STAGE 1 — critically fractured, holding
+    cap=(t<0.4?(R.pen?'penetrator buries — this strike exceeds what the body can absorb':'impact flash — this strike exceeds what the body can absorb'):
+      t<1.6?'the WHOLE BODY is failing — the ground trembles and glowing fissures open along the fault lines':
+      t<4.5?'the faults LET GO — the ground splits into plates that shift and settle · the body just holds together':
+      'CRITICALLY FRACTURED — cracked plates, unstable ground · ONE MORE landed strike disperses the body');
+  } else if(R.disrupt){ // STAGE 2 — struck again: gives way
+    cap=(t<0.5?'struck AGAIN — the fractured plates cannot take it':
+      t<2.2?'the strike CRATERS the broken ground · whole plates give way and FALL AWAY':
+      t<5.5?'sections drop out of sight · chunks detach and tumble into the dark · dust everywhere':
+      'result: catastrophic disruption — the surface has come apart; the asteroid no longer exists as a single body');
+  } else cap=R.pen
+    ?(t<0.45?'rod PENETRATES and BURIES itself — only a weak prompt flash escapes the entry hole':
+      t<1.05?'subsurface energy release — the ground HEAVES upward over the buried rod':
+      t<1.7?'the heave FAILS → the buried energy VENTS in a debris burst':
+      t<3.0?'excavation flow opens the deep crater · rim uplift · strong momentum-coupled shaking':
+      t<5.0?'aftershocks · debris falls back into the deep crater':
+      'result: deep crater + raised rim — the rod delivered its momentum INSIDE the body')
+    :(t<0.4?'impact flash — projectile + surface shock-heat to plasma (keV-scale · millions of K · fully ionised)':
+      t<1.2?'no penetration: energy couples AT the surface · ground shock races outward':
+      t<2.4?'silicate + carbon vapour plume — the diamond itself changes phase; volatiles (if present) flash to steam':
+      t<4.2?'surface waves ripple the regolith · vapour condenses to silicate droplets':
+      'result: broad shallow GLASSY scar — huge surface event, body barely pushed');
+  surfCaption('⛰ '+R.mat+' · '+cap+' · illustrative');
+  if(t>(R.disrupt?14:8))R.done=true; // the seismic collapse takes its time
+}
+let tgtCamFails=0;
+function renderTargetCam(){
+  const frame=document.getElementById('tgtcamFrame'),lab=document.getElementById('tgtcamLab'),cap=document.getElementById('tgtcamCap'),mb=document.getElementById('tgtcamMode');
+  const T=currentTarget();
+  const surf=camView==='surface';
+  const D=surf?INSET_BIG:INSET;
+  const show=insetOn&&mode==='system'&&window.innerWidth>900&&(T||impactFlash||surf);
+  if(frame){frame.style.display=show?'block':'none';frame.classList.toggle('big',surf);}
+  if(cap)cap.style.display=(show&&surf)?'block':'none';
+  if(mb)mb.textContent=surf?'◉ Orbit view':'⛰ Surface view';
+  if(!show||!tgtCam)return;
+  const W=cv.clientWidth,H=cv.clientHeight;
+  // the scissor viewport FOLLOWS the (draggable) frame element — the div is the single source of truth
+  frame.style.width=D.w+'px';frame.style.height=D.h+'px';
+  const fx=frame.offsetLeft-(cv.offsetLeft||0),fy=frame.offsetTop-(cv.offsetTop||0);
+  const x=Math.max(0,Math.min(W-D.w,fx)),y=Math.max(0,Math.min(H-D.h,H-fy-D.h));
+  if(!W||!H||W<D.w+20||H<D.h+20){if(frame)frame.style.display='none';return;} // canvas too small for the inset
+  try{
+    renderer.setScissorTest(true);renderer.setViewport(x,y,D.w,D.h);renderer.setScissor(x,y,D.w,D.h);
+    if(surf){
+      buildSurface();
+      surfCam.aspect=D.w/D.h;surfCam.updateProjectionMatrix();
+      if(lab)lab.textContent='⛰ SURFACE VIEW · parallel ground-level simulation';
+      if(!surfRun)surfCaption('⛰ awaiting impact — run a launch or salvo, then watch the ground');
+      renderer.render(surfScene,surfCam);
+    }else{
+      tgtCam.aspect=D.w/D.h;tgtCam.updateProjectionMatrix();
+      const fp=T?T.obj.position:(impactFlash&&impactFlash.userData.flash?impactFlash.userData.flash.position:null);
+      if(!fp)return;
+      const r=T?T.r:8;
+      // DEFLECTION framing: once the body has been knocked off track, frame BOTH the real body and the
+      // ghost (original course) from a direction perpendicular to the separation — the gap visibly grows.
+      const showDefl=(salvoActive||salvoEnded)&&!bodyBroken&&salvoOrigin&&offTrackU>0.5&&T&&!T.frag;
+      if(showDefl){
+        const mid=ghostPos.clone().add(T.obj.position).multiplyScalar(0.5);
+        const sepV=T.obj.position.clone().sub(ghostPos),sep=Math.max(sepV.length(),1);
+        let perp=sepV.clone().normalize().cross(new THREE.Vector3(0,1,0));if(perp.lengthSq()<1e-4)perp.set(0,0,1);perp.normalize();
+        const camDir=perp.multiplyScalar(0.85).add(new THREE.Vector3(0,0.5,0)).normalize();
+        tgtCam.position.copy(mid).addScaledVector(camDir,Math.max(r*3.6,sep*1.15+r*2.5));
+        tgtCam.lookAt(mid);
+        if(lab)lab.textContent='◉ TARGET CAM · knocked '+Math.round(offTrackU)+'u off course — ghost marks the ORIGINAL track';
+      }else{
+        const off=new THREE.Vector3(-0.55,0.35,0.76).normalize().multiplyScalar(Math.max(r*3.6,16));
+        tgtCam.position.copy(fp).add(off);tgtCam.lookAt(fp);
+        if(lab)lab.textContent='◉ TARGET CAM · '+(bodyBroken?(frags.length+' fragment'+(frags.length===1?'':'s')+' tracked'):(TARGETS[targetIdx].id+' body'))
+          +((shotPlan&&firing&&!shotPlan.willHit)?' · shot will MISS':'');
+      }
+      renderer.render(scene,tgtCam);
+    }
+  }catch(e){
+    tgtCamFails++;if(tgtCamFails>3){insetOn=false;const cb=document.getElementById('camBtn');if(cb)cb.classList.remove('on');if(frame)frame.style.display='none';}
+  }finally{
+    renderer.setScissorTest(false);renderer.setViewport(0,0,W,H);renderer.setScissor(0,0,W,H);
+  }
+}
+document.getElementById('tgtcamMode').addEventListener('click',e=>{e.stopPropagation();camView=camView==='orbit'?'surface':'orbit';});
+// ==== FLOATING PANELS: draggable + minimizable — informative boxes must never block the view =================
+function makeFloating(el,chipLabel,opts){
+  if(!el)return;opts=opts||{};
+  el.classList.add('floating');
+  if(chipLabel){const chip=document.createElement('span');chip.className='fp-chip';chip.textContent=chipLabel;el.insertBefore(chip,el.firstChild);}
+  if(!opts.noMin){
+    const btn=document.createElement('button');btn.className='fp-min';btn.textContent='—';btn.title='Minimize (drag anywhere to move)';
+    el.appendChild(btn);
+    btn.addEventListener('click',e=>{e.stopPropagation();const col=el.classList.toggle('fp-collapsed');
+      btn.textContent=col?'▢':'—';btn.title=col?'Restore':'Minimize (drag anywhere to move)';});
+  }
+  let drag=false,moved=false,sx=0,sy=0,ox=0,oy=0;
+  el.addEventListener('pointerdown',e=>{
+    if(e.target.closest('button'))return;                        // buttons keep their own behaviour
+    drag=true;moved=false;sx=e.clientX;sy=e.clientY;
+    const r=el.getBoundingClientRect(),pr=el.offsetParent.getBoundingClientRect();
+    ox=r.left-pr.left;oy=r.top-pr.top;
+    el.style.left=ox+'px';el.style.top=oy+'px';el.style.right='auto';el.style.bottom='auto';el.style.transform='none';
+    e.preventDefault();e.stopPropagation();
+  });
+  window.addEventListener('pointermove',e=>{if(!drag)return;
+    if(Math.abs(e.clientX-sx)+Math.abs(e.clientY-sy)>4)moved=true;
+    el.style.left=(ox+e.clientX-sx)+'px';el.style.top=(oy+e.clientY-sy)+'px';});
+  window.addEventListener('pointerup',()=>{drag=false;setTimeout(()=>{moved=false;},0);}); // flag survives just long enough to eat the drag's own click
+  el.addEventListener('click',e=>{if(moved){e.stopPropagation();moved=false;}},true); // a drag is not a click
+}
+makeFloating(document.getElementById('salvopanel'),'▤ SALVO — campaign');
+makeFloating(document.getElementById('shotpanel'),'▤ DEFLECTION');
+makeFloating(document.getElementById('scaleinset'),'▤ SCALE');
+makeFloating(document.getElementById('forcelegend'),null,{noMin:true}); // has its own ⚑ minimize — drag only
+makeFloating(document.getElementById('tgtcamFrame'),null,{noMin:true}); // the render follows the frame position
+(function(){ // target-cam gets a minimize of its own (restores via the ◉ Target cam button)
+  const f=document.getElementById('tgtcamFrame');if(!f)return;
+  const btn=document.createElement('button');btn.className='fp-min';btn.style.top='30px';btn.textContent='—';btn.title='Hide target cam (reopen with ◉ Target cam)';
+  f.appendChild(btn);
+  btn.addEventListener('click',e=>{e.stopPropagation();insetOn=false;const cb=document.getElementById('camBtn');if(cb)cb.classList.remove('on');});
+})();
+
+// ---- launch: travelling cell-wave, coast, fly-in, per-projectile impact, aftermath ----
+const T_ACCEL=5.0, T_COAST=4.5, T_HOLD=3.4;
+function stepFire(){
+  fireT+=0.016*speed;
+  if(fireT<=T_ACCEL){
+    phase='accelerating';document.getElementById('phase').textContent='cell wave · accelerating';
+    let f=fireT/T_ACCEL;const eased=f*f;
+    const x=-LEN/2+0.9+eased*(LEN-1.8);boreProjectile.position.set(x,0,0);boreProjectile.visible=true;
+    const vmax=FAMILY[famIdx].v/1000;
+    document.getElementById('vel').textContent=Math.round(eased*vmax).toLocaleString('en-GB')+' km/s';
+    const projFrac=(x-(-LEN/2+0.8))/((LEN-1.6));
+    cellRings.forEach((r,i)=>{const rf=i/(cellRings.length-1);const d=Math.abs(rf-projFrac);
+      const on=(rf<=projFrac+0.04);const glow=on?Math.max(0.3,2.0*Math.exp(-d*d*90)):0.3;
+      r.material.emissiveIntensity+=(glow-r.material.emissiveIntensity)*0.5;r.material.emissive.setHex(on&&d<0.12?0x2f7fd6:0x0a1e33);});
+    if(vectorRing)vectorRing.rotation.z=0.11*Math.sin(fireT*0.8); // slow, deliberate exit trim (not wobble)
+    boreProjectile.getWorldPosition(cineFocus);cineZoom=Z_CHASE;cineDir.copy(CAM_CHASE_DIR); // world pos (child of slewed sysRoot)
+  } else if(fireT<=T_ACCEL+T_COAST){
+    if(!shotPlan||!shotPlan.locked)shotPlan=mkShotPlan(true); // freeze ONCE at muzzle exit, lead-corrected for the drifting target
+    const P=shotPlan;if(!P){resetFire();return;}
+    phase='coast';
+    if(!impacted)document.getElementById('phase').textContent=P.willHit
+      ?'coast · shot flies straight down the aimed bore · vector-control trims ≤1.5°'
+      :'coast · bore is '+P.offDeg.toFixed(1)+'° OFF target — beyond the ±1.5° steering cone · shot will MISS';
+    cellRings.forEach(r=>{r.material.emissiveIntensity+=(0.3-r.material.emissiveIntensity)*0.2;r.material.emissive.setHex(0x0a1e33);});
+    const cf=(fireT-T_ACCEL)/T_COAST, sm=cf*cf*(3-2*cf), mt=1-cf;
+    // ---- flight follows the FROZEN shot plan: quadratic bezier from muzzle along the bore axis to plan.end.
+    //      On a hit, plan.end is the cone-clamped surface point; on a miss it is straight down the bore,
+    //      sailing PAST the body (physics, not scripting). ----
+    const muzzle=P.muzzle, aim=P.aim, end=P.end, range=P.range;
+    const ctrl=muzzle.clone().addScaledVector(aim,range*0.5);     // control ON the bore axis => the path hugs the cone
+    const wp=new THREE.Vector3(mt*mt*muzzle.x+2*mt*cf*ctrl.x+cf*cf*end.x, mt*mt*muzzle.y+2*mt*cf*ctrl.y+cf*cf*end.y, mt*mt*muzzle.z+2*mt*cf*ctrl.z+cf*cf*end.z);
+    boreProjectile.position.copy(sysRoot.worldToLocal(wp.clone())); // boreProjectile is a child of the slewed sysRoot
+    boreProjectile.scale.setScalar(1-0.9*sm);boreProjectile.visible=!impacted;
+    if(tracer){tracer.position.copy(wp);tracer.material.opacity=0.95;tracer.scale.setScalar(1.6);tracer.visible=!impacted;}
+    // ghost 'un-trimmed' line straight along the bore world-axis; the actual path trims ≤1.5° off it
+    if(ghostLine){ghostLine.geometry.setFromPoints([muzzle.clone(),muzzle.clone().addScaledVector(aim,range*1.06)]);ghostLine.computeLineDistances();ghostLine.visible=true;}
+    document.getElementById('vel').textContent=Math.round(FAMILY[famIdx].v/1000).toLocaleString('en-GB')+' km/s';
+    // ---- camera: TRACK the flying projectile across; on a hit ease onto the impact point, on a miss frame
+    //      the TARGET so the fly-past is visible ----
+    const kk=smoothstep(0.72,1.0,cf);
+    const focusPt=P.willHit?P.impactPt:(P.target?P.target.obj.position:end);
+    cineFocus.copy(wp).lerp(focusPt,kk);
+    cineZoom=Z_CHASE+((P.willHit?Z_IMPACT:Z_REVEAL*0.9)-Z_CHASE)*kk; // hit: close in · miss: pull wide to frame the fly-past
+    cineDir.copy(CAM_CHASE_DIR).lerp(CAM_IMPACT_DIR,kk);
+    if(cf>=0.985&&!impacted){
+      if(P.willHit){triggerImpact();impacted=true;if(tracer)tracer.visible=false;}
+      else{impacted=true; // no impact FX — the shot sails past
+        document.getElementById('phase').textContent='MISS — bore '+P.offDeg.toFixed(1)+'° off target (> ±1.5° authority) · passes ~'+Math.round(P.missDist)+'u from the body · no energy delivered';}
+    }
+  } else if(fireT<=T_ACCEL+T_COAST+T_HOLD){
+    phase='impact';
+    const P=shotPlan,hf=(fireT-(T_ACCEL+T_COAST))/T_HOLD;
+    const tgtPos=(P&&P.target)?P.target.obj.position:asteroid.position;
+    const impactPt=(P&&P.impactPt)?P.impactPt:tgtPos;
+    if(P&&!P.willHit){
+      // MISS aftermath: hold on the untouched body; let the tracer recede down the bore line
+      const past=P.muzzle.clone().addScaledVector(P.aim,P.range*(1.3+0.5*hf));
+      if(tracer){tracer.position.copy(past);tracer.material.opacity=Math.max(0,0.7-hf*0.8);tracer.visible=true;}
+      cineFocus.copy(tgtPos);cineZoom=Z_REVEAL*0.9;cineDir.copy(CAM_REVEAL_DIR);
+    }else{
+      // hold CLOSE on the surface reaction (flash / shock / ejecta), then ease back to reveal the outcome
+      const back=smoothstep(0.32,1.0,hf);
+      cineFocus.copy(impactPt).lerp(tgtPos,back);
+      cineZoom=Z_IMPACT+(Z_REVEAL-Z_IMPACT)*back;
+      cineDir.copy(CAM_IMPACT_DIR).lerp(CAM_REVEAL_DIR,back);
+    }
+  } else { if(salvoActive)endShotInSalvo(); else softStop(); } // single shot: SOFT stop — outcome stays on screen; ↺ Reset restores
+}
+// ---- layered impact-FX helpers (shared by main-body and fragment events; scaled to the struck body) ----
+function mkFlash(fx,ipW,S,hyper){ // two-layer plasma flash: white-hot core + coloured halo (a flash, not a fireball — vacuum)
+  const core=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTexture(),color:0xffffff,transparent:true,opacity:1,blending:THREE.AdditiveBlending,depthWrite:false}));
+  core.scale.setScalar(0.85*S);core.position.copy(ipW);fx.add(core);
+  const halo=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTexture(),color:hyper?0x9fc8ff:0xffa050,transparent:true,opacity:0.6,blending:THREE.AdditiveBlending,depthWrite:false}));
+  halo.scale.setScalar(1.9*S);halo.position.copy(ipW);fx.add(halo);
+  fx.userData.flash=core;fx.userData.flashBase=0.85*S;fx.userData.halo=halo;fx.userData.haloBase=1.9*S;
+}
+function mkPlume(fx,ipW,dir,S,velN){ // vapour/plasma plume along the surface normal — EVERY regime vaporises; emphasis ∝ velocity (science audit P1)
+  const pl=(0.5+1.6*velN)*S;
+  const plume=new THREE.Mesh(new THREE.ConeGeometry(pl*0.16,pl,16,1,true),new THREE.MeshBasicMaterial({color:velN>=0.45?0xcfe6ff:0xffcf9a,transparent:true,opacity:0.28+0.34*velN,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+  plume.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir);
+  plume.position.copy(ipW).addScaledVector(dir,pl*0.5);
+  fx.add(plume);fx.userData.plume=plume;
+}
+function mkShock(fx,ipW,dir,S,velN,hyper,aR){ // fast luminous surface shock ring + slower lingering dust ring
+  const shockR=(0.25+0.5*velN)*S;
+  const shock=new THREE.Mesh(new THREE.RingGeometry(shockR*0.7,shockR,40),new THREE.MeshBasicMaterial({color:hyper?0xbfe4ff:0xffab55,transparent:true,opacity:0.85,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false}));
+  shock.position.copy(ipW).addScaledVector(dir,aR*0.06);shock.lookAt(shock.position.clone().add(dir));
+  fx.add(shock);fx.userData.shock=shock;
+  const dust=new THREE.Mesh(new THREE.RingGeometry(shockR*0.5,shockR*0.9,40),new THREE.MeshBasicMaterial({color:0xcbb894,transparent:true,opacity:0.34,side:THREE.DoubleSide,depthWrite:false}));
+  dust.position.copy(ipW).addScaledVector(dir,aR*0.045);dust.lookAt(dust.position.clone().add(dir));
+  fx.add(dust);fx.userData.dust=dust;
+}
+function mkEjecta(fx,ipW,dir,S,velN,momN,hyper){ // two populations: fast hot vapour (additive, fades) + slow dust curtain (∝ momentum, lingers)
+  function burst(count,along,perp,speedBase,color,additive,size,op){
+    const ep=[],ev=[];
+    for(let i=0;i<count;i++){
+      const t=new THREE.Vector3(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).normalize();
+      const d=dir.clone().multiplyScalar(along*(0.5+Math.random())).addScaledVector(t,perp).normalize();
+      const sp=speedBase*(0.25+2.0*Math.random()*Math.random()); // wide speed distribution — some fast escaping, most slow
+      ep.push(ipW.x,ipW.y,ipW.z);ev.push(d.x*sp,d.y*sp,d.z*sp);
+    }
+    const eg=new THREE.BufferGeometry();eg.setAttribute('position',new THREE.Float32BufferAttribute(ep,3));
+    const pts=new THREE.Points(eg,new THREE.PointsMaterial({color,size,transparent:true,opacity:op,blending:additive?THREE.AdditiveBlending:THREE.NormalBlending,depthWrite:false}));
+    fx.add(pts);return {pts,vel:ev};
+  }
+  fx.userData.ejHot=burst(Math.round(90+260*velN),0.85,0.5,(7+26*velN)*S/2.5,hyper?0xcfe6ff:0xffd2a0,true,0.5,0.95);
+  fx.userData.ejDust=burst(Math.round(70+220*momN),0.55,0.8,(2.2+5*momN)*S/2.5,0xcbb894,false,0.55,0.8);
+}
+let shotOutcome=null; // 'deflected' | 'broke' | 'fragkill' — set per shot for the salvo bookkeeping
+function triggerImpact(){
+  const P=shotPlan,T=(P&&P.target)?P.target:currentTarget();if(!T)return;
+  const fam=FAMILY[famIdx], tgt=TARGETS[targetIdx];
+  const velN=fam.v/1e6;                     // 1.0 (R,1000) .. 0.1 (T,100) — sets vaporisation/ionisation emphasis
+  const momN=(fam.kg*fam.v)/3e6;            // 0.1 (R) .. 1.0 (T) — sets coherent momentum
+  const hyper=velN>=0.45;
+  const aRT=T.r, fxScale=Math.max(0.4,aRT/7)*1.6;
+  const dir=(P?P.aim.clone():boreDirWorld()).negate();          // muzzle-facing hemisphere = opposite the incoming bore
+  const ipW=(P&&P.impactPt)?P.impactPt.clone():T.obj.position.clone().addScaledVector(dir,aRT*0.94);
+  // ---- FRAGMENT hit: neutralise one tracked fragment with a scaled hypervelocity event ----
+  if(T.frag){
+    const fx=new THREE.Group();fx.userData={t:0,dur:T_HOLD,velN,momN,hyper,breakup:false};
+    mkFlash(fx,ipW,fxScale,hyper);mkPlume(fx,ipW,dir,fxScale,velN);mkEjecta(fx,ipW,dir,fxScale,velN,momN,hyper);
+    scene.remove(T.frag.mesh);frags=frags.filter(f=>f!==T.frag);
+    scene.add(fx);impactFlash=fx;boreProjectile.visible=false;shotOutcome='fragkill';
+    document.getElementById('phase').innerHTML=fam.id+' · '+(fam.v/1000)+' km/s → fragment · 150 GJ vaporises/disperses the small body · '+frags.length+' fragment'+(frags.length===1?'':'s')+' remaining · illustrative (P6)';
+    return;
+  }
+  // ---- MAIN BODY hit ----
+  const D=deflection(fam,tgt);
+  // CUMULATIVE FRACTURE (illustrative fatigue): repeated 150 GJ strikes accumulate damage. From the 4th
+  // landed strike, if cumulative specific energy ≥ 4×Q*, the weakened body FAILS even under a dart that
+  // could not disrupt it alone — so a full salvo's LAST shot breaks a 100 m body apart (a 300 m body
+  // shrugs off four: 4×150 GJ ≈ 21 J/kg ≪ Q*). Fracture accumulation is real rubble-pile behaviour;
+  // the threshold here is illustrative (P6 brackets it).
+  const nextHits=landedHits+1,cumSpecE=nextHits*KE_SHOT/tgt.mass;
+  const fatigue=!D.disrupt&&nextHits>=4&&cumSpecE>=4*Q_STAR;
+  const critHit=D.disrupt||fatigue;          // this strike meets the disruption criterion…
+  const fracture=critHit&&!bodyFractured;    // …first time: CRITICAL FRACTURE (body holds, barely)
+  const breakup=critHit&&bodyFractured;      // …struck again while fractured: full dispersal
+  startSurfaceRun(fracture?'fracture':breakup?'disperse':'normal'); // parallel SURFACE VIEW matches the outcome
+  // hypervelocity energy deposition, MATERIAL-aware: the light diamond-equivalent dart deposits energy at
+  // the SURFACE (vaporisation pit, body intact); dense tungsten-class penetrators drive momentum DEEP into
+  // the bulk — that penetration is what makes disruption possible
+  const emph = velN>=0.9 ? fam.matShort+' core vaporises, ionises & mixes → surface plasma flash (surface-level destruction)'
+             : velN>=0.45 ? fam.matShort+' core — strong surface vaporisation + plasma'
+             : velN>=0.25 ? fam.matShort+' core — cratering with melt & vapour'
+             : velN>=0.13 ? fam.matShort+' penetrator drives deep → cratering + fracture'
+             : fam.matShort+' penetrator burrows deep — momentum couples into the bulk';
+  const character = fracture ? 'CRITICAL FRACTURE — the body is failing; ONE MORE landed strike disperses it'
+                  : breakup  ? 'the fractured body GIVES WAY → dispersal'
+                  : 'coherent deflection';
+  document.getElementById('phase').innerHTML=fam.id+' · '+(fam.v/1000)+' km/s → '+tgt.id+' body · hypervelocity energy deposition · 150 GJ + '+(fam.kg*fam.v).toExponential(1)+' N·s · '+emph+' · Δv≈'+fmtDv(D.dv)+' · '+character+' · useful deflection/effect uncertain (impact campaign P6)';
+  const fx=new THREE.Group();fx.userData={t:0,dur:T_HOLD,velN,momN,hyper,breakup};
+  // --- layered FX: flash (white core + coloured halo), plume for EVERY regime (emphasis ∝ velocity),
+  //     fast luminous shock ring + slow dust ring, two-population ejecta. All kinetic — no fireball in vacuum. ---
+  mkFlash(fx,ipW,fxScale,hyper);
+  mkPlume(fx,ipW,dir,fxScale,velN);
+  mkShock(fx,ipW,dir,fxScale,velN,hyper,aRT);
+  mkEjecta(fx,ipW,dir,fxScale,velN,momN,hyper);
+  if(fracture){
+    // --- STAGE 1 · CRITICAL FRACTURE: the body HOLDS, but glowing cracks spread across it. The next landed
+    //     strike disperses it. (Two-stage failure — rubble piles come apart, they don't pop.) ---
+    bodyFractured=true;shotOutcome='fractured';landedHits++;
+    const ipLoc=T.obj.worldToLocal(ipW.clone()),nrmF=ipLoc.clone().normalize();
+    let tanF=nrmF.clone().cross(new THREE.Vector3(0,1,0));if(tanF.lengthSq()<1e-4)tanF.set(1,0,0);tanF.normalize();
+    const bitF=nrmF.clone().cross(tanF).normalize();
+    for(let k=0;k<9;k++){const a=k/9*Math.PI*2+Math.random()*0.5;
+      const dirT=tanF.clone().multiplyScalar(Math.cos(a)).addScaledVector(bitF,Math.sin(a));
+      const len=(2.2+Math.random()*3.4);
+      const crk=new THREE.Mesh(new THREE.PlaneGeometry(len,0.16+0.1*Math.random()),
+        new THREE.MeshBasicMaterial({color:0xff8a3a,side:THREE.DoubleSide,transparent:true,opacity:0.95}));
+      crk.position.copy(nrmF.clone().multiplyScalar(6.6)).addScaledVector(dirT,1.2+len*0.5);
+      crk.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),nrmF);crk.rotateZ(Math.atan2(Math.sin(a),Math.cos(a)));
+      T.obj.add(crk);scars.push(crk);}
+    fx.userData.hot=null;fx.userData.follow=T.obj;
+    fx.userData.deflect=dir.clone().multiplyScalar(-(0.05+0.6*momN)); // a fracturing hit still shoves the body
+  } else if(breakup){
+    // --- STAGE 2 · DISPERSAL: the fractured body GIVES WAY into TRACKED fragments (frags[]) — real
+    //     targetable objects that damp to a slow drift. Remaining salvo shots retarget them. ---
+    asteroid.visible=false;bodyBroken=true;shotOutcome='broke';
+    const nf=Math.round(4+4*momN);
+    for(let i=0;i<nf;i++){
+      const s=(0.24+0.18*Math.random())*asteroid.scale.x;
+      const fr=buildAsteroid();fr.scale.setScalar(s);
+      fr.position.copy(asteroid.position).add(new THREE.Vector3(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).multiplyScalar(aRT*0.55));
+      const v=fr.position.clone().sub(asteroid.position).normalize().multiplyScalar(16+14*momN).addScaledVector(dir,-(4+6*momN));
+      fr.material.emissive=new THREE.Color(0xff8844);fr.material.emissiveIntensity=0.38; // warm fracture faces, cool in loop()
+      label(fr,'target','Fragment','A break-up fragment — now a tracked body. Remaining shots retarget the largest surviving fragment (fragment-dispersion risk is exactly what Paper I §8 says the impact campaign must bracket).','fragment · targetable');
+      scene.add(fr);
+      frags.push({mesh:fr,r:7*s,vel:v,spin:new THREE.Vector3((Math.random()-0.5)*0.03,(Math.random()-0.5)*0.03,(Math.random()-0.5)*0.03)});
+    }
+  } else {
+    // --- INTACT: PERSISTENT, MATERIAL-TIERED damage (scars[] accumulate until ↺ Reset) — each family
+    //     leaves visibly DIFFERENT wounds, sized by the physics that makes them:
+    //     · R/Q (fast light diamond/alloy): broad BRIGHT GLASSY melt sheet — huge surface event, no pit
+    //     · V (mid): modest dark crater + thin rim
+    //     · M/T (tungsten-class penetrator): deep DARK pit + raised rim + radial fracture cracks ---
+    shotOutcome='deflected';landedHits++;
+    const ipLoc=T.obj.worldToLocal(ipW.clone());let nrm=ipLoc.clone().normalize();
+    if(landedHits>1){const jit=new THREE.Vector3(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).multiplyScalar(0.33);
+      nrm=nrm.add(jit).normalize();} // successive strikes scatter around the aim point
+    const dmg=Math.min(landedHits-1,6),Q=nrm.clone(),QU=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,0,1),Q);
+    let hot=null;
+    if(velN>=0.45){ // GLASSY MELT SHEET — pale, shallow, wide; cools from an orange glow to glass
+      const cr=(0.7+0.5*velN)*(1+0.10*dmg);
+      const glass=new THREE.Mesh(new THREE.CircleGeometry(cr,28),new THREE.MeshPhongMaterial({color:0xd8cfc0,emissive:0xff9040,emissiveIntensity:0.5,shininess:130,specular:0xaabbcc,transparent:true,opacity:0.9,side:THREE.DoubleSide}));
+      glass.position.copy(Q.clone().multiplyScalar(6.62));glass.quaternion.copy(QU);T.obj.add(glass);
+      hot=new THREE.Mesh(new THREE.RingGeometry(cr*0.9,cr*1.15,28),new THREE.MeshBasicMaterial({color:0xffd27a,transparent:true,opacity:0.85,side:THREE.DoubleSide}));
+      hot.position.copy(Q.clone().multiplyScalar(6.65));hot.quaternion.copy(QU);T.obj.add(hot);
+      scars.push(glass,hot);fx.userData.glassScar=glass;
+    } else if(momN<0.5){ // V-DART: modest dark crater + thin rim
+      const cr=(0.45+0.5*momN)*(1+0.12*dmg);
+      const crater=new THREE.Mesh(new THREE.CircleGeometry(cr,24),new THREE.MeshBasicMaterial({color:0x120b06,side:THREE.DoubleSide}));
+      crater.position.copy(Q.clone().multiplyScalar(6.62));crater.quaternion.copy(QU);T.obj.add(crater);
+      hot=new THREE.Mesh(new THREE.RingGeometry(cr*0.6,cr,24),new THREE.MeshBasicMaterial({color:0xff7a3a,transparent:true,opacity:0.9,side:THREE.DoubleSide}));
+      hot.position.copy(Q.clone().multiplyScalar(6.66));hot.quaternion.copy(QU);T.obj.add(hot);
+      scars.push(crater,hot);
+    } else { // TUNGSTEN-CLASS: deep dark pit + raised pale rim + radial fracture cracks
+      const cr=(0.55+0.95*momN)*(1+0.14*dmg);
+      const crater=new THREE.Mesh(new THREE.CircleGeometry(cr,24),new THREE.MeshBasicMaterial({color:0x0b0805,side:THREE.DoubleSide}));
+      crater.position.copy(Q.clone().multiplyScalar(6.60));crater.quaternion.copy(QU);T.obj.add(crater);
+      const rim=new THREE.Mesh(new THREE.RingGeometry(cr,cr*1.22,24),new THREE.MeshBasicMaterial({color:0x8a7f70,transparent:true,opacity:0.95,side:THREE.DoubleSide}));
+      rim.position.copy(Q.clone().multiplyScalar(6.68));rim.quaternion.copy(QU);T.obj.add(rim);
+      hot=new THREE.Mesh(new THREE.RingGeometry(cr*0.5,cr*0.85,24),new THREE.MeshBasicMaterial({color:0xff6a2a,transparent:true,opacity:0.9,side:THREE.DoubleSide}));
+      hot.position.copy(Q.clone().multiplyScalar(6.64));hot.quaternion.copy(QU);T.obj.add(hot);
+      scars.push(crater,rim,hot);
+      // radial fractures: thin dark spokes lying on the surface around the pit
+      let tan=Q.clone().cross(new THREE.Vector3(0,1,0));if(tan.lengthSq()<1e-4)tan.set(1,0,0);tan.normalize();
+      const bit=Q.clone().cross(tan).normalize();
+      const nCr=4+Math.round(3*momN);
+      for(let k=0;k<nCr;k++){const a=k/nCr*Math.PI*2+Math.random()*0.5,dirT=tan.clone().multiplyScalar(Math.cos(a)).addScaledVector(bit,Math.sin(a));
+        const len=cr*(1.1+Math.random()*1.1);
+        const crk=new THREE.Mesh(new THREE.PlaneGeometry(len,0.10+0.05*Math.random()),new THREE.MeshBasicMaterial({color:0x0d0a07,side:THREE.DoubleSide,transparent:true,opacity:0.9}));
+        crk.position.copy(Q.clone().multiplyScalar(6.63)).addScaledVector(dirT,cr+len*0.45);
+        crk.quaternion.copy(QU);crk.rotateZ(Math.atan2(Math.sin(a),Math.cos(a)));
+        T.obj.add(crk);scars.push(crk);}
+    }
+    fx.userData.hot=hot;                          // fades to a cooled rim in animateImpact
+    fx.userData.follow=T.obj;                     // transient FX rides along with the still-drifting body
+    // coherent deflection ∝ momentum (small for fast/light, real for heavy — but heavy breaks up instead)
+    fx.userData.deflect=dir.clone().multiplyScalar(-(0.06+0.9*momN));
+  }
+  scene.add(fx);impactFlash=fx;boreProjectile.visible=false;
+}
+function animateImpact(){
+  if(!impactFlash)return;const u=impactFlash.userData;u.t+=0.016*speed;
+  // transient FX ride along with the still-drifting struck body (flash stays ON the surface, not behind it)
+  if(u.follow&&u.follow.visible)impactFlash.position.addScaledVector(asteroidVel,DRIFT_UPS*0.016*speed);
+  const s=Math.min(u.t/1.35,3);   // long readable tails (plume / rings / dust)
+  const spike=Math.min(u.t/0.5,3);// the flash itself stays a quick spike
+  if(u.flash){u.flash.scale.setScalar(u.flashBase*(1+spike*1.6));u.flash.material.opacity=Math.max(0,1.0-spike*1.35);}
+  if(u.halo){u.halo.scale.setScalar(u.haloBase*(1+s*2.4));u.halo.material.opacity=Math.max(0,0.6-s*0.55);}
+  if(u.plume){u.plume.material.opacity=Math.max(0,u.plume.material.opacity-0.011*speed);u.plume.scale.x=u.plume.scale.z=1+s*0.25;u.plume.scale.y=1+s*0.9;}
+  // fast luminous shock spreads ACROSS the surface; the dust ring follows slower and lingers
+  if(u.shock){const g=1+s*(u.hyper?7:4);u.shock.scale.set(g,g,1);u.shock.material.opacity=Math.max(0,0.85-s*0.8);}
+  if(u.dust){const g2=1+s*1.6;u.dust.scale.set(g2,g2,1);u.dust.material.opacity=Math.max(0,0.34-s*0.16);}
+  [u.ejHot,u.ejDust].forEach((ej,idx)=>{if(!ej)return;const pos=ej.pts.geometry.attributes.position,st=0.016*speed;
+    for(let i=0;i<pos.count;i++){pos.setXYZ(i,pos.getX(i)+ej.vel[i*3]*st,pos.getY(i)+ej.vel[i*3+1]*st,pos.getZ(i)+ej.vel[i*3+2]*st);}
+    pos.needsUpdate=true;ej.pts.material.opacity=Math.max(0,idx===0?0.95-s*0.55:0.8-s*0.28);});
+  if(u.hot)u.hot.material.opacity=Math.max(0.22,0.9-s*0.55); // cools to a persistent faint rim (cumulative damage stays readable)
+  if(u.glassScar)u.glassScar.material.emissiveIntensity=Math.max(0.05,0.5*Math.exp(-s)); // melt sheet cools to glass
+  if(asteroid&&u.deflect&&asteroid.visible)asteroid.position.addScaledVector(u.deflect,0.016*speed);
+}
+function clearImpact(){
+  if(!impactFlash)return;
+  scene.remove(impactFlash);impactFlash=null; // scars + tracked fragments persist by design (cleared only in resetFire)
+}
+// ---- SOFT STOP: a shot/salvo ends leaving the WORLD as the physics left it — deflected position, scars,
+//      fragments, tally and tracks all stay. NOTHING teleports back into frame (that was the "asteroid
+//      clipping back" glitch). Only the explicit ↺ Reset restores the pristine scene. ----
+function softStop(){
+  firing=false;recharging=false;salvoActive=false;salvoDone=false;fireT=0;impacted=false;rechargeT=0;
+  phase='ready';nudgeDirV=null;nudgePrev=0;
+  clearImpact(); // transient FX only — scars/fragments/positions persist
+  boreProjectile.position.set(-LEN/2+0.9,0,0);boreProjectile.visible=true;boreProjectile.scale.setScalar(1);
+  if(tracer){tracer.visible=false;tracer.material.opacity=0;}if(ghostLine)ghostLine.visible=false;
+  cellRings.forEach(r=>{r.material.emissiveIntensity=0.3;r.material.emissive.setHex(0x0a1e33);});
+  if(vectorRing)vectorRing.rotation.z=0;
+  document.getElementById('vel').textContent='0 km/s';
+  document.getElementById('fireBtn').textContent='▶ Launch sequence';
+  const svb=document.getElementById('salvoBtn');if(svb)svb.textContent='▶▶ Fire salvo';
+  const sb=document.getElementById('slewBtn');if(sb)sb.disabled=false;
+  updateAimBtn(); // the phase readout keeps the last outcome (impact summary / MISS) on screen
+}
+function resetFire(){firing=false;fireT=0;phase='ready';impacted=false;
+  salvoActive=false;recharging=false;salvoDone=false;salvoEnded=false;rechargeT=0;salvoLanded=0;
+  const svp=document.getElementById('salvopanel');if(svp)svp.style.display='none';
+  const svb=document.getElementById('salvoBtn');if(svb)svb.textContent='▶▶ Fire salvo';
+  clearImpact();
+  // clear tracked fragments + persistent scars + salvo-deflection overlay + the frozen shot plan
+  frags.forEach(f=>scene.remove(f.mesh));frags=[];bodyBroken=false;bodyFractured=false;surfFract=null;shotPlan=null;shotOutcome=null;
+  scars.forEach(s=>{if(s.parent)s.parent.remove(s);});scars=[];landedHits=0;
+  salvoOrigin=null;offTrackU=0;nudgeDirV=null;nudgePrev=0;
+  trailPts=[];if(pathTrail)pathTrail.visible=false;
+  clearSurfaceExtras();surfRun=null;surfCaption('⛰ awaiting impact — run a launch or salvo, then watch the ground'); // boulders/fissures ALWAYS cleared on Reset (the leak)
+  if(origTrackLine)origTrackLine.visible=false;if(ghostMark)ghostMark.visible=false;if(tetherLine)tetherLine.visible=false;
+  if(asteroid&&asteroidHome){asteroid.position.copy(asteroidHome);asteroid.rotation.set(0,0,0);asteroid.visible=true;asteroidTravel=0;}
+  boreProjectile.position.set(-LEN/2+0.9,0,0);boreProjectile.visible=true;boreProjectile.scale.setScalar(1);
+  if(tracer){tracer.visible=false;tracer.material.opacity=0;}if(ghostLine)ghostLine.visible=false;
+  document.getElementById('vel').textContent='0 km/s';document.getElementById('phase').textContent='ready';
+  document.getElementById('fireBtn').textContent='▶ Launch sequence';
+  cellRings.forEach(r=>{r.material.emissiveIntensity=0.3;r.material.emissive.setHex(0x0a1e33);});
+  if(vectorRing)vectorRing.rotation.z=0;
+  const sb=document.getElementById('slewBtn');if(sb)sb.disabled=false;
+  updateAimBtn();
+}
+// ---- SHOT PLAN from the REAL bore direction. The shot flies down the bore; the vector-control can only
+//      bend it ±1.5°. Bore off-target by more (auto-aim HELD while the body drifts) ⇒ a genuine MISS.
+//      With lock=true (taken once at MUZZLE EXIT) the aim point is LEAD-corrected: the target keeps drifting
+//      during the coast, so the shot is pointed at where the body WILL be at arrival (drift is linear ⇒ the
+//      lead is exact — real fire-control geometry, illustrative here). ----
+function mkShotPlan(lock){
+  const muzzle=muzzleWorld(),aim=boreDirWorld(),T=currentTarget();
+  const plan={muzzle,aim,target:T,range:260,willHit:false,offDeg:0,missDist:0,
+              end:muzzle.clone().addScaledVector(aim,260),impactPt:null,locked:!!lock};
+  if(T){
+    const lead=(lock&&!T.frag)?asteroidVel.clone().multiplyScalar(DRIFT_UPS*T_COAST):new THREE.Vector3(); // fragments are ~settled
+    const tgtPos=T.obj.position.clone().add(lead);
+    const impactPt=tgtPos.addScaledVector(aim,-T.r*0.94); // near surface, on the incoming-bore side, at ARRIVAL time
+    const toT=impactPt.clone().sub(muzzle);plan.range=toT.length();
+    plan.offDeg=aim.angleTo(toT.clone().normalize())*180/Math.PI;
+    plan.willHit=plan.offDeg<=CONE_DEG;
+    plan.impactPt=impactPt;
+    plan.end=plan.willHit?clampToCone(muzzle,aim,impactPt,CONE_DEG)
+                         :muzzle.clone().addScaledVector(aim,plan.range*1.3); // straight past, down the bore
+    // closest approach of the bore line to the target centre (for the MISS readout)
+    const w=T.obj.position.clone().sub(muzzle),along=Math.max(0,w.dot(aim));
+    plan.missDist=w.clone().sub(aim.clone().multiplyScalar(along)).length();
+  }
+  return plan;
+}
+function beginShot(){ // start ONE shot (shared by single Launch and each salvo shot)
+  if(autoAim)updateAutoAim(1);                      // snap the bore onto the current target (it keeps tracking through the launch)
+  const sb=document.getElementById('slewBtn');if(sb)sb.disabled=true;   // no mid-flight Hold flips (ship still slews if auto-aim is on)
+  shotPlan=mkShotPlan(false);                       // provisional; re-frozen WITH LEAD at muzzle exit (coast start)
+  firing=true;fireT=0;impacted=false;document.getElementById('fireBtn').textContent='■ Abort';
+}
+document.getElementById('fireBtn').addEventListener('click',()=>{
+  if(mode!=='system')setMode('system');
+  if(firing||recharging||salvoActive){softStop();return;}      // ■ Abort: halt where things stand — no surprise restore
+  if(!currentTarget()){document.getElementById('phase').textContent='no target remains — press ↺ Reset to restore the scene';return;}
+  prepNextShot();beginShot();                                   // repeat launches ACCUMULATE damage on the same body
+});
+document.getElementById('resetBtn').addEventListener('click',()=>resetFire());
+// ---- target-cam toggle + compact-view toggle ----
+document.getElementById('camBtn').addEventListener('click',function(){insetOn=!insetOn;this.classList.toggle('on',insetOn);});
+(function(){
+  const vb=document.querySelector('.viewbox'),fb=document.getElementById('fitBtn');
+  let compact=false;try{compact=localStorage.getItem('argus3d-compact')==='1'}catch(e){}
+  function ap(){if(vb)vb.classList.toggle('compact',compact);if(fb)fb.classList.toggle('on',compact);
+    if(compact&&window.__setLegendMin)window.__setLegendMin(true); // the full legend eats half a 440px canvas
+    resize();}
+  if(fb)fb.addEventListener('click',()=>{compact=!compact;try{localStorage.setItem('argus3d-compact',compact?'1':'0')}catch(e){}ap();});
+  ap();
+})();
+// ---- SALVO controller: fires SALVO_TOTAL_DEFAULT shots, RECHARGING the pulse buffer between each (recharge
+//      time tied to electricity: 428.571 GJ ÷ 10 MW ≈ 11.9 h ideal — Paper II §8). Does NOT touch single Launch. ----
+document.getElementById('salvoBtn').addEventListener('click',()=>{
+  if(mode!=='system')setMode('system');
+  if(salvoActive||firing||recharging){                       // ■ Stop: halt where things stand, keep the tally
+    const hadLandings=salvoLanded>0;softStop();
+    if(hadLandings){salvoEnded=true;updateSalvoReadout('done');}
+    else{salvoEnded=false;const svp=document.getElementById('salvopanel');if(svp)svp.style.display='none';}
+    return;}
+  if(!currentTarget()){document.getElementById('phase').textContent='no target remains — press ↺ Reset to restore the scene';return;}
+  startSalvo();
+});
+function startSalvo(){
+  prepNextShot();salvoEnded=false;
+  salvoActive=true;salvoTotal=SALVO_TOTAL_DEFAULT;salvoShot=1;salvoLanded=0;salvoCumDv=0;salvoDone=false;
+  const svb=document.getElementById('salvoBtn');if(svb)svb.textContent='■ Stop salvo';
+  const svp=document.getElementById('salvopanel');if(svp)svp.style.display='block';
+  // anchor the ORIGINAL Earth-bound track where the salvo begins — the body will visibly walk OFF it while
+  // its un-deflected ghost twin keeps drifting DOWN the track
+  if(asteroid&&asteroid.visible&&!bodyBroken){salvoOrigin=asteroid.position.clone();ghostPos.copy(salvoOrigin);offTrackU=0;ensureSalvoTrack();
+    trailPts=[];if(pathTrail)pathTrail.visible=false;}
+  updateSalvoReadout('fire');
+  beginShot();                                       // fire shot 1
+}
+function salvoNudgeDir(){ // ⟂ to the Earth-bound line, so each shot visibly walks the body OFF its track
+  if(!asteroid||!earth)return new THREE.Vector3(0,1,0);
+  const eDir=earth.position.clone().sub(asteroid.position).normalize();
+  let perp=eDir.clone().cross(new THREE.Vector3(0,1,0));if(perp.lengthSq()<1e-5)perp.set(1,0,0);
+  return perp.normalize();
+}
+// ---- persistent salvo-deflection overlay: red dashed ORIGINAL track (anchored at salvo start), grey ghost
+//      marker on it (where the body WOULD be), gold tether to the real deflected body. Displacement is
+//      EXAGGERATED for visibility — the honest per-shot Δv stays in the readout. ----
+function ensureSalvoTrack(){
+  if(origTrackLine)return;
+  origTrackLine=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),new THREE.Vector3()]),
+    new THREE.LineDashedMaterial({color:0xe2683c,transparent:true,opacity:0.8,dashSize:6,gapSize:4}));
+  scene.add(origTrackLine);
+  ghostMark=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTexture(),color:0x9fb0c8,transparent:true,opacity:0.5,blending:THREE.AdditiveBlending,depthWrite:false}));
+  ghostMark.scale.set(9,9,1);scene.add(ghostMark);
+  tetherLine=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),new THREE.Vector3()]),
+    new THREE.LineBasicMaterial({color:0xd4b24c,transparent:true,opacity:0.9}));
+  scene.add(tetherLine);
+  pathTrail=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),new THREE.Vector3()]),
+    new THREE.LineBasicMaterial({color:0xf0c860,transparent:true,opacity:0.85}));
+  pathTrail.visible=false;scene.add(pathTrail); // the body's ACTUAL flown path — you watch it bend off the red line
+}
+function updateSalvoTrack(){
+  const on=(salvoActive||salvoEnded)&&!!salvoOrigin&&!bodyBroken&&asteroid&&asteroid.visible;
+  if(origTrackLine)origTrackLine.visible=on;
+  if(ghostMark)ghostMark.visible=on;
+  if(tetherLine)tetherLine.visible=on&&offTrackU>0.5;
+  if(!on)return;
+  const eDir=earth.position.clone().sub(salvoOrigin).normalize();
+  const L=Math.min(salvoOrigin.distanceTo(earth.position)*0.5,420);
+  origTrackLine.geometry.setFromPoints([salvoOrigin.clone().addScaledVector(eDir,-60),salvoOrigin.clone().addScaledVector(eDir,L)]);
+  origTrackLine.computeLineDistances();
+  ghostMark.position.copy(ghostPos);                              // the un-deflected twin, sliding down the original track
+  tetherLine.geometry.setFromPoints([ghostPos.clone(),asteroid.position.clone()]); // pure-deflection gap
+}
+function endShotInSalvo(){ // a shot's hold just finished during a salvo: bank the outcome, then recharge
+  const P=shotPlan,hit=!!(P&&P.willHit);
+  if(hit&&shotOutcome==='deflected'){ // coherent hit on the main body: bank Δv + set up the ANIMATED off-track nudge
+    const d=deflection(FAMILY[famIdx],TARGETS[targetIdx]);
+    salvoCumDv+=d.dv;salvoLanded++;
+    if(asteroid&&asteroid.visible){nudgeDirV=salvoNudgeDir();nudgePrev=0;offTrackU+=SALVO_NUDGE_U;} // applied INCREMENTALLY on top of the ongoing drift
+  } else if(hit){ // 'fractured' (body critically cracked), 'broke' (dispersed) or 'fragkill' (fragment neutralised)
+    salvoLanded++;
+  }                                                   // a MISS banks nothing
+  firing=false;document.getElementById('vel').textContent='0 km/s';
+  if(bodyBroken&&frags.length===0)salvoDone=true;      // everything neutralised — stand the rest of the salvo down
+  if(salvoShot<salvoTotal&&!salvoDone){recharging=true;rechargeT=0;updateSalvoReadout(hit?'recharge':'recharge-miss');}
+  else{salvoDone=true;recharging=true;rechargeT=0;updateSalvoReadout('done');} // hold on the final tally, then reset
+}
+function prepNextShot(){ // reset the launcher for the next salvo shot WITHOUT snapping the (nudged) body home
+  clearImpact();impacted=false;fireT=0;phase='ready';
+  if(asteroid&&!bodyBroken)asteroid.visible=true;      // never resurrect a dispersed body mid-salvo
+  boreProjectile.position.set(-LEN/2+0.9,0,0);boreProjectile.visible=true;boreProjectile.scale.setScalar(1);
+  if(tracer){tracer.visible=false;tracer.material.opacity=0;}if(ghostLine)ghostLine.visible=false;
+  cellRings.forEach(r=>{r.material.emissiveIntensity=0.3;r.material.emissive.setHex(0x0a1e33);});
+  if(vectorRing)vectorRing.rotation.z=0;
+}
+function stepRecharge(){ // sped-up recharge countdown; the readout states the REAL ~11.9 h / ~1-per-day figures
+  rechargeT+=0.016*speed;
+  const dur=salvoDone?SALVO_RECHARGE_DUR*2.2:SALVO_RECHARGE_DUR; // linger on the final tally
+  const frac=Math.min(1,rechargeT/dur),cd=document.getElementById('sv-cd');
+  // ANIMATED off-track nudge, applied INCREMENTALLY so the body's own drift continues underneath it
+  if(nudgeDirV&&asteroid&&asteroid.visible&&!salvoDone){
+    const e=smoothstep(0,0.75,frac),d=e-nudgePrev;nudgePrev=e;
+    if(d>0)asteroid.position.addScaledVector(nudgeDirV,SALVO_NUDGE_U*d);
+  }
+  if(cd&&!salvoDone){const remH=RECHARGE_H*(1-frac),bars=Math.round(frac*14);
+    cd.innerHTML='▸ buffer '+Math.round(frac*100)+'% charged · next shot in ~'+remH.toFixed(1)+' h (real) ['+'█'.repeat(bars)+'░'.repeat(14-bars)+']';}
+  if(rechargeT>=dur){
+    recharging=false;nudgeDirV=null;nudgePrev=0;
+    if(salvoDone){salvoEnded=true;softStop();updateSalvoReadout('done');return;} // SOFT end: deflected/dispersed state + tally stay until ↺ Reset
+    salvoShot++;prepNextShot();updateSalvoReadout('fire');beginShot();
+  }
+}
+function updateSalvoReadout(state){
+  const P=document.getElementById('salvopanel');if(!P)return;
+  P.style.display=(salvoActive||salvoEnded)?'block':'none';
+  const nEl=document.getElementById('sv-n'),dvEl=document.getElementById('sv-dv'),rcEl=document.getElementById('sv-rc');
+  const shown=Math.min(salvoShot,salvoTotal);
+  const T=currentTarget();
+  const mPerU=TARGETS[targetIdx].d/(7*TARGETS[targetIdx].vscale); // metres per scene-unit for THIS target class
+  if(nEl)nEl.textContent='Shot '+shown+' / '+salvoTotal+(state==='fire'?(bodyBroken&&T?' — retargeting fragment (~'+Math.round(T.r*mPerU)+' m class)':' — firing')
+    :state.indexOf('recharge')===0?' — recharging':' — complete');
+  if(dvEl){
+    let line=salvoLanded>0
+      ? 'cumulative Δv ≈ <b>'+fmtDv(salvoCumDv)+'</b> over '+salvoLanded+' shot'+(salvoLanded===1?'':'s')+' landed · '+FAMILY[famIdx].id+' → '+TARGETS[targetIdx].id+' body'
+      : 'cumulative Δv ≈ <b>—</b> · first shot in flight · '+FAMILY[famIdx].id+' → '+TARGETS[targetIdx].id+' body';
+    if(bodyBroken)line='body dispersed → engaging fragments: <b>'+frags.length+'</b> remaining · '+salvoLanded+' shot'+(salvoLanded===1?'':'s')+' landed';
+    else if(offTrackU>0.5)line+='<br>off-track displacement ≈ <b>'+Math.round(offTrackU)+'u</b> (displacement exaggerated for visibility — the honest per-shot Δv is above)';
+    dvEl.innerHTML=line;
+  }
+  if(rcEl){
+    if(state==='recharge'){rcEl.innerHTML='Recharging pulse buffer: 428.571 GJ ÷ 10 MW ≈ <b>'+RECHARGE_H.toFixed(1)+' h</b> to next shot (ideal; longer in practice) — conservative cadence ≈ 1 shot/day.<br><span class="sv-cd" id="sv-cd"></span>';
+      const ph=document.getElementById('phase');if(ph)ph.textContent='recharging pulse buffer · ≈'+RECHARGE_H.toFixed(1)+' h/shot (demo sped-up)';}
+    else if(state==='recharge-miss'){rcEl.innerHTML='<b>Last shot MISSED</b> — bore beyond the ±1.5° steering cone; no Δv banked. Recharging: 428.571 GJ ÷ 10 MW ≈ <b>'+RECHARGE_H.toFixed(1)+' h</b>.<br><span class="sv-cd" id="sv-cd"></span>';}
+    else if(state==='fire')rcEl.textContent=bodyBroken
+      ? 'Pulse buffer discharged (428.571 GJ) — engaging the largest surviving fragment.'
+      : bodyFractured
+      ? 'Pulse buffer discharged (428.571 GJ) — the body is CRITICALLY FRACTURED: the next landed strike disperses it.'
+      : 'Pulse buffer discharged (428.571 GJ) — each landed shot walks the target further off its Earth-bound track (watch the gold tether to the red original track).'
+        +(famIdx===0?' R-DART edge: 1,000 km/s ≈ c/300 — far-out taps arrive in HOURS, shaving impact probability early.':'');
+    else rcEl.innerHTML=(bodyFractured&&!bodyBroken
+      ? 'Salvo complete — the body ends CRITICALLY FRACTURED ('+salvoLanded+' landed): fire ONE more landed strike to disperse it, or'
+      : bodyBroken
+      ? (frags.length===0
+          ? 'Salvo stood down after '+salvoLanded+' landed shot'+(salvoLanded===1?'':'s')+' — the body broke up and every tracked fragment was neutralised.'
+          : 'Salvo complete — '+salvoLanded+' landed shot'+(salvoLanded===1?'':'s')+' · body dispersed · <b>'+frags.length+'</b> tracked fragment'+(frags.length===1?'':'s')+' remaining (no coherent Δv — fragmentation is the §8 dispersion risk).')
+      : 'Salvo complete — '+salvoTotal+' shots · '+salvoLanded+' landed · cumulative Δv ≈ <b>'+fmtDv(salvoCumDv)+'</b>'+(offTrackU>0.5?' · final off-track displacement ≈ <b>'+Math.round(offTrackU)+'u</b> (exaggerated)':''))
+      +' Real cadence ≈ 1 shot/day (≈ '+RECHARGE_H.toFixed(1)+' h recharge each). The end state stays on screen — <b>↺ Reset</b> restores the scene.';
+  }
+}
+document.querySelectorAll('#speedSel button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#speedSel button').forEach(x=>x.classList.remove('on'));b.classList.add('on');speed=parseFloat(b.dataset.s);});
+// ---- magnetic force visualisation ----
+function buildForces(){
+  forceGroup=new THREE.Group();forceGroup.visible=false;scene.add(forceGroup);
+  // bore-relative forces live in a group PARENTED TO sysRoot, so they rotate WITH the (auto-aimed/slewed) structure
+  boreForceGroup=new THREE.Group();boreForceGroup.visible=false;sysRoot.add(boreForceGroup);
+  const ax=new THREE.Vector3(1,0,0);
+  accelArrow=new THREE.ArrowHelper(ax,new THREE.Vector3(-LEN/2+0.9,0,0),3.2,0xffcf5a,1.0,0.6);boreForceGroup.add(accelArrow); // accelerating Lorentz force (down the bore)
+  vecArrow=new THREE.ArrowHelper(new THREE.Vector3(0.16,1,0.10).normalize(),new THREE.Vector3(LEN/2+0.6,0,0),2.8,0x43c59e,0.9,0.55);boreForceGroup.add(vecArrow); // vector-control exit trim (⊥ bore, local)
+  coilArrows=[];const nc=7;for(let i=0;i<nc;i++){const x=-LEN/2+2.2+i*(LEN-4.4)/(nc-1);
+    const a=new THREE.ArrowHelper(ax,new THREE.Vector3(x,RB*0.98,0),1.3,0x5aa0e0,0.45,0.3);boreForceGroup.add(a);coilArrows.push(a);}
+  // ---- geomagnetic attitude-control vectors (Show forces): external field B, commanded dipole m, and the
+  //      resulting slew torque τ = m×B. Positioned at the structure centre; m + τ are recomputed each frame
+  //      (updateGeomag) as the structure slews, so τ⊥B (under-actuation) always holds. ----
+  bArrow=new THREE.ArrowHelper(B_DIR.clone(),B_DIR.clone().multiplyScalar(-16),32,0xb06cff,1.7,1.05);forceGroup.add(bArrow);
+  mArrow=new THREE.ArrowHelper(new THREE.Vector3(0,1,0),new THREE.Vector3(0,0,0),8.5,0xe8913f,1.15,0.72);forceGroup.add(mArrow);
+  tauGroup=new THREE.Group();forceGroup.add(tauGroup);
+  const tauR=5.2,tSeg=44,tA0=-0.35,tA1=Math.PI*1.15,tPts=[];
+  for(let i=0;i<=tSeg;i++){const a=tA0+(tA1-tA0)*i/tSeg;tPts.push(new THREE.Vector3(Math.cos(a)*tauR,Math.sin(a)*tauR,0));}
+  const tauTube=new THREE.TubeGeometry(new THREE.CatmullRomCurve3(tPts),tSeg,0.12,8,false);
+  tauCurve=new THREE.Mesh(tauTube,new THREE.MeshBasicMaterial({color:0x8ee06a}));tauGroup.add(tauCurve);
+  const tEnd=new THREE.Vector3(Math.cos(tA1)*tauR,Math.sin(tA1)*tauR,0),tTan=new THREE.Vector3(-Math.sin(tA1),Math.cos(tA1),0).normalize();
+  tauHead=new THREE.Mesh(new THREE.ConeGeometry(0.42,1.15,14),new THREE.MeshBasicMaterial({color:0x8ee06a}));
+  tauHead.position.copy(tEnd);tauHead.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),tTan);tauGroup.add(tauHead);
+  // ---- vector-control authority: the reachable ±1.5° exit-steering cone (drawn along the bore/aim axis) ----
+  coneGroup=new THREE.Group();coneGroup.visible=false;scene.add(coneGroup);
+  coneSurface=new THREE.Mesh(new THREE.ConeGeometry(1,1,40,1,true),new THREE.MeshBasicMaterial({color:0x9fd0ff,transparent:true,opacity:0.06,side:THREE.DoubleSide,depthWrite:false}));
+  coneSurface.geometry.translate(0,-0.5,0); // apex at origin, opens toward -Y (mapped onto the aim axis each frame)
+  coneGroup.add(coneSurface);
+  coneRing=new THREE.Mesh(new THREE.RingGeometry(0.965,1,72),new THREE.MeshBasicMaterial({color:0x9fd0ff,transparent:true,opacity:0.5,side:THREE.DoubleSide,depthWrite:false}));
+  coneGroup.add(coneRing); // the reachable footprint at the target range
+  coneEdges=[];for(let i=0;i<4;i++){const ln=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),new THREE.Vector3(0,-1,0)]),new THREE.LineBasicMaterial({color:0x9fd0ff,transparent:true,opacity:0.4}));coneGroup.add(ln);coneEdges.push(ln);}
+}
+// orient the ±1.5° reachable cone from the muzzle along the current bore/aim axis (muzzle -> target)
+function updateCone(){
+  if(!coneGroup||!coneGroup.visible)return;
+  const T=currentTarget();if(!T){coneGroup.visible=false;return;}
+  const muzzle=muzzleWorld(),aimV=T.obj.position.clone().sub(muzzle),range=aimV.length();
+  if(range<1e-3)return;const aim=aimV.clone().normalize(),R=range*Math.tan(CONE_DEG*Math.PI/180); // footprint radius = range·tan1.5°
+  coneSurface.position.copy(muzzle);coneSurface.quaternion.setFromUnitVectors(new THREE.Vector3(0,-1,0),aim);coneSurface.scale.set(R,range,R);
+  const center=muzzle.clone().addScaledVector(aim,range);
+  coneRing.position.copy(center);coneRing.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),aim);coneRing.scale.set(R,R,1);
+  let p1=new THREE.Vector3().crossVectors(aim,new THREE.Vector3(0,1,0));if(p1.lengthSq()<1e-6)p1.set(1,0,0);p1.normalize();
+  const p2=new THREE.Vector3().crossVectors(aim,p1).normalize();
+  const rim=[center.clone().addScaledVector(p1,R),center.clone().addScaledVector(p1,-R),center.clone().addScaledVector(p2,R),center.clone().addScaledVector(p2,-R)];
+  coneEdges.forEach((ln,i)=>ln.geometry.setFromPoints([muzzle.clone(),rim[i]]));
+  const el=document.getElementById('coneReach');if(el){const tr=T.r;el.textContent='reachable radius ≈ range·tan1.5° ≈ '+R.toFixed(1)+'u (~'+(R/tr).toFixed(1)+'× target radius)';}
+}
+function updateForces(){
+  if(!forceGroup)return;forceGroup.visible=showForces;if(boreForceGroup)boreForceGroup.visible=showForces;
+  document.getElementById('forcelegend').style.display=showForces?'block':'none';
+  const sp=document.getElementById('shotpanel');if(sp)sp.style.display=(showForces&&mode==='system')?'block':'none';
+  if(coneGroup)coneGroup.visible=showForces&&mode==='system';updateCone();
+  if(!showForces)return;
+  // accelerating Lorentz force rides the projectile down the bore — all in sysRoot-local coords, so it rotates with the structure
+  if(firing&&phase==='accelerating'){ accelArrow.position.copy(boreProjectile.position);const f=Math.min(fireT/T_ACCEL,1);accelArrow.setLength(2.2+4.2*f,1.0,0.6);accelArrow.visible=true;
+  } else { accelArrow.position.set(-LEN/2+0.9,0,0);accelArrow.setLength(3.2,1.0,0.6);accelArrow.visible=(!firing); }
+  // vector-control exit-trim force: a small ⊥-bore steering vector in the LOCAL frame (rotates with sysRoot as it slews)
+  const s=Math.sin(performance.now()*0.0011)*0.5+0.5;
+  vecArrow.setDirection(new THREE.Vector3(0.16,1,0.10).normalize());vecArrow.setLength(2.2+0.6*s,0.9,0.55);
+}
+// ---- deflection trajectory: Earth-bound track vs deflected (missing) track, split at the intercept ----
+function updateTrajectory(){
+  if(!approachLine)return;
+  const show=showForces&&mode==='system'&&!firing&&asteroid&&asteroid.visible&&earth;
+  approachLine.visible=show;deflectLine.visible=show;interceptMark.visible=show;
+  if(!show)return;
+  const a=asteroid.position.clone(),eC=earth.position.clone();
+  const eDir=eC.clone().sub(a).normalize();                    // toward Earth
+  const dE=eC.distanceTo(a),L=Math.min(dE*0.42,150);           // finite arrows in open space (not into the huge Earth)
+  approachLine.position.copy(a);approachLine.setDirection(eDir);approachLine.setLength(L,16,10);
+  // deflected track forks off at the intercept and heads clear of Earth (illustrative divergence)
+  let perp=eDir.clone().cross(new THREE.Vector3(0,1,0));if(perp.lengthSq()<1e-5)perp.set(1,0,0);perp.normalize();
+  const th=0.52,dDir=eDir.clone().multiplyScalar(Math.cos(th)).addScaledVector(perp,Math.sin(th)).normalize();
+  deflectLine.position.copy(a);deflectLine.setDirection(dDir);deflectLine.setLength(L*0.96,16,10);
+  interceptMark.position.copy(a);
+}
+// ---- shots-before-impact estimate (illustrative planetary-defence framing) ----
+function updateShotPanel(){
+  const el=document.getElementById('shotpanel');if(!el)return;
+  const f=FAMILY[famIdx],t=TARGETS[targetIdx],d=deflection(f,t);
+  const tResp=HALF_AU/f.v;                                     // s for THIS dart to cross 0.5 AU
+  const N=Math.max(1,Math.round(WARNING_S/tResp));             // notional warning ÷ response time
+  const respTxt=tResp>=86400?(tResp/86400).toFixed(1)+' d':(tResp/3600).toFixed(1)+' h';
+  const n=document.getElementById('sp-n'),dv=document.getElementById('sp-dv'),rp=document.getElementById('sp-resp');
+  if(n)n.textContent='≈ '+N.toLocaleString('en-GB')+' flight windows in a notional 1-yr warning';
+  if(dv)dv.innerHTML='each imparts Δv ≈ <b style="color:#84d6ca">'+fmtDv(d.dv)+'</b> ('+f.id+' → '+t.id+' body · β≈1 assumed)';
+  const cFrac=Math.round(299792.458/(f.v/1000)),hFast=(HALF_AU/FAMILY[0].v/3600).toFixed(0),dSlow=(HALF_AU/FAMILY[4].v/86400).toFixed(1);
+  if(rp)rp.textContent='('+f.id+' crosses 0.5 AU in ~'+respTxt+' at '+(f.v/1000).toLocaleString('en-GB')+' km/s ≈ c/'+cFrac+'.) '
+    +'WHY THE FAST DART: R-DART reaches 0.5 AU in ~'+hFast+' h (T-DART: ~'+dSlow+' d). It cannot penetrate — but a tiny Δv applied EARLY multiplies into a large miss distance (Δposition ≈ Δv × time-to-encounter): a body with, say, a 5% impact probability can be gently tapped far out — below threshold, or into a different gravitational corridor — long before a heavy penetrator could even arrive. Count = warning ÷ one-way flight time (a screening quotient); the ≈1 shot/day recharge cadence separately caps a year at ≈365 launches.';
+}
+document.getElementById('forceBtn').addEventListener('click',function(){showForces=!showForces;this.classList.toggle('on',showForces);
+  updateShotPanel();
+  if(vectorRing)vectorRing.material&&0;});
+// ---- force-legend MINIMIZE/EXPAND: collapse the big legend to a compact "⚑ Forces ▸" chip and back. It still
+//      auto-shows when 'Show forces' is on and auto-hides when off (updateForces owns display:block/none); this
+//      only toggles the collapsed body. State kept in-memory, so it persists across force on/off. ----
+let legendMin=false;
+(function(){
+  const lg=document.getElementById('forcelegend'),head=document.getElementById('forcelegendHead'),tog=document.getElementById('legendToggle');
+  function apply(){ if(!lg)return; lg.classList.toggle('min',legendMin);
+    if(tog)tog.textContent=legendMin?'▸':'▾';
+    if(head)head.title=legendMin?'Expand force legend':'Minimize force legend'; }
+  function toggle(e){ if(e)e.stopPropagation(); legendMin=!legendMin; apply(); }
+  if(head)head.addEventListener('click',toggle);
+  if(tog)tog.addEventListener('click',toggle);
+  window.__setLegendMin=v=>{legendMin=v;apply();}; // compact view auto-collapses the tall legend
+  apply();
+})();
+
+// ---- geomagnetic attitude control: vector update + illustrative slew demo (companion paper) ----
+function updateGeomag(){
+  if(!bArrow||!sysRoot)return;
+  const on=showForces&&mode==='system';
+  bArrow.visible=on;mArrow.visible=on;if(tauGroup)tauGroup.visible=on;
+  if(!on)return;
+  // commanded dipole m = loop normal in WORLD space (rotates with the slewing structure)
+  const mW=M_LOCAL.clone().applyQuaternion(sysRoot.quaternion).normalize();
+  mArrow.position.set(0,0,0);mArrow.setDirection(mW);
+  // external field B is fixed (inertial) — a long arrow threading the structure centre
+  bArrow.position.copy(B_DIR.clone().multiplyScalar(-16));bArrow.setDirection(B_DIR);
+  // slew torque τ = m × B  (identically ⊥ B ⇒ under-actuated; →0 when m ∥ B)
+  const tau=new THREE.Vector3().crossVectors(mW,B_DIR),tl=tau.length();
+  if(tl<1e-4){if(tauGroup)tauGroup.visible=false;return;}
+  tauGroup.visible=true;tauGroup.position.set(0,0,0);
+  tauGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),tau.multiplyScalar(1/tl));
+}
+// ---- geomagnetic AUTO-AIM: continuously & SLOWLY slew the WHOLE structure (sysRoot) so the bore (local +x)
+//      points at the asteroid. This is the magnetorquer's job (τ = m×B — propellantless, slow, under-actuated);
+//      here it is illustrative/sped-up. Because the bore ends up on the asteroid, the shot flies down the bore. ----
+function muzzleWorld(){return MUZZLE_LOCAL.clone().applyQuaternion(sysRoot.quaternion);}
+function boreDirWorld(){return BORE_LOCAL.clone().applyQuaternion(sysRoot.quaternion).normalize();}
+function computeAimQ(){ // orientation whose bore (+x) points at the CURRENT target (asteroid, or largest fragment after break-up)
+  const T=currentTarget();
+  const aim=T?T.obj.position.clone().normalize():BORE_LOCAL.clone();
+  return new THREE.Quaternion().setFromUnitVectors(BORE_LOCAL,aim);
+}
+function updateAutoAim(k){ const T=currentTarget(); if(!T||!sysRoot)return; sysRoot.quaternion.slerp(computeAimQ(),k); // SLOW slerp onto the target
+  const rd=document.getElementById('slewRd');
+  if(rd&&autoAim&&!firing){const off=boreDirWorld().angleTo(T.obj.position.clone().normalize())*180/Math.PI;
+    const what=T.frag?'fragment':'asteroid';
+    rd.textContent=off>0.6?('◐ auto-aim ON · slewing bore onto '+what+' ('+off.toFixed(1)+'° to go)'):'◐ auto-aim ON · bore locked on '+what;}
+}
+function updateAimBtn(){
+  const b=document.getElementById('slewBtn'),rd=document.getElementById('slewRd');
+  if(b){b.textContent=autoAim?'◐ Auto-aim: ON':'⏸ Hold aim (frozen)';
+    b.title=autoAim?'Magnetorquer auto-aim ON: the whole apparatus slowly slews (τ = m×B) so the bore tracks the asteroid. Click to HOLD — freeze the structure so the force vectors stay aligned.':'Aim HELD: the structure is frozen and the force vectors are static & correctly aligned. Click to resume auto-aim.';}
+  if(rd)rd.textContent=autoAim?'◐ auto-aim ON · slewing bore onto asteroid':'⏸ aim held · structure frozen · forces aligned';
+}
+document.getElementById('slewBtn').addEventListener('click',()=>{ if(firing)return; autoAim=!autoAim; updateAimBtn(); }); // HOLD toggles auto-aim off (freezes the slew)
+
+// ---- family selector ----
+function buildFamSel(){
+  const box=document.getElementById('famsel');box.innerHTML='';
+  FAMILY.forEach((f,i)=>{const b=document.createElement('button');b.className=(i===famIdx?'on':'');b.textContent=f.id;
+    b.title=f.kg+' kg · '+(f.v/1000)+' km/s · '+f.mat+' · '+f.pen;b.onclick=()=>{famIdx=i;
+      document.querySelectorAll('#famsel button').forEach((x,j)=>x.classList.toggle('on',j===i));
+      if(boreProjectile){sysRoot.remove(boreProjectile);}boreProjectile=buildBoreProjectile(1.0);boreProjectile.position.x=-LEN/2+0.9;sysRoot.add(boreProjectile);
+      if(mode==='projectile'){scene.remove(projGroup);projMeshes={};projGroup=buildExplodedProjectile(1.4);scene.add(projGroup);}
+      updateMatch();resetFire();};box.appendChild(b);});
+}
+function buildTargetSel(){
+  const box=document.getElementById('tgtsel');box.innerHTML='';
+  TARGETS.forEach((t,i)=>{const b=document.createElement('button');b.className=(i===targetIdx?'on':'');b.textContent=t.id;
+    b.title='~'+t.mass.toExponential(1)+' kg body';b.onclick=()=>{targetIdx=i;
+      document.querySelectorAll('#tgtsel button').forEach((x,j)=>x.classList.toggle('on',j===i));
+      // rescale the target body to the chosen size
+      asteroid.scale.setScalar(TARGETS[i].vscale);asteroid.userData.read='down-range · '+TARGETS[i].id+' class';
+      updateMatch();resetFire();};box.appendChild(b);});
+}
+// Δv_a = β·m·v / M ; disruption needs BOTH enough delivered energy vs target AND momentum
+// coupling (so the heaviest/highest-momentum darts break a given body, per the user + science audit),
+// OR an overwhelming energy density that disrupts regardless of coupling.
+function deflection(fam,tgt){
+  const mom=fam.kg*fam.v, dv=mom/tgt.mass;            // β≈1 illustrative
+  const specE=KE_SHOT/tgt.mass;                        // J/kg delivered energy density
+  const momN=mom/3e6;                                  // 0.1 (R) .. 1.0 (T)
+  const disrupt=(specE>=Q_STAR && momN>=0.5) || (specE>=5*Q_STAR);
+  return {dv,mom,specE,momN,regime:disrupt?'disruption plausible':'coherent deflection',disrupt};
+}
+function fmtDv(dv){return dv>=1?dv.toFixed(2)+' m/s':dv>=1e-3?(dv*1e3).toFixed(2)+' mm/s':(dv*1e6).toFixed(1)+' µm/s';}
+function updateMatch(){
+  const box=document.getElementById('matchbox');if(!box)return;
+  const t=TARGETS[targetIdx],f=FAMILY[famIdx],d=deflection(f,t);
+  // best-for-deflection = highest-momentum dart that still deflects THIS body coherently (per-dart)
+  const coherent=FAMILY.filter(x=>!deflection(x,t).disrupt);
+  let best; if(coherent.length) best=coherent.reduce((a,b)=>(a.kg*a.v>=b.kg*b.v?a:b));
+  box.innerHTML='<b>'+f.id+' → '+t.id+' body</b> (~'+t.mass.toExponential(1)+' kg)<br>'+
+    '<span style="color:var(--muted)">'+f.mat+' · '+f.pen+(famIdx===0?' · response-time edge: 0.5 AU in ~21 h (1,000 km/s ≈ c/300)':'')+'</span><br>'+
+    'Delivers <b>150 GJ</b> + <b>'+(f.kg*f.v).toExponential(1)+' N·s</b> → Δv ≈ <span class="dv">'+fmtDv(d.dv)+'</span> (β≈1 assumed) · '+d.regime+
+    '<span class="best">'+(coherent.length? 'Best clean deflection: '+best.id+' (highest momentum that stays coherent → Δv '+fmtDv(best.kg*best.v/t.mass)+')' : 'This body is small enough that 150 GJ likely disrupts it for every dart — coherent deflection is not on the table (P6).')+'</span>'+
+    '<span class="best" style="color:var(--muted)">The family varies core MATERIAL (diamond-equivalent reference → tungsten-class penetrators), not size — dense penetrators couple momentum deep into the bulk; the light diamond core only works the surface. Illustrative; the papers fix mass &amp; velocity.</span>';
+  updateShotPanel();
+}
+
+// ---- modes ----
+function setMode(m){
+  if(m!=='system'&&m!=='projectile')return; // defensive: never accept an undefined mode
+  mode=m;document.querySelectorAll('.modes button[data-mode]').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+  sysRoot.visible=(m==='system');projGroup.visible=(m==='projectile');
+  [earth,sun,moon,mars,asteroid].forEach(o=>{if(o)o.visible=(m==='system');});
+  document.getElementById('listTitle').textContent=m==='system'?'Subsystems':'Projectile components';
+  document.getElementById('listSub').textContent=m==='system'?'Click to inspect · grounded in Paper II':'Deposited mass budget · click to inspect';
+  document.getElementById('orbitChip').style.display=m==='system'?'':'none';
+  document.querySelector('.controls').style.display=m==='system'?'':'none';
+  dist=m==='system'?32:14;yaw=m==='system'?-0.62:0.6;pitch=m==='system'?0.22:0.16;
+  buildList();clearSelect();
+}
+document.querySelectorAll('.modes button[data-mode]').forEach(b=>b.onclick=()=>setMode(b.dataset.mode)); // [data-mode] ONLY — camBtn/fitBtn share the row but must NOT trigger setMode(undefined)
+
+function buildList(){
+  const box=document.getElementById('parts');box.innerHTML='';
+  const items=mode==='projectile'
+    ? PARTS.map(p=>({id:p.id,name:p.name,color:p.color,meta:p.kg.toFixed(3)+' kg · '+Math.round(p.kg/TOTAL*100)+'%'}))
+    : SUBSYS.map(s=>({id:s.id,name:s.name,color:s.color,meta:''}));
+  items.forEach(it=>{const el=document.createElement('div');el.className='part';el.dataset.id=it.id;
+    el.innerHTML='<span class="sw" style="background:#'+it.color.toString(16).padStart(6,'0')+'"></span><span class="pn">'+it.name+'</span><span class="pm">'+it.meta+'</span>';
+    el.onclick=()=>select(it.id);box.appendChild(el);});
+}
+function findMesh(id){let f=null;(mode==='projectile'?projGroup:scene).traverse(o=>{if(o.userData&&o.userData.pick===id)f=o;});return f;}
+function select(id){
+  if(id==='projectile'){setMode('projectile');return;}
+  document.querySelectorAll('.part').forEach(e=>e.classList.toggle('on',e.dataset.id===id));
+  if(emphasised){emphasised.scale.setScalar(emphasised.userData._s||1);}
+  const mesh=findMesh(id),spec=document.getElementById('spec');
+  let name,role,read,color;
+  if(mode==='projectile'){const p=PARTS.find(x=>x.id===id);name=p.name;role=p.role;read=p.kg.toFixed(3)+' kg · '+Math.round(p.kg/TOTAL*100)+'% of 0.300 kg';color='#'+p.color.toString(16).padStart(6,'0');}
+  else{const s=SUBSYS.find(x=>x.id===id)||{};name=mesh?.userData.name||s.name||id;role=mesh?.userData.role||s.role||'';read=mesh?.userData.read||'';color='#'+((s.color||0x8aa0bf).toString(16).padStart(6,'0'));}
+  spec.innerHTML='<div class="st"><span class="sw" style="width:12px;height:12px;border-radius:4px;background:'+color+'"></span>'+name+'</div>'+(read?'<div class="sr">'+read+'</div>':'')+'<div class="sd">'+role+'</div>';
+  if(mesh){mesh.userData._s=mesh.scale.x;mesh.scale.setScalar((mesh.scale.x||1)*1.14);emphasised=mesh;}
+}
+function clearSelect(){document.querySelectorAll('.part').forEach(e=>e.classList.remove('on'));if(emphasised){emphasised.scale.setScalar(emphasised.userData._s||1);emphasised=null;}
+  document.getElementById('spec').innerHTML='<div class="sd" style="color:var(--muted)">Select a subsystem to see its role and provenance.</div>';}
+
+// raycast
+const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();
+cv.addEventListener('click',e=>{if(dragMoved)return;const r=cv.getBoundingClientRect();ndc.x=((e.clientX-r.left)/r.width)*2-1;ndc.y=-((e.clientY-r.top)/r.height)*2+1;
+  ray.setFromCamera(ndc,camera);const roots=mode==='projectile'?[projGroup]:[sysRoot,earth,sun,moon,mars,asteroid].filter(Boolean).concat(frags.map(f=>f.mesh));
+  const hits=ray.intersectObjects(roots,true);
+  for(const h of hits){let o=h.object;while(o&&!(o.userData&&o.userData.pick))o=o.parent;if(o&&o.userData.pick){select(o.userData.pick);return;}}});
+
+// controls
+cv.addEventListener('pointerdown',e=>{dragging=true;dragMoved=false;lx=e.clientX;ly=e.clientY;cv.setPointerCapture(e.pointerId);});
+cv.addEventListener('pointermove',e=>{if(!dragging)return;const dx=e.clientX-lx,dy=e.clientY-ly;if(Math.abs(dx)+Math.abs(dy)>3)dragMoved=true;yaw-=dx*0.007;pitch=Math.max(-0.55,Math.min(1.2,pitch+dy*0.007));lx=e.clientX;ly=e.clientY;}); // lower pitch bound keeps the orbit from diving under the Earth limb
+cv.addEventListener('pointerup',()=>dragging=false);
+cv.addEventListener('wheel',e=>{e.preventDefault();dist=Math.max(6,Math.min(120,dist+Math.sign(e.deltaY)*(mode==='system'?1.8:0.8)));},{passive:false});
+window.addEventListener('resize',resize);
+document.getElementById('theme').addEventListener('click',()=>{const h=document.documentElement,n=h.getAttribute('data-theme')==='light'?'dark':'light';h.setAttribute('data-theme',n);try{localStorage.setItem('cf-theme',n)}catch(e){}});
+try{var _q=new URLSearchParams(location.search).get('theme');if(_q){document.documentElement.setAttribute('data-theme',_q);}else{var t=localStorage.getItem('cf-theme');if(t)document.documentElement.setAttribute('data-theme',t);}}catch(e){}
+
+if(THREE_OK){ try{ initThree(); buildFamSel(); buildTargetSel(); updateMatch(); buildList(); updateAimBtn(); }catch(e){ cv.outerHTML='<div class="note" style="margin:20px">This device could not start WebGL, so the 3D view is unavailable. The subsystem list and projectile budget are in the panel and the provenance line below.</div>'; buildList(); console.error(e); } }
+else{ cv.outerHTML='<div class="note" style="margin:20px">3D library unavailable offline. Subsystems are listed in the panel.</div>'; buildList(); }
+</script>
+</body>
+</html>

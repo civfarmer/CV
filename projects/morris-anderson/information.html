@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Information — Your Own Build, Project Management and Regulation — Morris Anderson Construction</title>
+<meta name="description" content="Plain-spoken information before you build: what running your own build involves, what a project manager changes, and UK building regulation — including importing building materials.">
+<style>
+:root{--ground:#faf9f7;--surface:#fff;--ink:#22262a;--ink-soft:#4b5157;--stone:#6f6a61;--line:#e6e2da;--line-strong:#cfc9be;--bronze:#8c6d45;--navy:#1a1449;--navy-deep:#100c30;--charcoal:#1b1e21;--clay:#efece6;--heading:'Manrope','Segoe UI Semibold','Segoe UI',system-ui,sans-serif;--body:'Inter','Segoe UI',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0}body{background:var(--ground);color:var(--ink);font-family:var(--body);line-height:1.6}
+h1,h2,h3,h4{font-family:var(--heading);letter-spacing:-.015em;line-height:1.15;font-weight:650}
+.wrap{max-width:1020px;margin:0 auto;padding:0 24px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--bronze)}
+header.site{position:sticky;top:0;z-index:40;background:rgba(250,249,247,.95);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:64px;gap:24px;max-width:1120px;margin:0 auto;padding:0 24px}
+.nav ul{display:none;list-style:none;gap:clamp(16px,1.9vw,30px);padding:0;flex-wrap:nowrap}
+.nav ul a{font-size:13px;color:var(--ink-soft);text-decoration:none;white-space:nowrap}.nav ul a:hover{color:var(--navy)}
+.btn-ink{display:inline-block;background:var(--navy);color:#fff;border-radius:2px;font-family:var(--heading);font-weight:600;text-decoration:none}.btn-ink:hover{background:var(--navy-deep)}
+.menu-btn{display:flex;flex-direction:column;justify-content:center;gap:4px;width:42px;height:42px;padding:10px;border:1px solid var(--line-strong);background:var(--surface);border-radius:2px;cursor:pointer}
+.menu-btn span{display:block;height:2px;background:var(--ink);border-radius:1px}
+.m-panel{display:none;position:absolute;right:24px;top:60px;z-index:60;min-width:230px;background:var(--surface);border:1px solid var(--line);box-shadow:0 12px 32px rgba(20,18,40,.12);padding:8px 0}
+.m-panel a{display:block;padding:11px 20px;font-size:13.5px;color:var(--ink-soft);text-decoration:none;white-space:nowrap}
+.m-panel a:hover{background:var(--clay);color:var(--ink)}
+.nav .btn-ink{display:none}
+@media(min-width:1140px){.nav ul{display:flex}.menu-btn{display:none}.m-panel{display:none !important}.nav .btn-ink{display:inline-block}}
+.nav ul a.on{color:var(--navy);font-weight:600}
+.mark{display:flex;align-items:center;gap:10px;text-decoration:none}
+.mark img{height:30px}
+.mark b{font-family:var(--heading);font-size:15px;color:var(--navy);display:block}
+.mark .sub{margin-top:4px;font-size:9px;font-weight:600;letter-spacing:.34em;text-transform:uppercase;color:var(--bronze);display:block}
+.hero{position:relative;overflow:hidden;background:var(--surface);border-bottom:1px solid var(--line);padding:56px 0}
+.hero .wm{position:absolute;right:-30px;top:-20px;width:260px;opacity:.05;pointer-events:none}
+.hero h1{font-size:clamp(28px,4vw,44px);margin-top:14px;max-width:760px}
+.hero p.lead{margin-top:16px;color:var(--stone);max-width:680px;font-size:16px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px;padding:0;list-style:none}
+.tabs a{display:inline-block;border:1px solid var(--line);background:var(--surface);padding:8px 16px;font-size:13px;color:var(--ink-soft);text-decoration:none;border-radius:2px}
+.tabs a:hover{border-color:var(--ink)}
+section.blk{padding:56px 0;border-bottom:1px solid var(--line)}
+section.blk.alt{background:var(--surface)}
+.blk h2{font-size:clamp(22px,3vw,30px);margin-top:10px}
+.blk h3{font-size:19px;margin-top:30px}
+.blk p{margin-top:14px;color:var(--ink-soft);max-width:720px;font-size:15px}
+.blk ul.ticks{list-style:none;padding:0;margin-top:16px;max-width:720px}
+.blk ul.ticks li{position:relative;padding-left:26px;margin-top:10px;color:var(--ink-soft);font-size:15px}
+.blk ul.ticks li::before{content:"";position:absolute;left:0;top:11px;width:16px;height:1px;background:var(--bronze)}
+.cols{display:grid;gap:20px;margin-top:26px}
+@media(min-width:820px){.cols.c3{grid-template-columns:1fr 1fr 1fr}.cols.c2{grid-template-columns:1fr 1fr}}
+.card{background:var(--surface);border:1px solid var(--line);padding:24px}
+section.blk.alt .card{background:var(--ground)}
+.card h3,.card h4{margin-top:0;font-size:16px}
+.card p{font-size:13.5px;margin-top:8px}
+.card .tag{font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--bronze)}
+.card a.more{display:inline-block;margin-top:12px;font-size:13px;font-weight:600;color:var(--navy)}
+.steps{counter-reset:s;list-style:none;padding:0;margin-top:22px;max-width:720px}
+.steps li{counter-increment:s;position:relative;padding:16px 0 16px 56px;border-top:1px solid var(--line)}
+.steps li::before{content:counter(s,decimal-leading-zero);position:absolute;left:0;top:18px;font-family:var(--heading);font-weight:650;color:var(--bronze);font-size:15px}
+.steps b{display:block;font-family:var(--heading);font-size:15px;color:var(--ink)}
+.steps span{display:block;font-size:13.5px;color:var(--ink-soft);margin-top:2px}
+.notice{border-left:2px solid var(--bronze);background:var(--clay);padding:16px 20px;margin-top:22px;max-width:720px;font-size:13.5px;color:var(--ink-soft)}
+.cta{background:var(--navy);color:#fff;padding:52px 0}
+.cta h2{color:#fff;font-size:clamp(22px,3vw,30px)}
+.cta p{color:rgba(255,255,255,.75);margin-top:10px;max-width:640px;font-size:15px}
+.cta .btns{margin-top:24px;display:flex;gap:14px;flex-wrap:wrap}
+.cta a.b1{background:#fff;color:var(--navy);padding:13px 26px;font-family:var(--heading);font-weight:600;font-size:14px;text-decoration:none;border-radius:2px}
+.cta a.b2{border:1px solid rgba(255,255,255,.5);color:#fff;padding:13px 26px;font-family:var(--heading);font-weight:600;font-size:14px;text-decoration:none;border-radius:2px}
+footer{background:var(--charcoal);color:rgba(255,255,255,.55);padding:36px 0;font-size:12px}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+footer a{color:rgba(255,255,255,.8)}
+dl.facts{display:grid;gap:14px;margin-top:22px;max-width:760px}
+@media(min-width:720px){dl.facts{grid-template-columns:1fr 1fr}}
+dl.facts>div{background:var(--surface);border:1px solid var(--line);padding:16px 18px}
+section.blk.alt dl.facts>div{background:var(--ground)}
+dl.facts dt{font-family:var(--heading);font-weight:650;font-size:14px}
+dl.facts dd{margin:4px 0 0;font-size:13px;color:var(--ink-soft)}
+</style></head><body>
+<header class="site"><div class="nav">
+  <a href="index.html" class="mark"><img src="assets/ma-monogram.png" alt=""><span><b>Morris&nbsp;Anderson</b><span class="sub">Construction</span></span></a>
+  <ul><li><a href="index.html">Home</a></li><li><a href="turnkey-builds.html">Turnkey Builds</a></li><li><a href="self-build.html">Self-Build</a></li><li><a href="development.html">Development</a></li><li><a href="information.html" class="on">Information</a></li><li><a href="index.html#projects">Projects</a></li><li><a href="index.html#estimator">Estimator</a></li><li><a href="contact.html">Contact</a></li><li><a href="portal.html">Client Portal</a></li></ul>
+  <a class="btn-ink" href="contact.html" style="padding:10px 20px;font-size:13px;white-space:nowrap">Discuss a Project</a>
+  <button id="menuBtn" class="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="mPanel"><span></span><span></span><span></span></button><div id="mPanel" class="m-panel"><a href="index.html">Home</a><a href="turnkey-builds.html">Turnkey Builds</a><a href="self-build.html">Self-Build</a><a href="development.html">Development</a><a href="information.html">Information</a><a href="index.html#projects">Projects</a><a href="index.html#estimator">Estimator</a><a href="contact.html">Contact</a><a href="portal.html">Client Portal</a><a href="helicopter.html">Admin Portal</a></div>
+</div></header>
+<script>
+(function(){var b=document.getElementById('menuBtn'),p=document.getElementById('mPanel');
+if(!b||!p)return;
+b.addEventListener('click',function(){var open=p.style.display==='block';p.style.display=open?'none':'block';b.setAttribute('aria-expanded',String(!open));});
+document.addEventListener('click',function(e){if(!p.contains(e.target)&&e.target!==b&&!b.contains(e.target)){p.style.display='none';b.setAttribute('aria-expanded','false');}});
+})();
+</script>
+<section class="hero"><img class="wm" src="assets/ma-monogram.png" alt="" aria-hidden="true"><div class="wrap">
+<p class="eyebrow">Information</p>
+<h1>Three things worth understanding before you build</h1>
+<p class="lead">Plain-spoken information for anyone planning building work: what running your own build genuinely involves, what changes when an experienced project manager carries the coordination, and the regulation every UK project must satisfy.</p>
+<ul class="tabs"><li><a href="#your-own-build">1 &middot; Doing your own build</a></li><li><a href="#project-manager">2 &middot; Why employ a project manager</a></li><li><a href="#regulation">3 &middot; Regulation and compliance</a></li></ul>
+</div></section>
+<main>
+<section class="blk" id="your-own-build"><div class="wrap">
+  <p class="eyebrow">Part one</p><h2>Doing your own build</h2>
+  <p>Running your own build is entirely possible, and thousands of people do it well every year. It is also a second job. On a self-managed build you become the party responsible for sequence, procurement, cost control, information flow and compliance — everything that sits between the design and the finished building.</p>
+  <h3>What you take on</h3>
+  <ul class="ticks">
+    <li>Sequencing trades so each arrives to a site that is ready for them — and absorbing the cost when one is not</li>
+    <li>Procurement: comparing quotations on genuinely equal scope, ordering long-lead items months ahead, managing deliveries</li>
+    <li>Cost control: tracking committed against forecast spend line by line, holding a real contingency, pricing every change before agreeing it</li>
+    <li>Information: making sure the right drawing revision is on site, and answering the questions drawings never answer</li>
+    <li>Compliance: booking building-control inspections at the right moments and keeping the evidence</li>
+    <li>Risk: ground, weather, lead times, trade availability — carried by whoever holds the programme</li>
+  </ul>
+  <h3>When self-managing works well</h3>
+  <p>It suits people with time they genuinely control, some construction familiarity, a straightforward site and an appetite for detail. It rewards the disciplined and punishes the optimistic. If that is you, the <a href="self-build.html" style="text-decoration:underline;color:var(--navy)">cost-controlled self-build route</a> keeps a professional cost plan and scheduled reviews underneath your own management.</p>
+</div></section>
+<section class="blk alt" id="project-manager"><div class="wrap">
+  <p class="eyebrow">Part two</p><h2>Why employ a project manager</h2>
+  <p>A construction project manager is not an extra layer of cost on top of the build — done properly, the role pays for itself out of the mistakes that never happen. The value concentrates in four places.</p>
+  <dl class="facts">
+    <div><dt>Procurement leverage</dt><dd>Packages tendered on equal scope to trades whose work is known. Like-for-like comparison routinely finds the double-counted scope and the quietly excluded items that inflate self-procured builds.</dd></div>
+    <div><dt>Sequencing and programme</dt><dd>A resource-levelled programme with the critical path visible, so a slipped delivery is re-planned around the same day — not discovered as a five-week hole three months later.</dd></div>
+    <div><dt>Cost discipline</dt><dd>Every change priced for cost and time before it is agreed, committed spend tracked against forecast, contingency spent knowingly or not at all.</dd></div>
+    <div><dt>The record</dt><dd>Every decision, call and instruction logged with what was decided — the paper trail that prevents disputes rather than winning them.</dd></div>
+  </dl>
+  <p>The role matters most on constrained sites, on multi-unit schemes, and for anyone building at a distance. Morris Anderson is an international business with experience across large contractors and bespoke projects — expertly placed to manage teams across single and multi-site builds whilst adhering to the most stringent of building regulations.</p>
+</div></section>
+<section class="blk" id="regulation"><div class="wrap">
+  <p class="eyebrow">Part three</p><h2>Regulation and compliance</h2>
+  <p>UK building work sits under two separate regimes, and mixing them up is the most common early mistake: <strong>planning permission</strong> governs whether the development may happen at all — appearance, use, scale, neighbourhood impact — while the <strong>Building Regulations</strong> govern how the building must be constructed, whatever planning says.</p>
+  <h3>The Building Regulations, briefly</h3>
+  <p>The regulations are supported by Approved Documents covering, among others: structure (Part A), fire safety (Part B), ventilation (Part F), drainage (Part H), energy efficiency (Part L) and electrical safety (Part P). Compliance is evidenced through building-control inspections at defined stages — foundations, damp-proof course, structure, drainage, completion — and the certificates issued afterwards. Miss an inspection window and work may have to be opened up for approval.</p>
+  <dl class="facts">
+    <div><dt>CDM 2015</dt><dd>The Construction (Design and Management) Regulations apply to every project — they set who is responsible for health and safety at each stage, including duties on domestic clients that most self-builders have never heard of.</dd></div>
+    <div><dt>Party Wall Act</dt><dd>Work on or near shared walls and boundaries requires formal notice to neighbours, with a statutory process if they dissent. Timing matters: notice periods run before work may start.</dd></div>
+    <div><dt>Structural warranties</dt><dd>A new dwelling normally needs a 10-year structural warranty to be mortgageable and sellable — arranged before work starts, not after, because warranty providers inspect during the build.</dd></div>
+    <div><dt>Higher-risk and occupied buildings</dt><dd>Fire-safety regulation has tightened substantially in recent years; work on flats, conversions and occupied buildings carries additional duties and documentation.</dd></div>
+  </dl>
+  <h3>A note on importing building materials</h3>
+  <p>Importing materials — stone, timber systems, glazing, sanitaryware — can secure quality and price unavailable domestically, but it adds obligations: products must carry recognised conformity marking (UKCA or, where still accepted, CE) to be used in regulated work; imports attract customs declarations, duty and import VAT; lead times need programme slack for shipping and port handling; and quality inspection before dispatch matters, because rejecting a defective delivery is far harder once it has crossed a border. We have managed internationally procured packages and build these steps into the programme rather than discovering them at the port.</p>
+  <div class="notice">This page is general information, not legal advice. Regulations change and their application is project-specific — verify the current position with your local authority, building control body and professional advisers before relying on it.</div>
+</div></section>
+<section class="cta"><div class="wrap">
+  <h2>Talk the project through before anything is committed</h2>
+  <p>An international construction business with experience across large contractors and bespoke projects — expertly placed to manage teams across single and multi-site builds whilst adhering to the most stringent of building regulations.</p>
+  <div class="btns"><a class="b1" href="contact.html">Submit a Project Brief</a><a class="b2" href="index.html#estimator">Get an Indicative Estimate</a></div>
+</div></section>
+</main>
+<footer><div class="wrap" style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap"><p>&copy; 2026 Morris Anderson Construction. Director: Mathew Morris.</p><p><a href="index.html">Home</a> &middot; <a href="turnkey-builds.html">Turnkey</a> &middot; <a href="self-build.html">Self-Build</a> &middot; <a href="development.html">Development</a> &middot; <a href="information.html">Information</a> &middot; <a href="contact.html">Contact</a> &middot; <a href="portal.html">Client Portal</a> &middot; <a href="helicopter.html" style="opacity:.75">Admin portal</a></p></div></footer>
+</body></html>

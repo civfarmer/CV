@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Sentinel crest">
+  <defs>
+    <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e6cf8f"/>
+      <stop offset="1" stop-color="#c79f36"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#sg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="60" cy="60" r="54"/>
+    <circle cx="60" cy="60" r="50" stroke-width="1"/>
+
+    <!-- crown finial -->
+    <path d="M51 15 L53 8 L57 12 L60 5 L63 12 L67 8 L69 15 Z" stroke-width="1.6"/>
+    <path d="M50 17 L70 17" stroke-width="1.6"/>
+    <circle cx="53" cy="7" r="1.1" fill="url(#sg)" stroke="none"/>
+    <circle cx="60" cy="4" r="1.2" fill="url(#sg)" stroke="none"/>
+    <circle cx="67" cy="7" r="1.1" fill="url(#sg)" stroke="none"/>
+
+    <!-- LEFT STAG supporter (head faces inward; body sweeps down behind shield) -->
+    <g id="stag">
+      <path d="M23 52 C26 49 30 49 33 52 C36 55 39 60 43 64 C44 65 43 67 41 66 C38 65 35 65 32 66 C28 66 24 63 23 58 C22 55 22 54 23 52 Z"/>
+      <path d="M31 50 C30 46 28 44 24 43 C28 44 32 46 33 50"/>
+      <path d="M25 64 C21 72 20 82 25 92 C27 96 31 99 36 100"/>
+      <path d="M32 66 C31 74 33 84 39 93"/>
+      <path d="M30 50 C26 42 21 37 16 22"/>
+      <path d="M24 40 C22 34 22 31 24 27"/>
+      <path d="M19 32 C17 27 17 24 19 20"/>
+      <path d="M16 22 C15 19 16 17 19 16"/>
+      <path d="M16 22 C14 20 12 20 11 23"/>
+      <path d="M34 50 C35 42 36 36 40 25 C41 22 43 20 46 19"/>
+      <path d="M36 37 C34 33 34 30 36 26"/>
+      <path d="M39 28 C38 25 38 22 40 19"/>
+      <circle cx="32" cy="58" r="1.4" fill="url(#sg)" stroke="none"/>
+      <circle cx="42" cy="64" r="0.9" fill="url(#sg)" stroke="none"/>
+    </g>
+    <use href="#stag" transform="translate(120,0) scale(-1,1)"/>
+
+    <!-- central shield -->
+    <path d="M45 45 L75 45 L75 64 C75 79 68 89 60 95 C52 89 45 79 45 64 Z"/>
+    <path d="M48 48 L72 48 L72 64 C72 77 66 85 60 91 C54 85 48 77 48 64 Z" stroke-width="0.8"/>
+
+    <!-- sentinel eye: vigilance over an AI node, with a screening scan-line -->
+    <path d="M49 62 C54 54 66 54 71 62"/>
+    <path d="M49 62 C54 70 66 70 71 62"/>
+    <circle cx="60" cy="62" r="5"/>
+    <line x1="49" y1="62" x2="71" y2="62" stroke="#43b3a6" stroke-width="1" stroke-dasharray="2 2"/>
+    <!-- neural iris nodes -->
+    <circle cx="52" cy="56" r="0.9" fill="url(#sg)" stroke="none"/>
+    <circle cx="68" cy="56" r="0.9" fill="url(#sg)" stroke="none"/>
+    <line x1="54.5" y1="58" x2="57.8" y2="61" stroke-width="0.8"/>
+    <line x1="65.5" y1="58" x2="62.2" y2="61" stroke-width="0.8"/>
+    <!-- screening checkpoint below the eye -->
+    <path d="M53 82 L60 76 L67 82"/>
+    <line x1="55" y1="86" x2="65" y2="86" stroke="#43b3a6" stroke-width="1.4"/>
+    <!-- focal pupil / node -->
+    <circle cx="60" cy="62" r="2" fill="#0b0f17" stroke="#d4b24c" stroke-width="1.4"/>
+    <circle cx="60" cy="62" r="0.8" fill="#43b3a6" stroke="none"/>
+  </g>
+</svg>

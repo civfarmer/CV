@@ -1,0 +1,21 @@
+Earth textures — day (Blue Marble), night lights, topology (bump), water (specular).
+Source imagery: NASA Earth Observatory (Blue Marble: Next Generation), public domain.
+Bundled via the three-globe example asset set (MIT License).
+Resized for web/offline use. Credit: "NASA Earth Observatory".
+
+Mars & Sun surface maps: PlanetPixelEmporium (James Hastings-Trew), free to use with credit.
+Asteroid surface: lunar map (three.js examples, NASA/USGS-derived). Downsized for web/offline use.
+
+Structure/surface textures (struct-textures.js): ambientCG.com, CC0 (public domain) —
+  SolarPanel001 (solar-wing PV cells), MetalPlates006 (capacitor/buffer/converter/drive-module
+  casings, spatial-demo crates), Metal032 (radiator fins), Ground031 (cracked ground after the
+  body fractures), Concrete033 (spatial-demo floor). No attribution required; credited anyway.
+
+Smoke/vapour particle sprites (surface-assets.js): OpenGameArt.org "Smoke & vapor particles",
+  CC0 / public domain. Used for the surface-view dust and vapour columns.
+
+Impact fireball sprite-sheet (fireball.js): procedurally generated original work, CC0.
+  NOT CURRENTLY IN USE — no page loads fireball.js. Kept for a future impact effect;
+  safe to delete along with this entry if it is not wired in.
+
+All of the above are inlined as data URIs so WebGL textures are not CORS-tainted on file://.

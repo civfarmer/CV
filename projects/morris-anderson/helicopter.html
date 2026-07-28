@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Helicopter View — Morris Anderson Construction (Director)</title>
+<meta name="robots" content="noindex">
+<style>
+:root{--ground:#faf9f7;--surface:#fff;--ink:#22262a;--ink-soft:#4b5157;--stone:#6f6a61;--stone-light:#a39d92;--line:#e6e2da;--line-strong:#cfc9be;--bronze:#8c6d45;--navy:#1a1449;--navy-deep:#100c30;--charcoal:#1b1e21;--clay:#efece6;--green:#3c6449;--amber:#8a6722;--red:#a03e2d;--heading:'Manrope','Segoe UI Semibold','Segoe UI',system-ui,sans-serif;--body:'Inter','Segoe UI',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0}body{background:var(--ground);color:var(--ink);font-family:var(--body);line-height:1.6}
+h1,h2,h3,h4{font-family:var(--heading);letter-spacing:-.015em;line-height:1.15;font-weight:650}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--bronze)}
+header.site{position:sticky;top:0;z-index:40;background:rgba(250,249,247,.95);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:64px;gap:24px;max-width:1180px;margin:0 auto;padding:0 24px}
+.mark{display:flex;align-items:center;gap:10px;text-decoration:none}
+.mark img{height:30px}
+.mark b{font-family:var(--heading);font-size:15px;color:var(--navy)}
+.kstrip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:2px;overflow:hidden;margin-top:22px}
+.kstrip div{background:var(--surface);padding:14px 16px;text-align:center}
+.kstrip span{display:block;font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--stone)}
+.kstrip b{display:block;font-family:var(--heading);font-size:24px;margin-top:2px}
+.proj{background:var(--surface);border:1px solid var(--line);border-left-width:4px;padding:20px 22px;margin-top:18px}
+.proj.green{border-left-color:var(--green)}.proj.amber{border-left-color:var(--amber)}.proj.red{border-left-color:var(--red)}
+.head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:baseline}
+.chip{font-size:11px;font-weight:700;padding:3px 10px;border-radius:2px}
+.chip.green{background:rgb(60 100 73 / .12);color:var(--green)}.chip.amber{background:rgb(138 103 34 / .14);color:var(--amber)}.chip.red{background:rgba(160,62,45,.12);color:var(--red)}
+.facts{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 22px;margin-top:12px;font-size:12.5px}
+@media(min-width:760px){.facts{grid-template-columns:repeat(5,1fr)}}
+.facts span{display:block;color:var(--stone);font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;font-weight:600}
+.facts b{font-family:var(--heading)}
+.alerts{margin-top:10px;font-size:12.5px;color:var(--red);font-weight:600}
+.alerts li{list-style:none}
+.mini{margin-top:14px;overflow-x:auto}
+form.log{display:grid;gap:10px;background:var(--clay);border:1px solid var(--line);padding:14px 16px;margin-top:14px}
+@media(min-width:860px){form.log{grid-template-columns:1.4fr .9fr .5fr 1.6fr auto}}
+form.log label{font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--stone);display:block}
+form.log select,form.log input{margin-top:4px;width:100%;padding:8px 9px;font-size:13px;border:1px solid var(--line-strong);border-radius:2px;background:#fff;font-family:var(--body)}
+form.log button{align-self:end;background:var(--navy);color:#fff;border:0;border-radius:2px;padding:10px 16px;font-family:var(--heading);font-weight:600;font-size:13px;cursor:pointer}
+form.log button:hover{background:var(--navy-deep)}
+.evlist{margin-top:10px;font-size:12px;color:var(--ink-soft);list-style:none;padding:0}
+.evlist li{border-top:1px solid var(--line);padding:7px 0;display:flex;justify-content:space-between;gap:12px}
+.evlist button{border:0;background:none;color:var(--stone);text-decoration:underline;font-size:11.5px;cursor:pointer;padding:0}
+.preset{border:1px solid var(--navy);background:none;color:var(--navy);border-radius:2px;padding:8px 14px;font-size:12px;font-family:var(--heading);font-weight:600;cursor:pointer;margin-top:10px}
+.preset:hover{background:var(--navy);color:#fff}
+.notebox{border-left:2px solid var(--bronze);background:var(--clay);padding:12px 16px;margin-top:22px;font-size:12.5px;color:var(--ink-soft);max-width:860px}
+a.plink{font-size:12.5px;font-weight:600;color:var(--navy)}
+.createGrid{grid-template-columns:1fr}
+@media(min-width:900px){.createGrid{grid-template-columns:1.4fr 1fr .8fr 1fr 1.2fr auto}}
+.planEd{margin-top:12px;border:1px solid var(--line);background:var(--clay);padding:12px}
+.planEd table{width:100%;border-collapse:collapse;font-size:12px}
+.planEd th{font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--stone);text-align:left;padding:4px 6px;border-bottom:1px solid var(--line-strong)}
+.planEd td{padding:3px 4px;vertical-align:top}
+.planEd input,.planEd select{width:100%;padding:6px 7px;font-size:12px;border:1px solid var(--line-strong);border-radius:2px;background:#fff}
+.planEd .rowbtn{background:none;border:0;cursor:pointer;color:var(--stone);font-size:13px;padding:0 3px}
+.planEd .del{color:var(--red);font-size:11px;text-decoration:underline}
+footer{background:var(--charcoal);color:rgba(255,255,255,.55);padding:30px 0;font-size:12px;margin-top:48px}
+footer a{color:rgba(255,255,255,.8)}
+</style></head><body>
+<header class="site"><div class="nav">
+  <a href="index.html" class="mark"><img src="assets/ma-monogram.png" alt=""><b>Morris&nbsp;Anderson</b></a>
+  <span style="font-size:12px;color:var(--stone)">Director access · demonstration <a href="portal.html" style="margin-left:16px">Client portal →</a> <button id="signOutBtn" hidden style="margin-left:16px;background:none;border:0;color:var(--stone);font-size:12px;text-decoration:underline;cursor:pointer">Sign out</button></span>
+</div></header>
+<section id="gate"><div class="wrap" style="max-width:460px;padding-top:64px;padding-bottom:64px">
+  <p class="eyebrow">Admin access</p>
+  <h1 style="font-size:26px;margin-top:10px">Sign in to the helicopter view</h1>
+  <div style="background:var(--surface);border:1px solid var(--line);padding:24px;margin-top:18px">
+    <div id="gateSetup" hidden>
+      <p style="font-size:13px;color:var(--stone)">First use on this browser — set the admin password that protects this demonstration.</p>
+      <label style="display:block;font-size:12px;font-weight:600;margin-top:12px" for="gateNew">Choose an admin password</label>
+      <input id="gateNew" type="password" autocomplete="new-password" style="width:100%;margin-top:4px;padding:10px 11px;font-size:14px;border:1px solid var(--line-strong);border-radius:2px">
+      <button id="gateSetBtn" style="width:100%;margin-top:12px;background:var(--navy);color:#fff;border:0;border-radius:2px;padding:12px;font-family:var(--heading);font-weight:600;font-size:14px;cursor:pointer">Set password and enter</button>
+    </div>
+    <div id="gateLogin" hidden>
+      <label style="display:block;font-size:12px;font-weight:600" for="gatePass">Admin password</label>
+      <input id="gatePass" type="password" autocomplete="current-password" style="width:100%;margin-top:4px;padding:10px 11px;font-size:14px;border:1px solid var(--line-strong);border-radius:2px">
+      <p id="gateErr" hidden style="font-size:12px;color:var(--red);font-weight:600;margin-top:8px">Incorrect password.</p>
+      <button id="gateGoBtn" style="width:100%;margin-top:12px;background:var(--navy);color:#fff;border:0;border-radius:2px;padding:12px;font-family:var(--heading);font-weight:600;font-size:14px;cursor:pointer">Sign in</button>
+      <button id="gateResetBtn" style="width:100%;margin-top:8px;background:none;border:0;color:var(--stone);font-size:11.5px;text-decoration:underline;cursor:pointer">Forgotten? Reset the demo password (projects are kept)</button>
+    </div>
+  </div>
+  <p style="font-size:11.5px;color:var(--stone-light);margin-top:12px">In the production system this is the /admin sign-in — each team member has their own email and password, managed by the director.</p>
+</div></section>
+<main hidden><div class="wrap" style="padding-top:40px;padding-bottom:20px">
+  <p class="eyebrow">Helicopter view</p>
+  <h1 style="font-size:clamp(26px,3.6vw,38px);margin-top:10px">Every live project, one screen</h1>
+  <p style="margin-top:8px;color:var(--stone);max-width:760px;font-size:14.5px">Engine health, delivery confidence and what is waiting on whom — across the whole book. Log what happened on site and the affected client&rsquo;s portal re-plans immediately, with the reason attached to the bar.</p>
+
+  <div class="kstrip" id="kstrip"></div>
+
+  <section style="background:var(--surface);border:1px solid var(--line);padding:20px 22px;margin-top:18px">
+    <h2 style="font-size:17px">Create a project and push it to the client portal</h2>
+    <p style="font-size:12.5px;color:var(--stone);margin-top:4px">Name it, protect it with a client password, choose a starting plan — it appears below with the same live engine, and the client opens it at the portal sign-in with the name and password you set.</p>
+    <div style="display:grid;gap:12px;margin-top:14px" class="createGrid">
+      <div><label style="font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--stone)" for="cp-name">Project name</label>
+        <input id="cp-name" placeholder="e.g. Orchard Barn Conversion" style="width:100%;margin-top:4px;padding:9px 10px;font-size:13px;border:1px solid var(--line-strong);border-radius:2px"></div>
+      <div><label style="font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--stone)" for="cp-start">Start on site</label>
+        <input id="cp-start" type="date" style="width:100%;margin-top:4px;padding:8px 10px;font-size:13px;border:1px solid var(--line-strong);border-radius:2px"></div>
+      <div><label style="font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--stone)" for="cp-days">Commitment (days)</label>
+        <input id="cp-days" type="number" min="60" max="1200" value="400" style="width:100%;margin-top:4px;padding:9px 10px;font-size:13px;border:1px solid var(--line-strong);border-radius:2px"></div>
+      <div><label style="font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--stone)" for="cp-pass">Client password</label>
+        <input id="cp-pass" type="text" placeholder="On their welcome note" style="width:100%;margin-top:4px;padding:9px 10px;font-size:13px;border:1px solid var(--line-strong);border-radius:2px"></div>
+      <div><label style="font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--stone)" for="cp-template">Starting plan</label>
+        <select id="cp-template" style="width:100%;margin-top:4px;padding:9px 10px;font-size:13px;border:1px solid var(--line-strong);border-radius:2px;background:#fff">
+          <option value="standard">Standard residential build (18 activities)</option>
+          <option value="blank">Blank — build the plan yourself</option>
+        </select></div>
+      <div style="align-self:end"><button id="cp-create" style="width:100%;background:var(--navy);color:#fff;border:0;border-radius:2px;padding:11px 16px;font-family:var(--heading);font-weight:600;font-size:13px;cursor:pointer">Create project</button></div>
+    </div>
+    <p id="cp-msg" hidden style="font-size:12.5px;margin-top:10px"></p>
+  </section>
+  <div id="projects"></div>
+
+  <div class="notebox"><b>How the live link works:</b> changes you log against Hillside Residence are picked up by the client portal on this device — open <a href="portal.html" class="plink">the client portal</a> in another tab, enter the demonstration project, then log the timber-frame delay here and watch the client&rsquo;s programme re-plan with the reason attached. In the production system this flows through the server to every signed-in client device, with an email and device notification sent automatically.</div>
+</div></main>
+<footer><div class="wrap" style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap"><p>&copy; 2026 Morris Anderson Construction. Director: Mathew Morris.</p><p><a href="index.html">Home</a> &middot; <a href="turnkey-builds.html">Turnkey</a> &middot; <a href="self-build.html">Self-Build</a> &middot; <a href="development.html">Development</a> &middot; <a href="information.html">Information</a> &middot; <a href="contact.html">Contact</a> &middot; <a href="portal.html">Client Portal</a> &middot; <a href="helicopter.html" style="opacity:.75">Admin portal</a></p></div></footer>
+
+<script src="assets/helm-engine.js"></script>
+<script>
+// ── Three demonstration projects, each scheduled live by the engine ──
+function residenceSeed(){ return {
+  id:'demo01', name:'Hillside Residence', start:'2026-05-04', days:205, deadline:198, mcSeed:11,
+  resources:[
+    {id:'pm',name:'Site management',fte:1},{id:'ground',name:'Groundworks team',fte:1,external:true},
+    {id:'frame',name:'Frame contractor',fte:1,external:true},{id:'mne',name:'M&E trades',fte:1,external:true},
+    {id:'fin',name:'Finishing trades',fte:1,external:true},{id:'bc',name:'Building control',fte:1,external:true}],
+  decisions:[],scenarios:[],
+  tasks:[
+    {id:'t1',title:'Pre-construction information & approvals',dur:15,deps:[],assignee:'pm',risk:'low'},
+    {id:'t2',title:'Procurement & long-lead orders',dur:10,deps:['t1'],assignee:'pm',risk:'medium'},
+    {id:'t3',title:'Site setup & access works',dur:6,deps:['t1'],assignee:'ground',risk:'low'},
+    {id:'t4',title:'Excavation into hillside',dur:12,deps:['t3'],assignee:'ground',risk:'high'},
+    {id:'t5',title:'Retaining structures',dur:16,deps:['t4'],assignee:'ground',risk:'high'},
+    {id:'t6',title:'Foundations & slab',dur:10,deps:['t5'],assignee:'ground',risk:'medium'},
+    {id:'t7',title:'Drainage & services in ground',dur:8,deps:[{id:'t6',pct:0.5}],assignee:'ground',risk:'medium'},
+    {id:'t8',title:'Timber-frame erection',dur:14,deps:['t6','t2'],assignee:'frame',risk:'medium'},
+    {id:'t9',title:'Roof structure & coverings',dur:10,deps:['t8'],assignee:'frame',risk:'medium'},
+    {id:'t10',title:'Windows & external doors',dur:6,deps:['t9'],assignee:'frame',risk:'low'},
+    {id:'t11',title:'Weathertight inspection',dur:2,deps:['t10'],assignee:'bc',risk:'low',approvalLagDays:3},
+    {id:'t12',title:'First fix M&E',dur:15,deps:['t11'],assignee:'mne',risk:'medium'},
+    {id:'t13',title:'Insulation & boarding',dur:10,deps:[{id:'t12',pct:0.6}],assignee:'fin',risk:'low'},
+    {id:'t14',title:'Second fix & finishes',dur:18,deps:['t13'],assignee:'fin',risk:'medium'},
+    {id:'t15',title:'Kitchen & bathrooms',dur:12,deps:[{id:'t14',pct:0.4}],assignee:'fin',risk:'medium'},
+    {id:'t16',title:'External works & landscaping',dur:12,deps:['t10'],assignee:'ground',risk:'low'},
+    {id:'t17',title:'Commissioning & inspections',dur:6,deps:['t14','t15'],assignee:'bc',risk:'medium',approvalLagDays:3},
+    {id:'t18',title:'Snagging & handover',dur:8,deps:['t17','t16'],assignee:'pm',risk:'low'}]
+};}
+function orchardSeed(){ return {
+  id:'demo02', name:'Orchard Lane — 4-unit scheme', start:'2026-02-16', days:350, deadline:340, mcSeed:11,
+  resources:[
+    {id:'pm',name:'Site management',fte:1},{id:'ground',name:'Groundworks team',fte:1,external:true},
+    {id:'shell',name:'Shell contractor',fte:1,external:true},{id:'fin',name:'Finishing trades',fte:1,external:true},
+    {id:'bc',name:'Building control',fte:1,external:true}],
+  decisions:[],scenarios:[],
+  tasks:[
+    {id:'u0',title:'Site-wide infrastructure & services',dur:24,deps:[],assignee:'ground',risk:'medium'},
+    {id:'u1a',title:'Plot 1 — substructure',dur:12,deps:['u0'],assignee:'ground',risk:'medium'},
+    {id:'u1b',title:'Plot 1 — shell & weathertight',dur:22,deps:['u1a'],assignee:'shell',risk:'medium'},
+    {id:'u1c',title:'Plot 1 — fit-out & completion',dur:30,deps:['u1b'],assignee:'fin',risk:'medium'},
+    {id:'u2a',title:'Plot 2 — substructure',dur:12,deps:['u1a'],assignee:'ground',risk:'low'},
+    {id:'u2b',title:'Plot 2 — shell & weathertight',dur:22,deps:['u2a','u1b'],assignee:'shell',risk:'low'},
+    {id:'u2c',title:'Plot 2 — fit-out & completion',dur:30,deps:['u2b','u1c'],assignee:'fin',risk:'low'},
+    {id:'u3a',title:'Plot 3 — substructure',dur:12,deps:['u2a'],assignee:'ground',risk:'low'},
+    {id:'u3b',title:'Plot 3 — shell & weathertight',dur:22,deps:['u3a','u2b'],assignee:'shell',risk:'low'},
+    {id:'u3c',title:'Plot 3 — fit-out & completion',dur:30,deps:['u3b','u2c'],assignee:'fin',risk:'low'},
+    {id:'u4a',title:'Plot 4 — substructure',dur:12,deps:['u3a'],assignee:'ground',risk:'low'},
+    {id:'u4b',title:'Plot 4 — shell & weathertight',dur:22,deps:['u4a','u3b'],assignee:'shell',risk:'low'},
+    {id:'u4c',title:'Plot 4 — fit-out & completion',dur:30,deps:['u4b','u3c'],assignee:'fin',risk:'low'},
+    {id:'uz',title:'Site completion & inspections',dur:10,deps:['u4c'],assignee:'bc',risk:'medium',approvalLagDays:3}]
+};}
+function riversideSeed(){ return {
+  id:'demo03', name:'Riverside Office Conversion', start:'2026-06-01', days:160, deadline:150, mcSeed:5,
+  resources:[
+    {id:'pm',name:'Site management',fte:1},{id:'strip',name:'Strip-out crew',fte:1,external:true},
+    {id:'mne',name:'M&E trades',fte:1,external:true},{id:'fin',name:'Finishing trades',fte:1,external:true},
+    {id:'bc',name:'Building control',fte:1,external:true}],
+  decisions:[],scenarios:[],
+  tasks:[
+    {id:'c1',title:'Surveys, strip-out & structural opening-up',dur:18,deps:[],assignee:'strip',risk:'high'},
+    {id:'c2',title:'Structural alterations',dur:16,deps:['c1'],assignee:'strip',risk:'high'},
+    {id:'c3',title:'New services risers & distribution',dur:20,deps:[{id:'c2',pct:0.5}],assignee:'mne',risk:'medium'},
+    {id:'c4',title:'Fire compartmentation & doors',dur:14,deps:['c2'],assignee:'fin',risk:'medium'},
+    {id:'c5',title:'Unit fit-out',dur:34,deps:['c3','c4'],assignee:'fin',risk:'medium'},
+    {id:'c6',title:'Commissioning, inspections & handover',dur:10,deps:['c5'],assignee:'bc',risk:'medium',approvalLagDays:3}]
+};}
+
+const PROJECTS = [
+  { ref:'MAC-PRJ-26-DEMO01', client:'client@example.com', stage:'Frame & weathertight', seed:residenceSeed(), today:78, liveKey:'mac-live-events:MAC-PRJ-26-DEMO01',
+    base:[{t:'progress',task:'t1',pct:1,day:15},{t:'progress',task:'t2',pct:1,day:26},{t:'progress',task:'t3',pct:1,day:30},{t:'progress',task:'t4',pct:1,day:46},{t:'delay',task:'t5',days:4,note:'Ground conditions required a revised retaining detail'},{t:'progress',task:'t5',pct:1,day:66},{t:'progress',task:'t6',pct:1,day:74},{t:'progress',task:'t7',pct:0.6},{t:'progress',task:'t8',pct:0.35}],
+    waiting:['Change awaiting client approval: additional drainage run (+£3,200)','Record awaiting sign-off: rooflight sizes (phone-call record)'] },
+  { ref:'MAC-PRJ-26-DEMO02', client:'developer@example.com', stage:'Construction — phase 2 of 4', seed:orchardSeed(), today:145, liveKey:'mac-live-events:MAC-PRJ-26-DEMO02',
+    base:[{t:'progress',task:'u0',pct:1,day:26},{t:'progress',task:'u1a',pct:1,day:38},{t:'progress',task:'u1b',pct:1,day:62},{t:'progress',task:'u1c',pct:0.8},{t:'progress',task:'u2a',pct:1,day:52},{t:'progress',task:'u2b',pct:1,day:88},{t:'progress',task:'u2c',pct:0.4},{t:'progress',task:'u3a',pct:1,day:66},{t:'progress',task:'u3b',pct:0.5}],
+    waiting:[] },
+  { ref:'MAC-PRJ-26-DEMO03', client:'owner@example.com', stage:'Strip-out & structure', seed:riversideSeed(), today:40, liveKey:'mac-live-events:MAC-PRJ-26-DEMO03',
+    base:[{t:'progress',task:'c1',pct:1,day:20},{t:'delay',task:'c2',days:6,note:'Opening-up found corroded steelwork — engineer detail revised'},{t:'progress',task:'c2',pct:0.45}],
+    waiting:['Decision with the client: unit mix on second floor'] },
+];
+
+// ── Admin gate (demo): password set once per browser, hashed ──
+function djb2(str){ let h=5381; for (let i=0;i<str.length;i++) h=((h<<5)+h+str.charCodeAt(i))>>>0; return 'h'+h.toString(36); }
+async function hashPass(p){
+  try {
+    if (crypto && crypto.subtle){
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('mac-salt:'+p));
+      return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+  } catch(e){}
+  return djb2('mac-salt:'+p);
+}
+const GATE_KEY='mac-admin-pass';
+function gateInit(){
+  const stored = localStorage.getItem(GATE_KEY);
+  const authed = sessionStorage.getItem('mac-admin-session')==='1';
+  const gate=document.getElementById('gate'), main=document.querySelector('main');
+  const so=document.getElementById('signOutBtn');
+  if (authed){ gate.hidden=true; main.hidden=false; so.hidden=false; render(); return; }
+  main.hidden=true; gate.hidden=false;
+  document.getElementById('gateSetup').hidden = !!stored;
+  document.getElementById('gateLogin').hidden = !stored;
+}
+document.getElementById('gateSetBtn').addEventListener('click', async function(){
+  const p=document.getElementById('gateNew').value;
+  if (!p || p.length<6){ alert('Use at least 6 characters.'); return; }
+  localStorage.setItem(GATE_KEY, await hashPass(p));
+  sessionStorage.setItem('mac-admin-session','1');
+  gateInit();
+});
+document.getElementById('gateGoBtn').addEventListener('click', async function(){
+  const ok = (await hashPass(document.getElementById('gatePass').value)) === localStorage.getItem(GATE_KEY);
+  document.getElementById('gateErr').hidden = ok;
+  if (ok){ sessionStorage.setItem('mac-admin-session','1'); gateInit(); }
+});
+document.getElementById('gatePass').addEventListener('keydown', function(e){ if(e.key==='Enter') document.getElementById('gateGoBtn').click(); });
+document.getElementById('gateResetBtn').addEventListener('click', function(){
+  if (confirm('Reset the admin password for this browser? Your created projects are kept.')){
+    localStorage.removeItem(GATE_KEY); sessionStorage.removeItem('mac-admin-session'); gateInit();
+  }
+});
+document.getElementById('signOutBtn').addEventListener('click', function(){
+  sessionStorage.removeItem('mac-admin-session'); gateInit();
+});
+
+// ── Project registry: created projects live in this browser ──
+const REG_KEY='mac-registry';
+function readRegistry(){ try{ const a=JSON.parse(localStorage.getItem(REG_KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+function writeRegistry(a){ try{ localStorage.setItem(REG_KEY, JSON.stringify(a)); }catch(e){} }
+const STD_RESOURCES=[
+  {id:'pm',name:'Site management',fte:1},{id:'ground',name:'Groundworks',fte:1,external:true},
+  {id:'shell',name:'Frame / shell contractor',fte:1,external:true},{id:'mne',name:'M&E trades',fte:1,external:true},
+  {id:'fin',name:'Finishing trades',fte:1,external:true},{id:'bc',name:'Statutory inspections',fte:1,external:true}];
+function stdTemplate(){ return [
+  {id:'t1',title:'Initial review & feasibility',dur:10,deps:[],assignee:'pm',risk:'low'},
+  {id:'t2',title:'Delivery strategy & cost plan',dur:10,deps:['t1'],assignee:'pm',risk:'low'},
+  {id:'t3',title:'Pre-construction & procurement',dur:20,deps:['t2'],assignee:'pm',risk:'medium'},
+  {id:'t4',title:'Site setup & access',dur:6,deps:['t3'],assignee:'ground',risk:'low'},
+  {id:'t5',title:'Excavation & groundworks',dur:14,deps:['t4'],assignee:'ground',risk:'high'},
+  {id:'t6',title:'Foundations & slab',dur:10,deps:['t5'],assignee:'ground',risk:'medium'},
+  {id:'t7',title:'Drainage & services in ground',dur:8,deps:['t6'],assignee:'ground',risk:'medium'},
+  {id:'t8',title:'Frame / shell erection',dur:14,deps:['t6','t3'],assignee:'shell',risk:'medium'},
+  {id:'t9',title:'Roof structure & coverings',dur:10,deps:['t8'],assignee:'shell',risk:'medium'},
+  {id:'t10',title:'Windows & external doors',dur:6,deps:['t9'],assignee:'shell',risk:'low'},
+  {id:'t11',title:'Weathertight inspection',dur:2,deps:['t10'],assignee:'bc',risk:'low',approvalLagDays:3},
+  {id:'t12',title:'First fix M&E',dur:15,deps:['t11'],assignee:'mne',risk:'medium'},
+  {id:'t13',title:'Insulation & boarding',dur:10,deps:['t12'],assignee:'fin',risk:'low'},
+  {id:'t14',title:'Second fix & finishes',dur:18,deps:['t13'],assignee:'fin',risk:'medium'},
+  {id:'t15',title:'Kitchen & bathrooms',dur:12,deps:['t14'],assignee:'fin',risk:'medium'},
+  {id:'t16',title:'External works & landscaping',dur:12,deps:['t10'],assignee:'ground',risk:'low'},
+  {id:'t17',title:'Commissioning & inspections',dur:6,deps:['t14','t15'],assignee:'bc',risk:'medium',approvalLagDays:3},
+  {id:'t18',title:'Snagging & handover',dur:8,deps:['t17','t16'],assignee:'pm',risk:'low'}];
+}
+function regToday(reg){
+  const ms=Date.now()-new Date(reg.start+'T00:00:00').getTime();
+  return Math.max(1, Math.min(reg.days, Math.floor(ms/86400000)+1));
+}
+function regToProject(reg){
+  return {
+    ref: reg.ref, client: 'client-set password', stage: 'Live project',
+    isRegistry: true, regRef: reg.ref,
+    seed: { id: reg.ref, name: reg.name, start: reg.start, days: reg.days, deadline: reg.days,
+            mcSeed: 7, resources: STD_RESOURCES, decisions: [], scenarios: [], tasks: reg.tasks },
+    today: regToday(reg),
+    base: [], waiting: [],
+  };
+}
+function allProjects(){ return PROJECTS.concat(readRegistry().map(regToProject)); }
+
+function readLive(key){ try{ var a=JSON.parse(localStorage.getItem(key)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+function writeLive(key,arr){ try{ localStorage.setItem(key,JSON.stringify(arr)); }catch(e){} }
+function esc(x){ return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+function eventsFor(p){
+  if (p.isRegistry){
+    const reg = readRegistry().find(r=>r.ref===p.regRef);
+    return reg && Array.isArray(reg.events) ? reg.events : [];
+  }
+  return readLive(p.liveKey);
+}
+function planFor(p){ return schedule(p.seed, p.base.concat(eventsFor(p)), p.today); }
+
+function miniGantt(p, plan){
+  const rows = plan.tasks.filter(t=>!t.dropped);
+  const notes={}; p.base.concat(readLive(p.liveKey)).forEach(e=>{ if(e.t==='delay'&&e.note) notes[e.task]=e.note; });
+  const H=rows.length*17+44, W=980, X0=250, XW=W-X0-14;
+  const x=d=>X0+(d/p.seed.days)*XW;
+  let svg='';
+  for(let d=0; d<=p.seed.days; d+=Math.ceil(p.seed.days/10/10)*10){
+    svg+='<line x1="'+x(d)+'" y1="20" x2="'+x(d)+'" y2="'+(H-18)+'" stroke="#efece6"/><text x="'+x(d)+'" y="13" font-size="9" text-anchor="middle" fill="#a39d92">D'+d+'</text>';
+  }
+  svg+='<line x1="'+x(p.today)+'" y1="16" x2="'+x(p.today)+'" y2="'+(H-14)+'" stroke="#8c6d45" stroke-width="1.5" stroke-dasharray="4 3"/>';
+  rows.forEach((t,i)=>{
+    const y=24+i*17;
+    const done=t.status==='done', crit=t.critical||t.driving, note=notes[t.id];
+    const fill=done?'#cfc9be':crit?'#1a1449':'#8c6d45';
+    svg+='<text x="'+(X0-8)+'" y="'+(y+8)+'" font-size="9" text-anchor="end" fill="#4b5157">'+esc(t.title)+'</text>'+
+      '<rect x="'+x(t.start)+'" y="'+y+'" width="'+Math.max(3,x(t.end)-x(t.start))+'" height="10" rx="1" fill="'+fill+'" opacity="'+(done?0.8:crit?1:0.75)+'"'+(note?' stroke="#a03e2d" stroke-width="1.2"':'')+'/>' +
+      (!done&&t.progress>0?'<rect x="'+x(t.start)+'" y="'+y+'" width="'+Math.max(2,(x(t.end)-x(t.start))*t.progress)+'" height="10" rx="1" fill="#1a1449" opacity="0.9"/>':'')+
+      (note?'<circle cx="'+(x(t.end)+6)+'" cy="'+(y+5)+'" r="2.5" fill="#a03e2d"/>':'');
+  });
+  return '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;min-width:720px" role="img" aria-label="Programme for '+esc(p.seed.name)+'">'+svg+'</svg>';
+}
+
+let CURRENT=[];
+function render(){
+  CURRENT = allProjects();
+  let onTrack=0, attention=0, waitingTotal=0;
+  const cards = CURRENT.map((p,pi)=>{
+    const plan=planFor(p);
+    const live=eventsFor(p);
+    const alerts=p.waiting.slice();
+    if(plan.buffer<0) alerts.push(Math.abs(plan.buffer)+' days over commitment');
+    if(plan.health==='green') onTrack++;
+    if(alerts.length) attention++;
+    waitingTotal+=p.waiting.length;
+    const chip=plan.health==='green'?'On track':plan.health==='amber'?'Watch':'At risk';
+    const opts=p.seed.tasks.map(t=>'<option value="'+t.id+'">'+esc(t.title)+'</option>').join('');
+    const evs=live.map((e,i)=>'<li><span><b>'+esc((p.seed.tasks.find(t=>t.id===e.task)||{}).title||e.task)+'</b> — '+(e.t==='delay'?('delayed '+e.days+' days'):e.t)+(e.note?' · '+esc(e.note):'')+'</span><button onclick="removeEvent('+pi+','+i+')">Remove</button></li>').join('');
+    return '<article class="proj '+plan.health+'" aria-label="'+esc(p.seed.name)+'">'+
+      '<div class="head"><div><h2 style="font-size:19px">'+esc(p.seed.name)+'</h2>'+
+      '<p style="font-size:11.5px;color:var(--stone);font-family:monospace">'+p.ref+' · '+p.client+'</p></div>'+
+      '<span class="chip '+plan.health+'">'+chip+'</span></div>'+
+      '<div class="facts">'+
+      '<div><span>Stage</span><b>'+esc(p.stage)+'</b></div>'+
+      '<div><span>Confidence</span><b>'+plan.confidence+'%</b></div>'+
+      '<div><span>Buffer</span><b style="color:'+(plan.buffer<0?'var(--red)':'inherit')+'">'+(plan.buffer>=0?'+':'')+plan.buffer+' days</b></div>'+
+      '<div><span>Forecast finish</span><b>Day '+plan.finishDay+' · '+plan.cal.fmtShort(plan.finishDay)+'</b></div>'+
+      '<div><span>Feasibility</span><b>'+plan.feasibility.label+'</b></div>'+
+      '</div>'+
+      (alerts.length?'<ul class="alerts">'+alerts.map(a=>'<li>▲ '+esc(a)+'</li>').join('')+'</ul>':'<p style="margin-top:10px;font-size:12.5px;color:var(--stone)">Nothing outstanding.</p>')+
+      '<div class="mini">'+miniGantt(p,plan)+'</div>'+
+      '<form class="log" onsubmit="return logEvent(event,'+pi+')">'+
+      '<div><label for="task'+pi+'">Activity</label><select id="task'+pi+'">'+opts+'</select></div>'+
+      '<div><label for="type'+pi+'">What happened</label><select id="type'+pi+'" onchange="var d=document.getElementById(&quot;days'+pi+'&quot;);d.max=this.value===&quot;progress&quot;?100:400;if(+d.value>+d.max)d.value=d.max"><option value="delay">Delay</option><option value="progress">Progress %</option><option value="duration">Resize (new days)</option><option value="blocker">Blocked N days</option><option value="reassign">Reassign</option></select></div>'+
+      '<div><label for="days'+pi+'">Working days / %</label><input id="days'+pi+'" type="number" min="1" max="120" value="5"></div>'+
+      '<div><label for="note'+pi+'">Reason the client sees</label><input id="note'+pi+'" placeholder="e.g. weather conditions — crane could not operate"></div>'+
+      '<button type="submit">Log &amp; update client</button>'+
+      '</form>'+
+      (pi===0?'<button class="preset" onclick="presetWeather()">Preset example: timber frame delayed 5 days — weather conditions</button>':'')+
+      (evs?'<ul class="evlist">'+evs+'</ul>':'')+
+      (pi===0?'<p style="margin-top:10px;font-size:12px"><a class="plink" href="portal.html">Open this client&rsquo;s portal →</a> <span style="color:var(--stone)">(updates there the moment you log a change here)</span></p>':'')+
+      (p.isRegistry?
+        '<div style="margin-top:10px;display:flex;gap:14px;flex-wrap:wrap;align-items:center">'+
+        '<button class="preset" style="margin-top:0" onclick="togglePlanEditor('+pi+')">Edit the task plan</button>'+
+        '<a class="plink" href="portal.html">Client opens it at the portal sign-in →</a>'+
+        '<button class="rowbtn del" style="background:none;border:0;cursor:pointer;color:var(--red);font-size:12px;text-decoration:underline" onclick="deleteProject('+pi+')">Delete project</button>'+
+        '</div><div id="planEd'+pi+'" hidden class="planEd"></div>'
+      :'')+
+      '</article>';
+  }).join('');
+  document.getElementById('projects').innerHTML=cards;
+  document.getElementById('kstrip').innerHTML=
+    '<div><span>Live projects</span><b>'+PROJECTS.length+'</b></div>'+
+    '<div><span>On track</span><b style="color:var(--green)">'+onTrack+'</b></div>'+
+    '<div><span>Need attention</span><b style="color:'+(attention?'var(--red)':'inherit')+'">'+attention+'</b></div>'+
+    '<div><span>Waiting on clients</span><b>'+waitingTotal+'</b></div>';
+}
+
+window.logEvent=function(ev,pi){
+  ev.preventDefault();
+  const p=CURRENT[pi];
+  const task=document.getElementById('task'+pi).value;
+  const type=document.getElementById('type'+pi).value;
+  const n=Number(document.getElementById('days'+pi).value);
+  const note=(document.getElementById('note'+pi).value||'').trim();
+  if(!Number.isFinite(n)||n<=0){ alert('Enter the number of days (or %).'); return false; }
+  const live=eventsFor(p);
+  if (type==='delay') live.push({t:'delay',task:task,days:Math.round(n),note:note||undefined});
+  else if (type==='progress') live.push({t:'progress',task:task,pct:Math.min(100,n)/100});
+  else if (type==='duration') live.push({t:'duration',task:task,dur:Math.round(n)});
+  else if (type==='blocker') live.push({t:'blocker',task:task,days:Math.round(n),at:p.today,note:note||undefined});
+  else if (type==='reassign'){
+    const res=(p.seed.resources||[]).map(function(r){return r.id+" = "+r.name}).join("\n");
+    const to=prompt("Hand this task to which trade? Enter the id:\n"+res, (p.seed.resources[1]||p.seed.resources[0]).id);
+    if(!to) return false;
+    live.push({t:'reassign',task:task,to:to});
+  }
+  saveEvents(p, live);
+  render();
+  return false;
+};
+function saveEvents(p, live){
+  if (p.isRegistry){
+    const reg=readRegistry();
+    const r=reg.find(x=>x.ref===p.regRef);
+    if (r){ r.events=live; writeRegistry(reg); }
+  } else {
+    writeLive(p.liveKey, live);
+  }
+}
+window.removeEvent=function(pi,i){
+  const p=CURRENT[pi];
+  const live=eventsFor(p).slice();
+  live.splice(i,1);
+  saveEvents(p, live);
+  render();
+};
+window.presetWeather=function(){
+  const live=readLive(PROJECTS[0].liveKey);
+  live.push({t:'delay',task:'t8',days:5,note:'Weather conditions — crane could not operate in high winds'});
+  writeLive(PROJECTS[0].liveKey,live);
+  render();
+};
+window.addEventListener('storage',function(){ if (sessionStorage.getItem('mac-admin-session')==='1') render(); });
+
+// ── Create a project and push it to the portal ──
+document.getElementById('cp-create').addEventListener('click', async function(){
+  const name=(document.getElementById('cp-name').value||'').trim();
+  const start=document.getElementById('cp-start').value;
+  const days=Number(document.getElementById('cp-days').value)||400;
+  const pass=(document.getElementById('cp-pass').value||'').trim();
+  const tpl=document.getElementById('cp-template').value;
+  const msg=document.getElementById('cp-msg');
+  if (name.length<3 || !start || pass.length<4){
+    msg.hidden=false; msg.style.color='var(--red)';
+    msg.textContent='Give the project a name, a start date and a client password of at least 4 characters.';
+    return;
+  }
+  const ref='MAC-PRJ-26-'+Math.random().toString(36).slice(2,8).toUpperCase();
+  const reg=readRegistry();
+  reg.push({ ref, name, start, days: Math.max(60, Math.min(1200, days)),
+    passHash: await hashPass(pass),
+    tasks: tpl==='standard' ? stdTemplate() : [
+      {id:'t1',title:'Set up & mobilise',dur:5,deps:[],assignee:'pm',risk:'low'},
+      {id:'t2',title:'First activity',dur:10,deps:['t1'],assignee:'ground',risk:'medium'},
+      {id:'t3',title:'Completion & handover',dur:5,deps:['t2'],assignee:'pm',risk:'low'}],
+    events: [], createdAt: Date.now() });
+  writeRegistry(reg);
+  msg.hidden=false; msg.style.color='var(--green)';
+  msg.textContent='Created '+ref+' — it is live below, and the client opens it at the portal sign-in with the project name (or reference) and the password you set.';
+  document.getElementById('cp-name').value=''; document.getElementById('cp-pass').value='';
+  render();
+});
+
+// ── Per-project plan editor (registry projects) ──
+window.togglePlanEditor=function(pi){
+  const host=document.getElementById('planEd'+pi);
+  if (!host) return;
+  if (!host.hidden){ host.hidden=true; return; }
+  buildPlanEditor(pi); host.hidden=false;
+};
+function buildPlanEditor(pi){
+  const p=CURRENT[pi];
+  const reg=readRegistry().find(r=>r.ref===p.regRef);
+  if (!reg) return;
+  const host=document.getElementById('planEd'+pi);
+  const trades=STD_RESOURCES.map(r=>'<option value="'+r.id+'">'+r.name+'</option>').join('');
+  const rows=reg.tasks.map((t,i)=>{
+    const deps=(t.deps||[]).map(d=>typeof d==='string'?d:(d.id+'@'+Math.round((d.pct||0.5)*100)+'%')).join(', ');
+    return '<tr>'+
+      '<td style="width:60px"><input data-f="id" data-i="'+i+'" value="'+esc(t.id)+'"></td>'+
+      '<td><input data-f="title" data-i="'+i+'" value="'+esc(t.title)+'"></td>'+
+      '<td style="width:58px"><input data-f="dur" data-i="'+i+'" type="number" min="1" max="400" value="'+t.dur+'"></td>'+
+      '<td style="width:130px"><input data-f="deps" data-i="'+i+'" value="'+esc(deps)+'" placeholder="t1, t2@50%"></td>'+
+      '<td style="width:150px"><select data-f="assignee" data-i="'+i+'">'+trades.replace('value="'+t.assignee+'"','value="'+t.assignee+'" selected')+'</select></td>'+
+      '<td style="width:86px"><select data-f="risk" data-i="'+i+'">'+['low','medium','high'].map(r=>'<option'+(r===t.risk?' selected':'')+'>'+r+'</option>').join('')+'</select></td>'+
+      '<td style="width:64px;white-space:nowrap"><button class="rowbtn" onclick="movePlanTask('+pi+','+i+',-1)">↑</button><button class="rowbtn" onclick="movePlanTask('+pi+','+i+',1)">↓</button></td>'+
+      '<td style="width:60px"><button class="rowbtn del" onclick="removePlanTask('+pi+','+i+')">Remove</button></td>'+
+      '</tr>';
+  }).join('');
+  host.innerHTML='<p style="font-size:11.5px;color:var(--stone)">Change anything — id, activity, working days, dependencies (comma-separated; <code>t2@60%</code> starts when t2 is 60% done), trade, risk, order. Saving re-plans the client&rsquo;s programme; logged events replay on top.</p>'+
+    '<table><thead><tr><th>Id</th><th>Activity</th><th>Days</th><th>Depends on</th><th>Trade</th><th>Risk</th><th>Order</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>'+
+    '<div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap">'+
+    '<button class="preset" style="margin-top:0" onclick="addPlanTask('+pi+')">Add activity</button>'+
+    '<button class="preset" style="margin-top:0;background:var(--navy);color:#fff" onclick="savePlan('+pi+')">Save plan — re-plan the client programme</button>'+
+    '<span id="planMsg'+pi+'" style="font-size:12px;align-self:center"></span></div>';
+}
+function planReg(pi){ const p=CURRENT[pi]; const reg=readRegistry(); return { reg, r: reg.find(x=>x.ref===p.regRef) }; }
+window.movePlanTask=function(pi,i,dir){
+  const {reg,r}=planReg(pi); if(!r) return;
+  const j=i+dir; if (j<0||j>=r.tasks.length) return;
+  const t=r.tasks[i]; r.tasks[i]=r.tasks[j]; r.tasks[j]=t;
+  writeRegistry(reg); buildPlanEditor(pi);
+};
+window.removePlanTask=function(pi,i){
+  const {reg,r}=planReg(pi); if(!r||r.tasks.length<=1) return;
+  r.tasks.splice(i,1); writeRegistry(reg); buildPlanEditor(pi);
+};
+window.addPlanTask=function(pi){
+  const {reg,r}=planReg(pi); if(!r) return;
+  r.tasks.push({id:'t'+(r.tasks.length+1)+Math.random().toString(36).slice(2,3),title:'New activity',dur:5,deps:r.tasks.length?[r.tasks[r.tasks.length-1].id]:[],assignee:'pm',risk:'medium'});
+  writeRegistry(reg); buildPlanEditor(pi);
+};
+window.savePlan=function(pi){
+  const host=document.getElementById('planEd'+pi);
+  const {reg,r}=planReg(pi); if(!r) return;
+  const next=r.tasks.map((t,i)=>({...t}));
+  host.querySelectorAll('[data-f]').forEach(function(el){
+    const i=Number(el.getAttribute('data-i')), f=el.getAttribute('data-f');
+    if (!next[i]) return;
+    if (f==='dur') next[i].dur=Math.max(1,Math.min(400,Number(el.value)||1));
+    else if (f==='deps') next[i].deps=el.value.split(',').map(x=>x.trim()).filter(Boolean).map(function(x){
+      const m=/^([a-z0-9_-]+)@(\d{1,3})%?$/i.exec(x);
+      return m ? {id:m[1],pct:Math.max(10,Math.min(100,Number(m[2])))/100} : x;
+    });
+    else next[i][f]=el.value.trim();
+  });
+  // validate: unique ids, deps resolve
+  const ids=new Set(next.map(t=>t.id));
+  const msg=document.getElementById('planMsg'+pi);
+  if (ids.size!==next.length){ msg.style.color='var(--red)'; msg.textContent='Task ids must be unique.'; return; }
+  for (const t of next) for (const d of (t.deps||[])){
+    const id=typeof d==='string'?d:d.id;
+    if (!ids.has(id)){ msg.style.color='var(--red)'; msg.textContent='Dependency "'+id+'" does not match any task id.'; return; }
+  }
+  r.tasks=next; writeRegistry(reg);
+  msg.style.color='var(--green)'; msg.textContent='Saved — re-planned.';
+  render();
+};
+window.deleteProject=function(pi){
+  const p=CURRENT[pi];
+  if (!p.isRegistry) return;
+  if (!confirm('Delete "'+p.seed.name+'" and its history? The client will no longer be able to open it.')) return;
+  writeRegistry(readRegistry().filter(r=>r.ref!==p.regRef));
+  render();
+};
+
+gateInit();
+</script>
+</body></html>

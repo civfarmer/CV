@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Frontier crest">
+  <defs>
+    <linearGradient id="fg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e6cf8f"/>
+      <stop offset="1" stop-color="#c79f36"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#fg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="60" cy="60" r="54"/>
+    <circle cx="60" cy="60" r="50" stroke-width="1"/>
+
+    <!-- crown finial -->
+    <path d="M51 15 L53 8 L57 12 L60 5 L63 12 L67 8 L69 15 Z" stroke-width="1.6"/>
+    <path d="M50 17 L70 17" stroke-width="1.6"/>
+    <circle cx="53" cy="7" r="1.1" fill="url(#fg)" stroke="none"/>
+    <circle cx="60" cy="4" r="1.2" fill="url(#fg)" stroke="none"/>
+    <circle cx="67" cy="7" r="1.1" fill="url(#fg)" stroke="none"/>
+
+    <!-- LEFT STAG supporter (head faces inward; body sweeps down behind shield) -->
+    <g id="stag">
+      <!-- head: brow -> muzzle pointing down-inward -> jaw -> cheek -->
+      <path d="M23 52 C26 49 30 49 33 52 C36 55 39 60 43 64 C44 65 43 67 41 66 C38 65 35 65 32 66 C28 66 24 63 23 58 C22 55 22 54 23 52 Z"/>
+      <!-- ear -->
+      <path d="M31 50 C30 46 28 44 24 43 C28 44 32 46 33 50"/>
+      <!-- neck / body sweeping down beside the shield -->
+      <path d="M25 64 C21 72 20 82 25 92 C27 96 31 99 36 100"/>
+      <path d="M32 66 C31 74 33 84 39 93"/>
+      <!-- outer antler beam + tines -->
+      <path d="M30 50 C26 42 21 37 16 22"/>
+      <path d="M24 40 C22 34 22 31 24 27"/>
+      <path d="M19 32 C17 27 17 24 19 20"/>
+      <path d="M16 22 C15 19 16 17 19 16"/>
+      <path d="M16 22 C14 20 12 20 11 23"/>
+      <!-- inner antler beam + tines -->
+      <path d="M34 50 C35 42 36 36 40 25 C41 22 43 20 46 19"/>
+      <path d="M36 37 C34 33 34 30 36 26"/>
+      <path d="M39 28 C38 25 38 22 40 19"/>
+      <!-- eye + nostril -->
+      <circle cx="32" cy="58" r="1.4" fill="url(#fg)" stroke="none"/>
+      <circle cx="42" cy="64" r="0.9" fill="url(#fg)" stroke="none"/>
+    </g>
+    <use href="#stag" transform="translate(120,0) scale(-1,1)"/>
+
+    <!-- central shield -->
+    <path d="M45 45 L75 45 L75 64 C75 79 68 89 60 95 C52 89 45 79 45 64 Z"/>
+    <path d="M48 48 L72 48 L72 64 C72 77 66 85 60 91 C54 85 48 77 48 64 Z" stroke-width="0.8"/>
+
+    <!-- frontier / gateway motif -->
+    <line x1="60" y1="50" x2="60" y2="89" stroke="#d4b24c" stroke-width="1.1" stroke-dasharray="3 3"/>
+    <path d="M51 85 V68 a9 9 0 0 1 18 0 V85"/>
+    <line x1="51" y1="85" x2="51" y2="70" stroke-width="2.8"/>
+    <line x1="69" y1="85" x2="69" y2="70" stroke-width="2.8"/>
+    <line x1="48" y1="75" x2="68" y2="75" stroke-width="2.2"/>
+    <path d="M66 71.5 L73 75 L66 78.5 Z" fill="url(#fg)" stroke="none"/>
+    <circle cx="60" cy="75" r="3" fill="#0b0f17" stroke="#d4b24c" stroke-width="1.5"/>
+    <circle cx="60" cy="75" r="1" fill="#e6cf8f" stroke="none"/>
+  </g>
+</svg>

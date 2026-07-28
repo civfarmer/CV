@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Contact — Morris Anderson Construction</title>
+<meta name="description" content="Begin with the site, the objective and the practical constraints. Submit a structured project brief to Morris Anderson Construction.">
+<style>
+:root{--ground:#faf9f7;--surface:#fff;--ink:#22262a;--ink-soft:#4b5157;--stone:#6f6a61;--line:#e6e2da;--line-strong:#cfc9be;--bronze:#8c6d45;--navy:#1a1449;--navy-deep:#100c30;--charcoal:#1b1e21;--clay:#efece6;--heading:'Manrope','Segoe UI Semibold','Segoe UI',system-ui,sans-serif;--body:'Inter','Segoe UI',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0}body{background:var(--ground);color:var(--ink);font-family:var(--body);line-height:1.6}
+h1,h2,h3{font-family:var(--heading);letter-spacing:-.015em;line-height:1.15;font-weight:650}
+.wrap{max-width:840px;margin:0 auto;padding:0 24px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--bronze)}
+.nav ul{display:none;list-style:none;gap:clamp(16px,1.9vw,30px);padding:0;flex-wrap:nowrap}
+.nav ul a{font-size:13px;color:var(--ink-soft);text-decoration:none;white-space:nowrap}.nav ul a:hover{color:var(--navy)}
+.menu-btn{display:flex;flex-direction:column;justify-content:center;gap:4px;width:42px;height:42px;padding:10px;border:1px solid var(--line-strong);background:var(--surface);border-radius:2px;cursor:pointer}
+.menu-btn span{display:block;height:2px;background:var(--ink);border-radius:1px}
+.m-panel{display:none;position:absolute;right:24px;top:60px;z-index:60;min-width:230px;background:var(--surface);border:1px solid var(--line);box-shadow:0 12px 32px rgba(20,18,40,.12);padding:8px 0}
+.m-panel a{display:block;padding:11px 20px;font-size:13.5px;color:var(--ink-soft);text-decoration:none;white-space:nowrap}
+.m-panel a:hover{background:var(--clay);color:var(--ink)}
+@media(min-width:1140px){.nav ul{display:flex}.menu-btn{display:none}.m-panel{display:none !important}}
+header.site{position:sticky;top:0;z-index:40;background:rgba(250,249,247,.95);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:64px;gap:24px;max-width:1120px;margin:0 auto;padding:0 24px}
+.mark{display:flex;align-items:center;gap:10px;text-decoration:none}
+.mark img{height:30px}
+.mark b{font-family:var(--heading);font-size:15px;color:var(--navy);display:block}
+.mark .sub{margin-top:4px;font-size:9px;font-weight:600;letter-spacing:.34em;text-transform:uppercase;color:var(--bronze);display:block}
+.hero{position:relative;overflow:hidden;background:var(--surface);border-bottom:1px solid var(--line);padding:52px 0}
+.hero .wm{position:absolute;right:-30px;top:-20px;width:240px;opacity:.05;pointer-events:none}
+.hero h1{font-size:clamp(28px,4vw,42px);margin-top:14px}
+.hero p{margin-top:14px;color:var(--stone);max-width:640px}
+main .wrap{padding-top:48px;padding-bottom:72px}
+form{background:var(--surface);border:1px solid var(--line);padding:32px}
+.grid2{display:grid;gap:18px}
+@media(min-width:720px){.grid2{grid-template-columns:1fr 1fr}.grid2 .full{grid-column:1/-1}}
+label{display:block;font-size:13px;font-weight:600;color:var(--ink)}
+input,select,textarea{margin-top:6px;width:100%;padding:11px 12px;font-size:14px;border:1px solid var(--line-strong);border-radius:2px;background:#fff;font-family:var(--body);color:var(--ink)}
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--ink-soft);font-weight:400;margin-top:16px}
+.chk input{width:auto;margin-top:3px;accent-color:var(--navy)}
+button{margin-top:24px;background:var(--navy);color:#fff;border:0;border-radius:2px;padding:14px 30px;font-family:var(--heading);font-weight:600;font-size:14px;cursor:pointer}
+button:hover{background:var(--navy-deep)}
+.note{margin-top:14px;font-size:12px;color:var(--stone)}
+#done{display:none;background:var(--surface);border-left:2px solid var(--bronze);padding:20px;margin-top:20px;font-size:14px}
+footer{background:var(--charcoal);color:rgba(255,255,255,.55);padding:36px 0;font-size:12px}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-top:0;padding-bottom:0}
+footer a{color:rgba(255,255,255,.8)}
+</style></head><body>
+<header class="site"><div class="nav">
+  <a href="index.html" class="mark"><img src="assets/ma-monogram.png" alt=""><span><b>Morris&nbsp;Anderson</b><span class="sub">Construction</span></span></a>
+  <ul><li><a href="index.html">Home</a></li><li><a href="turnkey-builds.html">Turnkey Builds</a></li><li><a href="self-build.html">Self-Build</a></li><li><a href="development.html">Development</a></li><li><a href="information.html">Information</a></li><li><a href="index.html#projects">Projects</a></li><li><a href="index.html#estimator">Estimator</a></li><li><a href="portal.html">Client Portal</a></li></ul>
+  <button id="menuBtn" class="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="mPanel"><span></span><span></span><span></span></button>
+  <div id="mPanel" class="m-panel"><a href="index.html">Home</a><a href="turnkey-builds.html">Turnkey Builds</a><a href="self-build.html">Self-Build</a><a href="development.html">Development</a><a href="information.html">Information</a><a href="index.html#projects">Projects</a><a href="index.html#estimator">Estimator</a><a href="portal.html">Client Portal</a><a href="helicopter.html">Admin Portal</a></div>
+</div></header>
+<section class="hero"><div class="wrap">
+  <p class="eyebrow">Contact</p>
+  <h1>Begin with the site, the objective and the practical constraints</h1>
+  <p>Provide as much information as is currently available. Early-stage projects are welcome, but drawings, site details, planning information and an approximate budget allow a more useful initial assessment.</p>
+</div></section>
+<main><div class="wrap">
+<form id="brief" novalidate>
+
+<div class="grid2">
+  <div><label for="f-name">Full name *</label><input id="f-name" required></div>
+  <div><label for="f-company">Company</label><input id="f-company"></div>
+  <div><label for="f-email">Email *</label><input id="f-email" type="email" required></div>
+  <div><label for="f-phone">Telephone</label><input id="f-phone" type="tel"></div>
+  <div><label for="f-type">Project type *</label>
+    <select id="f-type" required>
+      <option value="">Please choose…</option>
+      <option>Turnkey new build</option><option>Self-build</option>
+      <option>Extension or major renovation</option><option>Commercial conversion</option>
+      <option>Development / multi-unit</option><option>Compliance works (e.g. fire doors)</option>
+      <option>Other</option>
+    </select></div>
+  <div><label for="f-site">Site postcode or area</label><input id="f-site"></div>
+  <div><label for="f-own">Do you own the site?</label>
+    <select id="f-own"><option value="">Please choose…</option><option>Yes — owned</option><option>Under offer</option><option>Not yet identified</option><option>Existing property</option></select></div>
+  <div><label for="f-planning">Planning status</label>
+    <select id="f-planning"><option value="">Please choose…</option><option>Permission secured</option><option>Application underway</option><option>Not started</option><option>Not required</option></select></div>
+  <div><label for="f-area">Approx. floor area (m²)</label><input id="f-area" type="number" min="0"></div>
+  <div><label for="f-units">Number of units (if multi-unit)</label><input id="f-units" type="number" min="1"></div>
+  <div class="full"><label for="f-mix">Unit sizes / mix (if multi-unit)</label><input id="f-mix" placeholder="e.g. 4 × 2-bed at ~75 m², 2 × 3-bed at ~95 m²"></div>
+  <div><label for="f-budget">Budget — up to (£)</label><input id="f-budget" type="number" min="0"></div>
+  <div><label for="f-start">Desired start</label><input id="f-start" placeholder="e.g. Spring 2027"></div>
+  <div class="full"><label for="f-desc">Short project description *</label>
+    <textarea id="f-desc" rows="6" required placeholder="The site, the objective and the practical constraints — as much as is currently available."></textarea></div>
+</div>
+<div style="margin-top:16px">
+  <label class="f" for="f-file">Drawings or documents (PDF, DOCX, JPG, PNG)</label>
+  <input id="f-file" type="file" multiple accept=".pdf,.docx,.jpg,.jpeg,.png" style="margin-top:6px;font-size:13px">
+  <p style="font-size:12px;color:var(--stone);margin-top:4px">Your email draft opens with the brief composed — attach the chosen files to it before pressing send and they arrive with the brief. (The live site uploads them automatically.)</p>
+</div>
+<label class="chk"><input type="checkbox" id="f-visit"> I would be interested in visiting a current or completed project by arrangement.</label>
+<label class="chk"><input type="checkbox" id="f-privacy" required> I have read the privacy notice and understand my information will be used to review and respond to this enquiry. *</label>
+
+<button type="submit">Submit Project Brief</button>
+<p class="note">Submitting opens a pre-addressed email in your mail programme with your brief composed and ready to send — press send and it comes straight to us. Prospective clients with a serious project are welcome to ask about visiting a current or completed project by arrangement.</p>
+<div id="done" role="status">Your email draft has opened in your mail programme — <strong>attach your chosen documents</strong> (they are listed in the draft) and press <strong>send</strong> to complete your enquiry. If nothing opened, email us directly with the details above.</div>
+</form>
+</div></main>
+<footer><div class="wrap" style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap"><p>&copy; 2026 Morris Anderson Construction. Director: Mathew Morris.</p><p><a href="index.html">Home</a> &middot; <a href="turnkey-builds.html">Turnkey</a> &middot; <a href="self-build.html">Self-Build</a> &middot; <a href="development.html">Development</a> &middot; <a href="information.html">Information</a> &middot; <a href="contact.html">Contact</a> &middot; <a href="portal.html">Client Portal</a> &middot; <a href="helicopter.html" style="opacity:.75">Admin portal</a></p></div></footer>
+<script>
+document.getElementById("brief").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var g = function (id) { return (document.getElementById(id).value || "").trim(); };
+  if (!g("f-name") || !g("f-email") || !g("f-type") || !g("f-desc") || !document.getElementById("f-privacy").checked) {
+    alert("Please complete the required fields (marked *) and confirm the privacy notice."); return;
+  }
+  var lines = [
+    "PROJECT BRIEF — submitted via the website",
+    "",
+    "Name: " + g("f-name"),
+    g("f-company") ? "Company: " + g("f-company") : null,
+    "Email: " + g("f-email"),
+    g("f-phone") ? "Telephone: " + g("f-phone") : null,
+    "",
+    "Project type: " + g("f-type"),
+    g("f-site") ? "Site: " + g("f-site") : null,
+    g("f-own") ? "Ownership: " + g("f-own") : null,
+    g("f-planning") ? "Planning: " + g("f-planning") : null,
+    g("f-area") ? "Approx. floor area: " + g("f-area") + " m²" : null,
+    g("f-units") ? "Units: " + g("f-units") : null,
+    g("f-mix") ? "Unit mix: " + g("f-mix") : null,
+    g("f-budget") ? "Budget up to: £" + g("f-budget") : null,
+    g("f-start") ? "Desired start: " + g("f-start") : null,
+    document.getElementById("f-visit").checked ? "Interested in visiting a project by arrangement: yes" : null,
+    (document.getElementById("f-file").files||[]).length ? "Documents to attach: " + [...document.getElementById("f-file").files].map(function(x){return x.name}).join(", ") + " (attached to this email)" : null,
+    "",
+    "Description:",
+    g("f-desc"),
+  ].filter(Boolean).join("\n");
+  // Address assembled at click-time.
+  var to = ["mathewmorris90", "gmail.com"].join("@");
+  var href = "mailto:" + to +
+    "?subject=" + encodeURIComponent("Project brief — " + g("f-type") + " — " + g("f-name")) +
+    "&body=" + encodeURIComponent(lines);
+  window.location.href = href;
+  document.getElementById("done").style.display = "block";
+});
+</script>
+<script>
+(function(){var b=document.getElementById('menuBtn'),p=document.getElementById('mPanel');
+if(!b||!p)return;
+b.addEventListener('click',function(){var open=p.style.display==='block';p.style.display=open?'none':'block';b.setAttribute('aria-expanded',String(!open));});
+document.addEventListener('click',function(e){if(!p.contains(e.target)&&e.target!==b&&!b.contains(e.target)){p.style.display='none';b.setAttribute('aria-expanded','false');}});
+})();
+</script>
+</body></html>

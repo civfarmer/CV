@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./vantage-bundle.js"></script>
+<script src="./dc-nosri.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  html { scroll-behavior: smooth; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { opacity: 0.8; }
+  input:focus { outline: none; box-shadow: 0 0 0 2px var(--accent); }
+  @keyframes livepulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  @media print { [data-noprint]{display:none!important} [data-report]{position:static!important} body{background:#fff!important} }
+</style>
+</helmet>
+
+<div style="{{ wrapperStyle }}">
+
+  <div data-noprint style="position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); pointer-events: none; z-index: 0; opacity: var(--watermarkOpacity); mix-blend-mode: var(--watermarkBlend);">
+    <img src="vantage-crest.png" style="width: 520px; height: auto;">
+  </div>
+
+  <div data-noprint style="position: sticky; top: 0; z-index: 100; background: var(--topbar); border-bottom: 2px solid var(--watneys); padding: 0 28px; display: flex; justify-content: space-between; align-items: center; height: 56px;">
+    <a href="Vantage.dc.html" style="display: flex; align-items: center; gap: 12px; text-decoration: none;" title="Back to Vantage home">
+      <img src="vantage-crest.png" style="height: 42px; width: auto; display: block;">
+      <div>
+        <div style="font: 700 16px/1 'Zilla Slab', serif; color: var(--topbarText); letter-spacing: 0.02em;">Vantage</div>
+        <div style="font: 500 9.5px/1 'IBM Plex Mono', monospace; color: var(--topbarSubtext); letter-spacing: 0.06em; margin-top: 3px;">FORECASTING &amp; PREDICTIVE ANALYTICS</div>
+      </div>
+    </a>
+    <div style="display: flex; gap: 4px;">
+      <a href="#dashboard" style="padding: 6px 12px; border-radius: 5px; font: 600 11.5px/1 'IBM Plex Sans', sans-serif; color: var(--pillText); background: var(--pillBg); text-decoration: none;">Dashboard</a>
+      <a href="#models" style="padding: 6px 12px; border-radius: 5px; font: 600 11.5px/1 'IBM Plex Sans', sans-serif; color: var(--pillText); background: var(--pillBg); text-decoration: none;">Models</a>
+      <a href="#scenarios" style="padding: 6px 12px; border-radius: 5px; font: 600 11.5px/1 'IBM Plex Sans', sans-serif; color: var(--pillText); background: var(--pillBg); text-decoration: none;">Scenarios</a>
+      <a href="#data" style="padding: 6px 12px; border-radius: 5px; font: 600 11.5px/1 'IBM Plex Sans', sans-serif; color: var(--pillText); background: var(--pillBg); text-decoration: none;">Data</a>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.08em; color: var(--watneys); background: var(--watneysLight); padding: 4px 8px; border-radius: 4px;">{{ industryTag }}</span>
+      <button onclick="{{ openReport }}" style="background: var(--accent); border: none; color: var(--card); font: 600 11px/1 'IBM Plex Sans', sans-serif; padding: 0 12px; height: 32px; border-radius: 6px; cursor: pointer;">Report</button>
+      <button onclick="{{ toggleMode }}" style="background: var(--pillBg); border: none; color: var(--pillText); font-size: 16px; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; display: grid; place-items: center;" title="{{ modeLabel }}">{{ modeIcon }}</button>
+    </div>
+  </div>
+
+  <div data-noprint style="max-width: 1100px; margin: 0 auto; padding: 28px 28px 80px; position: relative; z-index: 1;">
+
+    <div id="dashboard" style="scroll-margin-top: 68px;">
+      <div style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sectionLabel);">Dashboard Overview</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+        <div style="display: flex; align-items: center; gap: 13px;">
+          <img src="logo-saas.png" style="height: 44px; width: auto; border-radius: 9px;">
+          <h2 style="font: 700 24px/1.15 'Zilla Slab', serif; color: var(--textStrong); margin: 0;">{{ company }}</h2>
+        </div>
+        <div style="font: 500 12px/1 'IBM Plex Sans', sans-serif; color: var(--textMuted);">{{ subtitle }}</div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-top: 18px;">
+        <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+          <div onclick="{{ k.onClick }}" style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 10px; padding: 14px 15px; box-shadow: var(--cardShadow); cursor: pointer;" style-hover="border-color: var(--accent);">
+            <div style="font: 500 10.5px/1.3 'IBM Plex Sans', sans-serif; color: var(--textMuted); min-height: 26px;">{{ k.l }}</div>
+            <div style="font: 700 24px/1 'IBM Plex Mono', monospace; color: var(--kpiValue); margin: 7px 0 5px; letter-spacing: -0.02em;">{{ k.v }}</div>
+            <div style="display: flex; justify-content: space-between; align-items: center;"><span style="font: 600 10.5px/1 'IBM Plex Sans', sans-serif; color: var(--accent);">{{ k.sub }}</span><span style="font: 600 9px/1 'IBM Plex Mono', monospace; color: var(--textSubtle);">details ›</span></div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="margin-top: 16px; background: var(--card); border: 1px solid var(--cardBorder); border-radius: 12px; padding: 16px 18px; box-shadow: var(--cardShadow);">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px;">
+          <div style="font: 700 15px/1 'Zilla Slab', serif; color: var(--textStrong);">Action plan · what to do now</div>
+          <div style="font: 600 11px/1 'IBM Plex Mono', monospace; color: var(--textMuted);">{{ actionCount }} decisions</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <sc-for list="{{ actions }}" as="a" hint-placeholder-count="3">
+            <div onclick="{{ a.onClick }}" style="display: flex; align-items: center; gap: 12px; padding: 10px 13px; border: 1px solid var(--border); border-radius: 9px; border-left: 4px solid {{ a.tone }}; cursor: pointer;" style-hover="background: var(--bg);">
+              <div style="flex: 1;">
+                <div style="font: 700 13px/1.25 'IBM Plex Sans', sans-serif; color: var(--textStrong);">{{ a.title }}</div>
+                <div style="font: 500 11.5px/1.45 'IBM Plex Sans', sans-serif; color: var(--textMuted); margin-top: 3px;">{{ a.detail }}</div>
+              </div>
+              <div style="font: 600 11px/1 'IBM Plex Mono', monospace; color: {{ a.moneyColor }}; white-space: nowrap;">{{ a.money }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 12px; padding: 18px 20px; margin-top: 16px; box-shadow: var(--cardShadow);">
+        <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px;">
+          <sc-for list="{{ skuPills }}" as="p" hint-placeholder-count="5">
+            <button onclick="{{ p.onClick }}" style="{{ p.style }}">{{ p.name }}</button>
+          </sc-for>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div>
+            <div style="font: 700 16px/1 'Zilla Slab', serif; color: var(--textStrong);">{{ heroName }} — demand</div>
+            <div style="font: 500 11.5px/1.3 'IBM Plex Sans', sans-serif; color: var(--textMuted); margin-top: 4px;">actual history · {{ horizonLabel }} forecast · 80/95% intervals</div>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button onclick="{{ setBase }}" style="{{ sBase }}">Base</button>
+            <button onclick="{{ setOpt }}" style="{{ sOpt }}">Optimistic</button>
+            <button onclick="{{ setCon }}" style="{{ sCon }}">Conservative</button>
+          </div>
+        </div>
+        <div style="height: 260px;">{{ heroChart }}</div>
+        <div style="font: 500 11.5px/1.4 'IBM Plex Mono', monospace; color: var(--textSubtle); margin-top: 6px;">{{ scenDelta }}</div>
+
+        <div style="margin-top: 16px; padding: 14px 15px; border: 1px solid var(--border); border-radius: 9px; background: var(--bg);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <div style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sectionLabel);">Manual Data Entry · {{ heroName }}</div>
+            <button onclick="{{ resetData }}" style="font: 600 10.5px/1 'IBM Plex Sans', sans-serif; color: var(--textMuted); background: transparent; border: 1px solid var(--border); border-radius: 5px; padding: 5px 10px; cursor: pointer;">⟲ Reset all</button>
+          </div>
+          <div style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap;">
+            <div>
+              <div style="font: 500 10px/1 'IBM Plex Sans', sans-serif; color: var(--textSubtle); margin-bottom: 6px;">Add {{ entryMonth }} actual →</div>
+              <div style="display: flex; gap: 6px;">
+                <input value="{{ actual }}" oninput="{{ onActualInput }}" placeholder="e.g. 2,900" inputmode="numeric" style="width: 100px; padding: 7px 9px; border: 1px solid var(--inputBorder); border-radius: 6px; background: var(--inputBg); font: 600 13px/1 'IBM Plex Mono', monospace; color: var(--textStrong);">
+                <button onclick="{{ addActual }}" style="font: 600 11px/1 'IBM Plex Sans', sans-serif; color: var(--card); background: var(--accent); border: none; border-radius: 6px; padding: 0 12px; cursor: pointer; white-space: nowrap;">{{ addLabel }}</button>
+              </div>
+            </div>
+            <div>
+              <div style="font: 500 10px/1 'IBM Plex Sans', sans-serif; color: var(--textSubtle); margin-bottom: 6px;">{{ invLabel1 }}</div>
+              <input value="{{ onHandVal }}" oninput="{{ onHandInput }}" inputmode="numeric" style="width: 88px; padding: 7px 9px; border: 1px solid var(--inputBorder); border-radius: 6px; background: var(--inputBg); font: 600 13px/1 'IBM Plex Mono', monospace; color: var(--textStrong);">
+            </div>
+            <div>
+              <div style="font: 500 10px/1 'IBM Plex Sans', sans-serif; color: var(--textSubtle); margin-bottom: 6px;">{{ invLabel2 }}</div>
+              <input value="{{ onOrderVal }}" oninput="{{ onOrderInput }}" inputmode="numeric" style="width: 88px; padding: 7px 9px; border: 1px solid var(--inputBorder); border-radius: 6px; background: var(--inputBg); font: 600 13px/1 'IBM Plex Mono', monospace; color: var(--textStrong);">
+            </div>
+            <div style="flex: 1; min-width: 170px; font: 500 11px/1.45 'IBM Plex Sans', sans-serif; color: var(--textSubtle);">Type any value — champion model, confidence band, cover and reorder recompute live.</div>
+          </div>
+        </div>
+        <div style="margin-top: 12px; padding: 13px 15px; border-radius: 9px; background: {{ explBg }}; border: 1px solid var(--cardBorder); border-left: 3px solid {{ explColor }};">
+          <div style="font: 700 11px/1 'IBM Plex Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: {{ explColor }};">{{ explHead }}</div>
+          <div style="font: 500 12.5px/1.55 'IBM Plex Sans', sans-serif; color: var(--text); margin-top: 7px;">{{ explBody }}</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <div style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.12em; text-transform: uppercase; color: var(--sectionLabel); margin-bottom: 10px;">{{ planTitle }}</div>
+        <div style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 12px; padding: 18px 20px; box-shadow: var(--cardShadow);">
+          <div style="display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 16px;">
+            <span style="font: 500 11px/1 'IBM Plex Sans', sans-serif; color: var(--textMuted); margin-right: 3px;">{{ planQ }}</span>
+            <sc-for list="{{ monthPills }}" as="m" hint-placeholder-count="6">
+              <button onclick="{{ m.onClick }}" style="{{ m.style }}">{{ m.label }}</button>
+            </sc-for>
+          </div>
+          <div style="display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-end;">
+            <div>
+              <div style="font: 500 10.5px/1 'IBM Plex Sans', sans-serif; color: var(--textSubtle); margin-bottom: 6px;">Hold for {{ stockPlan.month }}</div>
+              <div style="font: 700 36px/1 'IBM Plex Mono', monospace; color: var(--kpiValue); letter-spacing: -0.02em;">{{ stockPlan.recHold }}</div>
+              <div style="font: 500 11px/1 'IBM Plex Sans', sans-serif; color: var(--textSubtle); margin-top: 4px;">{{ stockPlan.unit }} available</div>
+            </div>
+            <div style="flex: 1; min-width: 250px;">
+              <div style="font: 500 12.5px/1.6 'IBM Plex Sans', sans-serif; color: var(--text);">Forecast demand <strong>{{ stockPlan.demand }}</strong> (95%: {{ stockPlan.range }}) plus <strong>{{ stockPlan.safety }}</strong> safety stock for a 95% service level. You currently hold <strong>{{ stockPlan.onHand }}</strong> + <strong>{{ stockPlan.onOrder }}</strong> on order.</div>
+              <div style="margin-top: 8px; font: 500 11.5px/1.55 'IBM Plex Sans', sans-serif; color: var(--textMuted);">Calculated with <strong style="color: var(--accent);">{{ stockPlan.formula }}</strong> — the best-performing model for this line (WAPE {{ stockPlan.wape }}). Forecast confidence: <strong style="color: {{ stockPlan.confColor }};">{{ stockPlan.conf }}</strong>.</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="display: inline-block; padding: 9px 15px; border-radius: 9px; background: var(--bg); border: 1px solid var(--border);">
+                <div style="font: 700 16px/1 'IBM Plex Mono', monospace; color: {{ stockPlan.gapColor }};">{{ stockPlan.gapLabel }}</div>
+              </div>
+              <div style="font: 500 11px/1.45 'IBM Plex Sans', sans-serif; color: var(--textSubtle); margin-top: 8px; max-width: 230px;">{{ stockPlan.gapNote }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <div style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.12em; text-transform: uppercase; color: var(--sectionLabel); margin-bottom: 10px;">{{ entityLabel }}</div>
+        <div style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 10px; overflow: hidden; box-shadow: var(--cardShadow);">
+          <div style="display: grid; grid-template-columns: 1.7fr 1.1fr 0.8fr 0.8fr 1fr 0.9fr; gap: 4px 10px; padding: 11px 16px; font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.04em; text-transform: uppercase; color: var(--textSubtle); background: var(--bg); border-bottom: 1px solid var(--cardBorder);">
+            <div>Line</div><div>Model</div><div style="text-align: right;">{{ colNext }}</div><div style="text-align: right;">{{ col1 }}</div><div style="text-align: center;">Status</div><div style="text-align: right;">{{ col2 }}</div>
+          </div>
+          <sc-for list="{{ skuRows }}" as="row" hint-placeholder-count="5">
+            <div onclick="{{ row.onClick }}" style="display: grid; grid-template-columns: 1.7fr 1.1fr 0.8fr 0.8fr 1fr 0.9fr; gap: 4px 10px; padding: 11px 16px; align-items: center; border-bottom: 1px solid var(--border); cursor: pointer;" style-hover="background: var(--bg);">
+              <div><div style="font: 600 13px/1.2 'IBM Plex Sans', sans-serif; color: var(--textStrong);">{{ row.name }}</div><div style="font: 500 10.5px/1 'IBM Plex Sans', sans-serif; color: var(--textSubtle); margin-top: 2px;">{{ row.style }}</div></div>
+              <div style="font: 500 11px/1 'IBM Plex Mono', monospace; color: var(--textMuted);">{{ row.champ }}</div>
+              <div style="text-align: right; font: 600 13px/1 'IBM Plex Mono', monospace; color: var(--textStrong);">{{ row.next }}</div>
+              <div style="text-align: right; font: 500 12px/1 'IBM Plex Mono', monospace; color: var(--textMuted);">{{ row.c1 }}</div>
+              <div style="text-align: center;"><span style="display: inline-block; padding: 4px 9px; border-radius: 20px; font: 600 10.5px/1 'IBM Plex Sans', sans-serif; white-space: nowrap; background: {{ row.flagBg }}; color: {{ row.flagColor }};">{{ row.flagLabel }}</span></div>
+              <div style="text-align: right; font: 600 13px/1 'IBM Plex Mono', monospace; color: var(--accent);">{{ row.c2 }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <div style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.12em; text-transform: uppercase; color: var(--sectionLabel); margin-bottom: 10px;">Alerts</div>
+        <div style="display: flex; flex-direction: column; gap: 9px;">
+          <sc-for list="{{ alerts }}" as="al" hint-placeholder-count="3">
+            <div style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 10px; padding: 13px 16px; display: flex; gap: 12px; box-shadow: var(--cardShadow);">
+              <span style="width: 4px; border-radius: 4px; flex-shrink: 0; background: {{ al.toneColor }};"></span>
+              <div>
+                <div style="font: 700 13px/1.2 'IBM Plex Sans', sans-serif; color: var(--textStrong);">{{ al.head }}</div>
+                <div style="font: 500 12.5px/1.55 'IBM Plex Sans', sans-serif; color: var(--text); margin-top: 5px;">{{ al.body }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div id="models" style="scroll-margin-top: 68px; margin-top: 44px;">
+      <div style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sectionLabel);">Model Arena</div>
+      <h2 style="font: 700 22px/1.15 'Zilla Slab', serif; color: var(--textStrong); margin: 6px 0 4px;">Champion vs Challengers — {{ heroName }}</h2>
+      <div style="display: flex; align-items: center; gap: 10px; padding: 11px 14px; background: var(--accentBg); border: 1px solid var(--cardBorder); border-radius: 9px; margin-bottom: 12px; flex-wrap: wrap;">
+        <span style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); white-space: nowrap;">Industry policy</span>
+        <span style="font: 600 12.5px/1.4 'IBM Plex Sans', sans-serif; color: var(--textStrong);">{{ policyHeadline }}</span>
+      </div>
+      <p style="font: 500 12.5px/1.55 'IBM Plex Sans', sans-serif; color: var(--textMuted); margin: 0 0 12px;">{{ policyRationale }}</p>
+      <p style="font: 500 12.5px/1.5 'IBM Plex Sans', sans-serif; color: var(--textMuted); margin: 0 0 16px;"><strong style="color: var(--textStrong);">This line:</strong> {{ modelReason }}</p>
+
+      <div style="background: var(--accentBg); border: 1px solid var(--accent); border-radius: 10px; padding: 16px 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent);">Current Champion</div>
+          <div style="font: 700 20px/1 'Zilla Slab', serif; color: var(--textStrong); margin-top: 6px;">{{ champName }}</div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font: 600 10px/1 'IBM Plex Mono', monospace; color: var(--textSubtle);">BACK-TESTED WAPE</div>
+          <div style="font: 700 24px/1 'IBM Plex Mono', monospace; color: var(--accent); margin-top: 4px;">{{ champWape }}</div>
+        </div>
+      </div>
+
+      <div style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 10px; overflow: hidden; box-shadow: var(--cardShadow);">
+        <div style="display: grid; grid-template-columns: 2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.9fr; gap: 4px 8px; padding: 11px 16px; font: 600 9.5px/1 'IBM Plex Mono', monospace; letter-spacing: 0.04em; text-transform: uppercase; color: var(--textSubtle); background: var(--bg); border-bottom: 1px solid var(--cardBorder);">
+          <div>Model</div><div style="text-align: right;">WAPE</div><div style="text-align: right;">MAE</div><div style="text-align: right;">RMSE</div><div style="text-align: right;">sMAPE</div><div style="text-align: right;">Bias</div><div style="text-align: center;">Status</div>
+        </div>
+        <sc-for list="{{ modelRows }}" as="mr" hint-placeholder-count="6">
+          <div style="display: grid; grid-template-columns: 2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.9fr; gap: 4px 8px; padding: 11px 16px; align-items: center; border-bottom: 1px solid var(--border); background: {{ mr.rowBg }};">
+            <div style="font: 600 12.5px/1.2 'IBM Plex Sans', sans-serif; color: var(--textStrong);">{{ mr.name }}</div>
+            <div style="text-align: right; font: 600 12.5px/1 'IBM Plex Mono', monospace; color: var(--textStrong);">{{ mr.wape }}</div>
+            <div style="text-align: right; font: 500 12px/1 'IBM Plex Mono', monospace; color: var(--textMuted);">{{ mr.mae }}</div>
+            <div style="text-align: right; font: 500 12px/1 'IBM Plex Mono', monospace; color: var(--textMuted);">{{ mr.rmse }}</div>
+            <div style="text-align: right; font: 500 12px/1 'IBM Plex Mono', monospace; color: var(--textMuted);">{{ mr.smape }}</div>
+            <div style="text-align: right; font: 500 12px/1 'IBM Plex Mono', monospace; color: {{ mr.biasColor }};">{{ mr.bias }}</div>
+            <div style="text-align: center;"><span style="display: inline-block; padding: 3px 8px; border-radius: 20px; font: 600 10px/1 'IBM Plex Sans', sans-serif; white-space: nowrap; background: {{ mr.statusBg }}; color: {{ mr.statusColor }};">{{ mr.statusLabel }}</span></div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div id="scenarios" style="scroll-margin-top: 68px; margin-top: 44px;">
+      <div style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sectionLabel);">Scenario Lab</div>
+      <h2 style="font: 700 22px/1.15 'Zilla Slab', serif; color: var(--textStrong); margin: 6px 0 16px;">Compare Demand Scenarios</h2>
+
+      <div style="display: grid; grid-template-columns: repeat(3,1fr); gap: 14px;">
+        <sc-for list="{{ scenarioCards }}" as="sc" hint-placeholder-count="3">
+          <div style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 10px; padding: 16px 16px 14px; box-shadow: var(--cardShadow); border-top: 3px solid {{ sc.accentColor }};">
+            <div style="font: 700 14px/1 'Zilla Slab', serif; color: var(--textStrong); margin-bottom: 14px;">{{ sc.label }}</div>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <div><div style="font: 500 10px/1 'IBM Plex Mono', monospace; color: var(--textSubtle); text-transform: uppercase;">{{ sc.m1Label }}</div><div style="font: 700 20px/1 'IBM Plex Mono', monospace; color: var(--kpiValue); margin-top: 4px;">{{ sc.m1 }}</div></div>
+              <div><div style="font: 500 10px/1 'IBM Plex Mono', monospace; color: var(--textSubtle); text-transform: uppercase;">{{ sc.m2Label }}</div><div style="font: 700 18px/1 'IBM Plex Mono', monospace; color: var(--kpiValue); margin-top: 4px;">{{ sc.m2 }}</div></div>
+              <div><div style="font: 500 10px/1 'IBM Plex Mono', monospace; color: var(--textSubtle); text-transform: uppercase;">{{ sc.m3Label }}</div><div style="font: 600 15px/1 'IBM Plex Mono', monospace; color: var(--textMuted); margin-top: 4px;">{{ sc.m3 }}</div></div>
+              <div><div style="font: 500 10px/1 'IBM Plex Mono', monospace; color: var(--textSubtle); text-transform: uppercase;">{{ sc.m4Label }}</div><div style="font: 600 13px/1 'IBM Plex Mono', monospace; margin-top: 4px; color: {{ sc.m4Color }};">{{ sc.m4 }}</div></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 10px; padding: 18px 18px 10px; margin-top: 16px; box-shadow: var(--cardShadow);">
+        <div style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--textSubtle); margin-bottom: 10px;">Overlay · Base vs Optimistic vs Conservative</div>
+        <div style="height: 240px;">{{ scenChart }}</div>
+      </div>
+    </div>
+
+    <div id="data" style="scroll-margin-top: 68px; margin-top: 44px;">
+      <div style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sectionLabel);">Data Confidence</div>
+      <h2 style="font: 700 22px/1.15 'Zilla Slab', serif; color: var(--textStrong); margin: 6px 0 16px;">Provenance &amp; Quality</h2>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 10px; padding: 16px 18px; box-shadow: var(--cardShadow);">
+          <div style="font: 700 13px/1 'Zilla Slab', serif; color: var(--textStrong); margin-bottom: 12px;">Data Labels</div>
+          <sc-for list="{{ provenance }}" as="p" hint-placeholder-count="6">
+            <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
+              <span style="width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; background: {{ p.color }};"></span>
+              <div>
+                <div style="font: 600 12px/1 'IBM Plex Sans', sans-serif; color: var(--textStrong);">{{ p.label }}</div>
+                <div style="font: 500 11.5px/1.4 'IBM Plex Sans', sans-serif; color: var(--textMuted); margin-top: 2px;">{{ p.desc }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 10px; padding: 16px 18px; box-shadow: var(--cardShadow);">
+          <div style="font: 700 13px/1 'Zilla Slab', serif; color: var(--textStrong); margin-bottom: 12px;">What Would Improve This Forecast</div>
+          <sc-for list="{{ gaps }}" as="g" hint-placeholder-count="5">
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 9px;">
+              <span style="font-size: 10px; color: var(--accent); flex-shrink: 0; margin-top: 2px;">▸</span>
+              <div style="font: 500 12.5px/1.45 'IBM Plex Sans', sans-serif; color: var(--text);">{{ g }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 10px; padding: 16px 18px; margin-top: 16px; box-shadow: var(--cardShadow);">
+        <div style="font: 700 13px/1 'Zilla Slab', serif; color: var(--textStrong); margin-bottom: 12px;">Public Reference Sources</div>
+        <sc-for list="{{ references }}" as="ref" hint-placeholder-count="3">
+          <div style="display: flex; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--border);">
+            <div style="flex: 1;"><div style="font: 600 12.5px/1.2 'IBM Plex Sans', sans-serif; color: var(--textStrong);">{{ ref.name }}</div><div style="font: 500 11px/1.3 'IBM Plex Sans', sans-serif; color: var(--textSubtle); margin-top: 2px;">{{ ref.org }}</div></div>
+            <div style="flex: 1; font: 500 12px/1.4 'IBM Plex Sans', sans-serif; color: var(--textMuted);">{{ ref.use }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+      <div style="font: 500 11px/1.5 'IBM Plex Sans', sans-serif; color: var(--textSubtle);">Vantage Forecasting · Foresight · Precision · Insight</div>
+      <div style="font: 500 10px/1 'IBM Plex Mono', monospace; color: var(--textSubtle);">Engine: HW + ETS + Croston + OLS · Back-tested on rolling origins</div>
+    </div>
+  </div>
+
+  <sc-if value="{{ detailOpen }}" hint-placeholder-val="{{ false }}">
+    <div onclick="{{ closeDetail }}" style="position: fixed; inset: 0; z-index: 200; background: rgba(8,20,28,0.55);"></div>
+    <div style="position: fixed; top: 0; right: 0; bottom: 0; z-index: 201; width: 460px; max-width: 92vw; background: var(--card); border-left: 1px solid var(--cardBorder); box-shadow: -16px 0 48px -16px rgba(0,0,0,0.5); overflow-y: auto; padding: 22px 24px 40px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+        <div>
+          <span style="display: inline-block; padding: 4px 10px; border-radius: 20px; font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; background: var(--accentBg); color: {{ detail.tagColor }};">{{ detail.tagLabel }}</span>
+          <h3 style="font: 700 20px/1.15 'Zilla Slab', serif; color: var(--textStrong); margin: 10px 0 2px;">{{ detail.title }}</h3>
+          <div style="font: 500 11.5px/1 'IBM Plex Sans', sans-serif; color: var(--textSubtle);">{{ detail.subtitle }}</div>
+        </div>
+        <button onclick="{{ closeDetail }}" style="background: var(--bg); border: 1px solid var(--border); color: var(--textMuted); width: 30px; height: 30px; border-radius: 7px; cursor: pointer; font-size: 14px; flex-shrink: 0;">✕</button>
+      </div>
+      <div style="font: 500 12.5px/1.6 'IBM Plex Sans', sans-serif; color: var(--text); margin-bottom: 16px;">{{ detail.lead }}</div>
+      <div style="display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 18px;">
+        <sc-for list="{{ detail.metrics }}" as="m" hint-placeholder-count="4">
+          <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 9px; padding: 11px 12px;">
+            <div style="font: 500 10px/1.2 'IBM Plex Sans', sans-serif; color: var(--textSubtle); min-height: 24px;">{{ m.label }}</div>
+            <div style="font: 700 18px/1 'IBM Plex Mono', monospace; color: var(--textStrong); margin: 5px 0 3px;">{{ m.value }}</div>
+            <div style="font: 500 10px/1 'IBM Plex Sans', sans-serif; color: var(--textMuted);">{{ m.sub }}</div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sectionLabel); margin-bottom: 8px;">{{ detail.stepsTitle }}</div>
+      <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 9px; padding: 4px 14px; margin-bottom: 18px;">
+        <sc-for list="{{ detail.steps }}" as="st" hint-placeholder-count="5">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border);">
+            <span style="font: 500 12px/1.3 'IBM Plex Sans', sans-serif; color: var(--textMuted);">{{ st.label }}</span>
+            <span style="font: 600 12.5px/1 'IBM Plex Mono', monospace; color: var(--textStrong); white-space: nowrap;">{{ st.value }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <sc-for list="{{ detail.notes }}" as="n" hint-placeholder-count="2">
+          <div style="font: 500 12px/1.6 'IBM Plex Sans', sans-serif; color: var(--textMuted);">{{ n }}</div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ reportOpen }}" hint-placeholder-val="{{ false }}">
+    <div data-report style="position: fixed; inset: 0; z-index: 300; background: var(--bg); overflow-y: auto;">
+      <div style="max-width: 900px; margin: 0 auto; padding: 38px 48px 60px; position: relative;">
+        <div style="position: absolute; top: 44%; left: 50%; transform: translate(-50%,-50%); opacity: 0.05; pointer-events: none; z-index: 0;"><img src="vantage-crest.png" style="width: 440px;"></div>
+        <div style="position: relative; z-index: 1;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--watneys); padding-bottom: 16px;">
+            <div style="display: flex; gap: 12px; align-items: center;"><img src="vantage-crest.png" style="height: 46px;"><div><div style="font: 700 20px/1 'Zilla Slab', serif; color: var(--textStrong);">Vantage</div><div style="font: 500 9.5px/1 'IBM Plex Mono', monospace; color: var(--textMuted); letter-spacing: 0.06em; margin-top: 4px;">FORECASTING &amp; PREDICTIVE ANALYTICS</div></div></div>
+            <div data-noprint style="display: flex; gap: 8px;"><button onclick="{{ printReport }}" style="background: var(--accent); border: none; color: var(--card); font: 600 11px/1 'IBM Plex Sans', sans-serif; padding: 0 13px; height: 32px; border-radius: 6px; cursor: pointer;">Print / Save PDF</button><button onclick="{{ closeReport }}" style="background: var(--bg); border: 1px solid var(--border); color: var(--textMuted); font: 600 11px/1 'IBM Plex Sans', sans-serif; padding: 0 13px; height: 32px; border-radius: 6px; cursor: pointer;">Close</button></div>
+          </div>
+          <div style="margin: 16px 0 10px;"><div style="font: 700 24px/1.15 'Zilla Slab', serif; color: var(--textStrong);">{{ company }} — Forecast Report</div><div style="font: 500 12px/1 'IBM Plex Sans', sans-serif; color: var(--textMuted); margin-top: 5px;">{{ report.periodLabel }} · generated {{ report.generated }}</div></div>
+          <div data-noprint style="display: flex; gap: 6px; align-items: center; margin-bottom: 18px;"><span style="font: 500 11px/1 'IBM Plex Sans', sans-serif; color: var(--textMuted); margin-right: 3px;">Period:</span><sc-for list="{{ reportPills }}" as="rp" hint-placeholder-count="4"><button onclick="{{ rp.onClick }}" style="{{ rp.style }}">{{ rp.label }}</button></sc-for></div>
+          <div style="background: var(--accentBg); border-left: 3px solid var(--accent); border-radius: 8px; padding: 14px 16px; margin-bottom: 22px;"><div style="font: 700 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 7px;">Executive summary</div><div style="font: 500 14px/1.6 'IBM Plex Sans', sans-serif; color: var(--text);">{{ report.headline }}</div></div>
+          <div style="font: 700 13px/1 'Zilla Slab', serif; color: var(--textStrong); margin-bottom: 10px;">Forecast accuracy · {{ reviewName }}</div>
+          <div style="border: 1px solid var(--cardBorder); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px;"><div style="height: 200px;">{{ reviewChart }}</div></div>
+          <div style="font: 500 12.5px/1.6 'IBM Plex Sans', sans-serif; color: var(--textMuted); margin-bottom: 24px;">{{ reviewNote }}</div>
+          <div style="font: 700 13px/1 'Zilla Slab', serif; color: var(--textStrong); margin-bottom: 10px;">What we expect · {{ report.periodLabel }}</div>
+          <div style="border: 1px solid var(--cardBorder); border-radius: 10px; overflow: hidden; margin-bottom: 22px;">
+            <div style="display: grid; grid-template-columns: 2fr 1.3fr 1.2fr 1fr; gap: 4px 10px; padding: 10px 16px; background: var(--card); font: 600 9.5px/1 'IBM Plex Mono', monospace; letter-spacing: 0.04em; text-transform: uppercase; color: var(--textSubtle); border-bottom: 1px solid var(--cardBorder);"><div>Line</div><div style="text-align: right;">Expected</div><div>Model</div><div style="text-align: right;">Status</div></div>
+            <sc-for list="{{ report.rows }}" as="r" hint-placeholder-count="5"><div style="display: grid; grid-template-columns: 2fr 1.3fr 1.2fr 1fr; gap: 4px 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); align-items: center;"><div style="font: 600 12.5px/1.2 'IBM Plex Sans', sans-serif; color: var(--textStrong);">{{ r.name }}</div><div style="text-align: right; font: 600 12px/1 'IBM Plex Mono', monospace; color: var(--textStrong);">{{ r.expect }}</div><div style="font: 500 11px/1 'IBM Plex Mono', monospace; color: var(--textMuted);">{{ r.model }}</div><div style="text-align: right; font: 500 11px/1 'IBM Plex Sans', sans-serif; color: var(--textMuted);">{{ r.note }}</div></div></sc-for>
+          </div>
+          <div style="font: 700 13px/1 'Zilla Slab', serif; color: var(--textStrong); margin-bottom: 10px;">What we recommend</div>
+          <div style="display: flex; flex-direction: column; gap: 9px; margin-bottom: 22px;"><sc-for list="{{ report.recs }}" as="rec" hint-placeholder-count="3"><div style="display: flex; gap: 10px; padding: 11px 14px; border: 1px solid var(--cardBorder); border-left: 3px solid var(--accent); border-radius: 8px;"><span style="color: var(--accent); font-weight: 700;">→</span><div style="font: 500 12.5px/1.55 'IBM Plex Sans', sans-serif; color: var(--text);">{{ rec }}</div></div></sc-for></div>
+          <div style="border-top: 1px solid var(--border); padding-top: 14px; font: 500 10.5px/1.5 'IBM Plex Sans', sans-serif; color: var(--textSubtle);">Forecasts by the Vantage engine ({{ engineLine }}), back-tested on rolling origins. Data provenance is labelled per source; synthetic operational data is never mixed with real public data. Vantage · Foresight · Precision · Insight.</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { mode: 'light', ready: false, analysis: null, scenario: 'base', actual: '', recal: null, actualNum: null, selectedSku: 'ent', overrides: {}, targetMonth: 0, detail: null, reportOpen: false, reportPeriod: 'quarter' };
+
+  async componentDidMount() {
+    const s = localStorage.getItem('vantage-mode');
+    if (s === 'dark' || s === 'light') this.setState({ mode: s });
+    const [E, D, UI] = await Promise.all([
+      window.__dcImport('./forecast-engine.js'), window.__dcImport('./saas-data.js'), window.__dcImport('./vantage-ui.js')
+    ]);
+    this.E = E; this.D = D; this.UI = UI;
+    this.setState({ analysis: UI.computeAnalysis(E, D, this.props, this.state.overrides), ready: true });
+  }
+
+  recompute(ov) { return this.UI.computeAnalysis(this.E, this.D, this.props, ov); }
+
+  toggleMode = () => {
+    const m = this.state.mode === 'light' ? 'dark' : 'light';
+    localStorage.setItem('vantage-mode', m);
+    this.setState({ mode: m });
+  };
+
+  selectSku = (id) => this.setState({ selectedSku: id, actual: '', recal: null, actualNum: null });
+
+  heroFor(id) { const A = this.state.analysis; const k = id || this.state.selectedSku || A.heroDefault; return A.skus.find(s => s.id === k) || A.skus[0]; }
+
+  onActual = (e) => {
+    const val = e.target.value;
+    const num = parseFloat(String(val).replace(/[, ]/g, ''));
+    if (!this.state.analysis || val === '' || isNaN(num)) {
+      this.setState({ actual: val, recal: null, actualNum: null });
+      return;
+    }
+    const hero = this.heroFor();
+    const rc = this.E.recalibrate(hero.series, num, { season: this.D.META.season || 12, championName: hero.champ, horizon: this.D.META.horizon || 6 });
+    this.setState({ actual: val, recal: rc, actualNum: num });
+  };
+
+  addActual = () => {
+    const num = this.state.actualNum;
+    if (num == null || isNaN(num)) return;
+    const id = this.state.selectedSku;
+    const ov = { ...this.state.overrides };
+    ov[id] = { ...(ov[id] || {}) };
+    ov[id].appended = [ ...(ov[id].appended || []), num ];
+    this.setState({ overrides: ov, analysis: this.recompute(ov), actual: '', recal: null, actualNum: null });
+  };
+
+  setInv = (key, e) => {
+    const num = parseFloat(String(e.target.value).replace(/[, ]/g, ''));
+    const id = this.state.selectedSku;
+    const ov = { ...this.state.overrides };
+    ov[id] = { ...(ov[id] || {}), [key]: isNaN(num) ? null : num };
+    this.setState({ overrides: ov, analysis: this.recompute(ov) });
+  };
+
+  resetData = () => this.setState({ overrides: {}, analysis: this.recompute({}), actual: '', recal: null, actualNum: null });
+
+  renderVals() {
+    const handlers = {
+      toggleMode: this.toggleMode,
+      setBase: () => this.setState({ scenario: 'base' }),
+      setOpt: () => this.setState({ scenario: 'optimistic' }),
+      setCon: () => this.setState({ scenario: 'conservative' }),
+      onActualInput: this.onActual,
+      addActual: this.addActual,
+      resetData: this.resetData,
+      onHandInput: (e) => this.setInv('onHand', e),
+      onOrderInput: (e) => this.setInv('onOrder', e),
+      selectSku: this.selectSku,
+      selectMonth: (i) => this.setState({ targetMonth: i }),
+      openDetail: (d) => this.setState({ detail: d }),
+      closeDetail: () => this.setState({ detail: null }),
+      openReport: () => this.setState({ reportOpen: true }),
+      closeReport: () => this.setState({ reportOpen: false }),
+      setReportPeriod: (p) => this.setState({ reportPeriod: p }),
+      printReport: () => window.print(),
+    };
+    if (!this.UI) {
+      const vars = this.state.mode === 'dark'
+        ? '--bg:#0c1f2a;--card:#132e3c;--cardBorder:#1e4050;--text:#c8c0b0;--textStrong:#f0e8d8;--textMuted:#8da4ae;--textSubtle:#5f7a86;--accent:#d4a844;--topbar:#0a1820;--topbarText:#d4c8b4;--topbarSubtext:#6a8a95;--pillBg:rgba(255,255,255,0.08);--pillText:#8da4ae;--border:#1e4050;--watneys:#C4384C;--watneysLight:rgba(196,56,76,0.14);--sectionLabel:#d4a844;--kpiValue:#f0e8d8;--watermarkOpacity:0.05;--watermarkBlend:screen;--inputBg:#0e2530;--inputBorder:#264555;--cardShadow:0 4px 18px -8px rgba(0,0,0,0.5)'
+        : '--bg:#f0ebe2;--card:#faf8f4;--cardBorder:#e2d8c6;--text:#163544;--textStrong:#0e2530;--textMuted:#5f7a88;--textSubtle:#93a0a8;--accent:#c5993e;--topbar:#163544;--topbarText:#e8dcc8;--topbarSubtext:#8da4ae;--pillBg:rgba(255,255,255,0.12);--pillText:#c0b49e;--border:#e2d8c6;--watneys:#8B2332;--watneysLight:rgba(139,35,50,0.10);--sectionLabel:#c5993e;--kpiValue:#0e2530;--watermarkOpacity:0.04;--watermarkBlend:multiply;--inputBg:#fff;--inputBorder:#d4c8b2;--cardShadow:0 4px 18px -8px rgba(40,30,15,0.12)';
+      return { wrapperStyle: vars + ';min-height:100vh;background:var(--bg);color:var(--text);font-family:IBM Plex Sans,sans-serif', modeIcon: this.state.mode === 'light' ? '☾' : '☀', modeLabel: 'Toggle mode', ...handlers, kpis: [], heroName: '—', horizonLabel: '6 mo', heroChart: null, scenDelta: '', explHead: 'Loading…', explBody: 'Computing forecasts…', explColor: 'var(--accent)', explBg: 'transparent', actual: '', skuRows: [], alerts: [], champName: '—', champWape: '—', modelReason: '', modelRows: [], scenarioCards: [], scenChart: null, provenance: [], references: [], gaps: [], skuPills: [], entryMonth: '', onHandVal: '', onOrderVal: '', addLabel: 'Add', dataModified: false, stockPlan: { month: '', unit: '', recHold: '—', demand: '—', range: '—', safety: '—', avail: '—', onHand: '—', onOrder: '—', gapLabel: '', gapColor: 'var(--accent)', gapNote: '', formula: '—', wape: '—', conf: '—', confColor: 'var(--accent)' }, monthPills: [], actions: [], actionCount: 0, policyHeadline: '', policyRationale: '', detail: null, detailOpen: false, company: 'Cadence', subtitle: 'Recurring-revenue forecast · Jul–Dec 2025', industryTag: 'SAAS', entityLabel: 'Segments', colNext: 'MRR', col1: 'Churn', col2: 'MoM', planTitle: '', planQ: '', invLabel1: '', invLabel2: '' };
+    }
+    return this.UI.buildRenderVals(this.state, this.props, this.E, this.D, handlers);
+  }
+}
+</script>
+</body>
+</html>

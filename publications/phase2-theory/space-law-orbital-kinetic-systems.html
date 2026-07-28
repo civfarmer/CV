@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f17'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='27' font-weight='700' fill='%23d4b24c' text-anchor='middle'%3ECF%3C/text%3E%3C/svg%3E">
+<title>Orbital Denial and the Limits of the Outer Space Treaty: The Contested Legal Status of Kinetic and Conventional Space Systems</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{
+    --bg:#0b0f17; --bg2:#0e1420; --surface:#131b2a; --surface2:#182133;
+    --ink:#e9eef7; --ink2:#aab7cc; --muted:#7d8ba3; --line:#233145; --line2:#2c3d54;
+    --accent:#43b3a6; --accent-ink:#84d6ca; --gold:#d4b24c; --gold-soft:#e6cf8f;
+    --good:#43c59e; --warn:#e0a13a; --shadow:0 18px 50px -20px rgba(0,0,0,.7);
+    --radius:14px; --measure:70ch;
+    --font-display:'Zilla Slab',Georgia,'Times New Roman',serif;
+    --font-body:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --font-mono:'IBM Plex Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
+  }
+  html[data-theme="light"]{
+    --bg:#f4f1ec; --bg2:#ebe6dd; --surface:#ffffff; --surface2:#faf7f2;
+    --ink:#221e18; --ink2:#4c473e; --muted:#675f54; --line:#e7e1d6; --line2:#d9d2c5;
+    --accent:#0d5f57; --accent-ink:#0a463f; --gold:#836819; --gold-soft:#6f5714; --good:#0e7a52;
+    --shadow:0 18px 44px -24px rgba(15,30,60,.35);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:radial-gradient(1100px 700px at 82% -8%,rgba(67,179,166,.10),transparent 60%),var(--bg);
+    color:var(--ink);font-family:var(--font-body);line-height:1.72;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  a{color:var(--accent-ink);text-decoration:none}
+  a:hover{text-decoration:underline}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+  ::selection{background:color-mix(in oklab,var(--accent) 32%,transparent)}
+
+  /* Top bar */
+  .top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    padding:11px clamp(16px,4vw,34px);background:color-mix(in oklab,var(--bg),transparent 8%);
+    backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:11px;color:var(--ink);min-width:0}
+  .crest{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;flex:0 0 auto;
+    background:linear-gradient(145deg,#0e7b6f,#0b655b);color:#fff;font-family:var(--font-display);font-weight:700;font-size:14px;box-shadow:var(--shadow)}
+  .brand .nm{font-family:var(--font-display);font-weight:700;font-size:14.5px;line-height:1.05}
+  .brand .rl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+  .topacts{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:8px 13px;border-radius:10px;font-weight:600;font-size:13px;
+    border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer;transition:.16s;white-space:nowrap;font-family:var(--font-body)}
+  .btn:hover{border-color:var(--accent);transform:translateY(-1px);text-decoration:none}
+  .btn svg{width:16px;height:16px}
+  .btn.icon{padding:8px;width:36px}
+
+  /* Article */
+  main.wrap{max-width:calc(var(--measure) + 8rem);margin:0 auto;padding:clamp(26px,5vw,52px) clamp(18px,5vw,40px) 40px}
+  article.paper{max-width:var(--measure);margin:0 auto;font-size:1.05rem}
+  article.paper > *{max-width:var(--measure)}
+  .paper h1,.paper h2,.paper h3,.paper h4,.paper h5{font-family:var(--font-display);font-weight:600;line-height:1.18;color:var(--ink);letter-spacing:-.005em}
+  .paper h1{font-size:clamp(27px,4.4vw,40px);line-height:1.1;margin:0 0 .5rem;letter-spacing:-.015em}
+  .paper h2{font-size:clamp(20px,2.9vw,27px);margin:2.4rem 0 .9rem;padding-bottom:.35rem;border-bottom:1px solid var(--line)}
+  .paper h3{font-size:clamp(17px,2.2vw,21px);margin:1.9rem 0 .7rem}
+  .paper h4{font-size:16px;margin:1.5rem 0 .5rem;color:var(--ink2)}
+  .paper p{margin:0 0 1.05rem;overflow-wrap:anywhere;word-break:break-word}
+  .paper li{overflow-wrap:anywhere;word-break:break-word}
+  .paper strong{color:var(--ink);font-weight:700}
+  .paper em{color:inherit}
+  /* Byline: first bold paragraph right after the title */
+  .paper h1 + p{font-size:1.06rem;color:var(--ink);margin-bottom:.4rem}
+  .paper h1 + p + p em{color:var(--muted);font-size:.92rem}
+  .paper ul,.paper ol{margin:0 0 1.1rem;padding-left:1.5rem}
+  .paper li{margin:.3rem 0}
+  .paper li::marker{color:var(--accent)}
+  .paper a{color:var(--accent-ink);border-bottom:1px solid color-mix(in oklab,var(--accent) 35%,transparent)}
+  .paper a:hover{border-bottom-color:var(--accent);text-decoration:none}
+  .paper hr{border:none;border-top:1px solid var(--line);margin:2rem 0}
+
+  /* Blockquote (scope notes) */
+  .paper blockquote{margin:1.4rem 0;padding:1rem 1.2rem;border:1px solid var(--line2);border-left:3px solid var(--gold);
+    border-radius:12px;background:color-mix(in oklab,var(--gold) 7%,var(--surface));color:var(--ink2)}
+  .paper blockquote p{margin:0 0 .6rem}
+  .paper blockquote p:last-child{margin-bottom:0}
+  .paper blockquote strong{color:var(--ink)}
+
+  /* Tables */
+  .paper .tablewrap{overflow-x:auto;margin:1.3rem 0;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+  .paper table{border-collapse:collapse;width:100%;font-size:.95rem;line-height:1.5}
+  .paper th,.paper td{text-align:left;padding:.6rem .85rem;border-bottom:1px solid var(--line);vertical-align:top}
+  .paper thead th{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--accent-ink);background:color-mix(in oklab,var(--accent) 8%,var(--surface2));border-bottom:1px solid var(--line2)}
+  .paper tbody tr:last-child td{border-bottom:none}
+  .paper tbody tr:nth-child(even){background:color-mix(in oklab,var(--ink) 3%,transparent)}
+
+  /* Code */
+  .paper code{font-family:var(--font-mono);font-size:.88em;background:color-mix(in oklab,var(--accent) 10%,var(--surface));
+    border:1px solid var(--line);border-radius:5px;padding:.08em .38em;color:var(--accent-ink)}
+  .paper pre{background:var(--bg2);border:1px solid var(--line2);border-radius:12px;padding:1rem 1.15rem;overflow-x:auto;
+    margin:1.3rem 0;line-height:1.55}
+  .paper pre code{background:none;border:none;padding:0;color:var(--ink2);font-size:.86rem}
+
+  /* Mermaid figures */
+  .diagram-figure{margin:1.6rem 0;background:#f7f8fb;border:1px solid var(--line2);border-radius:14px;padding:1.1rem 1rem .6rem;
+    box-shadow:var(--shadow);overflow-x:auto}
+  html[data-theme="light"] .diagram-figure{background:#fbfaf7}
+  .diagram-figure pre.mermaid{background:none;border:none;box-shadow:none;padding:0;margin:0;text-align:center;
+    color:#1c2530;font-family:var(--font-mono);font-size:.82rem;line-height:1.5;white-space:pre-wrap}
+  .diagram-figure svg{max-width:100%;height:auto;display:block;margin:0 auto}
+  .diagram-figure figcaption{margin-top:.7rem;text-align:center;font-family:var(--font-mono);font-size:.7rem;
+    letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+
+  /* Footnotes */
+  .paper .footnote{margin-top:2.6rem;padding-top:1rem;border-top:1px solid var(--line);font-size:.9rem;color:var(--ink2)}
+  .paper .footnote hr{display:none}
+  .paper .footnote ol{padding-left:1.3rem}
+  .paper .footnote li{margin:.45rem 0}
+  .paper .footnote-backref{border-bottom:none;margin-left:.3rem}
+  .paper sup a.footnote-ref{border-bottom:none;color:var(--accent-ink);font-weight:600;padding:0 .05em}
+
+  /* TOC (if [TOC] used) */
+  .paper .toc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:.9rem 1.2rem;margin:1.4rem 0;font-size:.95rem}
+  .paper .toc > ul{margin:0}
+
+  footer.paperfoot{max-width:var(--measure);margin:3rem auto 0;padding-top:1.3rem;border-top:1px solid var(--line);
+    color:var(--muted);font-size:.82rem;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}
+  footer.paperfoot a{color:var(--ink2)}
+  footer.paperfoot .mono{font-family:var(--font-mono)}
+
+  .pubnav{display:flex;flex-wrap:wrap;gap:2px 16px;align-items:center;padding:9px clamp(18px,4vw,40px);
+    background:color-mix(in oklab,var(--bg2),transparent 20%);border-bottom:1px solid var(--line);
+    font-family:var(--font-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase}
+  .pubnav a{color:var(--ink2);padding:4px 0;border-bottom:2px solid transparent;text-decoration:none}
+  .pubnav a:hover{color:var(--ink)}
+  .pubnav a[aria-current="page"]{color:var(--accent-ink);border-bottom-color:var(--accent)}
+
+  .cfside{display:none}
+  @media(min-width:1080px){
+    body{padding-left:280px}
+    .pubnav{display:none}
+    .cfside{position:fixed;left:0;top:0;bottom:0;width:280px;z-index:30;display:flex;flex-direction:column;gap:18px;
+      padding:22px 18px;background:var(--bg2);border-right:1px solid var(--line);overflow-y:auto}
+  }
+  .cfside .cfbrand{display:flex;align-items:center;gap:11px}
+  .cfside .cfbrand img{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:0 0 auto}
+  .cfside .cfbrand .nm{font-family:var(--font-display);font-weight:700;font-size:15.5px;color:var(--ink);line-height:1.1}
+  .cfside .cfbrand .rl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px;line-height:1.5}
+  .cfside nav{display:flex;flex-direction:column;gap:4px}
+  .cfside nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;color:var(--ink2);font-size:14px;font-weight:500;border:1px solid transparent;text-decoration:none}
+  .cfside nav a svg{width:18px;height:18px;flex:0 0 auto}
+  .cfside nav a:hover{background:var(--surface);color:var(--ink)}
+  .cfside nav a.on{background:var(--surface);border-color:var(--line);color:var(--ink)}
+  .cfside .cffoot{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+  .cfside .cfavail{font-size:12px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+  .cfside .cfdot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 10px var(--good);flex:0 0 auto;margin-top:4px}
+  .cfside .cfbtns{display:flex;gap:8px}
+  .cfside .cfcv{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:12px;font-weight:600;font-size:13px;
+    background:var(--accent);border:1px solid var(--accent);color:#fff;text-decoration:none}
+  .cfside .cfcv:hover{filter:brightness(1.08)}
+  .cfside .cftheme{width:40px;display:inline-flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer}
+  .cfside .cftheme svg{width:16px;height:16px}
+</style>
+</head>
+<body>
+  <aside class="cfside" aria-label="Site navigation">
+    <div class="cfbrand">
+      <img src="../../assets/img/portrait-2026.png" alt="Christopher Farmer">
+      <div><div class="nm">Christopher Farmer</div><div class="rl">Legal, Risk &amp; Technology Transformation</div></div>
+    </div>
+    <nav>
+      <a href="../../index.html#overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg><span>Overview</span></a>
+      <a href="../../index.html#projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Projects</span></a>
+      <a href="../../case-studies/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 5h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h7z"/></svg><span>Case studies</span></a>
+      <a href="../../index.html#experience"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Experience</span></a>
+      <a href="../../index.html#warroom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>War Room</span></a>
+      <a href="../../index.html#expertise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.1L12 17l-5.5 3.3 1-6.1L3 8.9 9 8z"/></svg><span>Expertise</span></a>
+      <a href="../../index.html#credentials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg><span>Credentials</span></a>
+      <a href="../../publications/index.html" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg><span>Publications</span></a>
+      <a href="../../index.html#contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M4 7l8 6 8-6"/></svg><span>Contact</span></a>
+    </nav>
+    <div class="cffoot">
+      <div class="cfavail"><span class="cfdot"></span> Open to legal, risk &amp; transformation roles &mdash; Geneva</div>
+      <div class="cfbtns">
+        <a class="cfcv" href="../../docs/CV-Christopher-Farmer-2026-08.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg> CV</a>
+        <button class="cftheme" onclick="document.getElementById('theme')?document.getElementById('theme').click():(function(){var h=document.documentElement,n=h.getAttribute('data-theme')==='light'?'dark':'light';h.setAttribute('data-theme',n);try{localStorage.setItem('cf-theme',n)}catch(e){}})()" title="Toggle theme" aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="top">
+    <a class="brand" href="../index.html" aria-label="Back to Publications">
+      <div class="crest">CF</div>
+      <div><div class="nm">Christopher Farmer</div><div class="rl">Publications</div></div>
+    </a>
+    <div class="topacts">
+      <a class="btn" href="../index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M15 18l-6-6 6-6"/></svg>
+        Back to Publications
+      </a>
+      <button class="btn icon" id="theme" title="Toggle light / dark" aria-label="Toggle light or dark theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </div>
+  </div>
+<nav class="pubnav" aria-label="Site">
+  <a href="../../index.html#overview">Overview</a>
+  <a href="../../index.html#projects">Projects</a>
+  <a href="../../case-studies/index.html">Case studies</a>
+  <a href="../../index.html#experience">Experience</a>
+  <a href="../../index.html#warroom">War Room</a>
+  <a href="../../index.html#expertise">Expertise</a>
+  <a href="../../index.html#credentials">Credentials</a>
+  <a href="../index.html" aria-current="page">Publications</a>
+  <a href="../../index.html#contact">Contact</a>
+</nav>
+
+  <main class="wrap">
+    <article class="paper">
+<h1 id="orbital-denial-and-the-limits-of-the-outer-space-treaty-the-contested-legal-status-of-kinetic-and-conventional-space-systems">Orbital Denial and the Limits of the Outer Space Treaty: The Contested Legal Status of Kinetic and Conventional Space Systems</h1>
+      <div style="margin:18px 0;padding:12px 16px;border:1px solid var(--line2);border-left:3px solid var(--gold);border-radius:10px;background:var(--surface);color:var(--ink2);font-size:14px"><b style="color:var(--ink)">Companion draft available.</b> A v1.0.0 working draft (July 2026) develops the Article&nbsp;VI supervision and market-conditionality framework — <a href="../drafts/Counterspace_Conduct_and_Outer_Space_Treaty_v1.0.0.pdf" target="_blank" rel="noopener">read the draft (PDF)</a>.</div>
+<p><strong>Christopher I. V. Farmer, LL.M. (University of Worcester) · Independent Researcher · civfarmer@gmail.com</strong></p>
+<p><em>Preprint — submitted; pending peer review. Phase II Theory Paper. July 2026.</em></p>
+<blockquote>
+<p><strong>Scope note.</strong> This is a paper of public international law and policy. It analyses the <em>legal classification</em> and <em>regulatory status</em> of space systems and of the practice of "orbital denial." It contains no weapon design, no engineering, and no capability, performance, or operational detail of any kind. Where categories such as "kinetic," "co-orbital," "destructive," or "non-kinetic" appear, they are used solely as terms of legal art — the same taxonomy used in the arms-control and space-law literature — to locate conduct within or outside existing prohibitions. Nothing here describes how any system is built or employed.</p>
+</blockquote>
+<hr>
+<h2 id="abstract">Abstract</h2>
+<p>The Treaty on Principles Governing the Activities of States in the Exploration and Use of Outer Space (1967) is the constitutional instrument of the space domain, but its central security provision, Article IV, is an artefact of a particular Cold-War bargain. It prohibits the placement of nuclear weapons and other weapons of mass destruction in orbit and reserves the Moon and other celestial bodies for "exclusively peaceful purposes," while saying nothing whatever about conventional, kinetic, or dual-use systems in Earth orbit. That silence is not a gap the Treaty forgot to fill; it is the space the negotiators deliberately left open, and it has since widened into a large and consequential grey zone. This paper argues that "orbital denial" — the capacity to deny an adversary the use of an orbital region or of a specific space capability — is for that reason <em>legally contested</em> rather than <em>clearly prohibited</em>, and that the contest cannot be resolved by the instrument scholars instinctively reach for, a new multilateral treaty. It proceeds in five movements: an interpretive analysis of Article IV's text, structure, and <em>travaux</em>, and of the enduring "non-aggressive versus non-military" dispute over "peaceful purposes"; a mapping of where kinetic, conventional, and anti-satellite (ASAT) systems fall as a matter of law, and of why the residual-freedom baseline inherited from <em>Lotus</em> makes their status contested; an account of the ancillary regime — the Liability Convention, the Registration Convention, and the debris/Kessler-syndrome and environmental-law dimension of Article IX — and its inadequacy to the problem; a survey of the contemporary policy landscape, from the deadlocked PAROS process and the Russia–China PPWT to the 2022–2026 turn toward "responsible behaviours" in the UN Open-Ended Working Groups and the Group of Governmental Experts, the 2022 United States moratorium on destructive direct-ascent ASAT testing and the state practice that followed it, and the militarisation-versus-weaponisation distinction that organises the whole field. It closes with a normative proposal in the author's own voice, extending his prior work on the "Magnitsky model": that the Treaty's conventional-systems gap is best filled not by a convention that will not be concluded, but by <em>targeted, nationally-anchored measures</em> — an implementation, rather than a circumvention, of the authorisation-and-supervision duty that Article VI already imposes — which harden the emergent responsible-behaviour norms by attaching domestic consequences to irresponsible orbital-denial conduct and letting those consequences cascade through the commercial space economy. The proposal is offered as the author's original contribution and as a model for legislative adaptation, not as a statement of existing law.</p>
+<p><strong>Keywords:</strong> Outer Space Treaty; Article IV; peaceful purposes; anti-satellite weapons; orbital denial; weaponisation of space; PAROS; PPWT; responsible behaviours; space debris; Kessler syndrome; Liability Convention; Registration Convention; economic warfare; targeted measures; Magnitsky model.</p>
+<hr>
+<h2 id="1-introduction">1. Introduction</h2>
+<p>Space law was built for a world of two spacefaring states and a handful of objects; it now governs a world of dozens of state and hundreds of commercial actors and tens of thousands of objects, and it governs that world through a text that has not been substantively amended since it entered into force in 1967.<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup> In earlier work I described the Outer Space Treaty as the paradigm case of treaty <em>ossification</em> — "a Cold-War text [that] now governs, awkwardly and by strained analogy, a domain of mega-constellations, anti-satellite weapons and contemplated resource extraction that its drafters could not have imagined."<sup id="fnref:2"><a class="footnote-ref" href="#fn:2">2</a></sup> This paper takes that aside and makes it the subject. It asks a precise question: what is the legal status, under the Outer Space Treaty and the wider corpus of space and general international law, of the kinetic and conventional systems that the Treaty's marquee prohibition does not name?</p>
+<p>The question matters because the answer is neither "lawful" nor "unlawful" but the more uncomfortable "unregulated, and therefore contested." Article IV of the Treaty prohibits States Parties from placing "in orbit around the earth any objects carrying nuclear weapons or any other kinds of weapons of mass destruction," from installing such weapons on celestial bodies, or from stationing them "in outer space in any other manner"; and it reserves the Moon and other celestial bodies for use "exclusively for peaceful purposes," forbidding on them military bases, weapons testing, and manoeuvres.<sup id="fnref:3"><a class="footnote-ref" href="#fn:3">3</a></sup> The provision is a monument, but it is a monument to a specific fear — the orbiting nuclear bomb — and it is silent by design on everything else. A conventional or kinetic system in Earth orbit is not a weapon of mass destruction; a system launched from the ground to strike an object in orbit is not "placed" in orbit at all; and neither is deployed on a celestial body. On the face of the text, the entire category of conventional and kinetic counterspace capability falls outside the one prohibition the Treaty contains.</p>
+<p>I use the term <strong>orbital denial</strong> as the organising concept of this paper: the capacity, however achieved, to deny an adversary the beneficial use of an orbital region or of a particular space system.<sup id="fnref:4"><a class="footnote-ref" href="#fn:4">4</a></sup> The term is deliberately effect-oriented and capability-agnostic, and I use it precisely so that the analysis can proceed at the level of <em>legal effect</em> without touching <em>technical means</em>. Orbital denial may be achieved destructively or non-destructively, reversibly or irreversibly, from the ground or on orbit; the law cares about these distinctions, and I will draw them, but only as legal categories. The paper's thesis is that orbital denial sits in a grey zone that the Outer Space Treaty does not reach, that the ancillary space treaties address only its consequences and not its legality, and that the contemporary policy machinery has, after two decades of deadlock over a prohibitory treaty, begun to converge on a second-best answer — norms of "responsible behaviour" — that is right in substance but structurally incapable, as presently pursued, of binding anyone. My constructive claim, developed in Part 6 and marked throughout as my own proposal, is that the missing enforcement can be supplied from an unexpected quarter: the domestic authorisation-and-supervision jurisdiction that Article VI of the Treaty already requires every State Party to exercise over its nationals, weaponised in the same way that the Magnitsky sanctions model weaponised domestic market access.</p>
+<p>This is, at bottom, an argument about economic warfare, which is the field in which I work. Space systems are no longer merely strategic; they are economic infrastructure. Position, navigation, and timing signals underwrite financial-transaction timestamping, logistics, and energy grids; orbital communications and remote sensing underwrite commerce, insurance, and agriculture. To deny an adversary the use of orbit is therefore to conduct a form of infrastructural coercion — an exercise of what Farrell and Newman call <em>weaponized interdependence</em>, relocated from the financial network to the orbital one.<sup id="fnref:5"><a class="footnote-ref" href="#fn:5">5</a></sup> My dissertation argued that the defining pathology of modern conflict is <em>indirection</em>: coercion executed through deniable means that the state-centric, prohibition-based architecture of international law cannot reach.<sup id="fnref:6"><a class="footnote-ref" href="#fn:6">6</a></sup> Orbital denial is that pathology in a new medium. A destructive act attributable to no one, a "rendezvous" whose purpose is unprovable, a dual-use manoeuvre indistinguishable from a service call — each exploits the same structural gap between what the law prohibits and what technology permits. The remedy I will propose is the remedy I have proposed before in a different register: not a grand new instrument that the geopolitics of the domain will not permit, but a targeted, nationally-anchored measure that needs no adversary's consent and bites through the market.</p>
+<p>The argument proceeds in six further parts. Part 2 analyses Article IV's text, structure, and <em>travaux</em>, and the "peaceful purposes" debate. Part 3 locates kinetic, conventional, and ASAT systems within the law and explains why their status is contested rather than settled. Part 4 examines the ancillary regime — liability, registration, and the debris and environmental dimension. Part 5 surveys the contemporary policy landscape from PAROS to the 2025–2028 Open-Ended Working Group. Part 6 sets out the normative proposal. Part 7 concludes.</p>
+<h2 id="2-article-iv-text-structure-and-the-travaux">2. Article IV: Text, Structure, and the Travaux</h2>
+<h3 id="21-the-two-tier-architecture">2.1 The two-tier architecture</h3>
+<p>Article IV has a structure that is often flattened in summary but is decisive for the argument. It establishes <em>two different regimes</em> for two different places.<sup id="fnref:7"><a class="footnote-ref" href="#fn:7">7</a></sup> The first paragraph governs the whole of outer space, including "orbit around the earth," and imposes a <em>single, narrow</em> prohibition: States Parties "undertake not to place in orbit around the earth any objects carrying nuclear weapons or any other kinds of weapons of mass destruction, install such weapons on celestial bodies, or station such weapons in outer space in any other manner." The second paragraph governs only "the moon and other celestial bodies," and imposes a <em>broad, categorical</em> demilitarisation: those bodies "shall be used by all States Parties to the Treaty exclusively for peaceful purposes," and on them "[t]he establishment of military bases, installations and fortifications, the testing of any type of weapons and the conduct of military manoeuvres … shall be forbidden." A closing pair of savings clauses preserves the use of military personnel for scientific research and of any equipment necessary for peaceful exploration.<sup id="fnref:8"><a class="footnote-ref" href="#fn:8">8</a></sup></p>
+<p>The asymmetry is the whole point. On celestial bodies, the Treaty adopts the demilitarisation model of the Antarctic Treaty — an "exclusively peaceful purposes" regime that forbids weapons of <em>any type</em>, and even the testing of them and the conduct of manoeuvres.<sup id="fnref:9"><a class="footnote-ref" href="#fn:9">9</a></sup> In Earth orbit and the vast intervening volume of space, it does no such thing. There, the prohibition is confined to a single class of payload: weapons of mass destruction. Everything the demilitarisation model would forbid on the Moon — the emplacement of a conventional weapon, the testing of a weapon, a military manoeuvre — is left <em>unaddressed</em> in orbit. The Treaty thus draws its brightest line not between military and peaceful, nor between weapon and non-weapon, but between <em>the Moon and everything below it</em>.</p>
+<h3 id="22-what-article-iv-does-not-say">2.2 What Article IV does not say</h3>
+<p>Three textual silences follow, and together they define the grey zone.</p>
+<p><em>First, the payload limit.</em> The orbital prohibition reaches only "nuclear weapons or any other kinds of weapons of mass destruction." The phrase is undefined in the Treaty, but it is universally understood to track the 1948 Commission for Conventional Armaments formula — nuclear, radiological, chemical, and biological weapons — and to exclude conventional munitions.<sup id="fnref:10"><a class="footnote-ref" href="#fn:10">10</a></sup> A conventional or kinetic system in orbit is therefore, by the plain terms, not within the prohibition. The Treaty bans the orbiting bomb of the drafters' nightmares and is indifferent to the orbiting conventional capability of ours.</p>
+<p><em>Second, the "placement" limit.</em> The prohibition bites on placing, installing, or stationing WMD; it presupposes an object that is <em>emplaced</em> in space. A capability that transits space only briefly — that is launched from the surface, reaches into orbit to produce an effect, and does not itself become an emplaced space object — is not "placed in orbit" in the sense the Article contemplates. The entire category of direct-ascent counterspace capability thus escapes even the WMD prohibition's structure, quite apart from the payload limit.<sup id="fnref:11"><a class="footnote-ref" href="#fn:11">11</a></sup></p>
+<p><em>Third, the conventional-systems silence.</em> Nowhere does Article IV, or any other provision of the Treaty, prohibit the deployment, testing, or use of conventional or kinetic systems in orbit. This is the silence that matters most, and it is worth being exact about its character. It is not an <em>ambiguity</em> to be resolved by interpretation; it is a <em>deliberate omission</em>, the trace of a bargain the negotiators could reach on WMD and could not reach on anything wider.</p>
+<h3 id="23-the-travaux-and-the-cold-war-bargain">2.3 The travaux and the Cold-War bargain</h3>
+<p>The Vienna Convention on the Law of Treaties directs the interpreter first to the ordinary meaning of the terms in their context and light of object and purpose, and permits recourse to the preparatory work to confirm that meaning or to resolve ambiguity.<sup id="fnref:12"><a class="footnote-ref" href="#fn:12">12</a></sup> Here the <em>travaux</em> confirm rather than disturb the plain reading. Article IV's first paragraph did not originate as a general disarmament measure; it grew directly out of United Nations General Assembly Resolution 1884 (XVIII) of 1963, by which the United States and the Soviet Union — having each, in the preceding years, tested and contemplated the orbital emplacement of nuclear weapons — welcomed their mutual expression of intention <em>not to station weapons of mass destruction in space</em>.<sup id="fnref:13"><a class="footnote-ref" href="#fn:13">13</a></sup> The Treaty codified that specific, achievable détente. The negotiating record shows that broader proposals to bar the military use of space in general foundered on the reality that both superpowers were already using space intensively for military support functions — reconnaissance, early warning, communications — that neither would surrender and both regarded as stabilising.<sup id="fnref:14"><a class="footnote-ref" href="#fn:14">14</a></sup> The "exclusively peaceful purposes" language was accordingly confined to celestial bodies, where no such entrenched military use yet existed and demilitarisation cost the parties nothing.</p>
+<p>The upshot for interpretation is that the conventional-systems silence is <em>load-bearing</em>. It reflects a considered decision to prohibit the one thing the parties agreed to prohibit and to leave the rest to the residual freedom of the domain. An interpreter who read into Article IV a general ban on orbital weapons would not be filling a gap the drafters overlooked; he would be rewriting the bargain the drafters struck. That is a conclusion I reach with some reluctance, because its consequence — that conventional orbital denial is textually unprohibited — is precisely the problem this paper exists to address. But honest interpretation must precede reform, and the text will not bear the weight that the more optimistic commentary places on it.</p>
+<h3 id="24-peaceful-purposes-non-aggressive-or-non-military">2.4 "Peaceful purposes": non-aggressive or non-military?</h3>
+<p>The interpretive weight that Article IV's first paragraph will not bear is often transferred to the phrase "peaceful purposes," which appears in the Treaty's preamble, in Article IV's second paragraph, and, as "the exploration and use of outer space … for the benefit … of all countries," threaded through Article I.<sup id="fnref:15"><a class="footnote-ref" href="#fn:15">15</a></sup> If "peaceful" means "non-military," then a great deal of ordinary space activity — including the military support functions both superpowers insisted on retaining — is unlawful, and orbital denial by military systems is a fortiori prohibited. If "peaceful" means merely "non-aggressive," then military activity in space is lawful up to the threshold of the use of force, and the phrase adds little to the constraints that the UN Charter already imposes.</p>
+<p>The debate is old and unresolved, and the better view, which I share, is that "peaceful" in the space treaties means "non-aggressive," not "non-military."<sup id="fnref:16"><a class="footnote-ref" href="#fn:16">16</a></sup> Three considerations compel it. First, <em>state practice</em> is overwhelming and immediate: from the earliest days of the space age both leading spacefaring states used space for military purposes — reconnaissance above all — without protest from the other, and that unbroken, unchallenged practice is the strongest possible evidence of the parties' understanding of their own obligation.<sup id="fnref:17"><a class="footnote-ref" href="#fn:17">17</a></sup> Second, the <em>internal structure</em> of Article IV confirms it: if "peaceful purposes" already meant "non-military," the detailed enumeration in the second paragraph of specifically forbidden military activities on celestial bodies (bases, fortifications, weapons testing, manoeuvres) would be redundant, and the savings clause permitting the use of military personnel for peaceful research would be incoherent. The drafters plainly contemplated that military actors and assets could operate "peacefully."<sup id="fnref:18"><a class="footnote-ref" href="#fn:18">18</a></sup> Third, Bin Cheng's foundational analysis, tracing the phrase through the parallel usage in the Antarctic Treaty and the law of the sea, concluded that in the space treaties "peaceful" had come to mean "non-aggressive," and that the contrary reading could not be reconciled with the practice of the very states that drafted the instrument.<sup id="fnref:19"><a class="footnote-ref" href="#fn:19">19</a></sup></p>
+<p>The consequence is doubly awkward for those who would find orbital denial prohibited. Not only does Article IV's first paragraph fail to reach conventional systems; the "peaceful purposes" principle that might have supplied a residual prohibition dissolves, on the better reading, into the "non-aggressive" standard — which is to say, into the Charter's prohibition on the use of force, a standard that the deployment and even the testing of a capability does not, without more, cross. The Treaty's two most cited security provisions, read honestly, leave conventional orbital denial legally unaddressed. That is the space into which Part 3 must now look.</p>
+<h3 id="25-the-celestial-bodies-regime-beyond-article-iv">2.5 The celestial-bodies regime beyond Article IV</h3>
+<p>Two later instruments bear on the celestial-bodies tier and confirm, rather than close, the asymmetry just described. The Moon Agreement of 1979 elaborates Article IV(2), reaffirming that the Moon and other celestial bodies "shall be used … exclusively for peaceful purposes," expressly prohibiting the threat or use of force and the placement of weapons upon them, and declaring their natural resources the "common heritage of mankind." Had it been widely adopted it would have thickened the demilitarisation of the celestial tier considerably; but it was not. It has attracted only a small number of ratifications, none of them by a major spacefaring state, so that its constraints bind almost no one who matters and its "common heritage" principle has, in practice, remained a dead letter.<sup id="fnref:20"><a class="footnote-ref" href="#fn:20">20</a></sup> The non-binding Artemis Accords of 2020 approach the same tier from the opposite direction, reaffirming that cooperative lunar and planetary activity shall be conducted "for peaceful purposes" consistent with the Outer Space Treaty while facilitating commercial resource extraction and introducing the contested concept of "safety zones."<sup id="fnref:21"><a class="footnote-ref" href="#fn:21">21</a></sup> For present purposes the lesson of both is identical and negative: the legal energy of the last half-century has been spent almost entirely on the celestial bodies — the tier the Treaty had already demilitarised — while Earth orbit, the tier it deliberately left open and the tier in which orbital denial actually occurs, has attracted no comparable instrument at all.</p>
+<h2 id="3-the-grey-zone-where-kinetic-conventional-and-asat-systems-fall">3. The Grey Zone: Where Kinetic, Conventional, and ASAT Systems Fall</h2>
+<h3 id="31-the-residual-freedom-baseline-and-its-limits">3.1 The residual-freedom baseline and its limits</h3>
+<p>To ask whether a conventional or kinetic space system is "lawful" is, in the first instance, to ask the wrong question. General international law does not proceed by enumerating permissions; it proceeds, on the classical view associated with the <em>Lotus</em> case, from the premise that a sovereign state is free to act unless a rule prohibits it.<sup id="fnref:22"><a class="footnote-ref" href="#fn:22">22</a></sup> Article IV of the Outer Space Treaty is precisely such a rule for the emplacement of weapons of mass destruction; there is no such rule for conventional or kinetic systems. On the residual-freedom baseline, then, the deployment, testing, and possession of conventional counterspace capability is <em>presumptively permitted</em>, and the burden lies on the party asserting a prohibition to identify its source. This is why the honest answer to the status question is not "unlawful" but "unregulated": the systems fall into the space that no prohibition occupies.</p>
+<p>The <em>Lotus</em> baseline is, however, a starting point, not a conclusion, and I do not press it further than it will go. Three qualifications matter. First, freedom of use in space is expressly <em>conditioned</em>: Article I guarantees free access and use, but Article III subjects all activity to "international law, including the Charter of the United Nations," and Article IX qualifies it by the duties of "due regard" and consultation examined in Part 4.<sup id="fnref:23"><a class="footnote-ref" href="#fn:23">23</a></sup> Second, the International Court of Justice has cautioned against reading residual freedom as a licence: even where a category of weapon is not specifically prohibited, its threat or use remains fully governed by the general law — the Charter's rules on force and the requirements of international humanitarian law — as the Court held of nuclear weapons in 1996.<sup id="fnref:24"><a class="footnote-ref" href="#fn:24">24</a></sup> Third, a growing body of scholarship argues that the cooperative, common-interest architecture of the space treaties displaces the pure <em>Lotus</em> presumption in this domain, so that the weaponisation of space cannot be defended merely by observing that no rule forbids it.<sup id="fnref:25"><a class="footnote-ref" href="#fn:25">25</a></sup> I find these qualifications persuasive as <em>constraints on use</em>, and I rely on them below. But they do not convert the <em>absence of a deployment-and-testing prohibition</em> into its presence. The grey zone is real, and it is a grey zone precisely because the baseline is permissive and the qualifications bite mainly at the threshold of use, not of capability.</p>
+<h3 id="32-militarisation-and-weaponisation">3.2 Militarisation and weaponisation</h3>
+<p>The field's organising distinction is between the <em>militarisation</em> and the <em>weaponisation</em> of space, and the grey zone lives in the gap between them.<sup id="fnref:26"><a class="footnote-ref" href="#fn:26">26</a></sup> <em>Militarisation</em> denotes the use of space systems to support terrestrial and space military operations without deploying weapons in space — reconnaissance, early warning, communications, and position-navigation-timing. It is pervasive, decades old, and, on the "non-aggressive" reading of "peaceful purposes," broadly compatible with the Outer Space Treaty; no serious contemporary argument holds that a reconnaissance satellite violates the Treaty. <em>Weaponisation</em> denotes the actual placement of weapons in, or the extension of weapon effects into, space. It is the object of the prohibitory-treaty proposals canvassed in Part 5, and it is the thing the Treaty does <em>not</em>, save for weapons of mass destruction, prohibit.</p>
+<p>The distinction is analytically indispensable and practically eroding, for two reasons that the paper must confront squarely. The first is <em>dual use</em>. A single space object may lawfully perform a benign function and simultaneously possess an orbital-denial potential, and the same manoeuvre — a close approach to another object — may be a commercial servicing call, an inspection, or the rehearsal of a denial capability.<sup id="fnref:27"><a class="footnote-ref" href="#fn:27">27</a></sup> Legal classification depends on purpose and effect, which are exactly the facts that the space environment conceals. The second is the <em>non-kinetic register</em>. Orbital denial may be pursued by means that produce no physical destruction and leave no debris, and that may be temporary and reversible; such means sit even further outside Article IV, which is addressed to emplaced weapons of mass destruction and not at all to reversible interference. I mention the non-kinetic register only to classify it — as <em>non-destructive</em> and typically <em>reversible</em> orbital denial, legally distinct from the destructive kind — and not to describe it. The classificatory point is sufficient: the more that orbital denial migrates from destructive to non-destructive means, the further it recedes from the reach of a treaty built around a single class of catastrophic payload.</p>
+<h3 id="33-kinetic-conventional-and-asat-systems-as-legal-categories">3.3 Kinetic, conventional, and ASAT systems as legal categories</h3>
+<p>With those distinctions in place, the legal map of orbital denial can be drawn — strictly as a map of <em>categories</em>, not capabilities.</p>
+<p><em>Destructive orbital denial</em> — conduct that physically destroys a space object and generates debris — is the category the existing law comes closest to reaching, and even here it does so only obliquely. Such conduct is not prohibited by Article IV (the object destroyed is not a weapon of mass destruction, and a surface-launched effect is not "placed" in orbit). It is constrained, if at all, by the general law: by Article III's incorporation of the Charter where the conduct crosses the use-of-force threshold; by Article IX's "due regard" and consultation duties; by the Liability Convention's allocation of responsibility for the resulting damage; and, in armed conflict, by international humanitarian law's rules on indiscriminate effects, which debris-generating destruction strains.<sup id="fnref:28"><a class="footnote-ref" href="#fn:28">28</a></sup> None of these amounts to a prohibition on the <em>capability</em> or its <em>testing</em>. This is the doctrinal core of the paper's claim: the single most environmentally consequential form of orbital denial — debris-generating destruction — is regulated, to the extent it is regulated at all, by the law of <em>consequences</em> and not by any rule of <em>prohibition</em>.</p>
+<p><em>Co-orbital and rendezvous-and-proximity operations (RPO)</em> occupy the ambiguous centre of the map. An object that manoeuvres to approach another may be servicing it, inspecting it, or positioning for denial; the conduct is lawful, dual-use, or hostile depending on a purpose that cannot be read from the orbit. The Woomera Manual's expert drafters observe that such activities have been conducted in ways "dangerous and irresponsible without being characterized as violations of the Outer Space Treaty" — a formulation that captures the grey zone exactly.<sup id="fnref:29"><a class="footnote-ref" href="#fn:29">29</a></sup> Legally, RPO is presumptively within the freedom of use, constrained by the duty of due regard and by the prohibition on harmful interference, but not prohibited as such.</p>
+<p><em>Non-destructive and reversible orbital denial</em> sits furthest outside the treaty framework, for the reasons given in 3.2: it is neither WMD-emplacement nor, typically, a use of force, and it produces no damage to anchor a liability claim.</p>
+<p>The pattern across all three categories is the same. The law prohibits one narrow thing (WMD emplacement), constrains the <em>use</em> of everything else at the Charter threshold, allocates <em>liability</em> for damage after the fact, and prohibits the <em>capability</em> of orbital denial nowhere. That is not a loophole; it is the architecture.</p>
+<h3 id="34-the-jus-ad-bellum-overlay-and-why-orbital-denial-is-contested">3.4 The jus ad bellum overlay and why orbital denial is contested</h3>
+<p>If deployment and testing are largely unregulated, <em>use</em> is not. Article III makes plain that activities in space are conducted "in accordance with international law, including the Charter."<sup id="fnref:30"><a class="footnote-ref" href="#fn:30">30</a></sup> An act of orbital denial that rises to a "use of force" against another state engages Article 2(4) of the Charter, and one that constitutes an "armed attack" engages the right of self-defence under Article 51; in armed conflict, the whole of international humanitarian law applies to space operations as it does elsewhere.<sup id="fnref:31"><a class="footnote-ref" href="#fn:31">31</a></sup> The recent scholarly manuals — the Woomera Manual on military space operations and the McGill MILAMOS project — are largely devoted to working out how these settled bodies of law map onto space, and their existence is itself evidence that the <em>use</em> of counterspace capability is governed even though its <em>possession</em> is not.<sup id="fnref:32"><a class="footnote-ref" href="#fn:32">32</a></sup></p>
+<p>This overlay is what makes orbital denial <em>contested</em> rather than <em>clearly lawful</em> — and equally what makes it contested rather than <em>clearly prohibited</em>. It is contested because the same act may be characterised, depending on its intensity, reversibility, and effects, as a lawful exercise of the freedom of use, an internationally wrongful act short of force, a use of force, or an armed attack; and because the thresholds between these characterisations are unsettled in a domain where effects are hard to attribute and easy to deny. A reversible interference may be an unfriendly act or an internationally wrongful intervention without being a use of force; a debris-generating destruction of one's <em>own</em> object breaches no prohibition on force at all, yet may violate the due-regard duty and impose catastrophic externalities on third states. The law furnishes a vocabulary for all of this but no bright lines, and in a domain built for deniability the absence of bright lines is not a neutral fact. It is the condition that makes orbital denial an instrument of exactly the indirect, ambiguous coercion my earlier work identified as the frontier of economic warfare.</p>
+<h3 id="35-state-practice-as-evidence-of-the-gap">3.5 State practice as evidence of the gap</h3>
+<p>The clearest evidence that the law does not prohibit destructive orbital denial is that states have practised it and defended its legality. Four episodes are canonical, and I recite them only as <em>legal facts</em> — as instances of state practice and the reactions to it — not as accounts of capability.<sup id="fnref:33"><a class="footnote-ref" href="#fn:33">33</a></sup> In January 2007, China destroyed one of its own defunct weather satellites in a high-altitude test that produced the largest long-lived debris cloud in the history of spaceflight, thousands of trackable fragments of which remain in orbit.<sup id="fnref:34"><a class="footnote-ref" href="#fn:34">34</a></sup> In February 2008, the United States destroyed one of its own malfunctioning satellites at very low altitude, an act it characterised as a public-safety measure and others read as a capability demonstration; the low altitude ensured that the resulting fragments decayed quickly.<sup id="fnref:35"><a class="footnote-ref" href="#fn:35">35</a></sup> In March 2019, India destroyed one of its own satellites in low orbit, expressly choosing a low altitude to limit debris persistence, and joined the small group of states with demonstrated kinetic capability.<sup id="fnref:36"><a class="footnote-ref" href="#fn:36">36</a></sup> In November 2021, Russia destroyed one of its own defunct satellites, generating over a thousand trackable fragments and prompting the crew of the International Space Station to shelter in their return vehicles.<sup id="fnref:37"><a class="footnote-ref" href="#fn:37">37</a></sup></p>
+<p>Two features of this practice are legally significant. First, in no case did the acting state concede that it had violated the Outer Space Treaty, and in no case did the international community characterise the act as a treaty violation, however sharply the debris consequences of some tests were condemned. The reaction was the language of irresponsibility and danger, not of illegality — precisely because the Treaty contains no prohibition to breach. Second, the <em>variation</em> in the tests — from a high-altitude, debris-catastrophic event to deliberately low-altitude, debris-limited ones — is itself evidence of an emergent normative gradient: states increasingly behave as though the <em>debris consequences</em> of orbital denial, rather than the denial itself, are the locus of any constraint. That intuition, that the wrong lies in the irresponsible externality rather than in the capability, is the germ of the responsible-behaviour turn examined in Part 5 and the foundation of the proposal in Part 6.</p>
+<p>The gap's contemporary salience was made vivid in April 2024, when the United States and Japan brought before the Security Council a draft resolution reaffirming the Article IV obligation not to place weapons of mass destruction in orbit — a response to reports of a contemplated orbital nuclear capability. The draft drew the support of thirteen members but was vetoed by the Russian Federation, with China abstaining; a Russian–Chinese counter-amendment that would have extended the reaffirmation to a ban on <em>all</em> weapons in space was defeated.<sup id="fnref:38"><a class="footnote-ref" href="#fn:38">38</a></sup> The episode is a compressed illustration of the paper's entire thesis. Even the <em>existing</em> WMD prohibition proved contested at the moment of reaffirmation; and the attempt to widen the frame from weapons of mass destruction to conventional weapons collapsed on exactly the divide — the divide between the one thing the Treaty prohibits and the everything-else it does not — that Article IV inscribed in 1967.</p>
+<h2 id="4-the-ancillary-regime-liability-registration-debris-and-environmental-law">4. The Ancillary Regime: Liability, Registration, Debris, and Environmental Law</h2>
+<p>If the Outer Space Treaty does not prohibit orbital denial, three ancillary bodies of law address its consequences. None supplies the missing prohibition, but each shapes the incentives around the conduct, and each is a potential anchor for the reform proposed in Part 6.</p>
+<h3 id="41-the-liability-convention-consequences-not-legality">4.1 The Liability Convention: consequences, not legality</h3>
+<p>The 1972 Liability Convention elaborates the responsibility principle of Article VII of the Outer Space Treaty into a two-tier regime.<sup id="fnref:39"><a class="footnote-ref" href="#fn:39">39</a></sup> Under Article II, a launching state is <em>absolutely</em> liable for damage caused by its space object on the surface of the Earth or to aircraft in flight. Under Article III, where damage is caused elsewhere than on the surface — that is, in space itself — to the space object of another launching state, liability is based on <em>fault</em>.<sup id="fnref:40"><a class="footnote-ref" href="#fn:40">40</a></sup> For orbital denial the fault regime is the relevant one, and its limits are instructive. It presupposes an identified launching state, a damaged object belonging to another launching state, and — critically — proof of <em>fault</em>, a concept the Convention does not define and which is contested in a domain lacking agreed rules of the road.<sup id="fnref:41"><a class="footnote-ref" href="#fn:41">41</a></sup> Damage caused by <em>debris</em> compounds every difficulty: fragments are hard to attribute to a particular object and a particular launch, causation across years and collisions is nearly impossible to establish, and the injured party bears the burden. The regime has been invoked to settlement only once in its history, following the re-entry of a nuclear-powered satellite in 1978.<sup id="fnref:42"><a class="footnote-ref" href="#fn:42">42</a></sup> For the debris externalities of destructive orbital denial — diffuse, delayed, and multi-causal — the Liability Convention is, in practice, close to a dead letter. It addresses the <em>consequence</em> (damage) and not the <em>conduct</em> (denial), and even the consequence only imperfectly.</p>
+<h3 id="42-the-registration-convention-and-the-transparency-deficit">4.2 The Registration Convention and the transparency deficit</h3>
+<p>The 1976 Registration Convention requires a launching state to maintain a national registry of the objects it launches and to furnish specified particulars to a United Nations register, its object being to promote transparency and the identification of space objects.<sup id="fnref:43"><a class="footnote-ref" href="#fn:43">43</a></sup> Transparency is the precondition of every other constraint: liability, due regard, and responsible behaviour all depend on knowing whose object is where and what it is for. Yet the regime's information is thin and, for present purposes, close to useless. The particulars required are minimal and disclose nothing of <em>function</em>; reporting is often delayed and inconsistent; and the Convention has no mechanism to compel disclosure of the purpose of a manoeuvre or the character of a payload.<sup id="fnref:44"><a class="footnote-ref" href="#fn:44">44</a></sup> A dual-use object with an orbital-denial potential is registered exactly as an innocuous one; a rendezvous operation need not be declared in advance. The transparency deficit is therefore not incidental but structural, and it is the deficit that makes the co-orbital ambiguity of Part 3.3 so intractable: the law cannot classify what the registry does not reveal.</p>
+<h3 id="43-article-ix-due-regard-harmful-contamination-and-a-proto-environmental-norm">4.3 Article IX: due regard, harmful contamination, and a proto-environmental norm</h3>
+<p>The most promising anchor in the existing Treaty is Article IX, the domain's proto-environmental provision.<sup id="fnref:45"><a class="footnote-ref" href="#fn:45">45</a></sup> It requires States Parties to conduct their activities "with due regard to the corresponding interests of all other States Parties"; to avoid "harmful contamination" of space and "adverse changes in the environment of the Earth"; and, where a state "has reason to believe" that a planned activity "would cause potentially harmful interference" with the activities of others, to "undertake appropriate international consultations before proceeding." Debris-generating orbital denial is, on any natural reading, in tension with all three limbs: it disregards the interests of every other user of the affected orbit; it arguably "contaminates" the orbital environment with long-lived debris; and it is conducted, characteristically, without the prior consultation the Article contemplates.<sup id="fnref:46"><a class="footnote-ref" href="#fn:46">46</a></sup></p>
+<p>Two cautions are necessary, and I state them against my own interest in the provision. First, Article IX's obligations are framed as duties of <em>conduct</em> and <em>consultation</em>, not as prohibitions with determinate content; "due regard" is a standard of balance, not a rule of abstention, and it has never been authoritatively applied to condemn a specific act as unlawful.<sup id="fnref:47"><a class="footnote-ref" href="#fn:47">47</a></sup> Second, the better scholarly view is that Article IX does not, at least not yet, impose a hard obligation to remediate debris or to refrain from generating it, though it may furnish the seed from which such an obligation could grow through subsequent practice or interpretation.<sup id="fnref:48"><a class="footnote-ref" href="#fn:48">48</a></sup> Article IX is thus a <em>norm in embryo</em>: the closest the Treaty comes to an environmental constraint on orbital denial, but presently a standard of responsible conduct rather than an enforceable prohibition. That is exactly the character — genuine normative content, weak bindingness — that Part 6's proposal is designed to reinforce.</p>
+<h3 id="44-kessler-syndrome-and-the-commons-problem">4.4 Kessler syndrome and the commons problem</h3>
+<p>The stakes of the debris externality are captured by the <em>Kessler syndrome</em>: the scenario, first modelled by Kessler and Cour-Palais in 1978, in which the density of objects in a heavily used orbit becomes great enough that collisions cascade, each generating fragments that provoke further collisions, until the orbital region is rendered unusable for generations.<sup id="fnref:49"><a class="footnote-ref" href="#fn:49">49</a></sup> Earth orbit already carries, on the European Space Agency's counts, on the order of tens of thousands of trackable objects and an estimated many millions of smaller but still-lethal fragments, and the population is growing.<sup id="fnref:50"><a class="footnote-ref" href="#fn:50">50</a></sup> Destructive orbital denial is, in this light, not merely a bilateral act between belligerents but an assault on a global commons — a paradigmatic negative externality, in which the acting state captures the strategic benefit while the costs fall on every user of the orbit, present and future, including the acting state's own commercial sector.</p>
+<p>The commons character of the problem has generated a substantial body of <em>soft law</em> that the hard treaties lack: the Inter-Agency Space Debris Coordination Committee's mitigation guidelines; the Committee on the Peaceful Uses of Outer Space (COPUOS) Space Debris Mitigation Guidelines, endorsed by the General Assembly in 2007; and the 2019 COPUOS Guidelines for the Long-Term Sustainability of Outer Space Activities.<sup id="fnref:51"><a class="footnote-ref" href="#fn:51">51</a></sup> These instruments articulate, in careful and widely accepted detail, what responsible conduct in orbit requires. What they conspicuously lack is bindingness and enforcement. They are, in the taxonomy of my earlier work, fast and revisable but unable to bite — the soft-law half of a bifurcated governance space whose hard-law half is too rigid and too narrow to reach the conduct at all.<sup id="fnref:52"><a class="footnote-ref" href="#fn:52">52</a></sup> The debris problem thus presents, in acute form, the general predicament of this paper: a well-understood norm of responsible behaviour, no shortage of expert consensus on its content, and no mechanism to make it bind the actor who chooses to disregard it.</p>
+<h2 id="5-the-contemporary-policy-landscape">5. The Contemporary Policy Landscape</h2>
+<p>The international community has been trying to close Article IV's conventional-systems gap for four decades. The attempt has run on two tracks — a <em>prohibitory</em> track that seeks a new treaty banning space weapons, and, more recently, a <em>behavioural</em> track that seeks norms of responsible conduct. Understanding why the first has failed and the second has stalled is essential to the proposal that follows.</p>
+<h3 id="51-paros-and-the-deadlock-at-the-conference-on-disarmament">5.1 PAROS and the deadlock at the Conference on Disarmament</h3>
+<p>The prohibitory track runs through the agenda item known as the Prevention of an Arms Race in Outer Space (PAROS), which has been before the Conference on Disarmament in Geneva since the early 1980s.<sup id="fnref:53"><a class="footnote-ref" href="#fn:53">53</a></sup> For most of that period the item has been deadlocked, a victim both of the Conference's consensus rule and of a fundamental disagreement of approach: a coalition led by Russia and China has pressed for a legally binding prohibition on space weapons, while the United States has resisted, arguing that a meaningful and verifiable ban is not presently attainable and that a premature instrument would constrain the compliant while leaving the determined free.<sup id="fnref:54"><a class="footnote-ref" href="#fn:54">54</a></sup> The result is one of the longest-running impasses in the machinery of multilateral disarmament, and it is the empirical backdrop against which any proposal for <em>yet another</em> treaty must be assessed.</p>
+<h3 id="52-the-ppwt-and-the-definition-and-verification-impasse">5.2 The PPWT and the definition-and-verification impasse</h3>
+<p>The concrete expression of the prohibitory track is the draft Treaty on the Prevention of the Placement of Weapons in Outer Space and of the Threat or Use of Force against Outer Space Objects (PPWT), tabled by Russia and China at the Conference on Disarmament in 2008 and re-tabled in a revised form in 2014.<sup id="fnref:55"><a class="footnote-ref" href="#fn:55">55</a></sup> Its two core obligations are a ban on placing weapons in orbit and a ban on the threat or use of force against space objects. The United States and others have declined to negotiate on its basis, advancing objections that are, for my purposes, more illuminating than the draft itself.<sup id="fnref:56"><a class="footnote-ref" href="#fn:56">56</a></sup> The PPWT, its critics observe, <em>defines</em> a "weapon in outer space" so as to reach only objects <em>placed in orbit</em>, thereby leaving untouched the entire category of surface-launched, direct-ascent capability — the very category that produced the destructive tests of Part 3.5. And it contains <em>no verification mechanism</em>, an omission its proponents defend by noting that the Outer Space Treaty itself has none, but which its critics regard as fatal to a prohibition of this kind. The PPWT thus fails on both of the axes on which any prohibitory instrument must succeed: it does not reach the most-used form of the prohibited conduct, and it cannot confirm compliance with what it does reach. Its two-decade failure is not an accident of diplomacy; it is a demonstration that the definitional and verification problems of a space-weapons ban are, for now, unsolved.</p>
+<h3 id="53-the-behavioural-turn-the-open-ended-working-group">5.3 The behavioural turn: the Open-Ended Working Group</h3>
+<p>Confronted with the prohibitory track's paralysis, a group of states led by the United Kingdom and the United States redirected the effort onto the behavioural track. By Resolution 76/231 of December 2021, the General Assembly convened an Open-Ended Working Group (OEWG) to consider threats to space systems and to recommend "norms, rules and principles of responsible behaviours" — a deliberate reorientation from prohibiting <em>capabilities</em> to regulating <em>conduct</em>.<sup id="fnref:57"><a class="footnote-ref" href="#fn:57">57</a></sup> The reorientation is intellectually significant: it accepts, at least provisionally, that the capabilities cannot be banned, and it relocates the normative action to the <em>manner</em> of their use — precisely the debris-and-irresponsibility intuition that the state practice of Part 3.5 had already begun to express. The OEWG met across four sessions in 2022 and 2023 and generated a rich body of proposals, including detailed recommendations on the very conduct this paper is concerned with.<sup id="fnref:58"><a class="footnote-ref" href="#fn:58">58</a></sup> But it failed, at its concluding session, to adopt a consensus report, its work blocked in the end by the same geopolitical division that has always afflicted the field.<sup id="fnref:59"><a class="footnote-ref" href="#fn:59">59</a></sup> The behavioural track, in other words, produced consensus on much of the <em>content</em> of responsible behaviour and no consensus on a <em>binding output</em> — a pattern the reader will by now recognise.</p>
+<h3 id="54-the-gge-and-the-merged-20252028-process">5.4 The GGE, and the merged 2025–2028 process</h3>
+<p>Two further developments complete the picture. In parallel, a Group of Governmental Experts (GGE) established under Resolution 77/250 to consider "further practical measures" for PAROS — including elements of a possible legally binding instrument — met in 2023 and 2024 and, in August 2024, succeeded where the OEWG had failed, adopting a <em>consensus</em> report described by observers as among the most significant products of the field in a decade.<sup id="fnref:60"><a class="footnote-ref" href="#fn:60">60</a></sup> The achievement should not be overstated: a consensus GGE report is a set of recommendations, not a binding instrument, and it papered over rather than resolved the prohibitory-versus-behavioural divide. But it kept the multilateral process alive. That process was then reorganised: after the General Assembly created <em>two</em> parallel working groups in 2023 — one on responsible behaviours, one on further practical measures — it merged them, by decision in 2024, into a single Open-Ended Working Group on the Prevention of an Arms Race in Outer Space "in all its aspects," mandated to work by consensus over 2025–2028.<sup id="fnref:61"><a class="footnote-ref" href="#fn:61">61</a></sup> The merger unites the prohibitory and behavioural tracks in one forum, which is either an overdue synthesis or a device for ensuring that the disagreements of both tracks now block a single body instead of two. Its outcome is unknown as of this writing in mid-2026; what is known is that it, too, will proceed by consensus, and consensus is the rock on which every prior effort has broken.</p>
+<h3 id="55-the-moratorium-on-destructive-testing-an-emergent-norm">5.5 The moratorium on destructive testing: an emergent norm?</h3>
+<p>The one genuinely novel development of the period runs <em>outside</em> the treaty machinery and is, for the argument of this paper, the most important. In April 2022 the United States declared, unilaterally, that it would not conduct destructive direct-ascent anti-satellite testing, and called on other states to make the same commitment.<sup id="fnref:62"><a class="footnote-ref" href="#fn:62">62</a></sup> The declaration is precisely targeted at the debris externality: it does not renounce counterspace capability, or even all testing, but only the <em>destructive, debris-generating test</em> — the conduct of Part 3.5. Within months a cluster of states made parallel unilateral commitments — Canada, Germany, Japan, New Zealand, the Republic of Korea, Switzerland, the United Kingdom, Australia, and France among the first — and in December 2022 the General Assembly, in Resolution 77/41, welcomed the commitment and called on all states to join it, by a vote of 155 in favour to 9 against, with 9 abstentions.<sup id="fnref:63"><a class="footnote-ref" href="#fn:63">63</a></sup> By late 2023 some three dozen states had made the pledge.<sup id="fnref:64"><a class="footnote-ref" href="#fn:64">64</a></sup></p>
+<p>The moratorium is worth dwelling on because it models, in miniature, everything the treaty machinery cannot do. It is <em>fast</em>: it emerged in months, not decades. It is <em>unilateral</em>: it needs no adversary's consent, and its first movers proceeded without waiting for the states most likely to test. It is <em>targeted</em>: it isolates the single most damaging and least defensible form of orbital denial — irreversible, debris-generating destruction — and leaves the intractable definitional questions about "weapons" to one side. And it is <em>behavioural</em>: it constrains a manner of conduct, not a class of capability. What it is not, is <em>binding</em>: a General Assembly resolution is a recommendation, a unilateral commitment is revocable, and the states most likely to conduct such a test are among the nine that voted against the resolution.<sup id="fnref:65"><a class="footnote-ref" href="#fn:65">65</a></sup> The moratorium is thus an emergent norm of responsible behaviour with real traction and no teeth. It is, in my submission, the single best candidate in the entire field for the kind of national-anchoring reinforcement that the next Part proposes — a norm whose content is settled, whose legitimacy is broad, and whose only deficiency is the deficiency this paper exists to remedy: it cannot bind the actor who declines to be bound.</p>
+<h2 id="6-a-normative-proposal-nationally-anchored-measures-for-orbital-responsibility">6. A Normative Proposal: Nationally-Anchored Measures for Orbital Responsibility</h2>
+<p>I now set out, in my own voice and as my original contribution, a proposal for filling the Outer Space Treaty's conventional-systems gap. It is offered as a model for legislative adaptation, not as a statement of existing law, and it is deliberately modest in its legal ambition and immodest only in its claim about <em>sequence</em>: that the gap can begin to be closed now, nationally, without waiting for a treaty that four decades of practice suggest will not come.</p>
+<h3 id="61-why-not-a-new-treaty">6.1 Why not a new treaty</h3>
+<p>The reflexive response to the Article IV gap is the response the PAROS process has pursued since the 1980s: negotiate a treaty that prohibits what Article IV omits. I have argued at length elsewhere that this reflex mistakes the pathology of a fast-moving domain, and the space case confirms the diagnosis with unusual clarity.<sup id="fnref:66"><a class="footnote-ref" href="#fn:66">66</a></sup> A prohibitory space-weapons treaty must solve two problems that remain unsolved: it must <em>define</em> the prohibited object in a domain saturated with dual-use systems, where the same object may be a weapon or a tool depending on an unobservable purpose; and it must provide <em>verification</em> in an environment where capability is indistinguishable from intent and where the most damaging form of the conduct — surface-launched, direct-ascent capability — is not an emplaced object at all. The PPWT's twenty-year failure on precisely these two axes is not a diplomatic accident to be corrected by better drafting; it is evidence that the axes cannot presently be squared. And even a perfectly drafted instrument would inherit the ossification problem I have described: a treaty is a photograph of the consensus at the instant of its conclusion, and the technology of orbital denial will have moved before the ink dries.<sup id="fnref:67"><a class="footnote-ref" href="#fn:67">67</a></sup> The merged 2025–2028 Open-Ended Working Group will, I expect, reproduce the impasse rather than resolve it, because it proceeds by the consensus rule that has defeated every predecessor. The conclusion is not that multilateral effort is worthless — it builds the normative content that any later settlement will need — but that it cannot be the <em>primary</em> engine of enforcement. Something must do the work the treaty cannot.</p>
+<h3 id="62-the-magnitsky-lesson-transposed">6.2 The Magnitsky lesson, transposed</h3>
+<p>The something, I propose, is the mechanism I have theorised in the sanctions context: <em>targeted, nationally-anchored measures</em> that attach consequences to named conduct and let those consequences cascade through an indispensable network without the wrongdoer's consent.<sup id="fnref:68"><a class="footnote-ref" href="#fn:68">68</a></sup> The Magnitsky family of instruments demonstrated that a single sufficiently central jurisdiction, by excluding a designated actor from its market and financial system, can produce a de facto global exclusion — not by commanding foreign states, but by confronting rational intermediaries with a choice between the wrongdoer and continued access to the network's core, a choice they resolve, every time, by dropping the wrongdoer.<sup id="fnref:69"><a class="footnote-ref" href="#fn:69">69</a></sup> The cascade needs no treaty, no attribution of conduct to a state, and no adversary's agreement; it needs only a central node and a defensible predicate.</p>
+<p>The space domain has such nodes. The commercial space economy — launch services, satellite manufacturing, insurance and reinsurance, ground-segment and data services, and the capital markets that finance all of it — is concentrated in a handful of jurisdictions and a small number of indispensable providers.<sup id="fnref:70"><a class="footnote-ref" href="#fn:70">70</a></sup> An actor who cannot obtain launch, cannot insure a mission, cannot buy flight-qualified components, cannot access ground stations, and cannot raise capital is, whatever its capabilities, substantially disabled as a <em>commercial</em> space power. And — this is the doctrinal key — the leverage does not have to be improvised, because the Outer Space Treaty itself already requires every State Party to exercise exactly the jurisdiction the mechanism needs.</p>
+<h3 id="63-the-proposed-mechanism-authorisation-and-supervision-conditionality">6.3 The proposed mechanism: authorisation-and-supervision conditionality</h3>
+<p>Article VI of the Outer Space Treaty provides that States Parties bear international responsibility for national activities in space, "whether such activities are carried on by governmental agencies or by non-governmental entities," and that the activities of non-governmental entities "shall require authorization and continuing supervision by the appropriate State Party."<sup id="fnref:71"><a class="footnote-ref" href="#fn:71">71</a></sup> This is not a marginal provision; it is the hinge on which the entire commercial space order turns, and it is the reason every serious spacefaring state already operates a domestic licensing regime for launch and operation. My proposal is to make <em>responsible orbital behaviour a condition of that authorisation and supervision</em> — and to attach to breach the targeted, cascading consequences of the Magnitsky model. Because the mechanism operates through a jurisdiction the Treaty <em>commands</em> states to exercise, it is not a circumvention of the space-law framework but an <em>implementation</em> of it: Article VI conditionality is the Treaty enforcing itself through the one channel it actually controls.</p>
+<p>Concretely, an enacting state (or, more powerfully, a coalition of the jurisdictions that host the indispensable nodes) would legislate along the following lines. I set out the elements as a model, with the same insistence on designed-in safeguards that I have brought to the sanctions proposal.</p>
+<p><strong>(i) An enumerated predicate of irresponsible orbital-denial conduct.</strong> The trigger should be a closed, defined list of conduct drawn from the emergent responsible-behaviour norms — most obviously the conduct of a destructive, debris-generating direct-ascent test of the kind the 2022 moratorium and Resolution 77/41 address, and comparably the reckless generation of long-lived debris or the conduct of undeclared, non-consensual close-proximity operations in breach of Article IX's due-regard and consultation duties.<sup id="fnref:72"><a class="footnote-ref" href="#fn:72">72</a></sup> Enumeration is essential: the predicate must be <em>conduct</em> — the irresponsible externality — and not <em>capability</em>, both to avoid the definitional quicksand that sank the PPWT and to keep the measure squarely within the behavioural consensus that already commands broad support.</p>
+<p><strong>(ii) A responsibility nexus.</strong> The measure would attach to the entities and, where appropriate, the responsible individuals that conduct, direct, or knowingly provide indispensable services to the proscribed conduct — reaching, through the ordinary tools of corporate and beneficial-ownership law, the actor behind any interposed vehicle.<sup id="fnref:73"><a class="footnote-ref" href="#fn:73">73</a></sup></p>
+<p><strong>(iii) Cascading consequences through the commercial nodes.</strong> Designation would condition or deny access to the enacting jurisdiction's space-relevant markets: launch and operating licences; export licences for flight components; access to domestically regulated ground-segment and data services; eligibility for government procurement and launch manifests; and — borrowing directly from the sanctions register — access to the financial and insurance systems on which any space venture depends. As in the Magnitsky context, the extraterritorial <em>effect</em> would be produced not by any claim to legislate for foreign territory but by the self-protective compliance choices of insurers, launch providers, component suppliers, and banks unwilling to jeopardise their own access to the enacting jurisdiction's market.<sup id="fnref:74"><a class="footnote-ref" href="#fn:74">74</a></sup></p>
+<p><strong>(iv) A behavioural off-ramp.</strong> Consistent with the responsible-behaviour philosophy, the measure should reward compliance as much as it penalises breach: a designation should be liftable on demonstrated adherence to the debris-mitigation and long-term-sustainability guidelines, on transparency as to the character and purpose of manoeuvres, and on a credible commitment against destructive testing. The mechanism thereby converts the soft-law guidelines of Part 4.4 from aspirations into conditions of market access — hardening them without amending a single treaty.</p>
+<h3 id="64-safeguards-limits-and-honest-concessions">6.4 Safeguards, limits, and honest concessions</h3>
+<p>A proposal of this kind earns its keep only by confronting its weaknesses, and three are serious.</p>
+<p><em>The state-actor limit.</em> The mechanism operates on <em>commercial</em> dependence, and its bite therefore weakens against a state actor that conducts orbital denial through sovereign programmes with a captive domestic industrial base and no need of the enacting jurisdiction's market. This is the same limit I have conceded of the Magnitsky model against actors indifferent to market access, and I concede it again here: the measure disciplines the increasingly commercial and dual-use <em>periphery</em> of counterspace activity far more effectively than its sovereign <em>core</em>.<sup id="fnref:75"><a class="footnote-ref" href="#fn:75">75</a></sup> I do not claim it solves the hardest case. I claim it addresses the fast-growing and least-governed part of the problem — the commercial and quasi-commercial actors for whom market exclusion is decisive — which the treaty machinery reaches not at all.</p>
+<p><em>Fragmentation and weaponisation of the measure itself.</em> A regime of national designations could fragment, or be turned to competitive advantage, with rival blocs designating one another's champions on pretextual grounds. The mitigation is the same as in the sanctions context: an enumerated and closed predicate drawn from the <em>already-multilateralised</em> responsible-behaviour norms, so that the measure enforces a broadly shared standard rather than a parochial one; published reasons; and independent review with a genuine delisting pathway.<sup id="fnref:76"><a class="footnote-ref" href="#fn:76">76</a></sup> A designation anchored in the debris norm that 155 states endorsed in Resolution 77/41 is the enforcement of a near-universal norm; a designation anchored in nothing but rivalry is the abuse the safeguards exist to prevent, and the legitimacy of the whole mechanism depends on maintaining that distinction.</p>
+<p><em>The tension with the freedom of use.</em> Conditioning market access on orbital behaviour touches the Article I freedom of exploration and use. But the freedom of use is not unqualified: Article I itself is subject to the "due regard" of Article IX and the responsibility of Article VI, and a state that conditions <em>its own</em> licences and <em>its own</em> market on adherence to widely accepted sustainability norms exercises a jurisdiction the Treaty affirmatively requires it to exercise. The measure does not prohibit anyone from using space; it declines to <em>facilitate</em> irresponsible use through the enacting state's own commercial and regulatory apparatus. That is a defensible, indeed a mandated, exercise of the authorisation-and-supervision duty, not an infringement of the freedom of use.</p>
+<h3 id="65-complement-not-substitute">6.5 Complement, not substitute</h3>
+<p>I want to be precise about what the proposal is and is not. It is not a substitute for the multilateral process, and still less a rejection of the responsible-behaviour norms that the OEWG, the GGE, and the moratorium have painstakingly built; it <em>depends</em> on them, drawing its enumerated predicates from their content and its legitimacy from their breadth. The relationship is one of division of labour. The multilateral process is uniquely able to <em>generate and legitimate</em> the norms of responsible behaviour — to establish, through the slow accretion of consensus, that debris-generating testing is irresponsible and that transparency in manoeuvre is expected. What it cannot do is <em>enforce</em> those norms against a non-consenting actor. National anchoring supplies the missing enforcement, and it supplies it through a channel the Treaty already mandates. The norms give the mechanism its content and its legitimacy; the mechanism gives the norms their teeth. Neither suffices alone; together they close, incrementally and without a new treaty, the gap that Article IV left open in 1967. And — this is the deeper continuity with my prior work — the settled expectations that such national measures would harden into, replicated across the jurisdictions that host the indispensable nodes and reinforced by the compliance practice of the commercial sector, are precisely the substrate on which a durable multilateral settlement could one day be built. The cascade does not displace the convention. It precedes it, as domestic practice has always preceded and shaped the international law that eventually codifies it.</p>
+<h2 id="7-conclusion">7. Conclusion</h2>
+<p>The Outer Space Treaty is a great instrument that answered a specific fear. It banned the orbiting weapon of mass destruction, demilitarised the celestial bodies it could afford to demilitarise, and left the rest of the domain to the residual freedom of a world with two spacefarers and little to deny one another. Half a century later, that residual freedom has become a grey zone, and the grey zone has become the arena. Conventional and kinetic systems, and the practice of orbital denial they make possible, fall outside the one prohibition the Treaty contains; the "peaceful purposes" principle, read honestly, resolves into the Charter's "non-aggressive" standard and constrains use without reaching capability; and the ancillary regime of liability, registration, and Article IX addresses the <em>consequences</em> of orbital denial — damage, debris, harmful interference — without ever prohibiting the <em>conduct</em>. Orbital denial is, in consequence, neither clearly lawful nor clearly unlawful. It is contested, and it is contested because the law is silent where it most needs to speak.</p>
+<p>The policy machinery has understood this, in its way. Having failed for forty years to negotiate the prohibitory treaty that would fill the silence, it has turned to the norms of responsible behaviour that regulate the <em>manner</em> of orbital denial rather than its existence — a turn that is right in substance and that the destructive-testing moratorium has shown can move quickly and command broad assent. What the behavioural turn lacks is what every prior effort has lacked: the capacity to bind the actor who declines to be bound. That capacity, I have argued, need not await a convention. It can be supplied now, nationally, by making responsible orbital behaviour a condition of the authorisation and supervision that Article VI already requires every State Party to exercise over its nationals, and by attaching to breach the targeted, cascading market consequences that the Magnitsky model has shown can enforce a norm without a wrongdoer's consent. Such a measure is an implementation of the Treaty, not an escape from it; it enforces the multilateral norms rather than replacing them; and it disciplines, at least, the fast-growing commercial periphery of orbital denial that the treaty machinery reaches not at all. It is no panacea, and I have said where it fails — against the sovereign actor with a captive market, and wherever the underlying norm is genuinely contested rather than merely unenforced. But the choice is not between this mechanism and a perfect treaty. It is between enforcing the emerging norms of orbital responsibility now, by cascade, and waiting to enforce them later, by a convention that the domain's geopolitics have refused for two generations to conclude. For a grey zone built on deniability and silence, the answer is not a grander silence. It is a smaller, faster, and sharper instrument — anchored in the sovereignty the Treaty already commands each state to exercise, and aimed at the conduct the Treaty forgot to name.</p>
+<hr>
+<h2 id="notes">Notes</h2>
+<div class="footnote">
+<hr>
+<ol>
+<li id="fn:1">
+<p>Treaty on Principles Governing the Activities of States in the Exploration and Use of Outer Space, including the Moon and Other Celestial Bodies (adopted 27 January 1967, entered into force 10 October 1967) 610 UNTS 205 ("Outer Space Treaty" or "OST"). Its amendment provision (art XV) has never been used to modernise the substantive regime.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:2">
+<p>Christopher I V Farmer, 'The Magnitsky Model for AI: Localized Legislative Cascades as a Response to AI-Driven Circumvention of International Law' (preprint, July 2026) pt 2.2, citing OST (n 1) and characterising it as the paradigm of treaty ossification. The present paper takes up that characterisation as its subject.&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+<li id="fn:3">
+<p>OST (n 1) art IV.&#160;<a class="footnote-backref" href="#fnref:3" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+</li>
+<li id="fn:4">
+<p>I use "orbital denial" as an analytical organising concept for this paper. It is capability-agnostic and effect-oriented by design, so that the legal analysis can proceed without reference to technical means. The recognised counterspace taxonomy (kinetic-physical, non-kinetic-physical, electronic, and cyber) is well described in the open policy literature; see e.g. Union of Concerned Scientists, 'Legal Agreements and Space Weapons' (UCS resources). This paper treats these only as legal categories (destructive/non-destructive; reversible/irreversible; emplaced/direct-ascent) and describes no capability.&#160;<a class="footnote-backref" href="#fnref:4" title="Jump back to footnote 4 in the text">&#8617;</a></p>
+</li>
+<li id="fn:5">
+<p>Henry Farrell and Abraham L Newman, 'Weaponized Interdependence: How Global Economic Networks Shape State Coercion' (2019) 44(1) International Security 42.&#160;<a class="footnote-backref" href="#fnref:5" title="Jump back to footnote 5 in the text">&#8617;</a></p>
+</li>
+<li id="fn:6">
+<p>Christopher I V Farmer, 'Economic Warfare: The Unregulated War' (LLM dissertation, University of Worcester 2024) chs 1–2 (indirection and the "realm of legal ambiguity"). Cited hereafter as Farmer, <em>Unregulated War</em>.&#160;<a class="footnote-backref" href="#fnref:6" title="Jump back to footnote 6 in the text">&#8617;</a></p>
+</li>
+<li id="fn:7">
+<p>On the two-tier structure of art IV, see Bin Cheng, <em>Studies in International Space Law</em> (Clarendon Press 1997) chs 16–17; and Laura Montgomery, 'The Outer Space Treaty and Military Activities' (Nonproliferation Policy Education Center, 2023).&#160;<a class="footnote-backref" href="#fnref:7" title="Jump back to footnote 7 in the text">&#8617;</a></p>
+</li>
+<li id="fn:8">
+<p>OST (n 1) art IV (text as quoted; the four paragraphs comprise the orbital WMD prohibition, the celestial-bodies demilitarisation, the military-personnel savings clause, and the equipment savings clause).&#160;<a class="footnote-backref" href="#fnref:8" title="Jump back to footnote 8 in the text">&#8617;</a></p>
+</li>
+<li id="fn:9">
+<p>cf Antarctic Treaty (adopted 1 December 1959, entered into force 23 June 1961) 402 UNTS 71, art I (reserving Antarctica for peaceful purposes and prohibiting, inter alia, any measures of a military nature, weapons testing, and military manoeuvres). Article IV(2) of the OST closely tracks this model for celestial bodies.&#160;<a class="footnote-backref" href="#fnref:9" title="Jump back to footnote 9 in the text">&#8617;</a></p>
+</li>
+<li id="fn:10">
+<p>The commonly accepted content of "weapons of mass destruction" (nuclear, radiological, chemical, biological) derives from the 1948 UN Commission for Conventional Armaments definition. The OST does not define the term; the exclusion of conventional weapons from art IV(1) is undisputed. See Arms Control Association, 'The Outer Space Treaty at a Glance'.&#160;<a class="footnote-backref" href="#fnref:10" title="Jump back to footnote 10 in the text">&#8617;</a></p>
+</li>
+<li id="fn:11">
+<p>This is a recognised structural limitation of art IV(1) and of prohibitory proposals modelled on it; it is also the principal United States objection to the PPWT (n 55). See David A Koplow, 'ASAT-isfaction: Customary International Law and the Regulation of Anti-Satellite Weapons' (2009) 30 Michigan Journal of International Law 1187.&#160;<a class="footnote-backref" href="#fnref:11" title="Jump back to footnote 11 in the text">&#8617;</a></p>
+</li>
+<li id="fn:12">
+<p>Vienna Convention on the Law of Treaties (adopted 23 May 1969, entered into force 27 January 1980) 1155 UNTS 331, arts 31 (general rule) and 32 (supplementary means, including preparatory work).&#160;<a class="footnote-backref" href="#fnref:12" title="Jump back to footnote 12 in the text">&#8617;</a></p>
+</li>
+<li id="fn:13">
+<p>UNGA Res 1884 (XVIII) (17 October 1963) (calling on states to refrain from placing in orbit objects carrying nuclear weapons or other weapons of mass destruction). Article IV(1) of the OST codified this understanding.&#160;<a class="footnote-backref" href="#fnref:13" title="Jump back to footnote 13 in the text">&#8617;</a></p>
+</li>
+<li id="fn:14">
+<p>On the negotiating history and the entrenchment of military support uses (reconnaissance in particular) that constrained the scope of art IV, see Cheng (n 7); and the ICRC discussion in 'Space Law Revisited (1/3): The Notion of "Peaceful Uses" and the Outer Space Treaty' (Humanitarian Law and Policy Blog, 7 November 2016).&#160;<a class="footnote-backref" href="#fnref:14" title="Jump back to footnote 14 in the text">&#8617;</a></p>
+</li>
+<li id="fn:15">
+<p>OST (n 1) preamble, arts I and IV(2).&#160;<a class="footnote-backref" href="#fnref:15" title="Jump back to footnote 15 in the text">&#8617;</a></p>
+</li>
+<li id="fn:16">
+<p>For the "non-aggressive" reading, see Cheng (n 7); Koplow (n 11); and the analysis in 'Peaceful Purposes in International Space Law' (Lund University student thesis repository). For a contrary and minority "non-military" reading, and a survey of the debate, see the ICRC blog (n 14).&#160;<a class="footnote-backref" href="#fnref:16" title="Jump back to footnote 16 in the text">&#8617;</a></p>
+</li>
+<li id="fn:17">
+<p>On unchallenged early military (reconnaissance) use as decisive state practice, see Cheng (n 7) and Koplow (n 11).&#160;<a class="footnote-backref" href="#fnref:17" title="Jump back to footnote 17 in the text">&#8617;</a></p>
+</li>
+<li id="fn:18">
+<p>This structural argument — that a "non-military" reading would render art IV(2)'s enumeration and the military-personnel savings clause redundant — is developed in Cheng (n 7).&#160;<a class="footnote-backref" href="#fnref:18" title="Jump back to footnote 18 in the text">&#8617;</a></p>
+</li>
+<li id="fn:19">
+<p>Bin Cheng, 'The Legal Status of Outer Space and Relevant Issues: Delimitation of Outer Space and Definition of Peaceful Use' (1983) 11 Journal of Space Law 89; and Cheng (n 7). Cheng is also the originator of the concept of "instant" customary international law in the space-law context.&#160;<a class="footnote-backref" href="#fnref:19" title="Jump back to footnote 19 in the text">&#8617;</a></p>
+</li>
+<li id="fn:20">
+<p>Agreement Governing the Activities of States on the Moon and Other Celestial Bodies (adopted 5 December 1979, entered into force 11 July 1984) 1363 UNTS 3 (Moon Agreement), arts 3 (peaceful purposes; prohibition of the threat or use of force and of the placement of weapons on celestial bodies) and 11 (natural resources as the "common heritage of mankind"). The Agreement has attracted only some eighteen ratifications, none by a major spacefaring state, which is widely regarded as having deprived it of practical effect. See McGill Institute of Air and Space Law, 'The Moon Agreement: Hanging by a Thread?'.&#160;<a class="footnote-backref" href="#fnref:20" title="Jump back to footnote 20 in the text">&#8617;</a></p>
+</li>
+<li id="fn:21">
+<p>The Artemis Accords: Principles for Cooperation in the Civil Exploration and Use of the Moon, Mars, Comets, and Asteroids for Peaceful Purposes (2020), a non-binding political commitment. On their reaffirmation of 'peaceful purposes,' their facilitation of commercial resource extraction, and the contested 'safety zones' concept, see NASA, 'The Artemis Accords'; and 'The Interplay Between the Moon Agreement and the Artemis Accords' (2024). By mid-2025 the Accords had attracted well over fifty signatories.&#160;<a class="footnote-backref" href="#fnref:21" title="Jump back to footnote 21 in the text">&#8617;</a></p>
+</li>
+<li id="fn:22">
+<p>The Case of the SS Lotus (France v Turkey) (1927) PCIJ Rep Series A No 10, 18–19 (restrictions on the independence of states are not to be presumed). On the application and limits of the Lotus presumption in space law, see 'The Lotus Principle in Public International Law' (Space Legal Issues); and the critique in An Hertogen, 'Letting Lotus Bloom' (2015) 26 European Journal of International Law 901.&#160;<a class="footnote-backref" href="#fnref:22" title="Jump back to footnote 22 in the text">&#8617;</a></p>
+</li>
+<li id="fn:23">
+<p>OST (n 1) arts I (freedom of exploration and use), III (activities in accordance with international law including the UN Charter), IX (due regard, harmful contamination, consultation).&#160;<a class="footnote-backref" href="#fnref:23" title="Jump back to footnote 23 in the text">&#8617;</a></p>
+</li>
+<li id="fn:24">
+<p>Legality of the Threat or Use of Nuclear Weapons (Advisory Opinion) [1996] ICJ Rep 226 [39], [52]–[53] (a weapon not specifically prohibited remains governed by the Charter and by international humanitarian law). The analogy is offered for the proposition that the absence of a specific prohibition does not entail freedom from the general law of force and armed conflict.&#160;<a class="footnote-backref" href="#fnref:24" title="Jump back to footnote 24 in the text">&#8617;</a></p>
+</li>
+<li id="fn:25">
+<p>See e.g. the argument that the cooperative object and purpose of the space treaties displaces a pure Lotus presumption against the weaponisation of space, discussed in the "peaceful purposes" and PPWT literature at n 16 and n 53.&#160;<a class="footnote-backref" href="#fnref:25" title="Jump back to footnote 25 in the text">&#8617;</a></p>
+</li>
+<li id="fn:26">
+<p>On the militarisation/weaponisation distinction and its erosion by dual-use systems, see 'Dual-Use Conundrum: Towards the Weaponization of Outer Space?' (2021) Space Policy; Reaching Critical Will, 'Outer Space' (fact sheet); and Koplow (n 11).&#160;<a class="footnote-backref" href="#fnref:26" title="Jump back to footnote 26 in the text">&#8617;</a></p>
+</li>
+<li id="fn:27">
+<p>On dual-use ambiguity and rendezvous-and-proximity operations as the paradigm hard case, see the Woomera Manual (n 29) and the dual-use literature (n 26).&#160;<a class="footnote-backref" href="#fnref:27" title="Jump back to footnote 27 in the text">&#8617;</a></p>
+</li>
+<li id="fn:28">
+<p>On the constraint of destructive ASAT conduct by general international law and IHL rather than by any specific space-law prohibition, see Koplow (n 11); and Chris O'Meara, 'Anti-Satellite Weapons and Self-Defence: Law and Limitations' (NATO CCDCOE, 2024).&#160;<a class="footnote-backref" href="#fnref:28" title="Jump back to footnote 28 in the text">&#8617;</a></p>
+</li>
+<li id="fn:29">
+<p>Jack M Beard, Dale Stephens and others (eds), <em>The Woomera Manual on the International Law of Military Space Activities and Operations</em> (Oxford University Press 2025), as discussed in the reviews collected by the Lieber Institute, West Point ('The Woomera Manual and Military Space Activities and Operations'). The observation that ASAT tests have been "dangerous and irresponsible without being characterized as violations of the Outer Space Treaty" captures the grey-zone thesis of this paper.&#160;<a class="footnote-backref" href="#fnref:29" title="Jump back to footnote 29 in the text">&#8617;</a></p>
+</li>
+<li id="fn:30">
+<p>OST (n 1) art III.&#160;<a class="footnote-backref" href="#fnref:30" title="Jump back to footnote 30 in the text">&#8617;</a></p>
+</li>
+<li id="fn:31">
+<p>Charter of the United Nations (adopted 26 June 1945, entered into force 24 October 1945) arts 2(4) and 51. On the application of the jus ad bellum and IHL to counterspace conduct, see O'Meara (n 28) and the Woomera Manual (n 29).&#160;<a class="footnote-backref" href="#fnref:31" title="Jump back to footnote 31 in the text">&#8617;</a></p>
+</li>
+<li id="fn:32">
+<p>The Woomera Manual (n 29); and the McGill-led Manual on International Law Applicable to Military Uses of Outer Space (MILAMOS) project. The existence and focus of these expert manuals is itself evidence that the <em>use</em> of counterspace capability is legally governed even where its possession is not.&#160;<a class="footnote-backref" href="#fnref:32" title="Jump back to footnote 32 in the text">&#8617;</a></p>
+</li>
+<li id="fn:33">
+<p>These episodes are recited solely as instances of state practice and international reaction, and contain no capability or engineering detail. Sources: general open reporting collated in Koplow (n 11) (for the 2007 and 2008 events) and in the destructive-testing policy literature at nn 62–64.&#160;<a class="footnote-backref" href="#fnref:33" title="Jump back to footnote 33 in the text">&#8617;</a></p>
+</li>
+<li id="fn:34">
+<p>China's January 2007 destruction of its Fengyun-1C satellite is widely reported as the most prolific long-lived debris-generating event in spaceflight history; thousands of trackable fragments persist. See the debris literature at n 49 and Koplow (n 11).&#160;<a class="footnote-backref" href="#fnref:34" title="Jump back to footnote 34 in the text">&#8617;</a></p>
+</li>
+<li id="fn:35">
+<p>The United States' February 2008 interception of its USA-193 satellite (Operation Burnt Frost), conducted at low altitude with rapid debris decay, was characterised officially as a safety measure. See Koplow (n 11).&#160;<a class="footnote-backref" href="#fnref:35" title="Jump back to footnote 35 in the text">&#8617;</a></p>
+</li>
+<li id="fn:36">
+<p>India's March 2019 "Mission Shakti" test was conducted at low altitude to limit debris persistence. See the comparative analysis in 'Still Lost in Space? Understanding China and India's Anti-Satellite Tests' (2023) Astropolitics.&#160;<a class="footnote-backref" href="#fnref:36" title="Jump back to footnote 36 in the text">&#8617;</a></p>
+</li>
+<li id="fn:37">
+<p>Russia's November 2021 destruction of its Cosmos 1408 satellite generated over a thousand trackable fragments and prompted the ISS crew to shelter; the event was a principal catalyst of the 2022 moratorium initiative (nn 60–61).&#160;<a class="footnote-backref" href="#fnref:37" title="Jump back to footnote 37 in the text">&#8617;</a></p>
+</li>
+<li id="fn:38">
+<p>UN News, 'Russia Vetoes Security Council Draft Resolution on a Weapon-Free Outer Space' (24 April 2024); Security Council Report, 'Vote on Draft Resolution on Weapons of Mass Destruction in Outer Space' (What's in Blue, April 2024). The United States–Japan draft (reaffirming OST art IV) drew 13 votes in favour, 1 against (Russian Federation veto), 1 abstention (China); a Russian–Chinese amendment to extend the text to all weapons in space failed to secure the required votes. On the reports of a contemplated Russian orbital nuclear capability that prompted the draft, see 'Russia's Alleged Nuclear Anti-Satellite Weapon: International Law and Political Rhetoric' (Lieber Institute, West Point, 2024).&#160;<a class="footnote-backref" href="#fnref:38" title="Jump back to footnote 38 in the text">&#8617;</a></p>
+</li>
+<li id="fn:39">
+<p>Convention on International Liability for Damage Caused by Space Objects (adopted 29 March 1972, entered into force 1 September 1972) 961 UNTS 187 ("Liability Convention"), elaborating OST (n 1) art VII.&#160;<a class="footnote-backref" href="#fnref:39" title="Jump back to footnote 39 in the text">&#8617;</a></p>
+</li>
+<li id="fn:40">
+<p>Liability Convention (n 39) arts II (absolute liability for damage on the surface of the Earth or to aircraft in flight) and III (fault-based liability for damage caused elsewhere than on the surface to a space object of another launching state).&#160;<a class="footnote-backref" href="#fnref:40" title="Jump back to footnote 40 in the text">&#8617;</a></p>
+</li>
+<li id="fn:41">
+<p>On the indeterminacy of "fault" under art III in the absence of agreed rules of the road, see 'State Liability for Space Object Collisions: The Proper Interpretation of "Fault" for the Purposes of International Space Law' (2018) 29 European Journal of International Law 281.&#160;<a class="footnote-backref" href="#fnref:41" title="Jump back to footnote 41 in the text">&#8617;</a></p>
+</li>
+<li id="fn:42">
+<p>The only settlement referable to the Convention followed the 1978 re-entry of the Soviet nuclear-powered satellite Cosmos 954 over Canadian territory, resolved by a 1981 protocol. The absence of any in-orbit (art III) claim in the Convention's history illustrates the practical difficulty of debris attribution.&#160;<a class="footnote-backref" href="#fnref:42" title="Jump back to footnote 42 in the text">&#8617;</a></p>
+</li>
+<li id="fn:43">
+<p>Convention on Registration of Objects Launched into Outer Space (adopted 12 November 1974, opened for signature 14 January 1975, entered into force 15 September 1976) 1023 UNTS 15 ("Registration Convention"), arts II–IV.&#160;<a class="footnote-backref" href="#fnref:43" title="Jump back to footnote 43 in the text">&#8617;</a></p>
+</li>
+<li id="fn:44">
+<p>On the thinness, delay, and inconsistency of registration data and the resulting transparency deficit, see Jonathan McDowell, 'Critical Issues Related to Registration of Space Objects and Transparency of Space Activities' (2018); and UNOOSA, 'Registration of Objects Launched into Outer Space: Stakeholder Study' (ST/SPACE/91, 2023).&#160;<a class="footnote-backref" href="#fnref:44" title="Jump back to footnote 44 in the text">&#8617;</a></p>
+</li>
+<li id="fn:45">
+<p>OST (n 1) art IX.&#160;<a class="footnote-backref" href="#fnref:45" title="Jump back to footnote 45 in the text">&#8617;</a></p>
+</li>
+<li id="fn:46">
+<p>On the tension between debris-generating conduct and each limb of art IX, see the environmental-law literature at n 45 and the debris literature at n 49.&#160;<a class="footnote-backref" href="#fnref:46" title="Jump back to footnote 46 in the text">&#8617;</a></p>
+</li>
+<li id="fn:47">
+<p>On "due regard" as a standard of balance rather than a rule of abstention, see Lotus and space-law commentary at n 22; and O'Meara (n 28).&#160;<a class="footnote-backref" href="#fnref:47" title="Jump back to footnote 47 in the text">&#8617;</a></p>
+</li>
+<li id="fn:48">
+<p>On the contested question whether art IX grounds a hard debris-remediation or debris-avoidance obligation (probably not yet, but potentially through evolving practice), see 'It's Time to Take Out the Trash: Does Article IX of the Outer Space Treaty Require the Development of Active Debris Removal Technologies?' (2025); and the discussion of art IX as a foundation for space environmental law in the CGI Topic Guide, 'Outer Space Treaty Article IX'.&#160;<a class="footnote-backref" href="#fnref:48" title="Jump back to footnote 48 in the text">&#8617;</a></p>
+</li>
+<li id="fn:49">
+<p>Donald J Kessler and Burton G Cour-Palais, 'Collision Frequency of Artificial Satellites: The Creation of a Debris Belt' (1978) 83 Journal of Geophysical Research 2637 (originating the cascade model now known as the "Kessler syndrome").&#160;<a class="footnote-backref" href="#fnref:49" title="Jump back to footnote 49 in the text">&#8617;</a></p>
+</li>
+<li id="fn:50">
+<p>European Space Agency, Space Debris Office, annual environment reports (counts on the order of tens of thousands of trackable objects larger than roughly 10 cm, with estimated millions of smaller, still-hazardous fragments). Figures are recited here only to convey scale; no operational detail is implied.&#160;<a class="footnote-backref" href="#fnref:50" title="Jump back to footnote 50 in the text">&#8617;</a></p>
+</li>
+<li id="fn:51">
+<p>Inter-Agency Space Debris Coordination Committee, Space Debris Mitigation Guidelines (2002, rev 2007); COPUOS Space Debris Mitigation Guidelines (2007), endorsed by UNGA Res 62/217 (22 December 2007); Guidelines for the Long-Term Sustainability of Outer Space Activities (adopted by COPUOS 2019), UN Doc A/74/20 annex II.&#160;<a class="footnote-backref" href="#fnref:51" title="Jump back to footnote 51 in the text">&#8617;</a></p>
+</li>
+<li id="fn:52">
+<p>Farmer, 'Magnitsky Model for AI' (n 2) pt 2.3 (on the bifurcation of governance into binding-but-rigid hard law and fast-but-non-binding soft law).&#160;<a class="footnote-backref" href="#fnref:52" title="Jump back to footnote 52 in the text">&#8617;</a></p>
+</li>
+<li id="fn:53">
+<p>On the history of the PAROS agenda item at the Conference on Disarmament, see NTI, 'Proposed Prevention of an Arms Race in Space (PAROS) Treaty'; and UNODA, 'Outer Space' (emerging challenges).&#160;<a class="footnote-backref" href="#fnref:53" title="Jump back to footnote 53 in the text">&#8617;</a></p>
+</li>
+<li id="fn:54">
+<p>On the CD consensus-rule deadlock and the prohibitory-versus-behavioural divide, see UNODA (n 53); and the US statements collected in n 56.&#160;<a class="footnote-backref" href="#fnref:54" title="Jump back to footnote 54 in the text">&#8617;</a></p>
+</li>
+<li id="fn:55">
+<p>Draft Treaty on the Prevention of the Placement of Weapons in Outer Space and of the Threat or Use of Force against Outer Space Objects (PPWT), introduced by the Russian Federation and China, UN Doc CD/1839 (2008); updated draft UN Doc CD/1985 (2014).&#160;<a class="footnote-backref" href="#fnref:55" title="Jump back to footnote 55 in the text">&#8617;</a></p>
+</li>
+<li id="fn:56">
+<p>On the United States' definitional and verification objections — in particular that the PPWT does not reach ground-based direct-ascent capability and contains no verification mechanism — see the analysis in 'The 2014 Updated Draft PPWT: Hitting the Spot or Missing the Mark?' (2015) Space Policy; and successive US statements to the Conference on Disarmament.&#160;<a class="footnote-backref" href="#fnref:56" title="Jump back to footnote 56 in the text">&#8617;</a></p>
+</li>
+<li id="fn:57">
+<p>UNGA Res 76/231 (24 December 2021) (convening the Open-Ended Working Group on reducing space threats through norms, rules and principles of responsible behaviours).&#160;<a class="footnote-backref" href="#fnref:57" title="Jump back to footnote 57 in the text">&#8617;</a></p>
+</li>
+<li id="fn:58">
+<p>See the substantive proposals and working papers of the OEWG sessions (2022–2023), and the summary in UNIDIR, 'OEWG on Reducing Space Threats: Recap Report'; and ICRC, 'Preliminary Recommendations on Reducing Space Threats' (working paper).&#160;<a class="footnote-backref" href="#fnref:58" title="Jump back to footnote 58 in the text">&#8617;</a></p>
+</li>
+<li id="fn:59">
+<p>The OEWG concluded its fourth session (August–September 2023) without adopting a consensus final report. See UNIDIR (n 58); and the analysis in 'The Open-Ended Working Group on Reducing Space Threats … The Journey So Far, and the Road Ahead' (2023) 48 Air and Space Law (special issue).&#160;<a class="footnote-backref" href="#fnref:59" title="Jump back to footnote 59 in the text">&#8617;</a></p>
+</li>
+<li id="fn:60">
+<p>UNGA Res 77/250 (2022) (establishing the Group of Governmental Experts on further practical measures for the prevention of an arms race in outer space); the GGE adopted a consensus report on 16 August 2024. See UNODA, 'Group of Governmental Experts on Further Practical Measures for the Prevention of an Arms Race in Outer Space (2023)'.&#160;<a class="footnote-backref" href="#fnref:60" title="Jump back to footnote 60 in the text">&#8617;</a></p>
+</li>
+<li id="fn:61">
+<p>UNGA Res 78/20 (2023) (OEWG on responsible behaviours) and Res 78/238 (2023) (OEWG on further practical measures); the two were subsequently merged by General Assembly decision in 2024 into a single Open-Ended Working Group on the prevention of an arms race in outer space in all its aspects, mandated for 2025–2028 and operating by consensus. See Project Ploughshares, 'A Short Guide to the OEWG on PAROS in All Its Aspects'; and UNODA, 'Open-Ended Working Group on Prevention of an Arms Race in Outer Space (2025)'.&#160;<a class="footnote-backref" href="#fnref:61" title="Jump back to footnote 61 in the text">&#8617;</a></p>
+</li>
+<li id="fn:62">
+<p>The White House, 'Fact Sheet: Vice President Harris Advances National Security Norms in Space' (18 April 2022) (US commitment not to conduct destructive direct-ascent ASAT testing, and call on other states to join).&#160;<a class="footnote-backref" href="#fnref:62" title="Jump back to footnote 62 in the text">&#8617;</a></p>
+</li>
+<li id="fn:63">
+<p>UNGA Res 77/41 (7 December 2022) (welcoming the destructive direct-ascent ASAT testing commitment and calling on all states to commit), adopted 155–9–9. The nine negative votes were cast by Belarus, Bolivia, the Central African Republic, China, Cuba, Iran, Nicaragua, Russia, and Syria. On the early cluster of parallel unilateral commitments (Canada, New Zealand, Japan, Germany, the United Kingdom, the Republic of Korea, Australia, Switzerland, and France), see SpaceNews, 'United Nations General Assembly Approves ASAT Test Ban Resolution' (December 2022).&#160;<a class="footnote-backref" href="#fnref:63" title="Jump back to footnote 63 in the text">&#8617;</a></p>
+</li>
+<li id="fn:64">
+<p>By late 2023 approximately three dozen states had made unilateral commitments not to conduct destructive direct-ascent ASAT testing. See the compilation in 'Direct-Ascent Anti-Satellite Missile Tests: State Positions on the Moratorium, UNGA Resolution, and Lessons for the Future' (2024).&#160;<a class="footnote-backref" href="#fnref:64" title="Jump back to footnote 64 in the text">&#8617;</a></p>
+</li>
+<li id="fn:65">
+<p>The states most associated with demonstrated kinetic capability are among the negative votes and abstentions on Res 77/41 (n 61); the resolution is a recommendation and the underlying commitments are unilateral and revocable. This is the enforcement deficit the proposal in pt 6 addresses.&#160;<a class="footnote-backref" href="#fnref:65" title="Jump back to footnote 65 in the text">&#8617;</a></p>
+</li>
+<li id="fn:66">
+<p>Farmer, 'Magnitsky Model for AI' (n 2) pts 2 and 8 (the pacing and rigidity problems of treaty-making, and the inversion of priority from treaty to nationally-anchored measure); Farmer, <em>Unregulated War</em> (n 6) ch 4.&#160;<a class="footnote-backref" href="#fnref:66" title="Jump back to footnote 66 in the text">&#8617;</a></p>
+</li>
+<li id="fn:67">
+<p>Farmer, 'Magnitsky Model for AI' (n 2) pt 2.2 (treaty as "a photograph of the … consensus at the instant of its conclusion"), there illustrated by the OST itself.&#160;<a class="footnote-backref" href="#fnref:67" title="Jump back to footnote 67 in the text">&#8617;</a></p>
+</li>
+<li id="fn:68">
+<p>Farmer, 'Magnitsky Model for AI' (n 2) pts 4–5; Farmer, <em>Unregulated War</em> (n 6) ch 4(2).&#160;<a class="footnote-backref" href="#fnref:68" title="Jump back to footnote 68 in the text">&#8617;</a></p>
+</li>
+<li id="fn:69">
+<p>On the cascade mechanics of Magnitsky-style designation (market access, financial-network centrality, and legislative emulation), see Farmer, 'Magnitsky Model for AI' (n 2) pt 4.2, drawing on Farrell and Newman (n 5) and Anu Bradford, <em>The Brussels Effect: How the European Union Rules the World</em> (Oxford University Press 2020).&#160;<a class="footnote-backref" href="#fnref:69" title="Jump back to footnote 69 in the text">&#8617;</a></p>
+</li>
+<li id="fn:70">
+<p>The concentration of launch, manufacturing, insurance/reinsurance, ground-segment, data-services, and space-finance capacity in a small number of jurisdictions and providers is the analogue, in the space economy, of the hub-and-spoke topology of the financial system on which the sanctions cascade depends (n 69).&#160;<a class="footnote-backref" href="#fnref:70" title="Jump back to footnote 70 in the text">&#8617;</a></p>
+</li>
+<li id="fn:71">
+<p>OST (n 1) art VI (international responsibility for national activities, including those of non-governmental entities, which "shall require authorization and continuing supervision by the appropriate State Party"). This provision is the doctrinal anchor of the proposal: the mechanism operates through a jurisdiction the Treaty affirmatively requires each State Party to exercise.&#160;<a class="footnote-backref" href="#fnref:71" title="Jump back to footnote 71 in the text">&#8617;</a></p>
+</li>
+<li id="fn:72">
+<p>The enumerated predicate would draw on the content of the destructive-testing moratorium (nn 62–64), the debris-mitigation and long-term-sustainability guidelines (n 51), and the due-regard and consultation duties of OST art IX (n 45). The predicate is defined by <em>conduct</em> (the irresponsible externality), not by <em>capability</em>, to avoid the definitional problems that defeated the PPWT (n 55).&#160;<a class="footnote-backref" href="#fnref:72" title="Jump back to footnote 72 in the text">&#8617;</a></p>
+</li>
+<li id="fn:73">
+<p>On reaching the responsible actor behind an interposed corporate vehicle, see Farmer, 'Magnitsky Model for AI' (n 2) pt 5.2 (responsibility nexus and the concealment/evasion enquiry).&#160;<a class="footnote-backref" href="#fnref:73" title="Jump back to footnote 73 in the text">&#8617;</a></p>
+</li>
+<li id="fn:74">
+<p>On extraterritorial <em>effect</em> produced by intermediaries' self-protective compliance rather than by any claim of prescriptive jurisdiction over foreign territory, see Farmer, 'Magnitsky Model for AI' (n 2) pt 7.1; and Farrell and Newman (n 5).&#160;<a class="footnote-backref" href="#fnref:74" title="Jump back to footnote 74 in the text">&#8617;</a></p>
+</li>
+<li id="fn:75">
+<p>Farmer, 'Magnitsky Model for AI' (n 2) pt 6.3 and pt 7.3 (conceding the mechanism's weakness against actors, including states, with captive markets and no need of the enacting jurisdiction's system).&#160;<a class="footnote-backref" href="#fnref:75" title="Jump back to footnote 75 in the text">&#8617;</a></p>
+</li>
+<li id="fn:76">
+<p>On enumerated predicates, published reasons, independent review, and delisting pathways as designed-in safeguards against fragmentation and politicised designation, see Farmer, 'Magnitsky Model for AI' (n 2) pts 5.4 and 7.2–7.3.&#160;<a class="footnote-backref" href="#fnref:76" title="Jump back to footnote 76 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
+<hr>
+<h2 id="references">References</h2>
+<h3 id="primary-sources-treaties-instruments-and-un-documents">Primary sources — treaties, instruments, and UN documents</h3>
+<ul>
+<li>Antarctic Treaty (adopted 1 December 1959, entered into force 23 June 1961) 402 UNTS 71.</li>
+<li>Charter of the United Nations (adopted 26 June 1945, entered into force 24 October 1945) 1 UNTS XVI.</li>
+<li>Convention on International Liability for Damage Caused by Space Objects (adopted 29 March 1972, entered into force 1 September 1972) 961 UNTS 187.</li>
+<li>Convention on Registration of Objects Launched into Outer Space (opened for signature 14 January 1975, entered into force 15 September 1976) 1023 UNTS 15.</li>
+<li>COPUOS, Guidelines for the Long-Term Sustainability of Outer Space Activities (2019), UN Doc A/74/20 annex II.</li>
+<li>COPUOS, Space Debris Mitigation Guidelines (2007), endorsed by UNGA Res 62/217 (22 December 2007).</li>
+<li>Draft Treaty on the Prevention of the Placement of Weapons in Outer Space and of the Threat or Use of Force against Outer Space Objects (PPWT), UN Doc CD/1839 (2008); updated draft UN Doc CD/1985 (2014).</li>
+<li>Inter-Agency Space Debris Coordination Committee, Space Debris Mitigation Guidelines (2002, rev 2007).</li>
+<li>Agreement Governing the Activities of States on the Moon and Other Celestial Bodies (adopted 5 December 1979, entered into force 11 July 1984) 1363 UNTS 3 (Moon Agreement).</li>
+<li>The Artemis Accords: Principles for Cooperation in the Civil Exploration and Use of the Moon, Mars, Comets, and Asteroids for Peaceful Purposes (2020) (non-binding).</li>
+<li>Treaty on Principles Governing the Activities of States in the Exploration and Use of Outer Space, including the Moon and Other Celestial Bodies (adopted 27 January 1967, entered into force 10 October 1967) 610 UNTS 205.</li>
+<li>UNGA Res 1884 (XVIII) (17 October 1963).</li>
+<li>UNGA Res 62/217 (22 December 2007).</li>
+<li>UNGA Res 76/231 (24 December 2021).</li>
+<li>UNGA Res 77/41 (7 December 2022).</li>
+<li>UNGA Res 77/250 (2022).</li>
+<li>UNGA Res 78/20 (2023) and Res 78/238 (2023).</li>
+<li>UN Security Council draft resolution on weapons of mass destruction in outer space (United States and Japan), vetoed 24 April 2024; see UN News (24 April 2024) and Security Council Report, What's in Blue (April 2024).</li>
+<li>Vienna Convention on the Law of Treaties (adopted 23 May 1969, entered into force 27 January 1980) 1155 UNTS 331.</li>
+<li>The White House, 'Fact Sheet: Vice President Harris Advances National Security Norms in Space' (18 April 2022).</li>
+</ul>
+<h3 id="primary-sources-cases">Primary sources — cases</h3>
+<ul>
+<li>Legality of the Threat or Use of Nuclear Weapons (Advisory Opinion) [1996] ICJ Rep 226.</li>
+<li>The Case of the SS Lotus (France v Turkey) (1927) PCIJ Rep Series A No 10.</li>
+</ul>
+<h3 id="secondary-sources-books-articles-manuals-and-reports">Secondary sources — books, articles, manuals, and reports</h3>
+<ul>
+<li>Beard J M, Stephens D and others (eds), <em>The Woomera Manual on the International Law of Military Space Activities and Operations</em> (Oxford University Press 2025).</li>
+<li>Bradford A, <em>The Brussels Effect: How the European Union Rules the World</em> (Oxford University Press 2020).</li>
+<li>Cheng B, <em>Studies in International Space Law</em> (Clarendon Press 1997).</li>
+<li>Cheng B, 'The Legal Status of Outer Space and Relevant Issues: Delimitation of Outer Space and Definition of Peaceful Use' (1983) 11 Journal of Space Law 89.</li>
+<li>'Direct-Ascent Anti-Satellite Missile Tests: State Positions on the Moratorium, UNGA Resolution, and Lessons for the Future' (2024).</li>
+<li>'Dual-Use Conundrum: Towards the Weaponization of Outer Space?' (2021) Space Policy.</li>
+<li>Farmer C I V, 'Economic Warfare: The Unregulated War' (LLM dissertation, University of Worcester 2024).</li>
+<li>Farmer C I V, 'The Magnitsky Model for AI: Localized Legislative Cascades as a Response to AI-Driven Circumvention of International Law' (preprint, July 2026).</li>
+<li>Farrell H and Newman A L, 'Weaponized Interdependence: How Global Economic Networks Shape State Coercion' (2019) 44(1) International Security 42.</li>
+<li>Hertogen A, 'Letting Lotus Bloom' (2015) 26 European Journal of International Law 901.</li>
+<li>ICRC, 'Space Law Revisited (1/3): The Notion of "Peaceful Uses" and the Outer Space Treaty' (Humanitarian Law and Policy Blog, 7 November 2016).</li>
+<li>Kessler D J and Cour-Palais B G, 'Collision Frequency of Artificial Satellites: The Creation of a Debris Belt' (1978) 83 Journal of Geophysical Research 2637.</li>
+<li>Koplow D A, 'ASAT-isfaction: Customary International Law and the Regulation of Anti-Satellite Weapons' (2009) 30 Michigan Journal of International Law 1187.</li>
+<li>McDowell J, 'Critical Issues Related to Registration of Space Objects and Transparency of Space Activities' (2018).</li>
+<li>McGill Institute of Air and Space Law, 'The Moon Agreement: Hanging by a Thread?'.</li>
+<li>Montgomery L, 'The Outer Space Treaty and Military Activities' (Nonproliferation Policy Education Center, 2023).</li>
+<li>O'Meara C, 'Anti-Satellite Weapons and Self-Defence: Law and Limitations' (NATO CCDCOE, 2024).</li>
+<li>Project Ploughshares, 'A Short Guide to the OEWG on PAROS in All Its Aspects'.</li>
+<li>'State Liability for Space Object Collisions: The Proper Interpretation of "Fault" for the Purposes of International Space Law' (2018) 29 European Journal of International Law 281.</li>
+<li>'Still Lost in Space? Understanding China and India's Anti-Satellite Tests through an Eclectic Approach' (2023) Astropolitics.</li>
+<li>'The 2014 Updated Draft PPWT: Hitting the Spot or Missing the Mark?' (2015) Space Policy.</li>
+<li>'The Interplay Between the Moon Agreement and the Artemis Accords' (2024).</li>
+<li>'The Open-Ended Working Group on Reducing Space Threats … The Journey So Far, and the Road Ahead' (2023) 48 Air and Space Law (special issue).</li>
+<li>UNIDIR, 'OEWG on Reducing Space Threats: Recap Report'.</li>
+<li>UNOOSA, 'Registration of Objects Launched into Outer Space: Stakeholder Study' (ST/SPACE/91, 2023).</li>
+</ul>
+<hr>
+<p><em>Author's note: This is a Phase II theory paper — a working preprint circulated for scholarly discussion. It extends to the space domain the argument developed in the author's companion preprint, "The Magnitsky Model for AI," and in his LL.M. dissertation, "Economic Warfare: The Unregulated War." The normative mechanism proposed in Part 6 (nationally-anchored, authorisation-and-supervision conditionality for orbital responsibility) is the author's original proposal and is offered as a model for legislative adaptation, not as a statement of existing law. This paper is a work of legal and policy analysis and contains no weapon design, engineering, capability, or operational detail of any kind; all references to system types are legal classifications only. Comments are welcome.</em></p>
+<p>— <em>Christopher I. V. Farmer, LL.M. (University of Worcester) · Independent Researcher · civfarmer@gmail.com</em></p>
+    </article>
+    <footer class="paperfoot">
+      <span>&copy; <span id="yr">2026</span> Christopher I. V. Farmer</span>
+      <span>&middot;</span>
+      <a href="../index.html">Back to Publications</a>
+      <span>&middot;</span>
+      <a href="../../docs/CV-Christopher-Farmer-2026-08.pdf" target="_blank" rel="noopener">CV</a>
+      <span>&middot;</span>
+      <span class="mono">Preprint &mdash; submitted; pending peer review &middot; not legal advice</span>
+    </footer>
+  </main>
+
+<script>
+  (function(){
+    var root=document.documentElement, KEY='cf-theme';
+    try{ var s=localStorage.getItem(KEY); if(s){ root.setAttribute('data-theme', s); } }catch(e){}
+    var btn=document.getElementById('theme');
+    if(btn){ btn.addEventListener('click', function(){
+      var next=root.getAttribute('data-theme')==='dark'?'light':'dark';
+      root.setAttribute('data-theme', next);
+      try{ localStorage.setItem(KEY, next); }catch(e){}
+    }); }
+    var yr=document.getElementById('yr'); if(yr){ yr.textContent=String(new Date().getFullYear()); }
+  })();
+</script>
+
+</body>
+</html>
