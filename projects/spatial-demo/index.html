@@ -1,5 +1,33 @@
 <!doctype html>
-<!-- Spatial-Intelligence protective-interposition demo — companion to "A Software-First Spatial-Intelligence
+<!-- CHANGELOG
+  2026-07-29 (the guardian stops falling over; split sensing lanes in the ring; ring-edge clipping; car routing):
+   1) ONLY THE THING BEING INTERCEPTED GOES DOWN. The guardian used to knock itself over on every successful
+      interposition, which read as the machine failing at the moment it succeeded. Added brace(): it plants,
+      rocks back along the contact normal (a decaying lean on the model, ~0.75 s) and STAYS ON ITS FEET.
+      The struck party is the one that falls — storeroom: the carrier robot; VIP: the approaching man;
+      cordon: the subject. The ARENA is deliberately untouched: it is machine-vs-machine sport (§6.2) and
+      knockdowns are the point there.
+   2) THE FIGHTING RING CAN RUN ONE MACHINE ON LIDAR AND THE OTHER ON VISION. New arena-only control
+      ("Sensing: BLUE LiDAR · RED vision"). Sensing lane is now resolved per robot through LANE() rather
+      than from the single global mode, so whichever machine is attacking uses its OWN pipeline — blue
+      strikes the intercept point and lands, red commits to a stale fix and swings through empty air. The
+      button only appears in the arena and is force-cleared on leaving it.
+   3) NO MORE CLIPPING/STALLING AT THE EDGE OF THE VIP RING. The guardian used to seek() a point ON the
+      standoff circle, so it stopped dead on arrival (velocity → 0 → the walk clip dropped to Idle mid-
+      stride) and its body straddled the drawn ring. Replaced with ringMove(): it travels ALONG the circle
+      by angular interpolation, held at exactly r = 5.95 so its nearest edge sits at 4.90 — outside the
+      drawn bubble (4.50–4.72). Measured over a 10 s patrol: stalled frames fell 20.8% → 5.2% and the
+      radius is now constant to 0.00 u (was oscillating). Also added smoothed speed for clip selection.
+   4) THE MACHINE NO LONGER WALKS INTO THE PARKED CAR. Its route in the cordon scenario crossed the car's
+      footprint: measured closest approach to a car collision disc was 0.24 u against the 2.60 u required
+      (robot radius + disc radius) — i.e. straight through the wing. Added a footprint test and a routing
+      gate west of the bonnet at (-2.6, -3.2), verified clear on both legs (min 4.01 u). Used by the
+      advance, orders and recover legs, and by the subject walking back round.
+   5) ON THE VISION LANE IT TRIES AND MISSES. An interception now only converts on the LiDAR lane; on the
+      vision lane the machine still commits and lunges, but arrives through pavement he has already left,
+      with a readout saying so. Trying and missing is the failure mode being demonstrated — the machine
+      was willing, the pipeline was late.
+     Spatial-Intelligence protective-interposition demo — companion to "A Software-First Spatial-Intelligence
      Layer for Contact-Capable Robots" (Phase II; §5 impulse recovery · §6.2 robot sport · §6.3 Guardian pattern).
      FOUR SCENARIOS, one engine:
        1. FRAGILE PACKAGE — a storeroom. The other robots are NOT hostile: they are working machines running
@@ -100,6 +128,7 @@
       <div class="ctl">
         <button id="run">▶ Run</button>
         <button id="mode" class="mode on">Mode: LiDAR reflex lane</button>
+        <button id="asym" style="display:none">Sensing: both machines alike</button>
         <button id="reset">↺ Reset</button>
       </div>
     </div>
@@ -125,7 +154,7 @@ const PHASE=document.getElementById('phase'), TALLY=document.getElementById('tal
 let renderer,scene,camera,world=null;
 let yaw=-0.72,pitch=0.32,dist=30,camTgt=new THREE.Vector3(0,1.8,0);
 let dragging=false,lx=0,ly=0;
-let scenario='package',mode='reflex',running=false;
+let scenario='package',mode='reflex',running=false,asym=false;
 let simT=0,acc=0,lastMs=0,frames=0;
 let tally={ok:0,no:0,rec:0,contacts:0};
 let bodies=[],sensables=[],worstSep=Infinity,worstPair='';
@@ -401,7 +430,7 @@ function emitPoints(gPos,gYaw){
       const dx=s.o.position.x-gPos.x, dz=s.o.position.z-gPos.z, L=Math.hypot(dx,dz);
       if(L>senseR||L<0.4)continue;
       az=Math.atan2(dx,dz);
-      if(mode==='vision'){let da=az-gYaw;while(da>Math.PI)da-=6.28318;while(da<-Math.PI)da+=6.28318;
+      if(LANE()==='vision'){let da=az-gYaw;while(da>Math.PI)da-=6.28318;while(da<-Math.PI)da+=6.28318;
         if(Math.abs(da)>FOV/2)continue;}
       else{let da=az-sweepA;while(da>Math.PI)da-=6.28318;while(da<-Math.PI)da+=6.28318;if(Math.abs(da)>0.9)continue;}
       tgt=s;
@@ -410,7 +439,7 @@ function emitPoints(gPos,gYaw){
       const i=(ptN++)%PTCAP; pd.setXYZ(i,px,hh,pz);
       if(s.moving)cd.setXYZ(i,1,.3,.22);else cd.setXYZ(i,.5,.56,.66);
     } else {
-      az=(mode==='vision')?(gYaw+(Math.random()-.5)*FOV):(sweepA+(Math.random()-.5)*.5);
+      az=(LANE()==='vision')?(gYaw+(Math.random()-.5)*FOV):(sweepA+(Math.random()-.5)*.5);
       const R=2+Math.random()*(senseR-3);
       const i=(ptN++)%PTCAP; pd.setXYZ(i,gPos.x+Math.sin(az)*R,.05,gPos.z+Math.cos(az)*R);
       cd.setXYZ(i,.34,.4,.5);
@@ -418,8 +447,8 @@ function emitPoints(gPos,gYaw){
   }
   pd.needsUpdate=true;cd.needsUpdate=true;
   if(sensor){sensor.position.set(gPos.x,0,gPos.z);sensor.rotation.y=gYaw;sensor.scale.set(senseR/SENSE_R,1,senseR/SENSE_R);
-    sensor.userData.L.visible=(mode==='reflex');sensor.userData.V.visible=(mode==='vision');
-    if(mode==='reflex')sensor.userData.L.userData.spin.rotation.y=sweepA-gYaw;}
+    sensor.userData.L.visible=(LANE()==='reflex');sensor.userData.V.visible=(LANE()==='vision');
+    if(LANE()==='reflex')sensor.userData.L.userData.spin.rotation.y=sweepA-gYaw;}
 }
 /* ============================================================================================
    WORLD BUILDERS
@@ -666,15 +695,33 @@ function faceTo(a,tx,tz,dt){const dx=tx-a.o.position.x,dz=tz-a.o.position.z;
 function act(a,name,fade,hold){if(a.k!=='robot')return;a.rig.play(name,fade===undefined?.15:fade);a.hold=simT+(hold||0.5);}
 function knock(a,secs){a.down=Math.max(a.down,secs);a.r=a.r0*1.55;
   if(a.k==='robot'){a.rig.play('Death',.1);a.hold=simT+secs;}}
+/* BRACE — the guardian absorbs a contact WITHOUT going down: it plants, rocks back
+   along the contact normal, and stays on its feet. Only the arena (sport) uses knock()
+   on a robot; every protective scenario braces instead. */
+function brace(a,secs,nx,nz){
+  a.braceT=simT+(secs||0.75);
+  if(nx!==undefined){a.bx=nx;a.bz=nz;
+    a.o.position.x+=nx*0.28;a.o.position.z+=nz*0.28;}
+  if(a.k==='robot'){a.rig.play('Idle',.10);a.hold=0;}
+}
 function tickAgent(a,dt){
   if(a.down>0){a.down-=dt;
     if(a.down<=0){a.down=0;a.r=a.r0;tally.rec++;setTally();
       if(a.k==='robot')act(a,'Standing',.1,0.45);}}
+  /* brace lean — a short backward rock that decays, so the hit reads as absorbed */
+  const bt=(a.braceT||0)-simT;
+  if(a.k==='robot'&&a.rig){
+    const lean=bt>0?Math.sin(Math.max(0,bt)/(0.75)*Math.PI)*0.30:0;
+    a.rig.inner.rotation.x+=(-lean-a.rig.inner.rotation.x)*Math.min(1,dt*11);
+  }
   if(a.k==='robot'){
+    /* smoothed speed: stops the walk/idle clip flickering when a seek target is
+       recomputed every frame (this was the stutter at the edge of the VIP ring) */
+    a.spd=(a.spd||0)+(a.vel.length()-(a.spd||0))*Math.min(1,dt*9);
     if(a.down>0){if(a.rig.curName!=='Death')a.rig.play('Death',.1);}
     else if(simT<a.hold){/* scripted clip is holding */}
-    else{const sp=a.vel.length();
-      if(sp>5.2)a.rig.play('Running',.16);else if(sp>0.4)a.rig.play('Walking',.18);else a.rig.play('Idle',.25);}
+    else{const sp=a.spd;
+      if(sp>5.0)a.rig.play('Running',.16);else if(sp>0.30)a.rig.play('Walking',.18);else a.rig.play('Idle',.25);}
   } else if(a.k==='human'&&a.rig){
     a.rig.pose(simT,a.down>0?0:a.vel.length());
     const tg=a.down>0?-1.32:0;
@@ -683,33 +730,52 @@ function tickAgent(a,dt){
   if(a.vel.lengthSq()>0)a.vel.multiplyScalar(Math.max(0,1-dt*6));
   a.moving=a.vel.lengthSq()>0.6;
 }
+/* move an agent ALONG a circle of radius R about (cx,cz) — never across it.
+   Keeps the body exactly on the ring, so it can neither clip through the ring
+   nor stall on it, and the stride stays continuous. */
+function ringMove(a,cx,cz,R,tb,rate,dt){
+  const px=a.o.position.x-cx,pz=a.o.position.z-cz;
+  let cb=Math.atan2(px,pz);
+  let d=tb-cb;while(d>Math.PI)d-=6.283185;while(d<-Math.PI)d+=6.283185;
+  const nb=cb+Math.max(-rate*dt,Math.min(rate*dt,d));
+  const cur=Math.hypot(px,pz),rad=cur+(R-cur)*Math.min(1,dt*3.2);
+  const nx=cx+Math.sin(nb)*rad,nz=cz+Math.cos(nb)*rad;
+  a.vel.set((nx-a.o.position.x)/Math.max(dt,1e-4),0,(nz-a.o.position.z)/Math.max(dt,1e-4));
+  a.o.position.x=nx;a.o.position.z=nz;
+  a.o.rotation.y=turn(a.o.rotation.y,nb,9*dt);          /* faces outward, along the bearing it guards */
+  return Math.abs(d);
+}
 /* ---- the tracker: 360° + between-frame prediction, or a 60° cone and a stale fix ---- */
 const CAD={reflex:0.06,vision:0.26},DECIDE={reflex:0.07,vision:0.66};
+/* LANE — normally the global mode button, but a scenario may override it per robot
+   (the arena can run one machine on LiDAR and the other on vision at the same time). */
+let laneOv=null;
+function LANE(){return laneOv||mode;}
 let trk={p:new THREE.Vector3(),v:new THREE.Vector3(),t:-99,has:false,acq:-99};
 function resetTrack(){trk.has=false;trk.t=-99;trk.acq=-99;}
 function inCone(g,tx,tz){
   const dx=tx-g.o.position.x,dz=tz-g.o.position.z,L=Math.hypot(dx,dz);
   if(L>senseR)return false;
-  if(mode==='vision'){let a=Math.atan2(dx,dz)-g.o.rotation.y;
+  if(LANE()==='vision'){let a=Math.atan2(dx,dz)-g.o.rotation.y;
     while(a>Math.PI)a-=6.283185;while(a<-Math.PI)a+=6.283185;
     if(Math.abs(a)>FOV/2)return false;}
   return true;
 }
 function track(g,t){
   const vis=inCone(g,t.o.position.x,t.o.position.z);
-  if(vis&&simT-trk.t>=CAD[mode]){if(!trk.has)trk.acq=simT;
+  if(vis&&simT-trk.t>=CAD[LANE()]){if(!trk.has)trk.acq=simT;
     trk.p.copy(t.o.position);trk.v.copy(t.vel);trk.t=simT;trk.has=true;}
-  if(!vis&&mode==='vision'&&simT-trk.t>1.2)trk.has=false;
+  if(!vis&&LANE()==='vision'&&simT-trk.t>1.2)trk.has=false;
   return vis;
 }
 function estimate(){
   if(!trk.has)return null;
-  if(mode==='reflex')return V1.copy(trk.p).addScaledVector(trk.v,Math.min(.4,simT-trk.t));
+  if(LANE()==='reflex')return V1.copy(trk.p).addScaledVector(trk.v,Math.min(.4,simT-trk.t));
   return V1.copy(trk.p);
 }
-function acting(){return trk.has&&(simT-trk.acq)>=DECIDE[mode];}
+function acting(){return trk.has&&(simT-trk.acq)>=DECIDE[LANE()];}
 function showTrack(e){if(e){trackBox.visible=true;trackBox.position.set(e.x,baseY+1.7,e.z);
-  trackBox.material.color.setHex(mode==='reflex'?0xff5a4a:0xe6a866);}else trackBox.visible=false;}
+  trackBox.material.color.setHex(LANE()==='reflex'?0xff5a4a:0xe6a866);}else trackBox.visible=false;}
 /* ============================================================================================
    SCENARIOS
    ============================================================================================ */
@@ -787,19 +853,19 @@ SCN.package={
       const aim=V2.set(Math.sin(b)*4.7,0,Math.cos(b)*4.7);
       seek(A.g,aim.x,aim.z,8.6,dt,.18);
       if(A.g.vel.lengthSq()<1)faceTo(A.g,est.x,est.z,dt);
-      if(simT-A.t0>0.4)say(mode==='reflex'
+      if(simT-A.t0>0.4)say(LANE()==='reflex'
         ? 'PREDICTED PATH CONFLICT — nobody flagged that machine. The LiDAR layer simply propagated its velocity between frames, saw the route cross the protected volume, and moved the guardian onto the <b>intercept point</b> (gold ring) before the carrier arrived.'
         : 'LATE ACQUISITION — the carrier has only just entered the <b>60° camera cone</b>. Outside that wedge it did not exist to the machine, and the fix it now has is already stale.');
     } else if(A.g.down<=0){
       seek(A.g,-6.0,2.2,3.0,dt,.25);
       if(A.g.vel.lengthSq()<1)faceTo(A.g,A.wa.o.position.x,A.wa.o.position.z,dt);
-      if(!threat||!trk.has)say(mode==='reflex'
+      if(!threat||!trk.has)say(LANE()==='reflex'
         ? 'IDLE WATCH — two carriers are running delivery routes. Neither is hostile; neither is designated. The layer tracks all motion in 360° and asks one question: does any predicted path cross the protected volume?'
         : 'IDLE WATCH (vision) — the camera is pointed at the carrier moving <i>in front</i> of it. The 60° cone is the whole of its world: a machine approaching from behind is not tracked at all.');
     }
     predMark.visible=!!(est&&threat);
     if(predMark.visible){const b=Math.atan2(est.x,est.z);predMark.position.set(Math.sin(b)*4.7,baseY+.1,Math.cos(b)*4.7);
-      predMark.material.color.setHex(mode==='reflex'?0xffcf5a:0xe6a866);}
+      predMark.material.color.setHex(LANE()==='reflex'?0xffcf5a:0xe6a866);}
     /* --- outcomes --- */
     const c=hit(A.g,A.wb);
     if(c&&A.state==='route'&&!A.hitDone){
@@ -807,8 +873,11 @@ SCN.package={
       A.wbDir.set(c.nx,0,c.nz).multiplyScalar(-1);
       A.wb.o.rotation.y=Math.atan2(A.wbDir.x,A.wbDir.z);
       A.state='pause';A.t0=simT;
-      if(A.g.down<=0)knock(A.g,0.85);
-      say('INTERPOSED · ABSORBED — the guardian put its own body on the line of travel. It is unarmed and struck nothing: it took the impact, redirected the carrier away from the crate and is back on its feet in under a second. A fall is cheap for a machine; the package is not replaceable.');
+      /* the guardian PLANTS and absorbs — it stays upright. The carrier that ran the
+         route into the protected volume is the thing that goes over. */
+      brace(A.g,0.8,-c.nx,-c.nz);
+      if(A.wb.down<=0)knock(A.wb,1.05);
+      say('INTERPOSED · ABSORBED — the guardian put its own body on the line of travel and <b>stayed on its feet</b>: braced, took the impulse through the legs and shed it. It is unarmed and struck nothing. The carrier is the one that went over, and it is up again in about a second — a fall is cheap for a machine; the package is not replaceable.');
     }
     if(hit(A.ped,A.wb)&&A.state==='route'&&!A.hitDone){
       A.hitDone=true;tally.no++;setTally();A.state='pause';A.t0=simT;
@@ -845,11 +914,16 @@ SCN.arena={
   },
   step(dt){
     const S=world.userData.S-1.6,att=A.att,def=A.def;
+    /* ASYMMETRIC SENSING — the whole point of the bout. When it is on, BLUE keeps the
+       LiDAR reflex lane and RED is stuck on vision recognition, whichever of them is
+       attacking. Blue lands its strikes; red swings at where blue was. */
+    laneOv=asym?(att===A.a?'reflex':'vision'):null;
     if(simT<introEnd){introNarr();
       const an=simT*0.7;
       seek(att,Math.sin(an)*3.6,Math.cos(an)*3.6,2.4,dt,.2);
       seek(def,Math.sin(an+Math.PI)*3.6,Math.cos(an+Math.PI)*3.6,2.4,dt,.2);
       faceTo(att,def.o.position.x,def.o.position.z,dt);faceTo(def,att.o.position.x,att.o.position.z,dt);
+      if(asym)say('① <b>INFRARED DESIGNATION — the only human input.</b> The two competitors are marked as opponents for the bout. <b>Blue carries the LiDAR reflex lane; red is on vision recognition only.</b> Nothing else separates them — same body, same reach, same speed.');
       return;}
     track(att,def);
     const est=estimate();showTrack(est);
@@ -869,13 +943,14 @@ SCN.arena={
       seek(att,D.x,D.z,4.6,dt,3.3);
       faceTo(att,D.x,D.z,dt);
       const dd=Math.hypot(D.x-att.o.position.x,D.z-att.o.position.z);
-      say(mode==='reflex'
-        ? 'CLOSING — the LiDAR track is <b>predicted between frames</b>: the attacker is solving for where the opponent WILL be at the moment the arm arrives.'
-        : 'CLOSING — the vision pipeline only reports where the opponent WAS, ~20–50 ms+ ago, and only inside a 60° cone. The attacker is about to commit to a stale fix.');
+      const NM=asym?(att===A.a?'BLUE (LiDAR) ':'RED (vision) '):'';
+      say(LANE()==='reflex'
+        ? NM+'CLOSING — the LiDAR track is <b>predicted between frames</b>: the attacker is solving for where the opponent WILL be at the moment the arm arrives.'
+        : NM+'CLOSING — the vision pipeline only reports where the opponent WAS, ~20–50 ms+ ago, and only inside a 60° cone. The attacker is about to commit to a stale fix.');
       if(dd<3.5&&simT-(A.t0||0)>1.1){
         A.state='punch';A.t0=simT;
         const flight=0.34;
-        if(mode==='reflex')A.aim.copy(est).addScaledVector(trk.v,flight);
+        if(LANE()==='reflex')A.aim.copy(est).addScaledVector(trk.v,flight);
         else A.aim.copy(trk.p);                                     /* stale by one recognition cycle */
         A.aim.y=baseY;A.hitDone=false;
         act(att,'Punch',.08,0.85);
@@ -893,12 +968,12 @@ SCN.arena={
           const kb=V2.set(D.x-att.o.position.x,0,D.z-att.o.position.z).normalize();
           def.o.position.x+=kb.x*1.1;def.o.position.z+=kb.z*1.1;
           ghost.visible=false;A.state='land';A.t0=simT;
-          say('CONNECTED — the strike was thrown at the <b>intercept point</b>, not at the last observed position. LiDAR propagated the opponent’s velocity between frames and the arm arrived where the body arrived. Knocked down — and up again in about a second, because a fall costs a machine nothing.');
+          say((asym?(att===A.a?'BLUE LANDS IT — ':'RED LANDS ONE — '):'')+'CONNECTED — the strike was thrown at the <b>intercept point</b>, not at the last observed position. LiDAR propagated the opponent’s velocity between frames and the arm arrived where the body arrived. Knocked down — and up again in about a second, because a fall costs a machine nothing.');
         }else{
           tally.no++;setTally();
           ghost.visible=true;ghost.position.set(A.aim.x,baseY,A.aim.z);
           A.state='land';A.t0=simT;
-          say('WHIFFED — the arm swung through <b>empty air</b>. The attacker committed to where the opponent was seen ~'+Math.round(CAD.vision*1000)+' ms ago; by the time the arm arrived the body was '+miss.toFixed(1)+' units away. This is the defect you can watch all afternoon in a robot fighting league.');
+          say((asym?(att===A.b?'RED SWINGS AT A GHOST — ':''):'')+'WHIFFED — the arm swung through <b>empty air</b>. The attacker committed to where the opponent was seen ~'+Math.round(CAD.vision*1000)+' ms ago; by the time the arm arrived the body was '+miss.toFixed(1)+' units away. This is the defect you can watch all afternoon in a robot fighting league.');
         }
       }
     } else if(A.state==='land'){
@@ -913,9 +988,12 @@ SCN.arena={
       r.o.position.z=Math.max(-S,Math.min(S,r.o.position.z));r.o.position.y=baseY;});
     predMark.visible=(A.state==='punch');
     if(predMark.visible){predMark.position.set(A.aim.x,baseY+.1,A.aim.z);
-      predMark.material.color.setHex(mode==='reflex'?0xffcf5a:0xe6a866);}
+      predMark.material.color.setHex(LANE()==='reflex'?0xffcf5a:0xe6a866);}
   }};
 /* ---- 3 · VIP protection ------------------------------------------------------------------- */
+/* the standoff ring the guardian patrols. It sits OUTSIDE the drawn bubble (4.5–4.72)
+   by more than one body radius, so the machine can never overlap the ring line. */
+const RING=5.95;
 SCN.vip={
   cam:{t:new THREE.Vector3(0,2.2,-1.5),d:26,y:-0.78,p:0.33},
   setup(){
@@ -937,8 +1015,10 @@ SCN.vip={
   },
   reset(){
     A.vip.o.position.set(-2,0,0);A.vip.o.rotation.y=0.6;A.vipI=1;
-    A.g.o.position.set(2.6,0,3.8);A.g.o.rotation.y=0;
-    A.watch=0.35;A.state='wait';A.t0=0;A.tries=0;
+    A.watch=0.35;
+    A.g.o.position.set(-2+Math.sin(A.watch)*RING,0,Math.cos(A.watch)*RING);
+    A.g.o.rotation.y=A.watch;
+    A.state='wait';A.t0=0;A.tries=0;
     this.spawn();
     say('VIP PROTECTION — the guardian holds a standoff ring around the designated person. Press ▶ Run.');
   },
@@ -957,8 +1037,7 @@ SCN.vip={
     bubble.position.set(VX,baseY+.09,VZ);
     if(simT<introEnd){introNarr();
       A.ag.vel.multiplyScalar(0);
-      seek(A.g,VX+Math.sin(A.watch)*4.6,VZ+Math.cos(A.watch)*4.6,3.0,dt,.3);
-      if(A.g.vel.lengthSq()<1)A.g.o.rotation.y=turn(A.g.o.rotation.y,A.watch,3*dt);
+      ringMove(A.g,VX,VZ,RING,A.watch,2.0,dt);
       return;}
     if(A.state==='approach'){seek(A.ag,VX,VZ,7.0,dt,.05);}
     else if(A.state==='retreat'){
@@ -970,22 +1049,22 @@ SCN.vip={
     if(A.g.down<=0){
       if(est&&acting()&&A.state==='approach'){
         const b=Math.atan2(est.x-VX,est.z-VZ);
-        const ax=VX+Math.sin(b)*4.6,az=VZ+Math.cos(b)*4.6;
-        seek(A.g,ax,az,9.0,dt,.16);
-        if(A.g.vel.lengthSq()<1.2)faceTo(A.g,est.x,est.z,dt);
+        const ax=VX+Math.sin(b)*RING,az=VZ+Math.cos(b)*RING;
+        /* travel ROUND the standoff ring, never across it — this is what stops the
+           body clipping the ring edge and stalling the stride mid-step */
+        ringMove(A.g,VX,VZ,RING,b,3.4,dt);
         predMark.visible=true;predMark.position.set(ax,baseY+.1,az);
-        predMark.material.color.setHex(mode==='reflex'?0xffcf5a:0xe6a866);
-        say(mode==='reflex'
+        predMark.material.color.setHex(LANE()==='reflex'?0xffcf5a:0xe6a866);
+        say(LANE()==='reflex'
           ? 'INTERPOSING — acquired at the edge of the 360° field the moment he started moving, velocity propagated between LiDAR frames, and the guardian is already standing on the <b>intercept point</b> (gold ring). It will not touch the protected person and it will not strike him: it blocks and absorbs.'
           : 'LATE — he has only now crossed into the <b>60° camera cone</b>, and the fix is already stale. The guardian is committing to where he WAS, from the wrong side of the ring.');
       }else{
-        const gx=A.g.o.position.x-VX,gz=A.g.o.position.z-VZ,dg=Math.hypot(gx,gz);
-        if(dg<3.3){const b2=Math.atan2(gx,gz);      /* she walks, it yields — never a shove */
-          seek(A.g,VX+Math.sin(b2)*4.6,VZ+Math.cos(b2)*4.6,5.0,dt,.2);}
-        else seek(A.g,VX+Math.sin(A.watch)*4.6,VZ+Math.cos(A.watch)*4.6,4.2,dt,.35);
-        if(A.g.vel.lengthSq()<1.2)A.g.o.rotation.y=A.watch+Math.sin(simT*0.55)*2.0;
+        /* holding the ring: a slow patrol AROUND the standoff circle, so the walk cycle
+           never stalls and the body never crosses the ring line */
+        const sweep=A.watch+Math.sin(simT*0.42)*1.15;
+        ringMove(A.g,VX,VZ,RING,sweep,1.5,dt);
         predMark.visible=false;
-        if(A.state==='approach')say(mode==='reflex'
+        if(A.state==='approach')say(LANE()==='reflex'
           ? 'HOLDING THE RING — 360° returns, static map subtracted. Anything that moves is tracked whether the guardian is facing it or not.'
           : 'UNTRACKED — he is approaching from <b>outside the 60° cone</b>. To the vision lane he does not exist at all; the camera is sweeping the bearing where the last approach came from. This is why it reacts too late.');
       }
@@ -997,9 +1076,13 @@ SCN.vip={
     }
     if(A.state==='approach'&&hit(A.g,A.ag)){
       tally.ok++;tally.contacts++;setTally();A.state='retreat';A.t0=simT;A.watch=A.bear;
-      knock(A.g,0.8);
+      /* the guardian braces and holds the line — it does not go down. The man who ran
+         into a braced 60 kg machine is the one who ends up on the floor. */
+      const nb=Math.atan2(A.ag.o.position.x-A.g.o.position.x,A.ag.o.position.z-A.g.o.position.z);
+      brace(A.g,0.85,-Math.sin(nb),-Math.cos(nb));
+      knock(A.ag,1.1);
       A.ag.o.rotation.y+=Math.PI;
-      say('BLOCKED · ABSORBED — the guardian interposed its own body and stopped the approach. It is unarmed: no strike, no hold, no harmful force. It took the momentum, went down, and is back on its feet in under a second — which is precisely why a machine, and not a person, should be standing there.');
+      say('BLOCKED · ABSORBED — the guardian interposed its own body, <b>braced and stayed standing</b>. It is unarmed: no strike, no hold, no harmful force — it simply occupied the ground he wanted and let his own momentum do the rest. He is down and unhurt; nobody had to draw anything, and no officer had to be standing where the machine was standing.');
     }
     /* the protected person is a hard entity: never overlapped, never knocked, never struck */
     if(hit(A.g,A.vip)&&A.g.down<=0)say('CONTACT WITH THE PROTECTED PERSON — the guardian gives way. She is a hard, immovable entity in its world model: it can never pass through her and its contact response toward her is disabled entirely — it may touch and stop, never push, never knock.');
@@ -1031,12 +1114,29 @@ SCN.cordon={
   reset(){
     A.sub.o.position.set(5.2,0,-5.6);A.sub.o.rotation.y=0.1;
     A.g.o.position.set(-7,0,10);A.g.o.rotation.y=Math.PI;
-    A.state='designate';A.t0=0;A.wp=0;A.tries=0;irBeam.visible=false;
+    A.state='designate';A.t0=0;A.wp=0;A.tries=0;A.missSaid=false;irBeam.visible=false;
     say('CORDON CONTAINMENT — a subject stands behind a parked car; the officers cannot see his hands. Press ▶ Run.');
   },
   interpose(){
     const S=A.sub.o.position,dx=0-S.x,dz=16.5-S.z,L=Math.hypot(dx,dz);
     return [S.x+dx/L*2.8,S.z+dz/L*2.8];
+  },
+  /* --- the parked car is a wall, not a bump. Any leg of the machine's route that would
+     cross the car's footprint is redirected through the clear gap off its west end. --- */
+  /* gate verified clear of all three car collision discs (min 4.01 vs 2.60 required)
+     on both the approach leg and the leg on to the interposition point */
+  CAR:{x:4.6,z:1.2,hx:6.6,hz:3.1,gate:[-2.6,-3.2]},
+  clear(x,z){const C=this.CAR;return !(Math.abs(x-C.x)<C.hx&&Math.abs(z-C.z)<C.hz);},
+  route(a,tx,tz,spd,dt,stop){
+    const C=this.CAR,px=a.o.position.x,pz=a.o.position.z;
+    /* does the straight leg change sides of the car AND run along its length? */
+    const crosses=((pz-C.z)*(tz-C.z)<0)&&
+                  (Math.min(px,tx)<C.x+C.hx)&&(Math.max(px,tx)>C.x-C.hx);
+    if(crosses&&this.clear(px,pz)){
+      const g=C.gate;
+      if(Math.hypot(px-g[0],pz-g[1])>1.3){seek(a,g[0],g[1],spd,dt,.5);return false;}
+    }
+    return seek(a,tx,tz,spd,dt,stop);
   },
   step(dt){
     const S=A.sub.o.position;
@@ -1051,14 +1151,14 @@ SCN.cordon={
     irBeam.visible=false;
     if(A.state==='designate'){A.state='advance';A.wp=0;A.t0=simT;}
     if(A.state==='advance'){
-      const w=[[-2.5,-3.0],this.interpose()][A.wp];
-      if(seek(A.g,w[0],w[1],7.4,dt,.6)){A.wp++;if(A.wp>1){A.state='orders';A.t0=simT;}}
-      say('ADVANCING — the machine walks up to him. It can do that because <b>no life is at risk if it is wrong</b>: it is unarmed, it cannot shoot, and the worst case is a damaged machine. It puts itself between the subject and the cordon.');
+      const w=[this.CAR.gate,this.interpose()][A.wp];      /* west of the bonnet, then in */
+      if(this.route(A.g,w[0],w[1],7.4,dt,.6)){A.wp++;if(A.wp>1){A.state='orders';A.t0=simT;}}
+      say('ADVANCING — the machine walks up to him, <b>round the car rather than into it</b>. It can do that because <b>no life is at risk if it is wrong</b>: it is unarmed, it cannot shoot, and the worst case is a damaged machine. It puts itself between the subject and the cordon.');
     }
     else if(A.state==='orders'){
       const w=this.interpose();
-      seek(A.g,w[0],w[1],5.0,dt,.4);
-      if(A.g.vel.lengthSq()<1.5)faceTo(A.g,S.x,S.z,dt);
+      this.route(A.g,w[0],w[1],5.0,dt,.4);
+      if((A.g.spd||0)<1.2)faceTo(A.g,S.x,S.z,dt);
       const e=simT-A.t0;
       if(e<1.4){if(A.g.rig.curName!=='No')act(A.g,'No',.12,1.65);
         say('ISSUING ORDERS — the machine is between the subject and the officers, facing him, <b>unarmed</b>. It is calling the commands out loud — stop, show your hands — and gesturing them. No weapon is pointed at anyone, and no officer has to stand where it is standing.');}
@@ -1078,17 +1178,27 @@ SCN.cordon={
         const ax=est.x+dx/L*1.9,az=est.z+dz/L*1.9;
         seek(A.g,ax,az,9.2,dt,.15);
         predMark.visible=true;predMark.position.set(ax,baseY+.1,az);
-        predMark.material.color.setHex(mode==='reflex'?0xffcf5a:0xe6a866);
-        say(mode==='reflex'
+        predMark.material.color.setHex(LANE()==='reflex'?0xffcf5a:0xe6a866);
+        say(LANE()==='reflex'
           ? 'HE TRIES SOMETHING — the LiDAR layer had his velocity before the second step and put the machine on the <b>intercept point</b>. Blocking only: no strike, no weapon, no hold.'
           : 'TOO SLOW — the vision lane reports where he WAS. The machine is driving at a stale fix while he is already past the wing of the car.');
       } else if(A.g.down<=0){predMark.visible=false;
-        say(mode==='reflex'?'TRACKING.':'NO TRACK — he broke out of the 60° cone in the first stride. Outside that wedge there is nothing to react to.');}
-      if(hit(A.g,A.sub)){
+        say(LANE()==='reflex'?'TRACKING.':'NO TRACK — he broke out of the 60° cone in the first stride. Outside that wedge there is nothing to react to.');}
+      /* only the LiDAR lane actually converts the contact into an interception.
+         On the vision lane the machine still commits — it lunges at the stale fix and
+         goes through the space he has already left. It tries, and it misses. */
+      if(hit(A.g,A.sub)&&LANE()==='reflex'){
         tally.ok++;tally.contacts++;setTally();
-        knock(A.g,1.15);knock(A.sub,1.35);
+        /* the machine plants and holds; only the man it stopped goes to the ground */
+        const nb=Math.atan2(S.x-A.g.o.position.x,S.z-A.g.o.position.z);
+        brace(A.g,0.9,-Math.sin(nb),-Math.cos(nb));
+        knock(A.sub,1.35);
         A.state='recover';A.t0=simT;A.ret=0;predMark.visible=false;showTrack(null);
-        say('INTERCEPTED — non-kinetic: the machine simply got in the way and took the collision. Both go down. The subject is contained without a shot being fired and without an officer having to close the distance; the machine gets up and resumes the standoff.');
+        say('INTERCEPTED — non-kinetic: the machine simply got in the way and <b>took the collision on its feet</b>. It braced, absorbed the impulse and held the line; he is the one on the floor, and he is unhurt. Contained without a shot being fired and without an officer having to close the distance.');
+      }
+      if(LANE()==='vision'&&!A.missSaid&&A.bolt>0&&S.z>2.5){
+        A.missSaid=true;
+        say('LUNGED AND MISSED — the machine <b>did</b> commit: it drove at the last position vision gave it and arrived through empty pavement, because he had already been past that point for ~'+Math.round(CAD.vision*1000)+' ms. Trying and missing is the whole failure mode — the machine was willing, the pipeline was late.');
       }
       if(S.z>12.8){
         tally.no++;setTally();A.state='recover';A.t0=simT;A.ret=0;predMark.visible=false;showTrack(null);
@@ -1099,11 +1209,12 @@ SCN.cordon={
     else if(A.state==='recover'){
       if(simT-A.t0>2.4&&A.sub.down<=0&&A.g.down<=0){
         /* he walks back round the car to the near side — never through it */
-        const rp=[[-2.0,-5.2],[5.2,-5.6]][Math.min(A.ret||0,1)];
-        if(seek(A.sub,rp[0],rp[1],3.4,dt,.8)){A.ret=(A.ret||0)+1;
-          if(A.ret>1){A.state='orders';A.t0=simT;A.tries++;A.ret=0;}}
-        const w=this.interpose();seek(A.g,w[0],w[1],5.5,dt,.5);
-        say('RESET — the machine walks back into the gap between the subject and the cordon and resumes the standoff. It has no other authority: block, absorb, repeat, and wait for people to decide.');
+        const rp=[this.CAR.gate,[5.2,-5.6]][Math.min(A.ret||0,1)];
+        if(this.route(A.sub,rp[0],rp[1],3.4,dt,.8)){A.ret=(A.ret||0)+1;
+          if(A.ret>1){A.state='orders';A.t0=simT;A.tries++;A.ret=0;A.missSaid=false;}}
+        /* the machine takes the same gap west of the car — it never drives at the wing */
+        const w=this.interpose();this.route(A.g,w[0],w[1],5.5,dt,.5);
+        say('RESET — the machine walks back into the gap between the subject and the cordon, routing round the car rather than into it, and resumes the standoff. It has no other authority: block, absorb, repeat, and wait for people to decide.');
       } else A.sub.vel.multiplyScalar(0);
     }
   }};
@@ -1124,6 +1235,11 @@ function buildScenario(){
   world=new THREE.Group();scene.add(world);
   bodies=[];props=[];markers=[];A={};baseY=0;contacts.length=0;
   ({package:buildStoreroom,arena:buildArena,vip:buildPlaza,cordon:buildStreet})[scenario]();
+  /* the split-lane option only means anything with two machines facing each other */
+  const ab=document.getElementById('asym'),mb=document.getElementById('mode');
+  if(ab){ab.style.display=(scenario==='arena')?'':'none';
+    if(scenario!=='arena'&&asym){asym=false;ab.textContent='Sensing: both machines alike';ab.classList.remove('on');}
+    mb.disabled=asym;mb.style.opacity=asym?.45:1;}
   SCN[scenario].setup();
   world.traverse(o=>{if(o.userData&&o.userData.bead)markers.push(o.userData);});
   sensables=bodies.concat(props);
@@ -1132,10 +1248,10 @@ function buildScenario(){
 }
 function resetRun(){
   running=false;simT=0;acc=0;worstSep=Infinity;worstPair='';phaseTxt='';
-  resetTrack();clearPoints();
+  laneOv=null;resetTrack();clearPoints();
   trackBox.visible=false;predMark.visible=false;ghost.visible=false;irBeam.visible=false;
-  bodies.forEach(b=>{b.down=0;b.r=b.r0;b.vel.set(0,0,0);b.hold=0;
-    if(b.k==='robot'&&b.rig){b.rig.mixer.stopAllAction();b.rig.cur=null;b.rig.curName='';b.rig.play('Idle',0);}
+  bodies.forEach(b=>{b.down=0;b.r=b.r0;b.vel.set(0,0,0);b.hold=0;b.braceT=0;b.spd=0;
+    if(b.k==='robot'&&b.rig){b.rig.mixer.stopAllAction();b.rig.cur=null;b.rig.curName='';b.rig.play('Idle',0);b.rig.inner.rotation.x=0;}
     if(b.k==='human'&&b.rig){b.rig.body.rotation.x=0;b.rig.body.position.y=0;}});
   srand(20260728);SEEN={};
   SCN[scenario].reset();
@@ -1209,6 +1325,14 @@ document.getElementById('mode').addEventListener('click',function(){
   mode=(mode==='reflex')?'vision':'reflex';
   this.textContent='Mode: '+(mode==='reflex'?'LiDAR reflex lane':'Vision — 60° cone (lagged)');
   this.classList.toggle('on',mode==='reflex');resetTrack();clearPoints();});
+/* arena only: give ONE machine the LiDAR lane and leave the other on vision */
+document.getElementById('asym').addEventListener('click',function(){
+  asym=!asym;
+  this.textContent=asym?'Sensing: BLUE LiDAR · RED vision':'Sensing: both machines alike';
+  this.classList.toggle('on',asym);
+  document.getElementById('mode').disabled=asym;
+  document.getElementById('mode').style.opacity=asym?.45:1;
+  laneOv=null;resetTrack();clearPoints();});
 cv.addEventListener('pointerdown',e=>{dragging=true;lx=e.clientX;ly=e.clientY;});
 window.addEventListener('pointermove',e=>{if(!dragging)return;yaw-=(e.clientX-lx)*.006;
   pitch=Math.max(.1,Math.min(1.2,pitch+(e.clientY-ly)*.006));lx=e.clientX;ly=e.clientY;});

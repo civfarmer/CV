@@ -1,5 +1,30 @@
 <!doctype html>
 <!-- CHANGELOG
+  2026-07-29 (depth cue on the Moon/Mars fly-past + overmatch one-shot kill + family-dependent flight time.
+              Only the apparent-size block, the coast-duration constants and the fracture branch changed;
+              geometry, materials, auto-aim, camera, cone, surface view and all copy are untouched):
+   1) MOON AND MARS ARE NO LONGER STATIC MARBLES. The projectile genuinely flies past both (measured: it
+      passes ~57 u from the Moon at ~32% of flight and ~60 u from Mars at ~48%), so perspective alone
+      already gave an ~8.5× angular swing — but it peaked at only ~8° across, which still reads as a bead
+      pinned to the backdrop. Added an apparent-size depth cue: each body holds its authored size exactly
+      at or beyond its reference range (so the DEFAULT SYSTEM VIEW IS PIXEL-UNCHANGED — scale is exactly
+      1.00 there), and inside that range is scaled by (d0/d)^0.62, clamped at 3.4×, eased at 0.22/frame.
+      Measured result: Moon now peaks at 20.5° with a 21.8× swing (was 8.1°/8.6×); Mars peaks at 24.2°
+      with a 30.7× swing (was 7.2°/9.1×). Both swell on the approach and fall away behind the shot, so
+      the distance being crossed is legible. Illustrative depth cue in an explicitly schematic scene.
+   2) A HEAVY DART OVERMATCHES A SMALL BODY IN ONE SHOT. Previously EVERY disruption ran the two-stage
+      fracture→dispersal path, so even a 30 t·km/s tungsten-class penetrator needed two strikes on a 30 m
+      body. That is wrong: 150 GJ into 2.83e7 kg is 5,300 J/kg ≈ 44× Q*. Added an overmatch branch —
+      specE ≥ 20 Q* AND momN ≥ 0.5 (i.e. the dart also has the momentum to couple into the bulk rather
+      than flash off the surface) disperses the body on the FIRST landed strike. Verified: M-DART and
+      T-DART now one-shot the 30 m body; R/Q/V-DART still take the two-stage path (the light diamond-
+      equivalent core only works the surface); the 100 m and 300 m bodies are completely unaffected.
+   3) FLIGHT TIME NOW DEPENDS ON THE DART, SO THE TARGET DRIFTS FURTHER UNDER A SLOW ONE. The family spans
+      1,000 → 100 km/s, so time-of-flight over the same range spans 10×. Played literally that is a tedious
+      wait, so it is log-compressed: coast = T_COAST·(1 + 0.78·log10(1e6/v)) — 4.50 s for the R-DART up to
+      8.01 s for the T-DART (1.78×). Because the body never stops drifting Earth-ward, it now travels 24.0 u
+      under the heavy shot against 13.5 u under the light one (78% further), which is the visible form of the
+      response-time argument. The lead correction in mkShotPlan() uses the SAME number, so hits still land.
   2026-07-27 (verisimilitude rework: real miss physics, visible deflection, fragment retargeting, target cam,
               apparent-size Moon/Mars, camera Earth-clip fix, compact view, demo-grade impact FX):
    1) SHOT OBEYS THE REAL BORE. beginShot() freezes a shotPlan {muzzle, aim, offDeg, willHit}: if the bore is
@@ -864,6 +889,8 @@ function initThree(){
   mars=new THREE.Mesh(new THREE.SphereGeometry(4.5,32,32),B.mars?new THREE.MeshPhongMaterial({map:ldb.load(B.mars),shininess:2,color:0xd2673f}):new THREE.MeshPhongMaterial({color:0xb0492c,shininess:2}));
   mars.position.set(390,-10,-480);scene.add(mars); // kept clear of the target-cam inset corner in the default view
   label(mars,'mars','Mars','The small red point — from Earth\'s vicinity Mars appears far smaller than the Moon despite being physically ~2× its diameter (it is tens of millions of km away). Apparent sizes; illustrative. The planetary-defence context is interplanetary; the series specifies no operational orbit.','distant body · small red point');
+  // depth cue: both bodies grow as the chase camera closes on them during a shot and fall away behind it
+  registerApparent(moon,0.62,3.4);registerApparent(mars,0.62,3.4);
   // Earth below (illustrative altitude — series declares none)
   const T=window.EARTH_TEX||{},ld=new THREE.TextureLoader();
   const em=new THREE.MeshPhongMaterial({map:T.day?ld.load(T.day):null,bumpMap:T.bump?ld.load(T.bump):null,bumpScale:0.4,specularMap:T.specular?ld.load(T.specular):null,specular:0x2a4a66,shininess:14,color:T.day?0xffffff:0x24507e});
@@ -900,6 +927,30 @@ function initThree(){
   resize();loop();
 }
 let cine=0, camLook=new THREE.Vector3(0,-1.5,0);
+/* ============================================================================================
+   APPARENT-SIZE DEPTH CUE — the Moon and Mars must READ as bodies at a distance the shot is
+   closing on, not as fixed marbles pinned to the backdrop. Perspective alone gives an ~8.5×
+   angular swing across the flight, but peaks at only ~8° across, which still looks like a bead.
+   So beyond the authored reference range each body holds its authored size exactly (the default
+   system view is untouched); INSIDE that range it is scaled super-linearly with closing range,
+   so passing the Moon at ~100 u fills a real part of the frame and it shrinks away again after.
+   Illustrative depth cue in an explicitly schematic scene — positions were never to scale.
+   ============================================================================================ */
+const APPAR=[];
+function registerApparent(obj,gain,max){
+  if(!obj)return;
+  APPAR.push({o:obj,d0:null,gain:gain,max:max});
+}
+function updateApparentBodies(){
+  for(let i=0;i<APPAR.length;i++){
+    const B=APPAR[i];if(!B.o||!B.o.visible)continue;
+    if(B.d0===null){B.d0=camera.position.distanceTo(B.o.position)||1;continue;}
+    const d=Math.max(6,camera.position.distanceTo(B.o.position));
+    const s=(d>=B.d0)?1:Math.min(B.max,Math.pow(B.d0/d,B.gain));
+    const c=B.o.scale.x;
+    B.o.scale.setScalar(c+(s-c)*0.22);          // eased, so the swell is smooth rather than snapping
+  }
+}
 function loop(){raf=requestAnimationFrame(loop);
   // cinematic factor ramps up in coast/impact, down otherwise
   const cineGoal=(firing&&(phase==='coast'||phase==='impact'))?1:0;
@@ -932,6 +983,7 @@ function loop(){raf=requestAnimationFrame(loop);
     if(asteroidTravel>420&&!firing&&!salvoActive&&!recharging&&!salvoEnded&&scars.length===0){asteroid.position.copy(asteroidHome);asteroidTravel=0;}
   }
   if(mars)mars.rotation.y+=0.0006;
+  updateApparentBodies();   // Moon/Mars swell as the camera (chasing the shot) closes on them
   // tracked fragments: rapid initial separation damping to a slow drift; fracture-face glow cools
   frags.forEach(f=>{f.mesh.position.addScaledVector(f.vel,0.016*speed);f.vel.multiplyScalar(0.988);
     f.mesh.rotation.x+=f.spin.x;f.mesh.rotation.y+=f.spin.y;f.mesh.rotation.z+=f.spin.z;
@@ -1366,6 +1418,15 @@ makeFloating(document.getElementById('tgtcamFrame'),null,{noMin:true}); // the r
 
 // ---- launch: travelling cell-wave, coast, fly-in, per-projectile impact, aftermath ----
 const T_ACCEL=5.0, T_COAST=4.5, T_HOLD=3.4;
+/* ---- FLIGHT TIME IS FAMILY-DEPENDENT. The family spans 1,000 km/s (light diamond-equivalent
+   core) down to 100 km/s (tungsten-class heavy penetrator) — a factor of ten in speed, so a
+   factor of ten in time-of-flight over the same range. Played literally that is a tedious wait,
+   so it is log-compressed: the heavy dart's coast lasts ~1.8× the light dart's. What matters is
+   that it is VISIBLY slower, and the target — which never stops drifting Earth-ward — travels
+   proportionally further while the shot is in flight (the lead correction below uses the same
+   number, so the hit still lands). This is the whole argument for the fast dart: response time. */
+function coastFor(fam){return T_COAST*(1+0.78*Math.log10(1e6/fam.v));}
+let coastT=T_COAST;
 function stepFire(){
   fireT+=0.016*speed;
   if(fireT<=T_ACCEL){
@@ -1380,7 +1441,7 @@ function stepFire(){
       r.material.emissiveIntensity+=(glow-r.material.emissiveIntensity)*0.5;r.material.emissive.setHex(on&&d<0.12?0x2f7fd6:0x0a1e33);});
     if(vectorRing)vectorRing.rotation.z=0.11*Math.sin(fireT*0.8); // slow, deliberate exit trim (not wobble)
     boreProjectile.getWorldPosition(cineFocus);cineZoom=Z_CHASE;cineDir.copy(CAM_CHASE_DIR); // world pos (child of slewed sysRoot)
-  } else if(fireT<=T_ACCEL+T_COAST){
+  } else if(fireT<=T_ACCEL+coastT){
     if(!shotPlan||!shotPlan.locked)shotPlan=mkShotPlan(true); // freeze ONCE at muzzle exit, lead-corrected for the drifting target
     const P=shotPlan;if(!P){resetFire();return;}
     phase='coast';
@@ -1388,7 +1449,7 @@ function stepFire(){
       ?'coast · shot flies straight down the aimed bore · vector-control trims ≤1.5°'
       :'coast · bore is '+P.offDeg.toFixed(1)+'° OFF target — beyond the ±1.5° steering cone · shot will MISS';
     cellRings.forEach(r=>{r.material.emissiveIntensity+=(0.3-r.material.emissiveIntensity)*0.2;r.material.emissive.setHex(0x0a1e33);});
-    const cf=(fireT-T_ACCEL)/T_COAST, sm=cf*cf*(3-2*cf), mt=1-cf;
+    const cf=(fireT-T_ACCEL)/coastT, sm=cf*cf*(3-2*cf), mt=1-cf;
     // ---- flight follows the FROZEN shot plan: quadratic bezier from muzzle along the bore axis to plan.end.
     //      On a hit, plan.end is the cone-clamped surface point; on a miss it is straight down the bore,
     //      sailing PAST the body (physics, not scripting). ----
@@ -1413,9 +1474,9 @@ function stepFire(){
       else{impacted=true; // no impact FX — the shot sails past
         document.getElementById('phase').textContent='MISS — bore '+P.offDeg.toFixed(1)+'° off target (> ±1.5° authority) · passes ~'+Math.round(P.missDist)+'u from the body · no energy delivered';}
     }
-  } else if(fireT<=T_ACCEL+T_COAST+T_HOLD){
+  } else if(fireT<=T_ACCEL+coastT+T_HOLD){
     phase='impact';
-    const P=shotPlan,hf=(fireT-(T_ACCEL+T_COAST))/T_HOLD;
+    const P=shotPlan,hf=(fireT-(T_ACCEL+coastT))/T_HOLD;
     const tgtPos=(P&&P.target)?P.target.obj.position:asteroid.position;
     const impactPt=(P&&P.impactPt)?P.impactPt:tgtPos;
     if(P&&!P.willHit){
@@ -1501,8 +1562,15 @@ function triggerImpact(){
   const nextHits=landedHits+1,cumSpecE=nextHits*KE_SHOT/tgt.mass;
   const fatigue=!D.disrupt&&nextHits>=4&&cumSpecE>=4*Q_STAR;
   const critHit=D.disrupt||fatigue;          // this strike meets the disruption criterion…
-  const fracture=critHit&&!bodyFractured;    // …first time: CRITICAL FRACTURE (body holds, barely)
-  const breakup=critHit&&bodyFractured;      // …struck again while fractured: full dispersal
+  // ---- OVERMATCH: a heavy dense penetrator against a SMALL body is not a two-stage failure.
+  //      When the delivered specific energy is an order of magnitude beyond Q* AND the dart
+  //      carries the momentum to couple it into the bulk rather than flash it off the surface,
+  //      the body does not "crack and hold" — it comes apart on the first strike.
+  //      30 m body: 5,300 J/kg ≈ 44 Q* → M-DART and T-DART one-shot it; the light diamond-
+  //      equivalent core (momN 0.1) still only works the surface and needs the campaign. ----
+  const overmatch=D.specE>=20*Q_STAR&&D.momN>=0.5;
+  const fracture=critHit&&!bodyFractured&&!overmatch;   // first time: CRITICAL FRACTURE (body holds, barely)
+  const breakup=critHit&&(bodyFractured||overmatch);    // struck again while fractured — or overmatched outright
   startSurfaceRun(fracture?'fracture':breakup?'disperse':'normal'); // parallel SURFACE VIEW matches the outcome
   // hypervelocity energy deposition, MATERIAL-aware: the light diamond-equivalent dart deposits energy at
   // the SURFACE (vaporisation pit, body intact); dense tungsten-class penetrators drive momentum DEEP into
@@ -1513,6 +1581,8 @@ function triggerImpact(){
              : velN>=0.13 ? fam.matShort+' penetrator drives deep → cratering + fracture'
              : fam.matShort+' penetrator burrows deep — momentum couples into the bulk';
   const character = fracture ? 'CRITICAL FRACTURE — the body is failing; ONE MORE landed strike disperses it'
+                  : (breakup&&overmatch&&!bodyFractured)
+                             ? 'OVERMATCHED — '+D.specE.toFixed(0)+' J/kg is ≈'+Math.round(D.specE/Q_STAR)+'× Q* and this dart couples it into the bulk: the body is dispersed by this single strike'
                   : breakup  ? 'the fractured body GIVES WAY → dispersal'
                   : 'coherent deflection';
   document.getElementById('phase').innerHTML=fam.id+' · '+(fam.v/1000)+' km/s → '+tgt.id+' body · hypervelocity energy deposition · 150 GJ + '+(fam.kg*fam.v).toExponential(1)+' N·s · '+emph+' · Δv≈'+fmtDv(D.dv)+' · '+character+' · useful deflection/effect uncertain (impact campaign P6)';
@@ -1680,7 +1750,7 @@ function mkShotPlan(lock){
   const plan={muzzle,aim,target:T,range:260,willHit:false,offDeg:0,missDist:0,
               end:muzzle.clone().addScaledVector(aim,260),impactPt:null,locked:!!lock};
   if(T){
-    const lead=(lock&&!T.frag)?asteroidVel.clone().multiplyScalar(DRIFT_UPS*T_COAST):new THREE.Vector3(); // fragments are ~settled
+    const lead=(lock&&!T.frag)?asteroidVel.clone().multiplyScalar(DRIFT_UPS*coastFor(FAMILY[famIdx])):new THREE.Vector3(); // fragments are ~settled
     const tgtPos=T.obj.position.clone().add(lead);
     const impactPt=tgtPos.addScaledVector(aim,-T.r*0.94); // near surface, on the incoming-bore side, at ARRIVAL time
     const toT=impactPt.clone().sub(muzzle);plan.range=toT.length();
@@ -1699,6 +1769,7 @@ function beginShot(){ // start ONE shot (shared by single Launch and each salvo 
   if(autoAim)updateAutoAim(1);                      // snap the bore onto the current target (it keeps tracking through the launch)
   const sb=document.getElementById('slewBtn');if(sb)sb.disabled=true;   // no mid-flight Hold flips (ship still slews if auto-aim is on)
   shotPlan=mkShotPlan(false);                       // provisional; re-frozen WITH LEAD at muzzle exit (coast start)
+  coastT=coastFor(FAMILY[famIdx]);                  // slower dart ⇒ longer flight ⇒ the body drifts further under it
   firing=true;fireT=0;impacted=false;document.getElementById('fireBtn').textContent='■ Abort';
 }
 document.getElementById('fireBtn').addEventListener('click',()=>{
@@ -1794,7 +1865,7 @@ function endShotInSalvo(){ // a shot's hold just finished during a salvo: bank t
   else{salvoDone=true;recharging=true;rechargeT=0;updateSalvoReadout('done');} // hold on the final tally, then reset
 }
 function prepNextShot(){ // reset the launcher for the next salvo shot WITHOUT snapping the (nudged) body home
-  clearImpact();impacted=false;fireT=0;phase='ready';
+  clearImpact();impacted=false;fireT=0;phase='ready';coastT=coastFor(FAMILY[famIdx]);
   if(asteroid&&!bodyBroken)asteroid.visible=true;      // never resurrect a dispersed body mid-salvo
   boreProjectile.position.set(-LEN/2+0.9,0,0);boreProjectile.visible=true;boreProjectile.scale.setScalar(1);
   if(tracer){tracer.visible=false;tracer.material.opacity=0;}if(ghostLine)ghostLine.visible=false;
