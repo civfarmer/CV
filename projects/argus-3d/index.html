@@ -309,6 +309,8 @@
     color:#aab7cc;background:color-mix(in oklab,#0e1420,transparent 18%);border:1px solid var(--line2);border-radius:5px;padding:3px 8px}
   .tgtcam .tc-btn:hover{border-color:var(--accent);color:#e9eef7}
   .tgtcam.big .tc-btn{bottom:auto;top:6px;right:8px}
+  /* the header label used to run under that top-right button in the enlarged surface view */
+  .tgtcam.big .tc-lab{max-width:calc(100% - 130px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .tgtcam .tc-cap{position:absolute;bottom:6px;left:8px;right:96px;font-family:var(--fm);font-size:9px;line-height:1.35;
     color:#cfe0dc;background:color-mix(in oklab,#0e1420,transparent 22%);padding:3px 7px;border-radius:5px}
   .tgtcam.big .tc-cap{right:8px}
@@ -686,7 +688,9 @@ function axisRange(v){return v.dot(AXIS);}
 const DL_A=48.94, DL_P=0.27116;
 function rangeKm(u){return Math.pow(Math.max(u,1)/DL_A,1/DL_P);}
 function fmtRange(u){const km=rangeKm(u);
-  return km>=1.4e7?(km/1.495979e8).toFixed(2)+' AU':(km/1e6).toFixed(1)+'M km';}
+  if(km>=1.4e7)return (km/1.495979e8).toFixed(2)+' AU';
+  if(km>=1e6)return (km/1e6).toFixed(2)+'M km';
+  return Math.round(km/1000)*1000>=1000?(Math.round(km/1000)).toLocaleString('en-GB')+'k km':Math.round(km)+' km';}
 let screenRing=null;
 let interceptLog=[],lastInterceptU=0;   // down-range distance at which each shot met the body
 let asteroidHome=null,cineFocus=new THREE.Vector3(120,18,-160),cineZoom=110;
@@ -996,6 +1000,11 @@ function buildAsteroid(){
   return new THREE.Mesh(geo,m);
 }
 
+const PLANET_PTS=[
+  {name:'Jupiter', mag:'mag −3.0 · 48″ across from here', d:[-0.35,0.22,0.91], col:0xfff0d2, op:0.95, s:900},
+  {name:'Saturn',  mag:'mag +0.3',                        d:[0.62,0.30,0.72],  col:0xf0e2bb, op:0.72, s:640},
+  {name:'Venus',   mag:'mag −3.9 · sunward',              d:[-0.78,0.10,-0.61],col:0xfffaf0, op:0.85, s:760},
+];
 /* ============================================================================================
    THE SKY — deliberately NOT a sci-fi asteroid belt.
    The main belt is 2.06–3.27 AU; this engagement happens around 1.4–1.5 AU heliocentric, well
@@ -1077,11 +1086,6 @@ function buildSky(){
     s.scale.set(p.s,p.s,1);s.frustumCulled=false;
     s.userData.read=p.name+' · '+p.mag;skyShell.add(s);});
 }
-const PLANET_PTS=[
-  {name:'Jupiter', mag:'mag −3.0 · 48″ across from here', d:[-0.35,0.22,0.91], col:0xfff0d2, op:0.95, s:900},
-  {name:'Saturn',  mag:'mag +0.3',                        d:[0.62,0.30,0.72],  col:0xf0e2bb, op:0.72, s:640},
-  {name:'Venus',   mag:'mag −3.9 · sunward',              d:[-0.78,0.10,-0.61],col:0xfffaf0, op:0.85, s:760},
-];
 /* a faint ring drawn ON the outbound axis at a stated range — used to mark the papers'
    0.5 AU screening distance without pretending it is an intercept range */
 function mkRangeRing(d,col){
@@ -2080,9 +2084,15 @@ document.getElementById('resetBtn').addEventListener('click',()=>resetFire());
 document.getElementById('camBtn').addEventListener('click',function(){insetOn=!insetOn;this.classList.toggle('on',insetOn);});
 (function(){
   const vb=document.querySelector('.viewbox'),fb=document.getElementById('fitBtn');
+  let _preCompactLegend=null;   // the legend state before compact collapsed it
   let compact=false;try{compact=localStorage.getItem('argus3d-compact')==='1'}catch(e){}
   function ap(){if(vb)vb.classList.toggle('compact',compact);if(fb)fb.classList.toggle('on',compact);
-    if(compact&&window.__setLegendMin)window.__setLegendMin(true); // the full legend eats half a 440px canvas
+    // the full legend eats half a 440px canvas, so compact collapses it — but it used to stay
+    // collapsed for ever. Remember what the user had and restore it when compact is turned off.
+    if(window.__setLegendMin){
+      if(compact){if(_preCompactLegend===null)_preCompactLegend=!!window.__legendMin;window.__setLegendMin(true);}
+      else if(_preCompactLegend!==null){window.__setLegendMin(_preCompactLegend);_preCompactLegend=null;}
+    }
     resize();}
   if(fb)fb.addEventListener('click',()=>{compact=!compact;try{localStorage.setItem('argus3d-compact',compact?'1':'0')}catch(e){}ap();});
   ap();
@@ -2361,7 +2371,8 @@ let legendMin=false;
   function toggle(e){ if(e)e.stopPropagation(); legendMin=!legendMin; apply(); }
   if(head)head.addEventListener('click',toggle);
   if(tog)tog.addEventListener('click',toggle);
-  window.__setLegendMin=v=>{legendMin=v;apply();}; // compact view auto-collapses the tall legend
+  window.__setLegendMin=v=>{legendMin=v;window.__legendMin=v;apply();}; // compact view auto-collapses the tall legend
+  window.__legendMin=legendMin;
   apply();
 })();
 
