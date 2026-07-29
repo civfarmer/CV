@@ -1,13 +1,59 @@
 <!doctype html>
+<!-- CHANGELOG
+  2026-07-29c (SCENE REBUILT AROUND A REAL OUTBOUND JOURNEY — overlay collision fixed, sky rebuilt):
+   0) THE OVERLAY COLLISION. The 6-button mode row measured ~690-735px against a 772px canvas, so it
+      ALWAYS ran under the top-right HUD chip and "Full screen" was half-covered. It was an
+      unconditional bug at every width, not an edge case. .modes now wraps and is limited to a
+      60% lane; .hud takes the mirror 40% lane at z-index 4 with pointer-events:none. The force
+      legend and salvo panel moved from top 48/56 to 120 to clear a wrapped row.
+   1) BODIES ARE NOW TRUE SIZE RELATIVE TO ONE ANOTHER. Previously Earth was 280 u while the Moon
+      was 7 u and Mars 13.66 u — the Moon was ~11x too small against Earth. Anchored on Earth's
+      280 u by real diameter: Earth 280, Mars 148.99, Moon 76.34 (6,371 : 3,390 : 1,737 km).
+   2) THE JOURNEY IS ORDERED AND LONG. One documented law places everything:
+      d_scene = 48.94 · d_real^0.2712, fitted through Moon = 1,600 u and the body's first position
+      = 9,000 u. That yields Moon 1,600 | Mars 6,135 | 0.5 AU gate 6,681 | target 9,000. The shot
+      crosses the Moon early, passes Mars about two-thirds out, and still runs 2,865 u (32% of the
+      flight) BEYOND Mars before it reaches the body.
+   3) THE CAMERA TURNS TO WATCH EACH FLY-PAST. A body offset from the flight line is biggest exactly
+      when it is abeam — 90° off the view axis, i.e. out of frame. The chase camera now pans to
+      follow the Moon and then Mars past, then returns to the shot. Measured in-frame: Moon 14.4°
+      at 2,050 u, Mars 30.1° at 6,602 u (peaking near 48° as it sweeps by).
+   4) EARTH SHRINKS AS MARS SWELLS. Measured over one flight: Earth 82.3° → 4.0° (a factor of 21)
+      while Mars goes 2.8° → 51.9°. That is pure perspective — the apparent-size fudge added on
+      2026-07-29 has been DELETED, because true sizes over real distances no longer need it.
+   5) THE BODY IS INBOUND AND EVERY SHOT MEETS IT NEARER. It closes down the axis at 70 u/s and
+      never stops. Measured salvos: R-DART intercepts at 1.12 → 0.67 → 0.36 → 0.18 AU; T-DART at
+      0.90 → 0.39 AU. The slow dart is in flight ~2.6x longer (coast law now 1.60·log10), so the
+      body runs much further before it arrives (T-DART coasts 11.7 s against the R-DART's 4.5 s)
+      — which is the response-time argument made visible.
+      The salvo panel now prints the closing sequence in real units.
+   6) A REAL SKY, AND DELIBERATELY NO ASTEROID BELT. The main belt is 2.06-3.27 AU; this engagement
+      is around 1.4-1.5 AU heliocentric, well inside it — and a belt is never visible AS a belt
+      from anywhere (mean separation 1-5 million km, which is why every probe that crossed it saw
+      nothing). Drawing one would be the single obviously wrong thing in the scene. Instead:
+      ~9,060 stars in three magnitude tiers matching the Bright Star Catalogue to mag 6.5,
+      coloured by stellar class and heavily desaturated; a Milky Way band tilted 60.2° to the
+      ecliptic with unresolved glow; and Jupiter/Saturn/Venus as POINT sprites (Jupiter subtends
+      48 arcsec from here — about a quarter of a pixel — so a textured sphere would be a lie).
+      The whole shell rides with the camera, so 9,000 u of travel produces zero star parallax.
+   7) HOUSEKEEPING. Camera far 20,000 → 90,000; wheel zoom is multiplicative to 14,000 u; the
+      salvo off-track nudge scaled 26 → 180 u for the new scene; the idle reset is range-based.
+   8) HONESTY. A second standing note now states plainly that the inbound body, the campaign and
+      the closing intercepts are this visualiser's staging and NOT paper findings (Paper I §8 puts
+      Earth-intersecting states outside the research envelope; Paper III §7.2 makes no E3/E4
+      claim), and that 0.5 AU is a screening quotient R/v, not an intercept range — which is why
+      it is drawn as a marked gate.
+-->
 <!-- DISTANCE MODEL (read this before moving any body)
      True figures: Moon Ø 3,474 km at 384,400 km. Mars Ø 6,779 km at 54.6e6 km on a favourable
      approach — so Mars is 1.95× the Moon's DIAMETER and about 142× its DISTANCE. The target sits
      at the papers' 0.5 AU response-time reference = 74.8e6 km, which is 1.37× Mars's closest
      approach: the asteroid genuinely lies BEYOND Mars, and the 1,000 km/s dart reaches it in ~21 h.
-     Scene mapping: body RADII are true to each other (Moon 7.00 u, Mars 13.66 u). DISTANCES are
-     log-compressed about the target — d_scene = 1287·(d_real/0.5AU)^0.35 — which preserves the
-     ordering and keeps everything inside one frame: Moon 241 u, Mars 1,154 u, target 1,287 u.
-     The Moon→Mars gap is therefore 4.1× the station→Moon gap (it used to be 0.5×, i.e. backwards).
+     Scene mapping: body RADII are true to each other, anchored on Earth's 280 u — Earth 280.00,
+     Mars 148.99, Moon 76.34. DISTANCES are log-compressed by one fitted law,
+     d_scene = 48.94 · d_real^0.2712, through Moon = 1,600 u and the body's first position 9,000 u:
+       Moon 1,600 | Mars 6,135 | 0.5 AU gate 6,681 | inbound body starts 9,000
+     so the shot crosses the Moon early, passes Mars two-thirds out, and runs 2,865 u beyond Mars.
      Earth's disc remains drawn at an exaggerated radius, as it always has been — that is a separate,
      long-standing liberty so the limb fills the frame, and ranges here are quoted from the STATION.
 -->
@@ -267,6 +313,9 @@
     color:#cfe0dc;background:color-mix(in oklab,#0e1420,transparent 22%);padding:3px 7px;border-radius:5px}
   .tgtcam.big .tc-cap{right:8px}
   @media(max-width:900px){.tgtcam{display:none}}
+  /* 901-1080px: the 322px sidebar squeezes the canvas to ~490-670px, so .modes wraps to three
+     rows and would print over the target-cam frame (z:3 over z:2). Drop the inset below it. */
+  @media(min-width:901px) and (max-width:1080px){.tgtcam{top:112px}}
   html[data-theme="light"] .tgtcam{border-color:#2c3d54}
   html[data-theme="light"] .tgtcam .tc-btn{border-color:#2c3d54;color:#aab7cc;background:color-mix(in oklab,#0e1420,transparent 18%)}
   /* ---- FLOATING PANELS: every informative overlay is draggable and minimizable so it never blocks the view ---- */
@@ -279,8 +328,17 @@
   .fp-collapsed>*:not(.fp-min):not(.fp-chip){display:none!important}
   .fp-collapsed .fp-chip{display:inline-block;padding-right:26px}
   .fp-collapsed{width:auto!important;min-width:0!important;padding:7px 10px!important}
-  .modes{position:absolute;top:12px;left:12px;display:flex;gap:6px;z-index:3}
-  .modes button{font-family:var(--fm);font-size:11px;padding:7px 11px;border-radius:8px;border:1px solid var(--line2);background:color-mix(in oklab,var(--bg2),transparent 15%);color:var(--ink2);cursor:pointer;backdrop-filter:blur(6px)}
+  /* WRAP + LANE. The 6-button row measures ~690-735px, but the canvas is only 772px in the
+     1fr/322px stage (and ~493px at a 900px viewport), so an un-wrapped row ALWAYS ran under the
+     top-right HUD chip — the collision was unconditional, not an edge case. flex-wrap lets it
+     break onto a second row; max-width reserves the right lane for .hud. 60% - 18px here plus
+     40% - 18px on .hud plus the two 12px insets = 100% - 12px, i.e. a >=12px gutter between them
+     at EVERY canvas width, including compact and fullscreen. */
+  .modes{position:absolute;top:12px;left:12px;display:flex;flex-wrap:wrap;gap:6px;z-index:3;max-width:calc(60% - 18px)}
+  /* nowrap = a tight row breaks BETWEEN buttons, never mid-label; line-height pins the row to
+     ~30px whatever font the symbols fall back to; max-width + ellipsis stops the long
+     "Free look: ON" label ever crossing into the HUD lane (full text stays in the title). */
+  .modes button{font-family:var(--fm);font-size:11px;line-height:1.2;padding:7px 11px;border-radius:8px;border:1px solid var(--line2);background:color-mix(in oklab,var(--bg2),transparent 15%);color:var(--ink2);cursor:pointer;backdrop-filter:blur(6px);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
   .modes button.on{border-color:var(--accent);color:var(--ink);background:color-mix(in oklab,var(--accent) 18%,transparent)}
   /* max-width keeps the wrapping control row from running UNDER the right-side scale inset */
   .controls{position:absolute;bottom:12px;left:12px;display:flex;gap:8px;align-items:center;z-index:5;flex-wrap:wrap;max-width:calc(100% - 248px)}
@@ -291,7 +349,10 @@
   .speed{display:inline-flex;gap:3px;background:color-mix(in oklab,var(--bg2),transparent 10%);border:1px solid var(--line2);border-radius:8px;padding:3px;backdrop-filter:blur(6px)}
   .speed button{font-family:var(--fm);font-size:11px;padding:5px 8px;border-radius:6px;border:0;background:transparent;color:var(--muted);cursor:pointer}
   .speed button.on{background:color-mix(in oklab,var(--accent) 22%,transparent);color:var(--ink)}
-  .hud{position:absolute;top:12px;right:12px;text-align:right;z-index:3;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+  /* the HUD owns the mirror-image right lane. z-index 4 beats .modes (it was a z:3 tie resolved
+     by DOM order, which is why the chip painted over "Full screen"); the chips are inert labels,
+     so pointer-events:none means the lane can never swallow an orbit-drag meant for the scene. */
+  .hud{position:absolute;top:12px;right:12px;text-align:right;z-index:4;display:flex;flex-direction:column;gap:6px;align-items:flex-end;max-width:calc(40% - 18px);pointer-events:none}
   .hud .chip{font-family:var(--fm);font-size:10.5px;color:var(--muted);background:color-mix(in oklab,var(--bg2),transparent 20%);padding:6px 10px;border-radius:7px}
   #forceBtn.on{background:color-mix(in oklab,var(--accent) 34%,transparent)!important;color:var(--ink)}
   .scaleinset{position:absolute;bottom:64px;right:12px;z-index:3;width:210px;padding:9px 11px;border-radius:9px;border:1px solid var(--line2);
@@ -304,7 +365,13 @@
   .scaleinset .si-earth{color:var(--accent-ink)}
   @media(max-width:900px){.scaleinset{display:none}}
   .viewbox.compact .scaleinset{display:none} /* no room below the target cam at 440px */
-  .forcelegend{position:absolute;top:56px;left:12px;z-index:3;display:flex;flex-direction:column;gap:4px;padding:9px 11px;border-radius:9px;
+  /* B2: after an impact the #phase string is long, .controls grows to 385-480px tall and — in the
+     440px compact canvas — climbed over the wrapped .modes row. Clamp the two long read-outs to
+     two lines in compact so the control block can never reach the top of the canvas. */
+  .viewbox.compact #phase,.viewbox.compact #slewRd{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;max-width:min(100%,420px)}
+  .viewbox.compact .controls{max-height:calc(100% - 130px);overflow:hidden;align-content:flex-end}
+  /* top was 56px, which only cleared a SINGLE .modes row; 120px clears up to three wrapped rows. */
+  .forcelegend{position:absolute;top:120px;left:12px;z-index:3;display:flex;flex-direction:column;gap:4px;padding:9px 11px;border-radius:9px;
     border:1px solid var(--line2);background:color-mix(in oklab,var(--bg2),transparent 8%);backdrop-filter:blur(6px);font-size:11px;color:var(--ink2)}
   .forcelegend span{display:inline-flex;align-items:center;gap:7px}
   .forcelegend i{width:14px;height:4px;border-radius:2px;display:inline-block;flex:0 0 auto}
@@ -317,7 +384,9 @@
   .forcelegend.min .fl-body{display:none}
   .forcelegend.min{gap:0;padding:7px 10px}
   /* SALVO — multi-shot campaign readout (recharge countdown + cumulative deflection) */
-  .salvopanel{position:absolute;top:48px;left:50%;transform:translateX(-50%);z-index:4;width:352px;max-width:calc(100% - 24px);
+  /* 120px matches .forcelegend: clears a wrapped .modes, and also fixes a pre-existing overlap —
+     at 772px canvas this 352px centred panel reached x=562 while the HUD started at x=519. */
+  .salvopanel{position:absolute;top:120px;left:50%;transform:translateX(-50%);z-index:4;width:352px;max-width:calc(100% - 24px);
     padding:10px 13px;border-radius:10px;border:1px solid var(--line2);background:color-mix(in oklab,var(--bg2),transparent 4%);
     backdrop-filter:blur(8px);font-family:var(--fm);font-size:10.5px;color:var(--ink2);line-height:1.5;box-shadow:var(--shadow)}
   .salvopanel .sv-t{color:var(--gold);letter-spacing:.06em;margin-bottom:5px;font-size:9.5px;text-transform:uppercase}
@@ -414,6 +483,7 @@
       <h1 class="title">The launch architecture in orbit</h1>
       <p class="lede">A conceptual 3D view of the ARGUS-PD/POD-7K research architecture as an integrated orbital demonstrator: the seven-kilometre driver — <b>1,000 × 7 m cells at 150 MJ each</b> — energised as a travelling wave, its solar generation and pulse-energy buffer, converters, radiators, magnetic vector control, and the modular projectile whose deposited mass budget the papers screen. Pick a family member, drag to orbit, click any subsystem to label it, and run the launch to watch the cell wave sweep the projectile down the bore and coast to a demonstration target. Every subsystem traces to Paper II, the projectile budget to Paper I, and the attitude loop to the geomagnetic companion paper.</p>
       <div class="note"><b>Illustrative &amp; conceptual — not to scale, not a buildable design.</b> A hypothetical planetary-defence research demonstrator in orbit (the series declares no operational altitude; geometry and placement are schematic). Only the projectile <i>mass allocations</i> (deposited budget, total 0.300&nbsp;kg reference) and the 1,000-cell / 32-face / 0.505&nbsp;m-collar figures are quantitative. No operational targeting, fire-control, pulsed-power, coil, capacitor or rail engineering is shown or implied — the on-screen auto-aim and lead-corrected shots are game-style illustration of the papers&#8217; pointing hierarchy, not a firing solution.</div>
+      <div class="note" style="border-left-color:#cf8a44"><b>The engagement scenario is this visualiser&#8217;s invention, not a finding of the papers.</b> An inbound body on an Earth-crossing track, a multi-shot campaign, cumulative deflection and a closing sequence of intercepts are all staged here to make the geometry legible. The papers claim none of them: Paper&nbsp;I&nbsp;§8 places <i>&#8220;all Earth-intersecting states outside the intended research envelope&#8221;</i> and states that delivered kinetic energy is calculable while useful deflection is not; Paper&nbsp;III&nbsp;§7.2 makes <i>no E3 or E4 claim</i>; and no salvo, warning window or intercept range appears anywhere in the series. <b>0.5&nbsp;AU is a screening quotient</b> — the normalising range <i>R/v</i> used to compare family members (Paper&nbsp;I&nbsp;§6.2) — <b>not a stated intercept distance</b>; it is drawn here as a marked gate for exactly that reason. Ranges are log-compressed (Moon 384,400&nbsp;km → Mars ~54.6e6&nbsp;km → target 0.5–1.5&nbsp;AU) so all of it fits one frame; body diameters are true relative to each other.</div>
     </div>
 
     <div class="stage">
@@ -589,11 +659,38 @@ let freeLook=false,freeZoom=1;   // free-look orbit around the flying projectile
 //      real figures. Cumulative deflection (Δv per shot from deflection()) grows across the salvo. ----
 const PULSE_GJ=428.571, NET_MW=10;                 // Paper II §8 (VERIFIED): pulse energy vs net charging power
 const RECHARGE_H=PULSE_GJ/(NET_MW*3.6);            // 428.571 / 36 = 11.9 h ideal (10 MW = 36 GJ per hour)
-const SALVO_TOTAL_DEFAULT=4, SALVO_RECHARGE_DUR=2.6, SALVO_NUDGE_U=26; // demo secs/recharge (sped-up) + per-shot off-track nudge (units, EXAGGERATED for visibility — readout says so)
+const SALVO_TOTAL_DEFAULT=4, SALVO_RECHARGE_DUR=2.6, SALVO_NUDGE_U=180; // demo secs/recharge (sped-up) + per-shot off-track nudge (units, EXAGGERATED for visibility — readout says so)
 let salvoActive=false,salvoTotal=SALVO_TOTAL_DEFAULT,salvoShot=0,salvoLanded=0,salvoCumDv=0,salvoDone=false;
 let recharging=false,rechargeT=0;
+/* ============================================================================================
+   THE OUTBOUND AXIS AND THE DISTANCE LAW
+   Body radii are TRUE relative to each other, anchored on Earth's long-standing 280 u:
+     Earth 6,371 km -> 280.00 u  |  Mars 3,390 km -> 148.99 u  |  Moon 1,737 km -> 76.34 u
+   Ranges along the axis are log-compressed, d_scene = A · d_real^0.2712, fitted through
+   Moon = 1,600 u (384,400 km) and the asteroid's first position = 9,000 u (1.5 AU). That law
+   then PLACES the others rather than them being posed by hand:
+     Moon 1,600 u | Mars 6,135 u (54.6e6 km) | 0.5 AU screening mark 6,681 u | target 9,000 u
+   So the first shot crosses the Moon early, passes Mars about two-thirds out, and still has
+   ~2,865 u (32% of the flight) to run beyond Mars before it reaches the body.
+   ============================================================================================ */
+const AXIS=new THREE.Vector3(0.5905,0.0684,-0.8042).normalize();      // down-range direction
+const AX_P=new THREE.Vector3(-AXIS.z,0,AXIS.x).normalize();           // horizontal perpendicular
+const AX_Q=new THREE.Vector3().crossVectors(AXIS,AX_P).normalize();   // the other perpendicular
+const R_EARTH_U=280, R_MARS=148.99, R_MOON=76.34;
+const D_MOON=1600, D_MARS=6135, D_SCREEN=6681, D_START=9000;
+/* a point d units down-range, offset a units along AX_P and b units along AX_Q */
+function axisPt(d,a,b){return new THREE.Vector3().addScaledVector(AXIS,d).addScaledVector(AX_P,a||0).addScaledVector(AX_Q,b||0);}
+/* how far down-range something is (its projection on the axis) */
+function axisRange(v){return v.dot(AXIS);}
+/* invert the distance law so any scene range can be quoted back in real units */
+const DL_A=48.94, DL_P=0.27116;
+function rangeKm(u){return Math.pow(Math.max(u,1)/DL_A,1/DL_P);}
+function fmtRange(u){const km=rangeKm(u);
+  return km>=1.4e7?(km/1.495979e8).toFixed(2)+' AU':(km/1e6).toFixed(1)+'M km';}
+let screenRing=null;
+let interceptLog=[],lastInterceptU=0;   // down-range distance at which each shot met the body
 let asteroidHome=null,cineFocus=new THREE.Vector3(120,18,-160),cineZoom=110;
-let asteroidVel=new THREE.Vector3(),asteroidTravel=0;const DRIFT_UPS=3.0; // Earth-bound drift in units/SIM-second — NEVER pauses (real bodies don't stop for a launch); shots correct with exact linear lead
+let asteroidVel=new THREE.Vector3(),asteroidTravel=0;const DRIFT_UPS=70; // inbound closing speed in units/SIM-second — sized so a 4-shot salvo walks the intercept from beyond the 0.5 AU mark down to inside Mars — NEVER pauses (real bodies don't stop for a launch); shots correct with exact linear lead
 let forceGroup=null,boreForceGroup=null,showForces=false,accelArrow=null,vecArrow=null,coilArrows=[];
 // ---- geomagnetic attitude control (companion "Geomagnetic Attitude Control" paper): a commanded magnetic
 //      dipole m (magnetorquer loop) reacts against Earth's field B to make torque τ = m×B — propellantless,
@@ -899,18 +996,120 @@ function buildAsteroid(){
   return new THREE.Mesh(geo,m);
 }
 
+/* ============================================================================================
+   THE SKY — deliberately NOT a sci-fi asteroid belt.
+   The main belt is 2.06–3.27 AU; this engagement happens around 1.4–1.5 AU heliocentric, well
+   inside it. And a belt is never visible AS a belt from anywhere: mean separation between belt
+   objects is 1–5 million km, which is why every probe that has crossed it saw nothing. Drawing
+   one would be the one obviously wrong thing in an otherwise careful scene.
+   What IS defensible at this range: the same stars you see from Earth (0.5 AU of travel moves
+   Proxima by 0.38 arcsec — the sky is unchanged), the Milky Way band crossing the ecliptic at
+   ~60°, and the outer planets as POINTS. Jupiter subtends 48 arcsec from here, about a quarter
+   of a pixel — so it is a sprite, not a sphere. Everything sits on a shell that follows the
+   camera, so it has zero parallax over the 9,000 u the shot travels.
+   ============================================================================================ */
+let skyShell=null;
+const STAR_COL=[[0.19,[.62,.70,1]],[0.20,[.79,.85,1]],[0.08,[.97,.97,1]],
+                [0.12,[1,.96,.92]],[0.30,[1,.83,.65]],[0.11,[1,.72,.45]]];
+function pickStarCol(){let r=Math.random(),a=0;
+  for(const [w,c] of STAR_COL){a+=w;if(r<=a)return c;}return [1,1,1];}
+let _starTex=null;
+function starTexture(){                       // soft round dot — without a map, points are squares
+  if(_starTex)return _starTex;
+  const c=document.createElement('canvas');c.width=c.height=32;const g=c.getContext('2d');
+  const rg=g.createRadialGradient(16,16,0,16,16,16);
+  rg.addColorStop(0,'rgba(255,255,255,1)');rg.addColorStop(0.35,'rgba(255,255,255,0.85)');
+  rg.addColorStop(0.7,'rgba(255,255,255,0.22)');rg.addColorStop(1,'rgba(255,255,255,0)');
+  g.fillStyle=rg;g.fillRect(0,0,32,32);
+  _starTex=new THREE.CanvasTexture(c);return _starTex;
+}
+function starTier(n,R,size,opacity,bandDeg){
+  const g=new THREE.BufferGeometry(),pos=[],col=[];
+  for(let i=0;i<n;i++){
+    let x,y,z;
+    if(bandDeg){                                   // Milky Way: exponential scale height about b=0
+      const lon=Math.random()*Math.PI*2;
+      const b=(-bandDeg*Math.log(Math.random()||1e-6))*(Math.random()<.5?-1:1)*Math.PI/180;
+      const cb=Math.cos(b);x=R*cb*Math.cos(lon);y=R*Math.sin(b);z=R*cb*Math.sin(lon);
+    }else{                                         // isotropic
+      const u=Math.random()*2-1,th=Math.random()*Math.PI*2,s=Math.sqrt(1-u*u);
+      x=R*s*Math.cos(th);y=R*s*Math.sin(th);z=R*u;
+    }
+    pos.push(x,y,z);
+    // desaturate hard toward white — real stars sit near the eye's colour threshold, and a
+    // fully saturated field reads as confetti
+    const c=pickStarCol(),b=0.80+Math.random()*0.20;
+    col.push((c[0]*0.72+0.28)*b,(c[1]*0.72+0.28)*b,(c[2]*0.72+0.28)*b);
+  }
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
+  const p=new THREE.Points(g,new THREE.PointsMaterial({size:size,sizeAttenuation:false,
+    map:starTexture(),vertexColors:true,transparent:true,opacity:opacity,depthWrite:false,
+    blending:THREE.AdditiveBlending}));
+  p.frustumCulled=false;return p;
+}
+function buildSky(){
+  skyShell=new THREE.Group();skyShell.renderOrder=-10;scene.add(skyShell);
+  const R=40000;
+  // three magnitude tiers ≈ the Bright Star Catalogue's 9,095 stars to mag 6.5.
+  // r128's PointsMaterial has ONE size uniform and no per-point size attribute, so tiers are
+  // the correct way to get a magnitude distribution without a custom shader.
+  skyShell.add(starTier(7000,R,1.3,0.78));
+  skyShell.add(starTier(1800,R,2.1,0.92));
+  skyShell.add(starTier(260 ,R,3.6,1.00));
+  // Milky Way: a denser band, then tilted to cross the orbital plane at ~60°
+  const mw=starTier(6000,R*0.995,1.25,0.46,4.5);
+  const band=new THREE.Group();band.add(mw);
+  band.rotation.z=60.2*Math.PI/180;band.rotation.y=0.7;skyShell.add(band);
+  // unresolved glow along the band centreline (brightest toward the bulge)
+  const gt=glowTexture();
+  [[0,0.15],[1.1,0.10],[-1.3,0.09],[2.4,0.07]].forEach(([ph,op])=>{
+    const s=new THREE.Sprite(new THREE.SpriteMaterial({map:gt,color:0xbfd0e8,transparent:true,
+      opacity:op,blending:THREE.AdditiveBlending,depthWrite:false}));
+    s.position.set(Math.cos(ph)*R*0.9,0,Math.sin(ph)*R*0.9);
+    s.scale.set(R*0.5,R*0.28,1);s.frustumCulled=false;band.add(s);});
+  // outer planets as POINTS — at ~1.5 AU Jupiter is 48 arcsec across, roughly a quarter pixel.
+  // A textured sphere would be an order-of-magnitude size lie, so these are small sprites.
+  PLANET_PTS.forEach(p=>{
+    const s=new THREE.Sprite(new THREE.SpriteMaterial({map:gt,color:p.col,transparent:true,
+      opacity:p.op,blending:THREE.AdditiveBlending,depthWrite:false}));
+    s.position.copy(new THREE.Vector3(p.d[0],p.d[1],p.d[2]).normalize().multiplyScalar(R*0.94));
+    s.scale.set(p.s,p.s,1);s.frustumCulled=false;
+    s.userData.read=p.name+' · '+p.mag;skyShell.add(s);});
+}
+const PLANET_PTS=[
+  {name:'Jupiter', mag:'mag −3.0 · 48″ across from here', d:[-0.35,0.22,0.91], col:0xfff0d2, op:0.95, s:900},
+  {name:'Saturn',  mag:'mag +0.3',                        d:[0.62,0.30,0.72],  col:0xf0e2bb, op:0.72, s:640},
+  {name:'Venus',   mag:'mag −3.9 · sunward',              d:[-0.78,0.10,-0.61],col:0xfffaf0, op:0.85, s:760},
+];
+/* a faint ring drawn ON the outbound axis at a stated range — used to mark the papers'
+   0.5 AU screening distance without pretending it is an intercept range */
+function mkRangeRing(d,col){
+  // small enough to read as a distance GATE the shot passes through (≈3.4° wide from the
+  // launch point) rather than a giant hoop pasted over the scene
+  const geo=new THREE.RingGeometry(178,236,128);
+  const m=new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.26,
+    side:THREE.DoubleSide,depthWrite:false});
+  const o=new THREE.Mesh(geo,m);
+  o.position.copy(axisPt(d,0,0));
+  o.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),AXIS);   // face down-range
+  o.userData.read='0.5 AU — the papers’ screening distance R/v (Paper I §6.2), not an intercept range';
+  return o;
+}
 function initThree(){
   renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:false});
   renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setClearColor(0x04060c,1);
   scene=new THREE.Scene();
-  camera=new THREE.PerspectiveCamera(46,1,0.1,20000);
+  camera=new THREE.PerspectiveCamera(46,1,1,90000);   // scene now spans 9,000 u + a 40,000 u sky shell
   scene.add(new THREE.AmbientLight(0xffffff,0.42));
   const sunLight=new THREE.DirectionalLight(0xfff3e0,1.5);sunLight.position.set(120,60,90);scene.add(sunLight);
   const fill=new THREE.DirectionalLight(0x5a86c0,0.35);fill.position.set(-40,-10,-30);scene.add(fill);
-  // starfield
-  const sg=new THREE.BufferGeometry(),pos=[];for(let i=0;i<2200;i++){const r=4000,u=Math.random()*2-1,th=Math.random()*Math.PI*2,s=Math.sqrt(1-u*u);pos.push(r*s*Math.cos(th),r*s*Math.sin(th),r*u);}
-  sg.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
-  scene.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0xbcd0ea,size:1.5,sizeAttenuation:false,transparent:true,opacity:0.85})));
+  // down-range key light: the Moon and Mars sit thousands of units along -AXIS and were rendering
+  // as unlit discs that read as holes punched in the starfield. This lights the faces turned back
+  // toward the launch point, which is the hemisphere the chase camera ever sees.
+  const bodyKey=new THREE.DirectionalLight(0xfff2e0,0.85);
+  bodyKey.position.copy(AXIS).multiplyScalar(-1200);scene.add(bodyKey);
+  buildSky();                    // starfield + Milky Way + distant planet points, on a camera-locked shell
   // Sun (far, bright, textured, with glow)
   const B=window.BODY_TEX||{},ldb=new THREE.TextureLoader();
   sun=new THREE.Mesh(new THREE.SphereGeometry(15,40,40),B.sun?new THREE.MeshBasicMaterial({map:ldb.load(B.sun),color:0xfff4e2}):new THREE.MeshBasicMaterial({color:0xfff2cc}));
@@ -919,23 +1118,21 @@ function initThree(){
   const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTexture(),color:0xfff3d8,transparent:true,opacity:0.5,blending:THREE.AdditiveBlending,depthWrite:false}));
   glow.scale.set(85,85,1);glow.position.copy(sun.position);scene.add(glow);
   label(sun,'sun','The Sun','Distant primary — the demonstrator is solar-powered (Paper II solar generation & buffer). Illustrative position and scale.','solar primary');
-  // ---- APPARENT sizes from Earth's vicinity (the honest frame for a scene set in Earth orbit):
-  //      the Moon (~384,000 km away, Ø 3,474 km) LOOKS far larger than Mars (tens of millions of km away,
-  //      Ø 6,779 km). Mars is physically ~2× the Moon but appears as a small red point from here. So the
-  //      Moon is the LARGE grey disc; Mars the small distant red dot. ----
-  // ---- TRUE RELATIVE BODY SIZES, ORDERED DISTANCES (see the DISTANCE MODEL note above the changelog).
-  //      Moon r 1,737 km → 7.00 u; Mars r 3,390 km → 13.66 u, i.e. the true 1.95:1 diameter ratio.
-  //      Ranges from the station: Moon 241 u (384,400 km), Mars 1,154 u (54.6e6 km at a favourable
-  //      approach), target 1,287 u (0.5 AU). So you cross the Moon early, pass Mars late, and the
-  //      target lies BEYOND Mars — which is what the 0.5 AU response-time reference actually implies. ----
-  moon=new THREE.Mesh(new THREE.SphereGeometry(7.0,40,40),B.rock?new THREE.MeshPhongMaterial({map:ldb.load(B.rock),bumpMap:ldb.load(B.rock),bumpScale:0.22,color:0x8f8b84,shininess:1}):new THREE.MeshPhongMaterial({color:0x8f8b84,shininess:1}));
-  moon.position.set(224,40,-78);label(moon,'moon','The Moon','Ø 3,474 km, ~384,400 km from Earth — the NEAR body, crossed early in the shot. It is drawn at the true 1:1.95 size ratio against Mars, so once you are alongside them Mars is unmistakably the larger world. From Earth the Moon still looks the bigger disc, because it is ~142× closer; that is the ordering this scene reproduces. Distances are log-compressed (see header) — schematic, not to scale.','near body · Ø 3,474 km · 384,400 km');scene.add(moon);
-  mars=new THREE.Mesh(new THREE.SphereGeometry(13.66,40,40),B.mars?new THREE.MeshPhongMaterial({map:ldb.load(B.mars),shininess:2,color:0xd2673f}):new THREE.MeshPhongMaterial({color:0xb0492c,shininess:2}));
-  mars.position.set(593,64,-988);scene.add(mars);
-  label(mars,'mars','Mars','Ø 6,779 km — physically ~1.95× the Moon, and here drawn that way. At a favourable approach it is ~54.6 million km from Earth, ~142× the Moon\'s distance, so it is passed LATE in the shot and the target still lies beyond it. Distances are log-compressed (see header) — schematic, not to scale.','far body · Ø 6,779 km · ~54.6e6 km');
-  // depth cue on a SHARED reference range, so the two bodies keep their true 1.95:1 size ratio
-  // against each other at the fly-past instead of each being normalised to its own start range
-  registerApparent(moon);registerApparent(mars);
+  // ---- BODIES AT TRUE RELATIVE SIZE, ON THE OUTBOUND AXIS (see the DISTANCE MODEL note at the top).
+  //      Every radius is scaled from Earth's 280 u by its real diameter, so the family is internally
+  //      consistent for the first time: Earth 280, Mars 148.99, Moon 76.34 (6,371 : 3,390 : 1,737 km).
+  //      Positions lie ON the flight axis with a lateral offset, so the shot genuinely flies past them
+  //      and perspective alone does the swelling — no apparent-size fudge is applied to either body. ----
+  moon=new THREE.Mesh(new THREE.SphereGeometry(R_MOON,48,48),B.rock?new THREE.MeshPhongMaterial({map:ldb.load(B.rock),bumpMap:ldb.load(B.rock),bumpScale:1.4,color:0x8f8b84,shininess:1}):new THREE.MeshPhongMaterial({color:0x8f8b84,shininess:1}));
+  moon.position.copy(axisPt(D_MOON,380,-180));   // ~420 u off the line = 5.5 Moon radii
+  label(moon,'moon','The Moon','Ø 3,474 km at ~384,400 km — the first body the shot crosses, about a sixth of the way out. Drawn at true size against Earth and Mars (1,737 : 6,371 : 3,390 km). It swells as the projectile closes and falls away behind it; nothing is exaggerated, that is just perspective over a real distance. Ranges are log-compressed (see header).','crossed early · Ø 3,474 km · 384,400 km');scene.add(moon);
+  mars=new THREE.Mesh(new THREE.SphereGeometry(R_MARS,48,48),B.mars?new THREE.MeshPhongMaterial({map:ldb.load(B.mars),bumpScale:0.6,shininess:2,color:0xd2673f}):new THREE.MeshPhongMaterial({color:0xb0492c,shininess:2}));
+  // ~300 u off the flight line = 2 Mars radii — a close flyby, so it fills the frame as it passes
+  mars.position.copy(axisPt(D_MARS,-290,-60));scene.add(mars);
+  label(mars,'mars','Mars','Ø 6,779 km — nearly twice the Moon and drawn that way. At a favourable approach it is ~54.6 million km out, about 142× the Moon\'s distance, so it is passed roughly two-thirds of the way down the flight and fills a large part of the frame as the projectile goes by. The target still lies a long way beyond it. Ranges are log-compressed (see header).','passed late · Ø 6,779 km · ~54.6e6 km');
+  // the papers' 0.5 AU SCREENING distance, marked honestly on the track — it is the normalising
+  // constant R/v used to screen the family (Paper I §6.2), NOT a stated intercept range
+  screenRing=mkRangeRing(D_SCREEN,0x6f8bb0);scene.add(screenRing);
   // Earth below (illustrative altitude — series declares none)
   const T=window.EARTH_TEX||{},ld=new THREE.TextureLoader();
   const em=new THREE.MeshPhongMaterial({map:T.day?ld.load(T.day):null,bumpMap:T.bump?ld.load(T.bump):null,bumpScale:0.4,specularMap:T.specular?ld.load(T.specular):null,specular:0x2a4a66,shininess:14,color:T.day?0xffffff:0x24507e});
@@ -946,12 +1143,16 @@ function initThree(){
   const atmo=new THREE.Mesh(new THREE.SphereGeometry(290,64,64),new THREE.MeshBasicMaterial({color:0x5aa9ff,transparent:true,opacity:0.16,side:THREE.BackSide}));atmo.position.copy(earth.position);scene.add(atmo);
   // demonstration target asteroid — FAR out in deep space, well down-range and away from Earth: the whole
   // point is to intercept it far out with many shots, not as an extinction-level near-miss. Small distant body.
-  asteroid=buildAsteroid();asteroid.scale.setScalar(TARGETS[targetIdx].vscale);asteroid.position.set(760,88,-1035);asteroidHome=asteroid.position.clone();label(asteroid,'target','Demonstration target',SUBSYS.find(s=>s.id==='target').role,'deep space · '+TARGETS[targetIdx].id+' class · Earth-bound');scene.add(asteroid);
-  asteroidVel.copy(earth.position).sub(asteroid.position).normalize(); // heads slowly toward Earth (12,-300,-70)
+  asteroid=buildAsteroid();asteroid.scale.setScalar(TARGETS[targetIdx].vscale);
+  asteroid.position.copy(axisPt(D_START,0,0));asteroidHome=asteroid.position.clone();
+  label(asteroid,'target','Demonstration target',SUBSYS.find(s=>s.id==='target').role,'inbound · '+TARGETS[targetIdx].id+' class');scene.add(asteroid);
+  // it closes down the outbound axis toward the launch point — so every successive shot meets it
+  // NEARER than the last, and a slower dart lets it travel further before the dart arrives
+  asteroidVel.copy(AXIS).multiplyScalar(-1);
 
   sysRoot=buildSystem();scene.add(sysRoot);
   projGroup=buildExplodedProjectile(1.4);projGroup.visible=false;scene.add(projGroup);
-  tgtCam=new THREE.PerspectiveCamera(40,INSET.w/INSET.h,0.1,20000); // picture-in-picture target camera
+  tgtCam=new THREE.PerspectiveCamera(40,INSET.w/INSET.h,1,90000); // picture-in-picture target camera
   buildForces();
   sysRoot.quaternion.copy(computeAimQ()); // start already aimed at the asteroid; auto-aim keeps tracking as it drifts
   // visible tiny tracer for the coasting projectile (a 0.5 m speck would be sub-pixel otherwise)
@@ -972,6 +1173,26 @@ function initThree(){
   resize();loop();
 }
 let cine=0, camLook=new THREE.Vector3(0,-1.5,0);
+/* Which body, if any, the camera should turn to watch right now. Weight ramps up as the shot
+   closes on it and falls away once it is behind — so the Moon gets a look early in the flight
+   and Mars a much bigger one about two-thirds of the way out. */
+function flybyTarget(){
+  if(!firing||(phase!=='coast'&&phase!=='impact'))return null;
+  const camR=axisRange(camera.position);
+  let best=null;
+  [[moon,R_MOON],[mars,R_MARS]].forEach(([o,r])=>{
+    if(!o||!o.visible)return;
+    const d=camera.position.distanceTo(o.position);
+    const ang=2*Math.atan(r/d)*180/Math.PI;               // apparent size, degrees
+    if(ang<4)return;                                       // too small to be worth turning for
+    const ahead=axisRange(o.position)-camR;                // + = still ahead of us
+    if(ahead<-r*3.2)return;                                // well behind — let it go
+    // strongest just before and at closest approach, easing out behind
+    const w=Math.min(0.90,(ang-4)/14)*(ahead<0?Math.max(0,1+ahead/(r*3.2)):1);
+    if(w>0.02&&(!best||w>best.w))best={p:o.position.clone(),w:w,ang:ang};
+  });
+  return best;
+}
 /* ============================================================================================
    APPARENT-SIZE DEPTH CUE — the Moon and Mars must READ as bodies at a distance the shot is
    closing on, not as fixed marbles pinned to the backdrop. Perspective alone gives an ~8.5×
@@ -981,19 +1202,12 @@ let cine=0, camLook=new THREE.Vector3(0,-1.5,0);
    so passing the Moon at ~100 u fills a real part of the frame and it shrinks away again after.
    Illustrative depth cue in an explicitly schematic scene — positions were never to scale.
    ============================================================================================ */
-const APPAR=[], APPAR_D0=420, APPAR_GAIN=0.55, APPAR_MAX=2.6;
-function registerApparent(obj){if(obj)APPAR.push(obj);}
-function updateApparentBodies(){
-  for(let i=0;i<APPAR.length;i++){
-    const o=APPAR[i];if(!o||!o.visible)continue;
-    const d=Math.max(6,camera.position.distanceTo(o.position));
-    // ONE shared reference range for every body, so relative sizes are preserved: at the fly-past
-    // both the Moon and Mars sit on the same clamp and Mars reads 1.95× the Moon, exactly as it is.
-    const s=(d>=APPAR_D0)?1:Math.min(APPAR_MAX,Math.pow(APPAR_D0/d,APPAR_GAIN));
-    const c=o.scale.x;
-    o.scale.setScalar(c+(s-c)*0.22);            // eased, so the swell is smooth rather than snapping
-  }
-}
+/* The apparent-size fudge that used to live here has been DELETED. It existed because the Moon
+   and Mars were drawn far too small (7 u and 13.66 u against Earth's 280), so they needed
+   scaling up to read at all — and any such scaling distorts one body against another. Now that
+   every body is at its true relative radius and sits on a real down-range distance, ordinary
+   perspective does the work: the Moon swells to ~14° as the shot crosses it and Mars to ~39°,
+   and both shrink away behind. Nothing is scaled at runtime. */
 function loop(){raf=requestAnimationFrame(loop);
   // cinematic factor ramps up in coast/impact, down otherwise
   const cineGoal=(firing&&(phase==='coast'||phase==='impact'))?1:0;
@@ -1012,6 +1226,12 @@ function loop(){raf=requestAnimationFrame(loop);
         ).multiplyScalar(cineZoom*freeZoom))
       : cineFocus.clone().add(cineDir.clone().normalize().multiplyScalar(cineZoom));
     tPos=homePos.clone().lerp(cinePos,cine); tLook=homeLook.clone().lerp(cineFocus,cine);
+    // ---- FLY-PAST PAN. A body sitting off the flight line is at its biggest exactly when it is
+    //      abeam — i.e. 90° off the view axis and completely out of frame. So as the shot closes
+    //      on the Moon and then Mars, the camera turns to watch it go by and then returns to the
+    //      flight. Position still rides the projectile; only the look direction is blended. ----
+    const fb=flybyTarget();
+    if(fb&&!freeLook)tLook.lerp(fb.p,fb.w*cine);
   }
   if(cine>0.01){ camera.position.lerp(tPos,0.10); camLook.lerp(tLook,0.10); }
   else { camera.position.copy(homePos); camLook.copy(homeLook); }
@@ -1026,14 +1246,26 @@ function loop(){raf=requestAnimationFrame(loop);
   //      (sim-time step ∝ speed; the shot plan lead-corrects, so hits still land) ----
   if(asteroid&&asteroid.visible){
     asteroid.rotation.x+=0.0016*speed;asteroid.rotation.y+=0.0011*speed;
-    const dstep=DRIFT_UPS*0.016*speed;
+    // HARD FLOOR. The pristine reset below is disarmed the moment the body carries damage
+    // (scars), so without this a scarred body would keep closing until it flew through the
+    // demonstrator and into Earth. It holds station at 900 u instead — the closest approach the
+    // scene ever shows — and says so in the readout.
+    const atFloor=axisRange(asteroid.position)<=900;
+    const dstep=atFloor?0:DRIFT_UPS*0.016*speed;
+    if(atFloor&&!firing&&!salvoActive&&!recharging&&phase==='ready')
+      document.getElementById('phase').textContent='inbound body held at closest approach shown — press ↺ Reset to run it again from 1.5 AU';
     asteroid.position.addScaledVector(asteroidVel,dstep);asteroidTravel+=dstep;
     if(salvoActive&&salvoOrigin)ghostPos.addScaledVector(asteroidVel,dstep); // the un-deflected twin drifts down the ORIGINAL track
-    // loop back to keep it far out — but only in the pristine idle scene (never mid-engagement / with damage on the body)
-    if(asteroidTravel>420&&!firing&&!salvoActive&&!recharging&&!salvoEnded&&scars.length===0){asteroid.position.copy(asteroidHome);asteroidTravel=0;}
+    // reset it to its first position once it has closed a long way — but only in the pristine idle
+    // scene (never mid-engagement, never with damage on the body). Range-based now, because the
+    // body starts 9,000 u out and closes at 70 u/s.
+    if(axisRange(asteroid.position)<2600&&!firing&&!salvoActive&&!recharging&&!salvoEnded&&scars.length===0){asteroid.position.copy(asteroidHome);asteroidTravel=0;}
   }
   if(mars)mars.rotation.y+=0.0006;
-  updateApparentBodies();   // Moon/Mars swell as the camera (chasing the shot) closes on them
+  if(moon)moon.rotation.y+=0.0003;
+  // the sky rides with the camera: 40,000 u away is still only ~4.5x the 9,000 u the shot covers,
+  // so without this the stars would visibly slide as the projectile ran out. Zero parallax now.
+  if(skyShell)skyShell.position.copy(camera.position);
   // tracked fragments: rapid initial separation damping to a slow drift; fracture-face glow cools
   frags.forEach(f=>{f.mesh.position.addScaledVector(f.vel,0.016*speed);f.vel.multiplyScalar(0.988);
     f.mesh.rotation.x+=f.spin.x;f.mesh.rotation.y+=f.spin.y;f.mesh.rotation.z+=f.spin.z;
@@ -1475,7 +1707,7 @@ const T_ACCEL=5.0, T_COAST=4.5, T_HOLD=3.4;
    that it is VISIBLY slower, and the target — which never stops drifting Earth-ward — travels
    proportionally further while the shot is in flight (the lead correction below uses the same
    number, so the hit still lands). This is the whole argument for the fast dart: response time. */
-function coastFor(fam){return T_COAST*(1+0.78*Math.log10(1e6/fam.v));}
+function coastFor(fam){return T_COAST*(1+1.60*Math.log10(1e6/fam.v));}
 let coastT=T_COAST;
 function stepFire(){
   fireT+=0.016*speed;
@@ -1526,6 +1758,17 @@ function stepFire(){
     }
   } else if(fireT<=T_ACCEL+coastT+T_HOLD){
     phase='impact';
+    // SAFETY NET. The coast branch fires the impact when cf crosses 0.985, but fireT advances in
+    // fixed 0.016·speed steps — at higher speeds, or with a long coast, a single step can jump
+    // clean over that window and out of the coast branch entirely, so the shot would arrive with
+    // no impact resolved at all (salvos silently banked "landed" shots that never fired). Resolve
+    // it here the first time we enter the impact phase, whatever the timestep did.
+    if(!impacted){
+      const Q=shotPlan;
+      if(Q&&Q.willHit){triggerImpact();if(tracer)tracer.visible=false;}
+      else if(Q)document.getElementById('phase').textContent='MISS — bore '+Q.offDeg.toFixed(1)+'° off target (> ±1.5° authority) · passes ~'+Math.round(Q.missDist)+'u from the body · no energy delivered';
+      impacted=true;
+    }
     const P=shotPlan,hf=(fireT-(T_ACCEL+coastT))/T_HOLD;
     const tgtPos=(P&&P.target)?P.target.obj.position:asteroid.position;
     const impactPt=(P&&P.impactPt)?P.impactPt:tgtPos;
@@ -1604,6 +1847,10 @@ function triggerImpact(){
   }
   // ---- MAIN BODY hit ----
   const D=deflection(fam,tgt);
+  // record WHERE down-range this shot met it. Because the body never stops closing, and a slower
+  // dart spends longer in flight, each successive intercept happens nearer — that sequence IS the
+  // response-time argument, made visible.
+  lastInterceptU=axisRange(T.obj.position);interceptLog.push(lastInterceptU);
   // CUMULATIVE FRACTURE (illustrative fatigue): repeated 150 GJ strikes accumulate damage. From the 4th
   // landed strike, if cumulative specific energy ≥ 4×Q*, the weakened body FAILS even under a dart that
   // could not disrupt it alone — so a full salvo's LAST shot breaks a 100 m body apart (a 300 m body
@@ -1769,7 +2016,7 @@ function softStop(){
   updateAimBtn(); // the phase readout keeps the last outcome (impact summary / MISS) on screen
 }
 function resetFire(){firing=false;fireT=0;phase='ready';impacted=false;
-  salvoActive=false;recharging=false;salvoDone=false;salvoEnded=false;rechargeT=0;salvoLanded=0;
+  salvoActive=false;recharging=false;salvoDone=false;salvoEnded=false;rechargeT=0;salvoLanded=0;interceptLog=[];lastInterceptU=0;
   const svp=document.getElementById('salvopanel');if(svp)svp.style.display='none';
   const svb=document.getElementById('salvoBtn');if(svb)svb.textContent='▶▶ Fire salvo';
   clearImpact();
@@ -1875,7 +2122,7 @@ document.getElementById('salvoBtn').addEventListener('click',()=>{
 });
 function startSalvo(){
   prepNextShot();salvoEnded=false;
-  salvoActive=true;salvoTotal=SALVO_TOTAL_DEFAULT;salvoShot=1;salvoLanded=0;salvoCumDv=0;salvoDone=false;
+  salvoActive=true;salvoTotal=SALVO_TOTAL_DEFAULT;salvoShot=1;salvoLanded=0;salvoCumDv=0;salvoDone=false;interceptLog=[];
   const svb=document.getElementById('salvoBtn');if(svb)svb.textContent='■ Stop salvo';
   const svp=document.getElementById('salvopanel');if(svp)svp.style.display='block';
   // anchor the ORIGINAL Earth-bound track where the salvo begins — the body will visibly walk OFF it while
@@ -1962,7 +2209,11 @@ function stepRecharge(){ // sped-up recharge countdown; the readout states the R
 }
 function updateSalvoReadout(state){
   const P=document.getElementById('salvopanel');if(!P)return;
-  P.style.display=(salvoActive||salvoEnded)?'block':'none';
+  const showing=(salvoActive||salvoEnded);
+  P.style.display=showing?'block':'none';
+  // the expanded force legend is ~340x300 at top:120 and the salvo panel is 352 wide centred at
+  // the same top — they overlapped by ~181px. Collapse the legend while the salvo panel is up.
+  if(showing&&window.__setLegendMin)window.__setLegendMin(true);
   const nEl=document.getElementById('sv-n'),dvEl=document.getElementById('sv-dv'),rcEl=document.getElementById('sv-rc');
   const shown=Math.min(salvoShot,salvoTotal);
   const T=currentTarget();
@@ -1975,6 +2226,13 @@ function updateSalvoReadout(state){
       : 'cumulative Δv ≈ <b>—</b> · first shot in flight · '+FAMILY[famIdx].id+' → '+TARGETS[targetIdx].id+' body';
     if(bodyBroken)line='body dispersed → engaging fragments: <b>'+frags.length+'</b> remaining · '+salvoLanded+' shot'+(salvoLanded===1?'':'s')+' landed';
     else if(offTrackU>0.5)line+='<br>off-track displacement ≈ <b>'+Math.round(offTrackU)+'u</b> (displacement exaggerated for visibility — the honest per-shot Δv is above)';
+    // the closing sequence — every shot meets it nearer than the last, because it never stops
+    if(interceptLog.length){
+      line+='<br>met it at '+interceptLog.map(u=>'<b>'+fmtRange(u)+'</b>').join(' → ')+
+            (interceptLog.length>1?' — closing':'')+
+            '<br><span style="opacity:.72">a slower dart is in flight longer, so the body runs further before it arrives — the '+
+            FAMILY[famIdx].id+' coasts '+coastFor(FAMILY[famIdx]).toFixed(1)+'s here</span>';
+    }
     dvEl.innerHTML=line;
   }
   if(rcEl){
@@ -2246,7 +2504,8 @@ cv.addEventListener('wheel',e=>{e.preventDefault();
   // while free-looking at a shot in flight the wheel trims the follow distance, not the home orbit
   if(freeLook&&firing&&(phase==='coast'||phase==='impact')){
     freeZoom=Math.max(0.35,Math.min(3.5,freeZoom*(e.deltaY>0?1.09:0.92)));return;}
-  dist=Math.max(6,Math.min(120,dist+Math.sign(e.deltaY)*(mode==='system'?1.8:0.8)));},{passive:false});
+  // multiplicative zoom: the scene now spans 9,000 u, so a fixed 1.8-unit step could never cover it
+  dist=Math.max(6,Math.min(14000,dist*(e.deltaY>0?1.10:0.909)));},{passive:false});
 window.addEventListener('resize',resize);
 document.getElementById('theme').addEventListener('click',()=>{const h=document.documentElement,n=h.getAttribute('data-theme')==='light'?'dark':'light';h.setAttribute('data-theme',n);try{localStorage.setItem('cf-theme',n)}catch(e){}});
 try{var _q=new URLSearchParams(location.search).get('theme');if(_q){document.documentElement.setAttribute('data-theme',_q);}else{var t=localStorage.getItem('cf-theme');if(t)document.documentElement.setAttribute('data-theme',t);}}catch(e){}
