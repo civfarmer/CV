@@ -1,0 +1,6 @@
+# never publish editor/OS cruft or stray git backups to Pages
+.git-old/
+.git-prev/
+.git-new/
+.DS_Store
+Thumbs.db
