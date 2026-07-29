@@ -125,10 +125,44 @@
   .cfside .cfcv:hover{filter:brightness(1.08)}
   .cfside .cftheme{width:40px;display:inline-flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer}
   .cfside .cftheme svg{width:16px;height:16px}
+
+  /* ---- MOBILE MENU (matches the home page's drawer) -------------------------------------
+     Below 1080px the .cfside sidebar was simply hidden. Publications compensated with a
+     cramped uppercase .pubnav strip; the case-study pages had NO menu at all, so a phone
+     visitor was stranded with no way back. The sidebar now slides in as a drawer behind a
+     hamburger, exactly like index.html, so every page behaves the same way on a phone. */
+  .cftop{display:none;position:sticky;top:0;z-index:50;align-items:center;justify-content:space-between;
+    gap:12px;padding:10px clamp(14px,4vw,20px);background:color-mix(in oklab,var(--bg2),transparent 6%);
+    border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}
+  .cftop .cfb{display:flex;align-items:center;gap:10px;min-width:0;text-decoration:none;color:inherit}
+  .cftop .cfb img{width:32px;height:32px;border-radius:50%;object-fit:cover;flex:0 0 auto}
+  .cftop .cfb .nm{font-family:var(--font-display);font-weight:700;font-size:15px;color:var(--ink);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cfburger{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;flex:0 0 auto;
+    border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink2);cursor:pointer}
+  .cfburger svg{width:20px;height:20px}
+  .cfburger:hover{color:var(--ink)}
+  .cfscrim{display:none;position:fixed;inset:0;z-index:49;background:rgba(6,8,12,.55);backdrop-filter:blur(2px)}
+  .cfscrim.on{display:block}
+  @media(max-width:1079.98px){
+    .cftop{display:flex}
+    .pubnav{display:none}                     /* replaced by the drawer */
+    .cfside{display:flex;position:fixed;left:0;top:0;bottom:0;width:284px;max-width:86vw;z-index:51;
+      flex-direction:column;gap:18px;padding:22px 18px;background:var(--bg2);
+      border-right:1px solid var(--line);overflow-y:auto;
+      transform:translateX(-100%);visibility:hidden;transition:transform .25s ease,visibility 0s linear .25s}
+    .cfside.open{transform:none;visibility:visible;transition:transform .25s ease,visibility 0s}
+  }
+  @media print{.cftop,.cfscrim,.cfside{display:none!important}}
 </style>
 <script>(function(){try{var t=localStorage.getItem('cf-theme');if(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches)t='light';if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 </head>
 <body>
+<div class="cftop">
+  <a class="cfb" href="../index.html"><img src="../assets/img/portrait-2026.png" alt=""><span class="nm">Christopher Farmer</span></a>
+  <button class="cfburger" id="cfburger" aria-label="Menu" aria-expanded="false" aria-controls="cfsidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+</div>
+<div class="cfscrim" id="cfscrim" hidden></div>
   <aside class="cfside" aria-label="Site navigation">
     <div class="cfbrand">
       <img src="../assets/img/portrait-2026.png" alt="Christopher Farmer">
@@ -249,6 +283,22 @@
     }); }
     var yr=document.getElementById('yr'); if(yr){ yr.textContent=String(new Date().getFullYear()); }
   })();
+</script>
+<script>
+/* mobile drawer — same behaviour as the home page: hamburger opens, scrim or Esc closes,
+   any nav link closes it, and it is force-closed if the viewport grows past the breakpoint */
+(function(){
+  var side=document.querySelector('.cfside'), b=document.getElementById('cfburger'), sc=document.getElementById('cfscrim');
+  if(!side||!b||!sc)return;
+  side.id=side.id||'cfsidebar';
+  function set(o){side.classList.toggle('open',o);sc.classList.toggle('on',o);sc.hidden=!o;
+    b.setAttribute('aria-expanded',o?'true':'false');document.body.style.overflow=o?'hidden':'';}
+  b.addEventListener('click',function(){set(!side.classList.contains('open'));});
+  sc.addEventListener('click',function(){set(false);});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')set(false);});
+  side.addEventListener('click',function(e){if(e.target.closest('a'))set(false);});
+  addEventListener('resize',function(){if(innerWidth>=1080)set(false);});
+})();
 </script>
 </body>
 </html>
