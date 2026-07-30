@@ -12,7 +12,7 @@
 //     never to the viewport — exactly the pattern the working `flowGraph` (graph.js) uses.
 //
 // VISUAL DESIGN (grounded in Chainalysis Reactor, TRM Labs, Elliptic Investigator,
-// MetaSleuth and Breadcrumbs — see _design/reviews/chainlink-research.md):
+// MetaSleuth and Breadcrumbs):
 //   Reactor + MetaSleuth trace "first deposit -> final cash-out" over an ENTITY graph
 //   (addresses clustered into meaningful nodes), not a 58-hop hairball. So we AGGREGATE
 //   the raw hops into a handful of meaningful nodes laid out left->right in tiers:
@@ -930,7 +930,7 @@ export function chainTrace(container, opts) {
    *   - PAN works from ANYWHERE — background OR on a node — and is FREE even at the
    *     Fit scale: clampPan no longer snaps the content back to centre when it fits;
    *     it only stops you dragging it entirely off-screen (a generous margin keeps a
-   *     slab of content visible from any position). This is the pan-lock fix.
+   *     slab of content visible from any position).
    *   - ZOOM is COOPERATIVE: a plain wheel lets the PAGE scroll (no scroll-trap);
    *     only Ctrl/Cmd + wheel (or +/- buttons, keyboard, or a two-finger pinch)
    *     zooms, anchored at the cursor. A transient hint flashes on a plain scroll.

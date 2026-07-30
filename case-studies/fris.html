@@ -67,7 +67,7 @@
   .plink.ghost{color:var(--accent-ink);background:transparent;border-color:color-mix(in oklab,var(--accent) 40%,transparent)}
   .plink.ghost:hover{background:color-mix(in oklab,var(--accent) 12%,transparent);border-color:var(--accent);box-shadow:none}
 
-  /* Screenshot placeholder — intentionally empty until a real capture is dropped in */
+  /* Screenshot figure */
   figure.shot{margin:clamp(24px,4vw,36px) 0 0;padding:0}
   figure.shot .ph{aspect-ratio:16/9;display:grid;place-items:center;gap:4px;text-align:center;padding:18px;
     border:2px dashed var(--line2);border-radius:var(--radius);background:radial-gradient(120% 120% at 80% 0,rgba(67,179,166,.10),transparent 55%),var(--bg2);color:var(--muted)}
@@ -177,6 +177,7 @@
       <a href="../index.html#expertise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.1L12 17l-5.5 3.3 1-6.1L3 8.9 9 8z"/></svg><span>Expertise</span></a>
       <a href="../index.html#credentials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg><span>Credentials</span></a>
       <a href="../publications/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg><span>Publications</span></a>
+      <a href="../publications/research-lab.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3h6"/><path d="M10 3v7L5 20h14l-5-10V3"/><path d="M8 15h8"/></svg><span>Research Lab</span></a>
       <a href="../index.html#contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M4 7l8 6 8-6"/></svg><span>Contact</span></a>
     </nav>
     <div class="cffoot">
@@ -235,12 +236,12 @@
       </section>
 
       <section class="sec">
-        <h2><span class="secno">03</span>The legal &amp; regulatory reasoning</h2>
+        <h2><span class="secno">03</span>Three decisions that carry the legal judgement</h2>
         <p>Three design decisions carry the legal judgement. First, the primary object is the <b>graph, not the name</b>: because evasion is organised through ownership and control structures, beneficial-ownership edges and asset-tracing paths are first-class citizens, and screening results are read in that structural context — which is how an investigator gets from an alert to a defensible suspicion. Second, the peel-chain engine is <b>deterministic</b>: a financial-crime finding has to be explainable and reproducible on demand, so FRIS simulates and traces value movements with exact arithmetic rather than scoring them with an opaque model — a trace that cannot be re-run identically is an exhibit that fails. Third, <b>data provenance is a legal boundary</b>: real regulatory reference material is dated and source-linked; every private party is synthetic and labelled. Illustrative data is never allowed to masquerade as evidence — the same discipline a court applies to exhibits.</p>
       </section>
 
       <section class="sec">
-        <h2><span class="secno">04</span>Why it matters to a regulated employer</h2>
+        <h2><span class="secno">04</span>What it proves to a regulated employer</h2>
         <p>A sanctions or financial-crime function needs people who hold both halves: the typologies and the detection logic. Having built the screening, tracing and waterfall engines myself, I can interrogate a vendor's screening calibration rather than accept it, read an alert and know its legal consequence — escalation, SAR-grade narrative, freeze, or file — and translate between the MLRO and the engineers who tune the rules. For a forensic-analytics or investigations team, the same build demonstrates throughput: graph evidence, exact reconciliation and audit-ready working papers, produced by someone who understands what a regulator will ask of them.</p>
       </section>
 

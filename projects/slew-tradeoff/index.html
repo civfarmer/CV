@@ -76,7 +76,7 @@
   <div class="wrap">
     <div class="eyebrow">Interactive · geomagnetic attitude control</div>
     <h1 class="title">Why magnetic control is stabilising but slow</h1>
-    <p class="lede">The companion paper's central result in one chart. A magnetic actuator's torque is bounded by its dipole moment times the local field (&tau; = m&times;B). For a rest-to-rest slew of a large flexible platform, the time to turn scales as t = 2&radic;(I&theta;/mB). Set the platform and watch the required dipole for a fast slew rocket past anything ever flown — while an achievable dipole leaves you slewing for hours to days. That slowness is the paper's point: it is a virtue for a gravity-gradient-stabilised structure, not a defect.</p>
+    <p class="lede">The companion paper's central result in one chart. A magnetic actuator's torque is bounded by its dipole moment times the local field (&tau; = m&times;B). For a rest-to-rest slew of a large flexible platform, the time to turn scales as t = 2&radic;(I&theta;/mB). Set the platform and watch the required dipole for a fast slew rocket past anything ever flown — while an achievable dipole leaves you slewing for hours to days. That slowness is the paper's point: it matches magnetic actuation to slow tasks — detumbling, libration damping, biasing and momentum management — near a valid gravity-gradient equilibrium, which is itself conditional on principal-axis ordering and attitude. Slowness is not by itself proof of safety: the paper is explicit that low actuator bandwidth is <i>not</i> intrinsically safe for a flexible structure.</p>
 
     <div class="note"><b>Illustrative screening relation.</b> Bang-bang, single-axis, rigid-body slew under a bounded magnetic torque; the field is the deposited IGRF-14 orbit-mean. It bounds the <i>rate</i> question only — not pointing accuracy, flexible-mode coupling or three-axis control. Numbers are study values for a hypothetical platform.</div>
 
@@ -215,8 +215,10 @@ function draw(r){
   x.fillStyle=col('--gold');x.strokeStyle=col('--bg');x.lineWidth=2;
   x.beginPath();x.arc(X(r.tTarget),Y(my),6,0,7);x.fill();x.stroke();
   // reference platform marker (1km,1e5kg,90deg,~7min -> ~1e10)
-  x.fillStyle=col('--ink2');x.beginPath();x.arc(X(420),Y(9.9e9),3.5,0,7);x.fill();
-  x.fillText('paper reference',X(420)-30,Y(9.9e9)-9);
+  // 4·(1e5·1000²/12)·(π/2) / (31.99e-6 · 420²) = 9.28e9 A·m², using the deposited IGRF-14
+  // 51.6° orbit-mean field. (An earlier 9.9e9 here came from the superseded single 30 µT constant.)
+  x.fillStyle=col('--ink2');x.beginPath();x.arc(X(420),Y(9.28e9),3.5,0,7);x.fill();
+  x.fillText('paper reference',X(420)-30,Y(9.28e9)-9);
 }
 document.querySelectorAll('#orbitSeg button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#orbitSeg button').forEach(x=>x.classList.remove('on'));

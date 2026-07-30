@@ -1,49 +1,5 @@
 <!doctype html>
-<!-- CHANGELOG
-  2026-07-29b (cordon scenario now TERMINATES instead of looping):
-   1) THE SUBJECT STAYS ON THE GROUND. subdue() replaces the timed knockdown on a successful
-      interception — he does not get back up, and the run does not restart. His collision radius
-      drops to 0.42× (a prone body is not a standing obstacle), which lets the machine hold
-      station directly over him instead of being pushed out to standing clearance.
-   2) HANDS BEHIND THE HEAD. makeHuman() gained handsOnHead(k): elbows splayed, forearms folded
-      up, hands laced behind the skull, eased in over ~0.8 s so it reads as compliance rather
-      than a snap to a pose. pose() yields to it while the flag is set, so the walk cycle cannot
-      fight the posture. Cleared on reset.
-   3) THE MACHINE STANDS OVER HIM, THEN STOPS. New terminal 'hold' state: it takes station 1.25 u
-      from him on the cordon side, faces him, gestures the order once, and holds. After ~4 s the
-      run simply ends (running=false) with a closing line saying the machine has no arrest power
-      and everything past this point is the officers' decision. The old 'recover' loop — where he
-      got up, walked back round the car and the whole thing replayed forever — is gone.
-   4) THE FAILURE ENDING ALSO TERMINATES. Reaching the cordon on the vision lane, or timing out,
-      now ends the run cleanly with a message rather than restarting.
-  2026-07-29 (the guardian stops falling over; split sensing lanes in the ring; ring-edge clipping; car routing):
-   1) ONLY THE THING BEING INTERCEPTED GOES DOWN. The guardian used to knock itself over on every successful
-      interposition, which read as the machine failing at the moment it succeeded. Added brace(): it plants,
-      rocks back along the contact normal (a decaying lean on the model, ~0.75 s) and STAYS ON ITS FEET.
-      The struck party is the one that falls — storeroom: the carrier robot; VIP: the approaching man;
-      cordon: the subject. The ARENA is deliberately untouched: it is machine-vs-machine sport (§6.2) and
-      knockdowns are the point there.
-   2) THE FIGHTING RING CAN RUN ONE MACHINE ON LIDAR AND THE OTHER ON VISION. New arena-only control
-      ("Sensing: BLUE LiDAR · RED vision"). Sensing lane is now resolved per robot through LANE() rather
-      than from the single global mode, so whichever machine is attacking uses its OWN pipeline — blue
-      strikes the intercept point and lands, red commits to a stale fix and swings through empty air. The
-      button only appears in the arena and is force-cleared on leaving it.
-   3) NO MORE CLIPPING/STALLING AT THE EDGE OF THE VIP RING. The guardian used to seek() a point ON the
-      standoff circle, so it stopped dead on arrival (velocity → 0 → the walk clip dropped to Idle mid-
-      stride) and its body straddled the drawn ring. Replaced with ringMove(): it travels ALONG the circle
-      by angular interpolation, held at exactly r = 5.95 so its nearest edge sits at 4.90 — outside the
-      drawn bubble (4.50–4.72). Measured over a 10 s patrol: stalled frames fell 20.8% → 5.2% and the
-      radius is now constant to 0.00 u (was oscillating). Also added smoothed speed for clip selection.
-   4) THE MACHINE NO LONGER WALKS INTO THE PARKED CAR. Its route in the cordon scenario crossed the car's
-      footprint: measured closest approach to a car collision disc was 0.24 u against the 2.60 u required
-      (robot radius + disc radius) — i.e. straight through the wing. Added a footprint test and a routing
-      gate west of the bonnet at (-2.6, -3.2), verified clear on both legs (min 4.01 u). Used by the
-      advance, orders and recover legs, and by the subject walking back round.
-   5) ON THE VISION LANE IT TRIES AND MISSES. An interception now only converts on the LiDAR lane; on the
-      vision lane the machine still commits and lunges, but arrives through pavement he has already left,
-      with a readout saying so. Trying and missing is the failure mode being demonstrated — the machine
-      was willing, the pipeline was late.
-     Spatial-Intelligence protective-interposition demo — companion to "A Software-First Spatial-Intelligence
+<!-- Spatial-Intelligence protective-interposition demo — companion to "A Software-First Spatial-Intelligence
      Layer for Contact-Capable Robots" (Phase II; §5 impulse recovery · §6.2 robot sport · §6.3 Guardian pattern).
      FOUR SCENARIOS, one engine:
        1. FRAGILE PACKAGE — a storeroom. The other robots are NOT hostile: they are working machines running

@@ -82,7 +82,7 @@
   <div class="wrap">
     <div class="eyebrow">Interactive · illustrative screening model</div>
     <h1 class="title">ARGUS-PD/POD-7K — projectile tradespace explorer</h1>
-    <p class="lede">Move the moving-mass and release-speed sliders and watch the conservation-law screening quantities from Papers I–III recompute live, against the deposited non-dominated frontier and the two hard conservation screens (E_k &le; 150 GJ, B_ideal &le; 16.5 T); installed nameplate, coupling area, flight time and miss-&sigma; are reported attributes. Every relation here is the deposited, unit-tested v1.0.0 model — the same code and the same 28-point frontier that ship in the reproducibility package.</p>
+    <p class="lede">Move the moving-mass and release-speed sliders and watch the conservation-law screening quantities from Papers I–III recompute live, against the deposited non-dominated frontier and the two hard conservation screens (E_k &le; 150 GJ, B_ideal &le; 16.5 T); installed nameplate, coupling area, flight time and miss-&sigma; are reported attributes. Every relation here is the deposited, unit-tested v1.2.0 model — the same code and the same 28-point frontier that ship in the reproducibility package.</p>
 
     <div class="note"><b>Illustrative, non-operational.</b> A conservation-law and parametric screen for a hypothetical planetary-defence research system — no targeting, firing logic, trajectory optimisation, or buildable launcher design. Fixed active length 7,000&nbsp;m; efficiency &eta;=0.35; field screen 16.5&nbsp;T; screening distance 0.5&nbsp;AU. Numbers are study allocations, not as-built figures.</div>
 
@@ -125,7 +125,7 @@
     </div>
 
     <div class="foot">
-      Provenance: <span class="prov">argus_pd_repro/argus_model.py</span> · deposited data <span class="prov">pareto_front.csv</span>, <span class="prov">design_space_grid.csv</span>, <span class="prov">reference_family.csv</span> (v1.0.0). Frontier and grid are the exact deposited values; live slider outputs are recomputed in-browser from the identical relations and agree with the deposited reference family at its five points. Not a system of record; not engineering design.
+      Provenance: <span class="prov">argus_pd_repro/argus_model.py</span> · deposited data <span class="prov">pareto_front.csv</span>, <span class="prov">design_space_grid.csv</span>, <span class="prov">reference_family.csv</span> (v1.2.0). Frontier and grid are the exact deposited values; live slider outputs are recomputed in-browser from the identical relations and agree with the deposited reference family at its five points. Not a system of record; not engineering design.
     </div>
   </div>
 
@@ -168,7 +168,7 @@ function massToSlider(m){ return Math.log(m/massMin)/Math.log(massMax/massMin); 
 
 function gate(pass, lab, why){ return {pass,lab,why}; }
 function evalGates(m,v,r){
-  // Per the audited spec, the only HARD conservation screens are E_k ≤ 150 GJ (mechanical ceiling)
+  // The only HARD conservation screens are E_k ≤ 150 GJ (mechanical ceiling)
   // and B_ideal ≤ 16.5 T (Paper I §6.1). Installed nameplate, coupling area, 0.5-AU flight time and
   // miss-σ are REPORTED ATTRIBUTES (shown in the read-outs), not pass/fail gates.
   return [
