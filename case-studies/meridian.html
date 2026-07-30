@@ -67,7 +67,7 @@
   .plink.ghost{color:var(--accent-ink);background:transparent;border-color:color-mix(in oklab,var(--accent) 40%,transparent)}
   .plink.ghost:hover{background:color-mix(in oklab,var(--accent) 12%,transparent);border-color:var(--accent);box-shadow:none}
 
-  /* Screenshot placeholder — intentionally empty until a real capture is dropped in */
+  /* Screenshot figure */
   figure.shot{margin:clamp(24px,4vw,36px) 0 0;padding:0}
   figure.shot .ph{aspect-ratio:16/9;display:grid;place-items:center;gap:4px;text-align:center;padding:18px;
     border:2px dashed var(--line2);border-radius:var(--radius);background:radial-gradient(120% 120% at 80% 0,rgba(212,178,76,.10),transparent 55%),var(--bg2);color:var(--muted)}
@@ -177,6 +177,7 @@
       <a href="../index.html#expertise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.1L12 17l-5.5 3.3 1-6.1L3 8.9 9 8z"/></svg><span>Expertise</span></a>
       <a href="../index.html#credentials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg><span>Credentials</span></a>
       <a href="../publications/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg><span>Publications</span></a>
+      <a href="../publications/research-lab.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3h6"/><path d="M10 3v7L5 20h14l-5-10V3"/><path d="M8 15h8"/></svg><span>Research Lab</span></a>
       <a href="../index.html#contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M4 7l8 6 8-6"/></svg><span>Contact</span></a>
     </nav>
     <div class="cffoot">
@@ -215,7 +216,7 @@
 
       <figure class="shot" data-shot="meridian">
         <img src="img/meridian.png" alt="Meridian companies view — coverage-gated issuer list with provenance labels and coverage warnings" loading="lazy" style="width:100%;height:auto;display:block;border-radius:12px;border:1px solid var(--line)">
-        <figcaption>Meridian — Companies view of the static export: verified Swiss issuers ranked by information completeness, with provenance and an as-of timestamp on every value and coverage gaps stated on the face of the record. Captured from the running application.</figcaption>
+        <figcaption>Meridian — Companies view of the static export: verified Swiss issuers ranked by information completeness, with provenance and an as-of timestamp on every value and coverage gaps stated on the face of the record. Screenshot, not a mock-up.</figcaption>
       </figure>
 
       <section class="sec">
@@ -236,7 +237,7 @@
       </section>
 
       <section class="sec">
-        <h2><span class="secno">03</span>The legal &amp; regulatory reasoning</h2>
+        <h2><span class="secno">03</span>The rules of evidence, applied to data</h2>
         <p>Meridian is the rules of evidence applied to data engineering. The governing judgement is that <b>an intelligence platform for regulated use must refuse to know things it does not know</b>: exposure and materiality stay marked &ldquo;insufficient evidence&rdquo; until disclosed figures — segment or geographic revenue — are actually ingested; they are never estimated. Semantic similarity alone never establishes a material relationship between a rule and a company; it only nominates candidates for review. Composite scores are labelled for what they are: a way of ordering a queue, not a view on what a security will do. And because every value keeps its capture timestamp, hash and source, any answer the platform gives can be taken apart claim by claim — the same way a lawyer builds a submission: assertion, source, date, weight. That discipline is the product; the charts are decoration.</p>
       </section>
 

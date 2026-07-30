@@ -286,7 +286,8 @@
       <a href="../index.html#warroom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>War Room</span></a>
       <a href="../index.html#expertise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.1L12 17l-5.5 3.3 1-6.1L3 8.9 9 8z"/></svg><span>Expertise</span></a>
       <a href="../index.html#credentials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg><span>Credentials</span></a>
-      <a href="../publications/index.html" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg><span>Publications</span></a>
+      <a href="../publications/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg><span>Publications</span></a>
+      <a href="../publications/research-lab.html" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3h6"/><path d="M10 3v7L5 20h14l-5-10V3"/><path d="M8 15h8"/></svg><span>Research Lab</span></a>
       <a href="../index.html#contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M4 7l8 6 8-6"/></svg><span>Contact</span></a>
     </nav>
     <div class="cffoot">
@@ -321,7 +322,8 @@
   <a href="../index.html#warroom">War Room</a>
   <a href="../index.html#expertise">Expertise</a>
   <a href="../index.html#credentials">Credentials</a>
-  <a href="index.html" aria-current="page">Publications</a>
+  <a href="index.html">Publications</a>
+  <a href="research-lab.html" aria-current="page">Research Lab</a>
   <a href="../index.html#contact">Contact</a>
 </nav>
 
@@ -341,10 +343,106 @@
       <nav class="pubclasses" aria-label="Publication categories">
         <span class="pcl-lab">Jump to</span>
         <a href="#interactive"><span class="pcl-tri">&#9654;</span> Interactive</a>
-        <a href="#drafts-h">Working drafts</a>
         <a href="#p1">Preprints</a>
         <a href="#p2">Theory</a>
+        <a href="#drafts-h">Working drafts</a>
       </nav>
+    </section>
+
+    <!-- INTERACTIVE DEMONSTRATIONS -->
+    <section class="papers demos-section" id="interactive" aria-labelledby="demos-h">
+      <div class="sechead">
+        <span class="ph">Interactive</span>
+        <h2 id="demos-h">Interactive demonstrations</h2>
+        <span class="demos-cue"><span class="tri">&#9654;</span> 6 live tools &middot; run in-browser</span>
+      </div>
+      <p class="ab" style="max-width:72ch">The six differ in what they rest on. Four run the deposited, unit-tested v1.2.0 models directly, and the geomagnetic orbit screen checks itself against the deposited screen on load; the slew tradeoff reproduces the companion paper's reference case from the deposited orbit-mean field; the arena demo illustrates the robotics paper's architecture and has no deposited dataset.</p>
+      <div class="grid">
+        <article class="card">
+          <div class="meta"><span class="chip">Interactive 3D · illustrative</span><span class="chip venue">Spatial-intelligence paper</span><span class="chip play"><span class="tri">&#9654;</span> Interactive</span></div>
+          <h3>Interpose, absorb, recover &mdash; protective spatial intelligence in 3D</h3>
+          <img class="demo-shot" src="assets/previews/spatial-demo.jpg" alt="Arena demo: an IR-designated threat unit closing on the protected equipment pod, with the guardian's LiDAR track and its predicted intercept point marked" loading="lazy">
+          <div class="code">Four scenarios &middot; IR designation is the only human input &middot; between-frame prediction &middot; non-kinetic interposition &middot; impulse recovery</div>
+          <p class="ab">The Phase II robotics paper made runnable, in four scenarios. Watch a robot fighting league and you see the same defect: a unit commits to a strike at an opponent that has <b>already moved</b>, because its recognition loop is tens of milliseconds behind. <b>Arena</b> shows that failure and its fix &mdash; LiDAR with between-frame prediction commits to the <b>intercept point</b>, where the target <i>will</i> be. <b>Fragile package</b> (a storeroom of working, non-hostile machines), <b>VIP protection</b> and <b>cordon containment</b> turn the same competence protective: a humanoid guardian holds a standoff around a designated person, or blocks a designated subject from reaching a line of officers and public. Throughout, the <b>infrared marker is the only human input</b> &mdash; it designates who is protected and who is not &mdash; and the response is <b>bounded, human-authorised and non-kinetic</b>: the machine interposes, blocks and <i>absorbs</i>. It is unarmed, never strikes a person, and applies no harmful force; its advantage is that it can take an impact instead of a person having to, then run pre-load &rarr; detect &rarr; absorb &rarr; reacquire and stand up again. Collisions resolve with real separation and momentum exchange. Cadences are engineering targets, not measurements (&sect;3.3); the Guardian pattern is placed after regulation, not before it (&sect;6.3).</p>
+          <div class="foot">
+            <a class="read" href="../projects/spatial-demo/index.html" data-modal data-modal-title="Strike where it is, not where it was &mdash; spatial intelligence" target="_blank" rel="noopener" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg> Open the demo</a>
+            <a class="cf-newtab" href="../projects/spatial-demo/index.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg> <span>New tab</span></a>
+            <span class="fmt">Live · WebGL</span>
+          </div>
+        </article>
+        <article class="card">
+          <div class="meta"><span class="chip">Interactive · illustrative</span><span class="chip venue">Deposited model v1.2.0</span><span class="chip play"><span class="tri">&#9654;</span> Interactive</span></div>
+          <h3>ARGUS-PD tradespace explorer</h3>
+          <img class="demo-shot" src="assets/previews/argus-explorer.jpg" alt="The tradespace explorer: a scatter of candidate configurations with the non-dominated frontier traced across the top" loading="lazy">
+          <div class="code">Conservation-law screen · live frontier · evidence gates</div>
+          <p class="ab">Move moving-mass and release-speed sliders; watch energy, momentum, installed nameplate, ideal field, flight time and the covariance miss-screen recompute against the deposited 28-point non-dominated frontier and the paper's evidence gates. Reproduces the deposited reference family exactly.</p>
+          <div class="foot">
+            <a class="read" href="../projects/argus-explorer/index.html" data-modal data-modal-title="ARGUS-PD tradespace explorer" target="_blank" rel="noopener" aria-haspopup="dialog">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+              Open the explorer
+            </a>
+            <a class="cf-newtab" href="../projects/argus-explorer/index.html" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
+              <span>New tab</span>
+            </a>
+            <span class="fmt">Live · offline</span>
+          </div>
+        </article>
+        <article class="card">
+          <div class="meta"><span class="chip">Interactive 3D · illustrative</span><span class="chip venue">Deposited model v1.2.0</span><span class="chip play"><span class="tri">&#9654;</span> Interactive</span></div>
+          <h3>Geomagnetic orbit screen — 3D</h3>
+          <img class="demo-shot" src="assets/previews/geomag-orbit.jpg" alt="The geomagnetic orbit screen: a rotatable 3D globe with an orbit track and the per-orbit control-authority read-out" loading="lazy">
+          <div class="code">IGRF-14 degree-1 field · orbit authority · rotatable globe</div>
+          <p class="ab">Rotate the Earth; set altitude, inclination and torque axis; the IGRF-14 degree-1 field and per-orbit control authority recompute live. The in-browser port reproduces the deposited Python screen to 10⁻¹³ across all 27 reference cases — nine orbits &times; three torque axes — verified on load.</p>
+          <div class="foot">
+            <a class="read" href="../projects/geomag-orbit/index.html" data-modal data-modal-title="Geomagnetic orbit screen &mdash; 3D" target="_blank" rel="noopener" aria-haspopup="dialog">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg>
+              Open the 3D screen
+            </a>
+            <a class="cf-newtab" href="../projects/geomag-orbit/index.html" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
+              <span>New tab</span>
+            </a>
+            <span class="fmt">Live · WebGL</span>
+          </div>
+        </article>
+        <article class="card">
+          <div class="meta"><span class="chip">Interactive 3D · illustrative</span><span class="chip venue">Deposited budget v1.2.0</span><span class="chip play"><span class="tri">&#9654;</span> Interactive</span></div>
+          <h3>Launch architecture &amp; projectile — 3D</h3>
+          <img class="demo-shot" src="assets/previews/argus-3d.jpg" alt="The launch architecture in orbit above Earth" loading="lazy">
+          <div class="code">Conceptual driver + exploded projectile · family &amp; target selectors · force overlay · launch-to-impact</div>
+          <p class="ab">A rotatable 3D view of the ARGUS-PD/POD-7K architecture: the seven-kilometre driver — 1,000 × 7 m cells at 150 MJ each — and an exploded projectile whose every component is clickable and labelled with its <b>deposited</b> mass allocation (core 0.150 kg, coupling collar 0.090 kg … total 0.300 kg). Pick a projectile family member and a demonstration target, toggle the force overlay, and run the launch to watch the cell wave sweep the shot down the bore and coast to impact — with a Δv read-out under Paper I §8: delivered energy is calculable, useful deflection is not. Schematic and not to scale; no buildable design.</p>
+          <div class="foot">
+            <a class="read" href="../projects/argus-3d/index.html" data-modal data-modal-title="Launch architecture &amp; projectile &mdash; 3D" target="_blank" rel="noopener" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 12l9-5M12 12v10M12 12L3 7"/></svg> Open the 3D model</a>
+            <a class="cf-newtab" href="../projects/argus-3d/index.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg> <span>New tab</span></a>
+            <span class="fmt">Live · WebGL</span>
+          </div>
+        </article>
+        <article class="card">
+          <div class="meta"><span class="chip">Interactive · illustrative</span><span class="chip venue">Paper relation</span><span class="chip play"><span class="tri">&#9654;</span> Interactive</span></div>
+          <h3>Slew-time / dipole tradeoff</h3>
+          <img class="demo-shot" src="assets/previews/slew-tradeoff.jpg" alt="The slew tradeoff: a log-log chart of required magnetic dipole against slew time, with the ever-flown magnetorquer band marked" loading="lazy">
+          <div class="code">Why magnetic control is stabilising but slow — the geomagnetic paper's headline</div>
+          <p class="ab">A log–log chart of the dipole a magnetic actuator needs to slew a large platform against the time it takes. Set the platform and watch the required dipole for a fast turn shoot past anything ever flown, while a realistic dipole leaves you slewing for hours to days. Reproduces the paper's 1-km / 10⁵-kg, ~7-minute, ~10¹⁰ A·m² reference.</p>
+          <div class="foot">
+            <a class="read" href="../projects/slew-tradeoff/index.html" data-modal data-modal-title="Slew-time / dipole tradeoff" target="_blank" rel="noopener" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 4-6"/></svg> Open the tradeoff</a>
+            <a class="cf-newtab" href="../projects/slew-tradeoff/index.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg> <span>New tab</span></a>
+            <span class="fmt">Live · offline</span>
+          </div>
+        </article>
+        <article class="card">
+          <div class="meta"><span class="chip">Interactive · illustrative</span><span class="chip venue">Deposited model v1.2.0</span><span class="chip play"><span class="tri">&#9654;</span> Interactive</span></div>
+          <h3>Evidence-gate sequence</h3>
+          <img class="demo-shot" src="assets/previews/evidence-gates.jpg" alt="The evidence-gate sequence: the two conservation screens resolving pass or fail above the eight open development gates" loading="lazy">
+          <div class="code">Falsification built in: a shot survives to the first gate it fails</div>
+          <p class="ab">Papers I–III separate what a configuration passes <i>now</i> from what remains to be tested. Choose a shot and see the two deposited conservation screens (kinetic energy ≤ 150 GJ, ideal field ≤ 16.5 T) resolve pass/fail with the other quantities as read-outs — then the eight open development gates P1–P8 (matched materials, collar, cell, pulse-store, subscale assembly, dust/gas exposure, trajectory environment, impact) that still require evidence. The 1,000 km/s reference stands unless a lower gate shows no scalable path: feasibility with an honest to-do list, not a false verdict.</p>
+          <div class="foot">
+            <a class="read" href="../projects/evidence-gates/index.html" data-modal data-modal-title="Evidence-gate sequence" target="_blank" rel="noopener" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="3" width="16" height="4" rx="1"/><rect x="4" y="10" width="16" height="4" rx="1"/><rect x="4" y="17" width="16" height="4" rx="1"/></svg> Open the gates</a>
+            <a class="cf-newtab" href="../projects/evidence-gates/index.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg> <span>New tab</span></a>
+            <span class="fmt">Live · offline</span>
+          </div>
+        </article>
+      </div>
     </section>
 
     <!-- PHASE 1 -->
@@ -427,111 +525,14 @@
       </div>
     </section>
 
-
-    <!-- INTERACTIVE DEMONSTRATIONS -->
-    <section class="papers demos-section" id="interactive" aria-labelledby="demos-h">
-      <div class="sechead">
-        <span class="ph">Interactive</span>
-        <h2 id="demos-h">Interactive demonstrations</h2>
-        <span class="demos-cue"><span class="tri">&#9654;</span> 6 live tools &middot; run in-browser</span>
-      </div>
-      <p class="ab" style="max-width:72ch">The six differ in what they rest on. Four run the deposited, unit-tested v1.0.0 models directly, and the geomagnetic orbit screen checks itself against the deposited screen on load; the slew tradeoff reproduces the companion paper's reference case from the deposited orbit-mean field; the arena demo illustrates the robotics paper's architecture and has no deposited dataset.</p>
-      <div class="grid">
-        <article class="card">
-          <div class="meta"><span class="chip">Interactive 3D · illustrative</span><span class="chip venue">Spatial-intelligence paper</span><span class="chip play"><span class="tri">&#9654;</span> Interactive</span></div>
-          <h3>Interpose, absorb, recover &mdash; protective spatial intelligence in 3D</h3>
-          <img class="demo-shot" src="assets/previews/spatial-demo.jpg" alt="Arena demo: an IR-designated threat unit closing on the protected equipment pod, with the guardian's LiDAR track and its predicted intercept point marked" loading="lazy">
-          <div class="code">Three scenarios &middot; IR designation is the only human input &middot; between-frame prediction &middot; non-kinetic interposition &middot; impulse recovery</div>
-          <p class="ab">The Phase II robotics paper made runnable, in three scenarios. Watch a robot fighting league and you see the same defect: a unit commits to a strike at an opponent that has <b>already moved</b>, because its recognition loop is tens of milliseconds behind. <b>Arena</b> shows that failure and its fix &mdash; LiDAR with between-frame prediction commits to the <b>intercept point</b>, where the target <i>will</i> be. <b>VIP protection</b> and <b>cordon containment</b> turn the same competence protective: a humanoid guardian holds a standoff around a designated person, or blocks a designated subject from reaching a line of officers and public. Throughout, the <b>infrared marker is the only human input</b> &mdash; it designates who is protected and who is not &mdash; and the response is <b>bounded, human-authorised and non-kinetic</b>: the machine interposes, blocks and <i>absorbs</i>. It is unarmed, never strikes a person, and applies no harmful force; its advantage is that it can take an impact instead of a person having to, then run pre-load &rarr; detect &rarr; absorb &rarr; reacquire and stand up again. Collisions resolve with real separation and momentum exchange. Cadences are engineering targets, not measurements (&sect;3.3); the Guardian pattern is placed after regulation, not before it (&sect;6.3).</p>
-          <div class="foot">
-            <a class="read" href="../projects/spatial-demo/index.html" data-modal data-modal-title="Strike where it is, not where it was &mdash; spatial intelligence" target="_blank" rel="noopener" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg> Open the demo</a>
-            <a class="cf-newtab" href="../projects/spatial-demo/index.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg> <span>New tab</span></a>
-            <span class="fmt">Live · WebGL</span>
-          </div>
-        </article>
-        <article class="card">
-          <div class="meta"><span class="chip">Interactive · illustrative</span><span class="chip venue">Deposited model v1.0.0</span><span class="chip play"><span class="tri">&#9654;</span> Interactive</span></div>
-          <h3>ARGUS-PD tradespace explorer</h3>
-          <img class="demo-shot" src="assets/previews/argus-explorer.jpg" alt="The tradespace explorer: a scatter of candidate configurations with the non-dominated frontier traced across the top" loading="lazy">
-          <div class="code">Conservation-law screen · live frontier · evidence gates</div>
-          <p class="ab">Move moving-mass and release-speed sliders; watch energy, momentum, installed nameplate, ideal field, flight time and the covariance miss-screen recompute against the deposited 28-point non-dominated frontier and the paper's evidence gates. Reproduces the deposited reference family exactly.</p>
-          <div class="foot">
-            <a class="read" href="../projects/argus-explorer/index.html" data-modal data-modal-title="ARGUS-PD tradespace explorer" target="_blank" rel="noopener" aria-haspopup="dialog">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-              Open the explorer
-            </a>
-            <a class="cf-newtab" href="../projects/argus-explorer/index.html" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
-              <span>New tab</span>
-            </a>
-            <span class="fmt">Live · offline</span>
-          </div>
-        </article>
-        <article class="card">
-          <div class="meta"><span class="chip">Interactive 3D · illustrative</span><span class="chip venue">Deposited model v1.0.0</span><span class="chip play"><span class="tri">&#9654;</span> Interactive</span></div>
-          <h3>Geomagnetic orbit screen — 3D</h3>
-          <img class="demo-shot" src="assets/previews/geomag-orbit.jpg" alt="The geomagnetic orbit screen: a rotatable 3D globe with an orbit track and the per-orbit control-authority read-out" loading="lazy">
-          <div class="code">IGRF-14 degree-1 field · orbit authority · rotatable globe</div>
-          <p class="ab">Rotate the Earth; set altitude, inclination and torque axis; the IGRF-14 degree-1 field and per-orbit control authority recompute live. The in-browser port reproduces the deposited Python screen to 10⁻¹³ across all 27 reference cases — nine orbits &times; three torque axes — verified on load.</p>
-          <div class="foot">
-            <a class="read" href="../projects/geomag-orbit/index.html" data-modal data-modal-title="Geomagnetic orbit screen &mdash; 3D" target="_blank" rel="noopener" aria-haspopup="dialog">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg>
-              Open the 3D screen
-            </a>
-            <a class="cf-newtab" href="../projects/geomag-orbit/index.html" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
-              <span>New tab</span>
-            </a>
-            <span class="fmt">Live · WebGL</span>
-          </div>
-        </article>
-        <article class="card">
-          <div class="meta"><span class="chip">Interactive 3D · illustrative</span><span class="chip venue">Deposited budget v1.0.0</span><span class="chip play"><span class="tri">&#9654;</span> Interactive</span></div>
-          <h3>Launch architecture &amp; projectile — 3D</h3>
-          <img class="demo-shot" src="assets/previews/argus-3d.jpg" alt="The launch architecture in orbit above Earth" loading="lazy">
-          <div class="code">Conceptual driver + exploded projectile · family &amp; target selectors · force overlay · launch-to-impact</div>
-          <p class="ab">A rotatable 3D view of the ARGUS-PD/POD-7K architecture: the seven-kilometre driver — 1,000 × 7 m cells at 150 MJ each — and an exploded projectile whose every component is clickable and labelled with its <b>deposited</b> mass allocation (core 0.150 kg, coupling collar 0.090 kg … total 0.300 kg). Pick a projectile family member and a demonstration target, toggle the force overlay, and run the launch to watch the cell wave sweep the shot down the bore and coast to impact — with a Δv read-out under Paper I §8: delivered energy is calculable, useful deflection is not. Schematic and not to scale; no buildable design.</p>
-          <div class="foot">
-            <a class="read" href="../projects/argus-3d/index.html" data-modal data-modal-title="Launch architecture &amp; projectile &mdash; 3D" target="_blank" rel="noopener" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 12l9-5M12 12v10M12 12L3 7"/></svg> Open the 3D model</a>
-            <a class="cf-newtab" href="../projects/argus-3d/index.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg> <span>New tab</span></a>
-            <span class="fmt">Live · WebGL</span>
-          </div>
-        </article>
-        <article class="card">
-          <div class="meta"><span class="chip">Interactive · illustrative</span><span class="chip venue">Paper relation</span><span class="chip play"><span class="tri">&#9654;</span> Interactive</span></div>
-          <h3>Slew-time / dipole tradeoff</h3>
-          <img class="demo-shot" src="assets/previews/slew-tradeoff.jpg" alt="The slew tradeoff: a log-log chart of required magnetic dipole against slew time, with the ever-flown magnetorquer band marked" loading="lazy">
-          <div class="code">Why magnetic control is stabilising but slow — the geomagnetic paper's headline</div>
-          <p class="ab">A log–log chart of the dipole a magnetic actuator needs to slew a large platform against the time it takes. Set the platform and watch the required dipole for a fast turn shoot past anything ever flown, while a realistic dipole leaves you slewing for hours to days. Reproduces the paper's 1-km / 10⁵-kg, ~7-minute, ~10¹⁰ A·m² reference.</p>
-          <div class="foot">
-            <a class="read" href="../projects/slew-tradeoff/index.html" data-modal data-modal-title="Slew-time / dipole tradeoff" target="_blank" rel="noopener" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 4-6"/></svg> Open the tradeoff</a>
-            <a class="cf-newtab" href="../projects/slew-tradeoff/index.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg> <span>New tab</span></a>
-            <span class="fmt">Live · offline</span>
-          </div>
-        </article>
-        <article class="card">
-          <div class="meta"><span class="chip">Interactive · illustrative</span><span class="chip venue">Deposited model v1.0.0</span><span class="chip play"><span class="tri">&#9654;</span> Interactive</span></div>
-          <h3>Evidence-gate sequence</h3>
-          <img class="demo-shot" src="assets/previews/evidence-gates.jpg" alt="The evidence-gate sequence: the two conservation screens resolving pass or fail above the six open development gates" loading="lazy">
-          <div class="code">Falsification built in: a shot survives to the first gate it fails</div>
-          <p class="ab">Papers I–III separate what a configuration passes <i>now</i> from what remains to be tested. Choose a shot and see the two deposited conservation screens (kinetic energy ≤ 150 GJ, ideal field ≤ 16.5 T) resolve pass/fail with the other quantities as read-outs — then the six open development gates P1–P6 (core, collar, cell, pulse-store, subscale assembly, impact) that still require evidence. The 1,000 km/s reference stands unless a lower gate shows no scalable path: feasibility with an honest to-do list, not a false verdict.</p>
-          <div class="foot">
-            <a class="read" href="../projects/evidence-gates/index.html" data-modal data-modal-title="Evidence-gate sequence" target="_blank" rel="noopener" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="3" width="16" height="4" rx="1"/><rect x="4" y="10" width="16" height="4" rx="1"/><rect x="4" y="17" width="16" height="4" rx="1"/></svg> Open the gates</a>
-            <a class="cf-newtab" href="../projects/evidence-gates/index.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg> <span>New tab</span></a>
-            <span class="fmt">Live · offline</span>
-          </div>
-        </article>
-      </div>
-    </section>
-
     <!-- WORKING DRAFTS -->
     <section class="papers" aria-labelledby="drafts-h">
       <div class="sechead">
         <span class="ph">Drafts</span>
         <h2 id="drafts-h">Working drafts — space systems &amp; space law</h2>
-        <span class="cnt">8 drafts + annex · package v1.2.0 · not yet submitted</span>
+        <span class="cnt">7 drafts + annex · package v1.2.0 · not yet submitted</span>
       </div>
-      <p class="ab" style="max-width:72ch;margin-top:0">Eight drafts posted for reading (July 2026), plus the consolidated reproducibility annex. Papers&nbsp;I&ndash;III, the legal article and the geomagnetic article are now at <b>manuscript v1.1.0</b> — their final revised editions — and the launcher-science study and programme capstone are new. Two revise work already on this page: the geomagnetic paper corrects four overclaims in the Phase II web version, and Paper&nbsp;II supersedes the earlier 49&nbsp;km analyses. All are drawn from publication package v1.2.0, whose 228-file checksum manifest verifies clean; DOIs are not yet minted.</p>
+      <p class="ab" style="max-width:72ch;margin-top:0">Seven drafts posted for reading (July 2026), plus the consolidated reproducibility annex. Papers&nbsp;I&ndash;III, the legal article and the geomagnetic article are now at <b>manuscript v1.1.0</b> — their final revised editions — and the launcher-science study and programme capstone are new. Two revise work already on this page: the geomagnetic paper corrects four overclaims in the Phase II web version, and Paper&nbsp;II supersedes the earlier 49&nbsp;km analyses. All are drawn from publication package v1.2.0, whose 228-file checksum manifest verifies clean; DOIs are not yet minted.</p>
       <div class="grid">
         <article class="card">
           <div class="meta"><span class="chip">Supplementary materials</span><span class="chip venue">Reproducibility annex v1.0.0 · superseded by package v1.2.0</span></div>
@@ -555,16 +556,6 @@
           <div class="foot">
             <a class="read" href="drafts/Counterspace_Conduct_and_Outer_Space_Treaty_v1.1.0.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg> Read the draft (PDF)</a>
             <span class="fmt">.pdf · 16 pages</span>
-          </div>
-        </article>
-        <article class="card">
-          <div class="meta"><span class="chip">Working draft · v0.1.0</span><span class="chip venue">Machine-assisted first draft · awaiting author verification · not for citation</span></div>
-          <h3>Authorising Planetary Defence</h3>
-          <div class="code">Article IV characterisation, Article VI supervision and independent oversight for high-energy civil planetary-defence research systems</div>
-          <p class="ab">The companion legal paper that ARGUS-PD/POD-7K Paper II defers to. Characterises the hypothetical system under Article IV of the Outer Space Treaty (conventional-kinetic research outside the Article IV(1) WMD prohibition; Article IV(2) celestial-body limits regardless of civil labelling), analyses registration and liability for objects launched from an orbiting platform, engages Koplow's counter-position on debris-creating destructive testing, and proposes an independent-oversight model in which authorisation advances only through the technical series' own evidence gates — offered as policy consistent with existing law, not as existing law.</p>
-          <div class="foot">
-            <a class="read" href="drafts/Authorising_Planetary_Defence_v0.1.0.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg> Read the draft (PDF)</a>
-            <span class="fmt">.pdf · 22 pages</span>
           </div>
         </article>
         <article class="card">

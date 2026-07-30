@@ -1,7 +1,6 @@
-// FRIS flow-graph — the WINNING "Variant B" renderer ("Tiered ownership & flow"),
-// adapted from _design/graph-variant-B.js into a proper ES module for the live app.
+// FRIS flow-graph — the "Tiered ownership & flow" renderer.
 //
-// THESIS (unchanged from Variant B): replace the force-directed "hairball" with a
+// THESIS: replace the force-directed "hairball" with a
 // STRUCTURED, DIRECTIONAL layout so the answer is obvious at a glance.
 //   - nexus     : Sugiyama-style LAYERED ownership hierarchy. Ultimate beneficial
 //                 owners on the TOP tier; holdings/nominees in the middle; operating

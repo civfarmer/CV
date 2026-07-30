@@ -1,49 +1,4 @@
 <!doctype html>
-<!-- CHANGELOG
-  2026-07-29c (SCENE REBUILT AROUND A REAL OUTBOUND JOURNEY — overlay collision fixed, sky rebuilt):
-   0) THE OVERLAY COLLISION. The 6-button mode row measured ~690-735px against a 772px canvas, so it
-      ALWAYS ran under the top-right HUD chip and "Full screen" was half-covered. It was an
-      unconditional bug at every width, not an edge case. .modes now wraps and is limited to a
-      60% lane; .hud takes the mirror 40% lane at z-index 4 with pointer-events:none. The force
-      legend and salvo panel moved from top 48/56 to 120 to clear a wrapped row.
-   1) BODIES ARE NOW TRUE SIZE RELATIVE TO ONE ANOTHER. Previously Earth was 280 u while the Moon
-      was 7 u and Mars 13.66 u — the Moon was ~11x too small against Earth. Anchored on Earth's
-      280 u by real diameter: Earth 280, Mars 148.99, Moon 76.34 (6,371 : 3,390 : 1,737 km).
-   2) THE JOURNEY IS ORDERED AND LONG. One documented law places everything:
-      d_scene = 48.94 · d_real^0.2712, fitted through Moon = 1,600 u and the body's first position
-      = 9,000 u. That yields Moon 1,600 | Mars 6,135 | 0.5 AU gate 6,681 | target 9,000. The shot
-      crosses the Moon early, passes Mars about two-thirds out, and still runs 2,865 u (32% of the
-      flight) BEYOND Mars before it reaches the body.
-   3) THE CAMERA TURNS TO WATCH EACH FLY-PAST. A body offset from the flight line is biggest exactly
-      when it is abeam — 90° off the view axis, i.e. out of frame. The chase camera now pans to
-      follow the Moon and then Mars past, then returns to the shot. Measured in-frame: Moon 14.4°
-      at 2,050 u, Mars 30.1° at 6,602 u (peaking near 48° as it sweeps by).
-   4) EARTH SHRINKS AS MARS SWELLS. Measured over one flight: Earth 82.3° → 4.0° (a factor of 21)
-      while Mars goes 2.8° → 51.9°. That is pure perspective — the apparent-size fudge added on
-      2026-07-29 has been DELETED, because true sizes over real distances no longer need it.
-   5) THE BODY IS INBOUND AND EVERY SHOT MEETS IT NEARER. It closes down the axis at 70 u/s and
-      never stops. Measured salvos: R-DART intercepts at 1.12 → 0.67 → 0.36 → 0.18 AU; T-DART at
-      0.90 → 0.39 AU. The slow dart is in flight ~2.6x longer (coast law now 1.60·log10), so the
-      body runs much further before it arrives (T-DART coasts 11.7 s against the R-DART's 4.5 s)
-      — which is the response-time argument made visible.
-      The salvo panel now prints the closing sequence in real units.
-   6) A REAL SKY, AND DELIBERATELY NO ASTEROID BELT. The main belt is 2.06-3.27 AU; this engagement
-      is around 1.4-1.5 AU heliocentric, well inside it — and a belt is never visible AS a belt
-      from anywhere (mean separation 1-5 million km, which is why every probe that crossed it saw
-      nothing). Drawing one would be the single obviously wrong thing in the scene. Instead:
-      ~9,060 stars in three magnitude tiers matching the Bright Star Catalogue to mag 6.5,
-      coloured by stellar class and heavily desaturated; a Milky Way band tilted 60.2° to the
-      ecliptic with unresolved glow; and Jupiter/Saturn/Venus as POINT sprites (Jupiter subtends
-      48 arcsec from here — about a quarter of a pixel — so a textured sphere would be a lie).
-      The whole shell rides with the camera, so 9,000 u of travel produces zero star parallax.
-   7) HOUSEKEEPING. Camera far 20,000 → 90,000; wheel zoom is multiplicative to 14,000 u; the
-      salvo off-track nudge scaled 26 → 180 u for the new scene; the idle reset is range-based.
-   8) HONESTY. A second standing note now states plainly that the inbound body, the campaign and
-      the closing intercepts are this visualiser's staging and NOT paper findings (Paper I §8 puts
-      Earth-intersecting states outside the research envelope; Paper III §7.2 makes no E3/E4
-      claim), and that 0.5 AU is a screening quotient R/v, not an intercept range — which is why
-      it is drawn as a marked gate.
--->
 <!-- DISTANCE MODEL (read this before moving any body)
      True figures: Moon Ø 3,474 km at 384,400 km. Mars Ø 6,779 km at 54.6e6 km on a favourable
      approach — so Mars is 1.95× the Moon's DIAMETER and about 142× its DISTANCE. The target sits
@@ -56,194 +11,6 @@
      so the shot crosses the Moon early, passes Mars two-thirds out, and runs 2,865 u beyond Mars.
      Earth's disc remains drawn at an exaggerated radius, as it always has been — that is a separate,
      long-standing liberty so the limb fills the frame, and ranges here are quoted from the STATION.
--->
-<!-- CHANGELOG
-  2026-07-29b (real distance ordering, true relative body sizes, full screen, free-look):
-   1) MARS IS NOW BIGGER THAN THE MOON AND MUCH FURTHER AWAY. Mars was drawn at r 4.5 against the
-      Moon's 7.0 — i.e. SMALLER than the Moon, which is backwards — and sat only 1.4× further out.
-      Mars is now r 13.66 (the true 1.95:1 ratio) at 1,154 u, the Moon 7.00 u at 241 u. Measured
-      over the flight the peak apparent sizes are Moon 13.0°, Mars 25.3° — a ratio of 1.95, exactly
-      the true figure. You cross the Moon early, pass Mars late, and the target is beyond both.
-   2) THE GAPS ARE THE RIGHT WAY ROUND. Moon→Mars separation was SHORTER than station→Moon (0.5×).
-      It is now 982 u against 241 u — 4.1× — via the log-compressed distance law documented above.
-   3) THE DEPTH CUE NO LONGER DISTORTS RELATIVE SIZE. It previously normalised each body to its own
-      start range, so whichever body you passed first looked biggest. It now uses ONE shared
-      reference range (420 u, gain 0.55, clamp 2.6×) for every body, so at the fly-past the Moon and
-      Mars sit on the same curve and their true 1.95:1 ratio survives.
-   4) FULL SCREEN. New ⛶ button promotes the whole viewbox (canvas, target cam, HUD and controls)
-      via the Fullscreen API, with a resize on entry and exit.
-   5) FREE LOOK (opt-in). New 🎥 toggle. With it on, dragging during a launch orbits the camera
-      around the flying projectile instead of being locked to the scripted chase offset — you can
-      ride alongside, look back at the station, or turn to watch the Moon and Mars go past. The
-      wheel trims the follow distance while free-looking. Off by default, so the directed camera
-      remains the out-of-the-box experience.
-  2026-07-29 (depth cue on the Moon/Mars fly-past + overmatch one-shot kill + family-dependent flight time.
-              Only the apparent-size block, the coast-duration constants and the fracture branch changed;
-              geometry, materials, auto-aim, camera, cone, surface view and all copy are untouched):
-   1) MOON AND MARS ARE NO LONGER STATIC MARBLES. The projectile genuinely flies past both (measured: it
-      passes ~57 u from the Moon at ~32% of flight and ~60 u from Mars at ~48%), so perspective alone
-      already gave an ~8.5× angular swing — but it peaked at only ~8° across, which still reads as a bead
-      pinned to the backdrop. Added an apparent-size depth cue: each body holds its authored size exactly
-      at or beyond its reference range (so the DEFAULT SYSTEM VIEW IS PIXEL-UNCHANGED — scale is exactly
-      1.00 there), and inside that range is scaled by (d0/d)^0.62, clamped at 3.4×, eased at 0.22/frame.
-      Measured result: Moon now peaks at 20.5° with a 21.8× swing (was 8.1°/8.6×); Mars peaks at 24.2°
-      with a 30.7× swing (was 7.2°/9.1×). Both swell on the approach and fall away behind the shot, so
-      the distance being crossed is legible. Illustrative depth cue in an explicitly schematic scene.
-   2) A HEAVY DART OVERMATCHES A SMALL BODY IN ONE SHOT. Previously EVERY disruption ran the two-stage
-      fracture→dispersal path, so even a 30 t·km/s tungsten-class penetrator needed two strikes on a 30 m
-      body. That is wrong: 150 GJ into 2.83e7 kg is 5,300 J/kg ≈ 44× Q*. Added an overmatch branch —
-      specE ≥ 20 Q* AND momN ≥ 0.5 (i.e. the dart also has the momentum to couple into the bulk rather
-      than flash off the surface) disperses the body on the FIRST landed strike. Verified: M-DART and
-      T-DART now one-shot the 30 m body; R/Q/V-DART still take the two-stage path (the light diamond-
-      equivalent core only works the surface); the 100 m and 300 m bodies are completely unaffected.
-   3) FLIGHT TIME NOW DEPENDS ON THE DART, SO THE TARGET DRIFTS FURTHER UNDER A SLOW ONE. The family spans
-      1,000 → 100 km/s, so time-of-flight over the same range spans 10×. Played literally that is a tedious
-      wait, so it is log-compressed: coast = T_COAST·(1 + 0.78·log10(1e6/v)) — 4.50 s for the R-DART up to
-      8.01 s for the T-DART (1.78×). Because the body never stops drifting Earth-ward, it now travels 24.0 u
-      under the heavy shot against 13.5 u under the light one (78% further), which is the visible form of the
-      response-time argument. The lead correction in mkShotPlan() uses the SAME number, so hits still land.
-  2026-07-27 (verisimilitude rework: real miss physics, visible deflection, fragment retargeting, target cam,
-              apparent-size Moon/Mars, camera Earth-clip fix, compact view, demo-grade impact FX):
-   1) SHOT OBEYS THE REAL BORE. beginShot() freezes a shotPlan {muzzle, aim, offDeg, willHit}: if the bore is
-      more than ±1.5° off the target (auto-aim HELD while the body drifts), the shot now genuinely MISSES —
-      it flies straight down the bore past the body, with a MISS readout (off-bore angle + closest approach)
-      and NO impact. Only within the cone does clampToCone bend it onto the surface. Salvo misses bank no Δv.
-   2) DEFLECTION IS VISIBLE. Salvo nudge raised 8.5→26u and ANIMATED during recharge (the body glides off its
-      track, it doesn't teleport). Persistent salvo overlay: red dashed ORIGINAL Earth-bound track anchored at
-      the salvo-start point, a grey ghost marker on that track, and a gold tether line to the real (deflected)
-      body; the salvo panel reports the growing off-track displacement, labelled EXAGGERATED for visibility
-      (real per-shot Δv stays honest in the readout).
-   3) FRAGMENT RETARGETING. Break-up now spawns TRACKED fragments (frags[]), not cosmetic chunks: they damp to
-      slow drift and remain clickable-scale bodies. currentTarget() returns the largest surviving fragment once
-      the parent body is gone; auto-aim slews onto it and remaining salvo shots engage fragments one by one
-      ("retargeting fragment n — ~Xm"), each hit neutralising one with a scaled impact. All fragments gone →
-      salvo stands down early. prepNextShot no longer resurrects a destroyed body mid-salvo.
-   4) TARGET CAM. A picture-in-picture inset (scissor viewport, top-right) tracks the current target with its
-      own camera, so impacts/fragments stay legible with the asteroid pushed ~2× farther out (400,45,-545 →
-      (760,88,-1035), ~1.3k units). Toggleable (◉ Target cam); hidden on mobile + in projectile mode.
-   5) MOON/MARS = APPARENT sizes from Earth's vicinity (the Moon ~400,000 km away should
-      LOOK far larger than Mars tens of millions of km away). Moon radius 3.4→7.0 nearer (210,-6,-360); Mars
-      9.5→4.5 farther (455,-36,-400) as a small red point. Labels updated to explain apparent vs physical size.
-   6) EARTH-CLIP FIX. The camera could orbit/lerp INSIDE the Earth sphere (station floats only ~28u above the
-      280u-radius surface), swallowing the vessel. Hard clamp in loop(): camera is pushed radially outside
-      R=302 (sphere 280 + atmo shell) every frame, covering user orbit AND cinematic paths.
-   7) COMPACT VIEW + layout. #scene height is now responsive (min(600px, calc(100vh - 300px), floor 430px) so
-      Launch is pressable without scrolling; explicit ⤡ Compact toggle (persisted) forces 440px.
-   8) IMPACT FX to demo grade: two-layer flash (white core + coloured halo), vapour plume for EVERY regime
-      (emphasis ∝ velocity per the science audit), two-population ejecta (fast hot additive + slow lingering
-      dust ∝ momentum), second slow surface dust ring, fracture-glow on fragments (emissive decay), longer
-      eased decay tails. Fireball sprite-sheet include removed (retired asset — no chemical fireballs in vacuum).
-  2026-07-27 (SALVO recharge cadence + minimizable force legend + unmistakable Moon/Mars sizing — additive UI/JS
-              + Moon/Mars materials only; auto-aim/geometry, impact FX, camera, ±1.5° cone, break-up thresholds,
-              family/target selectors and all clickable ids untouched):
-   1) MULTI-FIRE SALVO with RECHARGE DELAY (tied to electricity). New "▶▶ Fire salvo" button beside Launch fires
-      4 shots, RECHARGING the pulse buffer between each. New centred #salvopanel shows the growing shot number
-      (Shot k / 4), the cumulative Δv (banked per shot from the existing deflection() model) and, between shots,
-      the recharge readout: "Recharging pulse buffer: 428.571 GJ ÷ 10 MW ≈ 11.9 h to next shot (ideal; longer in
-      practice) — conservative cadence ≈ 1 shot/day" with a sped-up countdown/progress bar (RECHARGE_H computed
-      = 428.571/(10·3.6) = 11.9 h, from Paper II §8 VERIFIED). Each shot nudges the body further OFF its
-      Earth-bound track (SALVO_NUDGE_U ⟂ the Earth line; natural drift frozen during a salvo). Single Launch is
-      unchanged — beginShot() is shared; resetFire()/Stop cancels a salvo. loop() gains an else-if stepRecharge();
-      stepFire()'s end branch routes to endShotInSalvo() only when salvoActive.
-   2) FORCE LEGEND is MINIMIZABLE. #forcelegend now has a clickable header (⚑ Forces + ▾/▸ #legendToggle) over a
-      collapsible #forcelegendBody; clicking either collapses it to a compact chip and back (in-memory legendMin).
-      updateForces() still owns auto show/hide with 'Show forces'; minimize only hides the body, so forces stay on.
-   3) MOON vs MARS made UNMISTAKABLE. Mars radius 7→9.5 and moved nearer (395,-31,-345) with a warmer red tint
-      (0xd2673f over the mars texture) = clearly the LARGER, reddish body; Moon radius 3.2→3.4, moved to
-      (250,-16,-430), kept cool grey = clearly SMALLER. Measured on-screen apparent radii give Moon:Mars ≈ 0.38–0.40
-      (was ~0.55); both sit comfortably in the default frame. Impact FX / camera / break-up / family / Earth+
-      asteroid / cone untouched.
-  2026-07-27 (comprehensive aiming/geometry fix — auto-aim slew + on-axis shot + forces follow the structure):
-   (a) IMPROBABLE ANGLE fixed: the shell no longer flies ~55° off the bore. A geomagnetic AUTO-AIM (default ON)
-       continuously & SLOWLY slerps the WHOLE structure (sysRoot) so the bore (local +x) points at the asteroid;
-       the launched projectile now LEAVES THE MUZZLE along the live bore world-direction and flies essentially
-       straight to the target (still inside the ±1.5° exit cone). Coast path, ghost line, cone and the impact
-       hemisphere are all recomputed from boreDirWorld(); during coast the projectile position is mapped through
-       sysRoot.worldToLocal (it is a child of the slewed structure) and a world tracer follows it.
-   (b) AUTO-AIM added (previously only a manual tilt): computeAimQ()/updateAutoAim() track the asteroid every
-       frame; the structure starts already aimed and re-points as the asteroid drifts. On Launch the aim snaps
-       exactly onto the asteroid so the shot is on-axis, then auto-aim pauses for the shot and resumes on reset.
-   (c) HOLD freezes it: the slew button (id slewBtn) is repurposed to TOGGLE auto-aim — 'Auto-aim: ON' ⇄
-       'Hold aim (frozen)'. When held, the structure is frozen and the force vectors are static & correctly
-       aligned (no drift/errors). Auto-aim also pauses during a launch.
-   (d) ASTEROID moved FAR down-range to (400,45,-545) (~680u, was ~290u) roughly along the bore's forward
-       direction, deep in space, with a slow velocity TOWARD Earth (12,-300,-70) that loops. The 30/100/300
-       selector still rescales it.
-   FORCES FOLLOW THE STRUCTURE: the bore-relative arrows (accelerating Lorentz, drive-cell field, vector-control
-   exit trim) now live in boreForceGroup parented to sysRoot, and the commanded dipole m rotates with it; the
-   geomagnetic field B stays INERTIAL (world-fixed) and τ = m×B is recomputed each frame (⊥ B, under-actuated).
-   Camera-follow-to-impact, the ±1.5° cone, the deflection/shots panel, the hypervelocity impact, break-up
-   thresholds, family/target selectors and all clickable ids are unchanged.
-  2026-07-27 (light-theme readability of canvas overlays — CSS/inline only; no geometry/logic change):
-   The in-canvas overlay UI (mode buttons .modes, HUD chips .hud .chip, launch .controls — fire/speed/
-   #forceBtn/◐ magnetic-slew/.rd read-outs #vel/#phase/#slewRd, the .forcelegend, the .scaleinset, and the
-   .shotpanel deflection panel) used themed vars (--bg2/--ink2/--muted/--accent…) that flip to cream/dark
-   ink in light theme. But these ALWAYS sit over the permanently-dark 3D canvas, so in light theme they
-   became light-on-light / low-contrast and were unreadable. FIX: a scoped `html[data-theme="light"] …`
-   block pins EVERY canvas overlay to the dark-theme palette (dark translucent glass color-mix(#0e1420…) +
-   #e9eef7/#aab7cc/#93a2ba text), while keeping accent/active states legible (teal .on mode + Show-forces
-   button, gold fire button + gold/#vel & teal/#phase read-outs, orange slew). Also pinned two .forcelegend
-   muted spans and the .sp-dv Δv <b> from var(--muted)/var(--accent-ink) to fixed #7d8ba3/#84d6ca (identical
-   in dark, readable in light). Dark theme is untouched (the override only applies under [data-theme=light]);
-   page/panel chrome (.top/.panel/.spec/.famsel/.matchbox/.foot) deliberately NOT changed (correctly themed
-   on the light page). No JS/geometry/launch/camera/impact logic touched.
-  2026-07-27 (geomagnetic attitude control — additive; companion "Geomagnetic Attitude Control" paper):
-   1) ATTITUDE subsystem added: a large conductive MAGNETORQUER loop (3-turn copper rectangle spanning the
-      barrel/truss, clickable pick id 'attitude') — the commanded magnetic dipole m. New SUBSYS entry + panel
-      role explaining τ = m×B geomagnetic slewing (propellantless, SLOW, UNDER-ACTUATED: torque ∥ B is
-      identically zero), coarse whole-apparatus pointing complementary to the ±1.5° vector-control exit trim.
-   2) SHOW FORCES now also draws three labelled geomagnetic vectors at the structure: the external field B
-      (long violet arrow through the structure, fixed/inertial), the commanded dipole m (copper arrow along
-      the loop normal, rotates with the structure) and the slew torque τ = m×B (lime curved arrow about the
-      perpendicular axis, recomputed each frame so τ⊥B always holds). New legend entries. Existing
-      Lorentz/coil/vector-control arrows + ±1.5° cone untouched.
-   3) "◐ Magnetic slew" button slowly re-points the WHOLE structure a few degrees about the τ axis over
-      ~2.2 s (visibly slow; readout notes it is illustrative/sped-up — hours-to-days in reality — and
-      magnetic-only). Disabled + reset to identity during a launch so it never fights the launch animation.
-      Impact FX / launch camera / break-up / family / Earth+asteroid / ±1.5° cone unchanged.
-  2026-07-27 (station realism upgrade + Moon/Mars differentiation — geometry/materials only):
-   1) STATION rebuilt toward the engineered mass-driver mock-ups (buildSystem, procedural r128 only):
-      - Driver: dropped 44 near-touching rings ("corrugated hose") → 24 discrete OCTAGONAL drive-module
-        casings with real ~40% bore gaps, end chamfer rings, 3 external truss rails (30/90/150°) + periodic
-        ring frames = a barrel-on-truss silhouette. One recessed emissive coil per module sits in each
-        exposed gap and still carries the travelling wave (cellRings, now 24 elements — launch anim unchanged).
-      - Breech: plain drum → large injector THROAT ring + 3-step breech housing + emissive aperture + 6 feed
-        conduits. Solar: flat boards → 3×2 gridded PV sub-panels on a gimballed yoke+boom with frame spars.
-        Radiators: muddy brown boards → pale-grey finned banks on standoff spars. Truss: single stick →
-        triangulated lattice (3 longerons + transverse frames + zig-zag diagonals). Buffer/converters now sit
-        on hung truss shelves (kept gold/purple legend hues). New metal() Phong helper for brushed metals;
-        shared geometries/materials reused for performance. All subsystem userData.pick/label ids intact
-        (driver, breech, vector, solar, buffer, converter, radiator, truss, projectile, target).
-   2) MOON vs MARS: Moon was same size as Mars → Moon radius 4.5→3.2 and moved to (159,-11,-440) so it reads
-      as the nearer, clearly SMALLER grey body (~half Mars's apparent size, matching real Ø ratio). Mars
-      radius 6→7 at (418,-35,-363). Both repositioned into the DEFAULT view frustum (were off-frame: Mars
-      above the top edge, Moon far left). Muted, distinct: Moon grey/cratered (BODY_TEX.rock), Mars reddish
-      (BODY_TEX.mars); labels kept. Impact FX / camera / break-up / family / Earth+asteroid / cone untouched.
-  2026-07-27 (cinematic camera + ±1.5° exit-steering cone):
-   1) Camera now TRACKS the projectile through coast (chase framing keeps the tiny tracer centred as it
-      crosses to the far, off-axis target), then eases onto the muzzle-facing surface impact point and
-      closes to Z_IMPACT=30u so the plasma flash / shock ring / crater fill a sensible fraction of the
-      frame; holds ~1/3 of T_HOLD close, then eases back (Z_REVEAL=108u) to reveal the deflected body /
-      debris. Retuned follow distances (Z_CHASE/Z_IMPACT/Z_REVEAL) + per-phase offset dir (cineDir);
-      smooth at 0.5× and 0.1×. Only cineFocus/cineZoom/cineDir + stepFire()/loop() cine block touched.
-   2) Exit steering capped to a ±1.5° cone: the driver is coarse-aimed down-range and the vector-control
-      only trims the exit ≤1.5° (clampToCone + control point on the aim axis => bezier stays inside the
-      cone; ghost line = un-trimmed aim). Show-forces now draws the reachable ±1.5° cone from the muzzle
-      (faint surface + 4 edge lines + footprint ring), labelled "±1.5° cone → reachable radius ≈
-      range·tan1.5°" with a live footprint-vs-target ratio, plus a note that cone × range sets the impact
-      footprint. Impact-effect internals / break-up / family / Earth+asteroid placement unchanged.
-  2026-07-26 (scale + asteroid revision):
-   1) Earth scale: radius 88 -> 280 units, centre pushed down/back to (12,-300,-70); atmosphere 91 -> 290.
-      Reads as a vast curved planet limb below the tiny 22-unit structure (true ratio ~1,820:1). No numeric
-      orbit altitude claimed. Scale-inset now states "Earth 12,742 km (approx 1,820x the structure)".
-      Default system view re-aimed (yaw/pitch/dist) to look down-range so Earth limb fills the lower frame.
-   2) Demonstration asteroid moved FAR into deep space (~390 units from Earth, ~290 from the structure) as a
-      small distant body; given a slow Earth-bound drift (drifts toward Earth over time, loops). Target-size
-      selector (30/100/300 m) still rescales the far body.
-   3) Show forces: added the asteroid's Earth-bound projected track (red) and the deflected/missing track
-      (green, splitting at the intercept), plus a dark-glass "DEFLECTION" HTML panel giving per-shot Dv from
-      deflection() and an illustrative shot-count N (notional 1-yr warning / 0.5-AU dart response time).
-      Launch / impact / force-toggle logic unchanged; illustrative, non-operational framing intact.
 -->
 <html lang="en-GB" data-theme="dark">
 <head>
@@ -638,7 +405,7 @@ const SUBSYS=[
   {id:'radiator', name:'Radiators', color:0xe07a5a, role:'Reject waste heat from the pulse and from solar input (Paper II §4.4 radiator duty: ~3.2 MW average cadence-level rejection in the conservative no-recovery, ≈1-shot-per-day case — the local millisecond pulse heating must close separately).'},
   {id:'truss', name:'Structural truss & arms', color:0x8aa0bf, role:'The fixed 7,000 m backbone and deployable arms carrying the subsystems. Length is Paper II’s one fixed parameter.'},
   {id:'projectile', name:'Projectile (0.300 kg)', color:0xd4b24c, role:'The modular screening projectile. Switch to the exploded view to inspect its deposited mass budget and the collar-to-core geometry.'},
-  {id:'target', name:'Demonstration target', color:0x9a8b78, role:'A notional deflection-demonstration body far down-range. Per Paper I §8, delivered kinetic energy is calculable but useful deflection is not — the impact campaign (gate P6) must bracket momentum transfer, ejecta, fragmentation and target-structure uncertainty.'},
+  {id:'target', name:'Demonstration target', color:0x9a8b78, role:'A notional deflection-demonstration body far down-range. Per Paper I §8, delivered kinetic energy is calculable but useful deflection is not — the impact campaign (gate P8) must bracket momentum transfer, ejecta, fragmentation and target-structure uncertainty.'},
 ];
 
 let renderer,scene,camera,raf,yaw=-0.62,pitch=0.22,dist=32,dragging=false,lx,ly;
@@ -1798,7 +1565,7 @@ function mkFlash(fx,ipW,S,hyper){ // two-layer plasma flash: white-hot core + co
   halo.scale.setScalar(1.9*S);halo.position.copy(ipW);fx.add(halo);
   fx.userData.flash=core;fx.userData.flashBase=0.85*S;fx.userData.halo=halo;fx.userData.haloBase=1.9*S;
 }
-function mkPlume(fx,ipW,dir,S,velN){ // vapour/plasma plume along the surface normal — EVERY regime vaporises; emphasis ∝ velocity (science audit P1)
+function mkPlume(fx,ipW,dir,S,velN){ // vapour/plasma plume along the surface normal — EVERY regime vaporises; emphasis ∝ velocity
   const pl=(0.5+1.6*velN)*S;
   const plume=new THREE.Mesh(new THREE.ConeGeometry(pl*0.16,pl,16,1,true),new THREE.MeshBasicMaterial({color:velN>=0.45?0xcfe6ff:0xffcf9a,transparent:true,opacity:0.28+0.34*velN,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
   plume.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir);
@@ -1846,7 +1613,7 @@ function triggerImpact(){
     mkFlash(fx,ipW,fxScale,hyper);mkPlume(fx,ipW,dir,fxScale,velN);mkEjecta(fx,ipW,dir,fxScale,velN,momN,hyper);
     scene.remove(T.frag.mesh);frags=frags.filter(f=>f!==T.frag);
     scene.add(fx);impactFlash=fx;boreProjectile.visible=false;shotOutcome='fragkill';
-    document.getElementById('phase').innerHTML=fam.id+' · '+(fam.v/1000)+' km/s → fragment · 150 GJ vaporises/disperses the small body · '+frags.length+' fragment'+(frags.length===1?'':'s')+' remaining · illustrative (P6)';
+    document.getElementById('phase').innerHTML=fam.id+' · '+(fam.v/1000)+' km/s → fragment · 150 GJ vaporises/disperses the small body · '+frags.length+' fragment'+(frags.length===1?'':'s')+' remaining · illustrative (P8)';
     return;
   }
   // ---- MAIN BODY hit ----
@@ -1859,7 +1626,7 @@ function triggerImpact(){
   // landed strike, if cumulative specific energy ≥ 4×Q*, the weakened body FAILS even under a dart that
   // could not disrupt it alone — so a full salvo's LAST shot breaks a 100 m body apart (a 300 m body
   // shrugs off four: 4×150 GJ ≈ 21 J/kg ≪ Q*). Fracture accumulation is real rubble-pile behaviour;
-  // the threshold here is illustrative (P6 brackets it).
+  // the threshold here is illustrative (P8 brackets it).
   const nextHits=landedHits+1,cumSpecE=nextHits*KE_SHOT/tgt.mass;
   const fatigue=!D.disrupt&&nextHits>=4&&cumSpecE>=4*Q_STAR;
   const critHit=D.disrupt||fatigue;          // this strike meets the disruption criterion…
@@ -1886,7 +1653,7 @@ function triggerImpact(){
                              ? 'OVERMATCHED — '+D.specE.toFixed(0)+' J/kg is ≈'+Math.round(D.specE/Q_STAR)+'× Q* and this dart couples it into the bulk: the body is dispersed by this single strike'
                   : breakup  ? 'the fractured body GIVES WAY → dispersal'
                   : 'coherent deflection';
-  document.getElementById('phase').innerHTML=fam.id+' · '+(fam.v/1000)+' km/s → '+tgt.id+' body · hypervelocity energy deposition · 150 GJ + '+(fam.kg*fam.v).toExponential(1)+' N·s · '+emph+' · Δv≈'+fmtDv(D.dv)+' · '+character+' · useful deflection/effect uncertain (impact campaign P6)';
+  document.getElementById('phase').innerHTML=fam.id+' · '+(fam.v/1000)+' km/s → '+tgt.id+' body · hypervelocity energy deposition · 150 GJ + '+(fam.kg*fam.v).toExponential(1)+' N·s · '+emph+' · Δv≈'+fmtDv(D.dv)+' · '+character+' · useful deflection/effect uncertain (impact campaign P8)';
   const fx=new THREE.Group();fx.userData={t:0,dur:T_HOLD,velN,momN,hyper,breakup};
   // --- layered FX: flash (white core + coloured halo), plume for EVERY regime (emphasis ∝ velocity),
   //     fast luminous shock ring + slow dust ring, two-population ejecta. All kinetic — no fireball in vacuum. ---
@@ -2437,7 +2204,7 @@ function buildTargetSel(){
       updateMatch();resetFire();};box.appendChild(b);});
 }
 // Δv_a = β·m·v / M ; disruption needs BOTH enough delivered energy vs target AND momentum
-// coupling (so the heaviest/highest-momentum darts break a given body, per the science audit),
+// coupling (so the heaviest/highest-momentum darts break a given body),
 // OR an overwhelming energy density that disrupts regardless of coupling.
 function deflection(fam,tgt){
   const mom=fam.kg*fam.v, dv=mom/tgt.mass;            // β≈1 illustrative
@@ -2456,7 +2223,7 @@ function updateMatch(){
   box.innerHTML='<b>'+f.id+' → '+t.id+' body</b> (~'+t.mass.toExponential(1)+' kg)<br>'+
     '<span style="color:var(--muted)">'+f.mat+' · '+f.pen+(famIdx===0?' · response-time edge: 0.5 AU in ~21 h (1,000 km/s ≈ c/300)':'')+'</span><br>'+
     'Delivers <b>150 GJ</b> + <b>'+(f.kg*f.v).toExponential(1)+' N·s</b> → Δv ≈ <span class="dv">'+fmtDv(d.dv)+'</span> (β≈1 assumed) · '+d.regime+
-    '<span class="best">'+(coherent.length? 'Best clean deflection: '+best.id+' (highest momentum that stays coherent → Δv '+fmtDv(best.kg*best.v/t.mass)+')' : 'This body is small enough that 150 GJ likely disrupts it for every dart — coherent deflection is not on the table (P6).')+'</span>'+
+    '<span class="best">'+(coherent.length? 'Best clean deflection: '+best.id+' (highest momentum that stays coherent → Δv '+fmtDv(best.kg*best.v/t.mass)+')' : 'This body is small enough that 150 GJ likely disrupts it for every dart — coherent deflection is not on the table (P8).')+'</span>'+
     '<span class="best" style="color:var(--muted)">The family varies core MATERIAL (diamond-equivalent reference → tungsten-class penetrators), not size — dense penetrators couple momentum deep into the bulk; the light diamond core only works the surface. Illustrative; the papers fix mass &amp; velocity.</span>';
   updateShotPanel();
 }

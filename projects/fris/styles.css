@@ -410,7 +410,7 @@ button, input, select, textarea { font-family: var(--sans); }
   .search { flex: 1; min-width: 0; }
 }
 @media (max-width: 560px) {
-  /* 2026-07-28 overflow fix: the top bar's fixed 14px gaps + 16px padding measured
+  /* Overflow fix: the top bar's fixed 14px gaps + 16px padding measured
      406px inside a 390px viewport, giving the document a horizontal scrollbar. */
   .topbar { gap: 8px; padding: 0 10px; }
   /* Collapse only the visible label text — the button keeps its accessible
