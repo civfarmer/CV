@@ -2,7 +2,7 @@
 
 **Author:** Christopher I. V. Farmer, LL.M. (University of Worcester); Independent Researcher; civfarmer@gmail.com
 **Date:** 2026
-**Report type:** Independent advisory / technical report — gray literature
+**Report type:** Independent advisory / technical report — grey literature
 **Advisory practice:** Keystone Analytics & Victory Finance
 
 > **Case study based on the author's own advisory work.** The jurisdiction and regulatory analysis are real; the project, counterparties and location have been anonymised, and no individual is identified. No confidential, privileged, or NDA-protected material is reproduced.

@@ -2,7 +2,7 @@
 
 **Author:** Christopher I. V. Farmer, LL.M. (University of Worcester); Independent Researcher; civfarmer@gmail.com
 **Date:** 2024/2025
-**Report type:** Independent advisory / technical report — gray literature
+**Report type:** Independent advisory / technical report — grey literature
 
 ## Abstract
 
@@ -14,8 +14,8 @@ charity governance; insolvency avoidance; crisis management; trustee fiduciary d
 
 ## How to cite
 
-Farmer, C. I. V. (2024/2025). *Insolvency Avoidance & Executive Crisis Intervention Model — A Simulated Charity Governance Case Study*. Independent advisory / technical report (gray literature). Zenodo. [DOI to be minted on deposit]
+Farmer, C. I. V. (2024/2025). *Insolvency Avoidance & Executive Crisis Intervention Model — A Simulated Charity Governance Case Study*. Independent advisory / technical report (grey literature). Zenodo. [DOI to be minted on deposit]
 
 ---
 
-*Deposited as gray literature to provide a stable, citable reference for this independent report.*
+*Deposited as grey literature to provide a stable, citable reference for this independent report.*
