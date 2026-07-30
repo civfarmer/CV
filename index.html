@@ -914,7 +914,7 @@
   window.closeApp=function(){ if(avtimer) clearTimeout(avtimer); appv.classList.remove('on'); avframe.src='about:blank'; document.body.style.overflow='';_bgInert(false);_restoreFocus(); };
   appv.addEventListener('click', function(e){ if(e.target===appv) closeApp(); });
 
-  var NOTE = { fris:'Runs offline · synthetic data', meridian:'Runs offline · frozen real dataset (2026-07-09)', vantage:'Runs offline · synthetic data', helm:'Runs offline · synthetic data', frontier:'Runs offline · decision-support, not legal advice', sentinel:'Runs offline · decision-support, not legal advice', morris:'Client build · design & estimator preview with demo data' };
+  var NOTE = { fris:'Runs offline · synthetic data', meridian:'Runs offline · frozen real dataset (2026-07-19)', vantage:'Runs offline · synthetic data', helm:'Runs offline · synthetic data', frontier:'Runs offline · decision-support, not legal advice', sentinel:'Runs offline · decision-support, not legal advice', morris:'Client build · design & estimator preview with demo data' };
   var TECH = {
     fris:{ title:"FRIS — how it’s built", icon:'assets/img/fris-crest.png', html:
       '<span class="mine">Built by me · vanilla JS · runs offline</span>'+
@@ -930,7 +930,7 @@
       '<p>A truthfulness-first regulatory &amp; market-intelligence platform.</p>'+
       '<ul><li>Python server + SQLite with scheduled ingestion under a fixed API budget.</li>'+
       '<li>Each figure is written with the <b>timestamp and provenance label</b> it was captured under — real and synthetic data are never silently mixed.</li>'+
-      '<li>Embedded here as the <b>full platform on a frozen local dataset (2026-07-09, enriched 2026-07-12)</b> — no live API calls by design; server-side search, ingestion and admin idle in this copy.</li></ul>' },
+      '<li>Embedded here as the <b>full platform on a frozen local dataset (identity and market records to 2026-07-19; static export generated 2026-07-28)</b> — no live API calls by design; server-side search, ingestion and admin idle in this copy.</li></ul>' },
     vantage:{ title:"Vantage — how it’s built", icon:'assets/img/vantage-crest.png', html:
       '<span class="mine">Built by me · dependency-free engine</span>'+
       '<p>A forecasting engine wrapped in five industry skins.</p>'+
