@@ -121,7 +121,7 @@
    4) TARGET CAM. A picture-in-picture inset (scissor viewport, top-right) tracks the current target with its
       own camera, so impacts/fragments stay legible with the asteroid pushed ~2× farther out (400,45,-545 →
       (760,88,-1035), ~1.3k units). Toggleable (◉ Target cam); hidden on mobile + in projectile mode.
-   5) MOON/MARS = APPARENT sizes from Earth's vicinity (the user is right: the Moon ~400,000 km away should
+   5) MOON/MARS = APPARENT sizes from Earth's vicinity (the Moon ~400,000 km away should
       LOOK far larger than Mars tens of millions of km away). Moon radius 3.4→7.0 nearer (210,-6,-360); Mars
       9.5→4.5 farther (455,-36,-400) as a small red point. Labels updated to explain apparent vs physical size.
    6) EARTH-CLIP FIX. The camera could orbit/lerp INSIDE the Earth sphere (station floats only ~28u above the
@@ -1221,7 +1221,7 @@ function loop(){raf=requestAnimationFrame(loop);
   let tPos=homePos,tLook=homeLook;
   if(cine>0.01){
     // cinematic: camera = focus + per-phase offset direction × distance (set each frame by stepFire).
-    // FREE LOOK: the offset direction instead comes from the user's own yaw/pitch drag, so the camera
+    // FREE LOOK: the offset direction instead comes from the viewer's own yaw/pitch drag, so the camera
     // orbits the flying projectile — you can fly alongside it and look back at the station, or round
     // to see the Moon and Mars go past. The scripted zoom still applies, scaled by the wheel.
     const cinePos=freeLook
@@ -2088,7 +2088,7 @@ document.getElementById('camBtn').addEventListener('click',function(){insetOn=!i
   let compact=false;try{compact=localStorage.getItem('argus3d-compact')==='1'}catch(e){}
   function ap(){if(vb)vb.classList.toggle('compact',compact);if(fb)fb.classList.toggle('on',compact);
     // the full legend eats half a 440px canvas, so compact collapses it — but it used to stay
-    // collapsed for ever. Remember what the user had and restore it when compact is turned off.
+    // collapsed for ever. Remember what the viewer had and restore it when compact is turned off.
     if(window.__setLegendMin){
       if(compact){if(_preCompactLegend===null)_preCompactLegend=!!window.__legendMin;window.__setLegendMin(true);}
       else if(_preCompactLegend!==null){window.__setLegendMin(_preCompactLegend);_preCompactLegend=null;}
@@ -2437,7 +2437,7 @@ function buildTargetSel(){
       updateMatch();resetFire();};box.appendChild(b);});
 }
 // Δv_a = β·m·v / M ; disruption needs BOTH enough delivered energy vs target AND momentum
-// coupling (so the heaviest/highest-momentum darts break a given body, per the user + science audit),
+// coupling (so the heaviest/highest-momentum darts break a given body, per the science audit),
 // OR an overwhelming energy density that disrupts regardless of coupling.
 function deflection(fam,tgt){
   const mom=fam.kg*fam.v, dv=mom/tgt.mass;            // β≈1 illustrative

@@ -97,7 +97,7 @@ export function home(root) {
     root.append(grid);
   };
 
-  section('Overview', 'Start here. Get the one-screen picture, then dive into a domain.',
+  section('Overview', 'Start here. Get the one-screen picture, then open the domain you need.',
     ['overview']);
   section('Investigations & Forensics', 'Follow a company and its money — trace who really owns and controls it, and trace the crypto that moves through it.',
     ['nexus', 'chainlink']);
