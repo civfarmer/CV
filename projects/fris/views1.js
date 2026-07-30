@@ -157,7 +157,7 @@ async function nexusNetwork(panel, focusId) {
     if (!d.nodes.length) { graphBox.replaceChildren(emptyState('No entities match the current filters', 'Loosen a filter or clear the search to see the network.')); updateCounts(0, 0); graph = null; _lastNexusGraph = null; return; }
     const box = el('div', { style: { height: '640px' } });
     graphBox.replaceChildren(box);
-    // The winning "Variant B" tiered-ownership renderer (flowGraph). It draws its
+    // The tiered-ownership renderer (flowGraph). It draws its
     // own encoding-driven legend and lays owners on the TOP tier, so the answer is
     // structural. We wrap its handle so the existing Network-Explorer toolbar
     // (trace-to-UBO, path-between, search-centre, red-flags) keeps working.
