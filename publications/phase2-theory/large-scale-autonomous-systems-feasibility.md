@@ -315,3 +315,16 @@ Wright, T. P. (1936). Factors Affecting the Cost of Airplanes. *Journal of the A
 ---
 
 *Preprint — submitted; pending peer review. All numerical values in the worked illustration are illustrative and notional. This paper contains no weapons, munitions, or operational-military content of any kind.*
+
+
+---
+
+## Further reading and points of disagreement (July 2026 addendum)
+
+The worked illustration in this paper assumes learning-curve improvement and stable procurement incentives; both assumptions have a critical literature that a careful reader should weigh. The empirical learning-curve record since Wright shows large variance in realised learning rates across organisations and programmes — Argote and Epple's survey is the standard corrective to any deterministic projection. The procurement-incentives literature, exemplified by Rogerson, explains why defence-adjacent programmes systematically drift from should-cost baselines, and the megaproject base rates assembled by Flyvbjerg and by Merrow quantify the drift for first-of-a-kind systems. Read against that canon, the appropriately cautious position — and the one this paper intends — is that the illustration's numbers are notional throughout, the feasibility claim is confined to structure rather than point estimates, and any real programme would govern commitment through staged technology-readiness gates in Mankins' sense rather than through the illustration's smooth curves.
+
+- Argote, L. & Epple, D., "Learning curves in manufacturing" (1990) 247 *Science* 920–924. https://doi.org/10.1126/science.247.4945.920.
+- Rogerson, W. P., "Economic incentives and the defense procurement process" (1994) 8 *Journal of Economic Perspectives* 65–90. https://doi.org/10.1257/jep.8.4.65.
+- Flyvbjerg, B., "What you should know about megaprojects and why: an overview" (2014) 45 *Project Management Journal* 6–19. https://doi.org/10.1002/pmj.21409.
+- Merrow, E. W., *Industrial Megaprojects: Concepts, Strategies, and Practices for Success* (Wiley 2011).
+- Mankins, J. C., "Technology readiness assessments: a retrospective" (2009) 65 *Acta Astronautica* 1216–1223. https://doi.org/10.1016/j.actaastro.2009.03.058.

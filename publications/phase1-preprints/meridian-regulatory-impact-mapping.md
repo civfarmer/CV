@@ -354,3 +354,15 @@ core complete (≥90, no missing critical) · core usable (≥75) · partial (�
 ---
 
 *Data acknowledgements (as carried in the system's provenance chips and attribution notice): official and public sources including exchange issuer directories, the Global LEI Foundation, national and EU regulatory publishers and sanctions authorities, official filing registers and central-bank statistical services; and free/personal-tier commercial and community providers. Each stored value names its own provider in its provenance record. Meridian is a private, non-commercial research instrument; provider data remains subject to each provider's terms.*
+
+
+---
+
+## Further reading and points of disagreement (July 2026 addendum)
+
+Meridian's identity-resolution and company–regulation matching sit on ground the informatics literature has mapped, and the design's departures from that literature are choices, not omissions. Fellegi and Sunter's record-linkage theory is the optimal probabilistic treatment of entity matching; Meridian's provenance-first display — every value labelled by source class, gaps shown rather than imputed — trades some of that coverage for auditability, the same trade defended in the companion FRIS paper. The knowledge-graph survey of Hogan and colleagues describes the representation family Meridian's link graph belongs to, and the public identifier infrastructures it consumes (the GLEIF Legal Entity Identifier system; the European Legislation Identifier) are the load-bearing standards that make deterministic joins possible at all. The disagreement worth naming: probabilistic enrichment would raise match counts, and declining it is a deliberate epistemic posture — a regulatory-intelligence tool whose numbers cannot be re-derived is a liability in exactly the settings it serves.
+
+- Fellegi, I. P. & Sunter, A. B., "A theory for record linkage" (1969) 64 *Journal of the American Statistical Association* 1183–1210. https://doi.org/10.1080/01621459.1969.10501049.
+- Hogan, A. et al., "Knowledge graphs" (2021) 54 *ACM Computing Surveys* 1–37. https://doi.org/10.1145/3447772.
+- Global Legal Entity Identifier Foundation, *The Global LEI System*. https://www.gleif.org/.
+- European Union, *European Legislation Identifier (ELI)*. https://eur-lex.europa.eu/eli-register/about.html.

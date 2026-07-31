@@ -505,3 +505,14 @@ Powering a large orbital platform entirely from sunlight is an exercise in manag
 ---
 
 *Preprint — submitted; pending peer review. © 2026 Christopher I. V. Farmer. This manuscript is a drafting-stage scientific preprint; all system-level figures are explicitly labelled illustrative calculations built upon cited primary inputs, and no proprietary or classified data are used. Scope statement: this document concerns general large-platform power engineering only and contains no weapon, launcher, railgun/coilgun, projectile, or "firing" content; the large intermittent load is treated exclusively as generic utilisation (scientific instruments, electric propulsion, or communications transmitters).*
+
+
+---
+
+## Further reading and points of disagreement (July 2026 addendum)
+
+The nearest adjacent debate — space-based solar *power for Earth* — has a sharply sceptical recent entry: NASA's 2024 Office of Technology, Policy and Strategy assessment finds beamed-power concepts substantially more expensive than terrestrial alternatives on current assumptions. That scepticism does not bear on this paper's claim, and the distinction is worth making explicit: this study treats generation, storage and thermal rejection for a platform's *own* loads, with no power beaming, no ground segment and no terrestrial cost comparison; its figures stand or fall on the AM0 constant, cell efficiency and the storage mass model alone. On the optimistic side, the hardware frontier continues to move —six-junction concentrator cells at 47.1% under concentration define the laboratory ceiling above the flight-qualified efficiencies assumed here, and the Caltech SSPD-1 flight demonstration retired some transmission-hardware risk in 2023. Neither result changes this paper's end-of-life areal power density, which is deliberately anchored to flight-qualified, not record, efficiencies.
+
+- NASA Office of Technology, Policy and Strategy, *Space-Based Solar Power* (January 2024). https://www.nasa.gov/otps/.
+- Geisz, J. F. et al., "Six-junction III–V solar cells with 47.1% conversion efficiency under 143 Suns concentration" (2020) 5 *Nature Energy* 326–335. https://doi.org/10.1038/s41560-020-0598-5.
+- California Institute of Technology, Space Solar Power Project, SSPD-1 mission results (2023–2024). https://www.spacesolar.caltech.edu/.

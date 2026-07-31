@@ -784,7 +784,21 @@
 <p>Zhang, J., &amp; Singh, S. (2014). LOAM: Lidar Odometry and Mapping in Real-Time. <em>Robotics: Science and Systems (RSS) X.</em></p>
 <hr>
 <p><em>Preprint — submitted; pending peer review. This paper describes a software and control-layer architecture for responsible, human-governed, contact-capable robotics. It contains no weapon, munition, or autonomous-use-of-force content of any kind; all physical responses discussed are bounded, non-kinetic, and human-authorised. All latency figures, sensor cadences, and proof metrics are engineering targets or vendor-published capabilities, clearly labelled; no measured benchmark or performance result is claimed.</em></p>
-    </article>
+    <hr>
+<h2 id="addendum-2026">Further reading and points of disagreement (July 2026 addendum)</h2>
+<p>Two literatures ground the architecture more firmly than the original reference list made explicit, and one live disagreement should be stated. First, the governance-by-design commitments of §6 are not free-floating: they map onto the industrial functional-safety and collaborative-robot standards (IEC 61508; ISO 10218; ISO/TS 15066) and, at the regulatory layer, the European Union's AI Act — and the deterministic reflex lane exists precisely because certification against those instruments requires bounded, analysable behaviour. Second, the empirical basis for treating contact as a designed-for event rather than a failure is Haddadin's safe physical human–robot interaction programme, with the control-theoretic lineage running back to Hogan's impedance framework; the perception stack's components correspond to current published baselines (LiDAR-inertial odometry and mapping; volumetric world models; online multi-object tracking). The disagreement: the contemporary research mainstream favours end-to-end learned policies, which promise performance the modular architecture here deliberately forgoes. I hold the line for a certification reason, not a performance one — a learned monolith cannot presently be decomposed into the auditable, bounded functions the safety standards and the governance commitments of §6 require, and physical response in this architecture is human-authorised and non-kinetic by construction.</p>
+<ul class="addendum-refs">
+<li>International Electrotechnical Commission, IEC 61508, <em>Functional Safety of Electrical/Electronic/Programmable Electronic Safety-Related Systems</em> (2010).</li>
+<li>International Organization for Standardization, ISO 10218-1/-2, <em>Robotics — Safety requirements</em> ; and ISO/TS 15066, <em>Robots and robotic devices — Collaborative robots</em> (2016).</li>
+<li>European Union, Regulation (EU) 2024/1689 (Artificial Intelligence Act), OJ L, 12 July 2024.</li>
+<li>Haddadin, S., Albu-Schäffer, A. &amp; Hirzinger, G., "Requirements for safe robots: measurements, analysis and new insights" (2009) 28 <em>International Journal of Robotics Research</em> 1507–1527. <a href="https://doi.org/10.1177/0278364909343970" rel="noopener">https://doi.org/10.1177/0278364909343970</a>.</li>
+<li>Hogan, N., "Impedance control: an approach to manipulation: Part I — theory" (1985) 107 <em>Journal of Dynamic Systems, Measurement, and Control</em> 1–7. <a href="https://doi.org/10.1115/1.3140702" rel="noopener">https://doi.org/10.1115/1.3140702</a>.</li>
+<li>Shan, T. et al., "LIO-SAM: tightly-coupled lidar inertial odometry via smoothing and mapping", <em>IEEE/RSJ IROS</em> (2020). <a href="https://doi.org/10.1109/IROS45743.2020.9341176" rel="noopener">https://doi.org/10.1109/IROS45743.2020.9341176</a>.</li>
+<li>Xu, W. et al., "FAST-LIO2: fast direct LiDAR-inertial odometry" (2022) 38 <em>IEEE Transactions on Robotics</em> 2053–2073. <a href="https://doi.org/10.1109/TRO.2022.3141876" rel="noopener">https://doi.org/10.1109/TRO.2022.3141876</a>.</li>
+<li>Hornung, A. et al., "OctoMap: an efficient probabilistic 3D mapping framework based on octrees" (2013) 34 <em>Autonomous Robots</em> 189–206. <a href="https://doi.org/10.1007/s10514-012-9321-0" rel="noopener">https://doi.org/10.1007/s10514-012-9321-0</a>.</li>
+<li>Bewley, A. et al., "Simple online and realtime tracking", <em>IEEE ICIP</em> (2016). <a href="https://doi.org/10.1109/ICIP.2016.7533003" rel="noopener">https://doi.org/10.1109/ICIP.2016.7533003</a>.</li>
+</ul>
+</article>
     <footer class="paperfoot">
       <span>&copy; <span id="yr">2026</span> Christopher I. V. Farmer</span>
       <span>&middot;</span>

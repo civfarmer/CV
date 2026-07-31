@@ -528,3 +528,20 @@ Zhang, J., & Singh, S. (2014). LOAM: Lidar Odometry and Mapping in Real-Time. *R
 ---
 
 *Preprint — submitted; pending peer review. This paper describes a software and control-layer architecture for responsible, human-governed, contact-capable robotics. It contains no weapon, munition, or autonomous-use-of-force content of any kind; all physical responses discussed are bounded, non-kinetic, and human-authorised. All latency figures, sensor cadences, and proof metrics are engineering targets or vendor-published capabilities, clearly labelled; no measured benchmark or performance result is claimed.*
+
+
+---
+
+## Further reading and points of disagreement (July 2026 addendum)
+
+Two literatures ground the architecture more firmly than the original reference list made explicit, and one live disagreement should be stated. First, the governance-by-design commitments of §6 are not free-floating: they map onto the industrial functional-safety and collaborative-robot standards (IEC 61508; ISO 10218; ISO/TS 15066) and, at the regulatory layer, the European Union's AI Act — and the deterministic reflex lane exists precisely because certification against those instruments requires bounded, analysable behaviour. Second, the empirical basis for treating contact as a designed-for event rather than a failure is Haddadin's safe physical human–robot interaction programme, with the control-theoretic lineage running back to Hogan's impedance framework; the perception stack's components correspond to current published baselines (LiDAR-inertial odometry and mapping; volumetric world models; online multi-object tracking). The disagreement: the contemporary research mainstream favours end-to-end learned policies, which promise performance the modular architecture here deliberately forgoes. I hold the line for a certification reason, not a performance one — a learned monolith cannot presently be decomposed into the auditable, bounded functions the safety standards and the governance commitments of §6 require, and physical response in this architecture is human-authorised and non-kinetic by construction.
+
+- International Electrotechnical Commission, IEC 61508, *Functional Safety of Electrical/Electronic/Programmable Electronic Safety-Related Systems* (2010).
+- International Organization for Standardization, ISO 10218-1/-2, *Robotics — Safety requirements* ; and ISO/TS 15066, *Robots and robotic devices — Collaborative robots* (2016).
+- European Union, Regulation (EU) 2024/1689 (Artificial Intelligence Act), OJ L, 12 July 2024.
+- Haddadin, S., Albu-Schäffer, A. & Hirzinger, G., "Requirements for safe robots: measurements, analysis and new insights" (2009) 28 *International Journal of Robotics Research* 1507–1527. https://doi.org/10.1177/0278364909343970.
+- Hogan, N., "Impedance control: an approach to manipulation: Part I — theory" (1985) 107 *Journal of Dynamic Systems, Measurement, and Control* 1–7. https://doi.org/10.1115/1.3140702.
+- Shan, T. et al., "LIO-SAM: tightly-coupled lidar inertial odometry via smoothing and mapping", *IEEE/RSJ IROS* (2020). https://doi.org/10.1109/IROS45743.2020.9341176.
+- Xu, W. et al., "FAST-LIO2: fast direct LiDAR-inertial odometry" (2022) 38 *IEEE Transactions on Robotics* 2053–2073. https://doi.org/10.1109/TRO.2022.3141876.
+- Hornung, A. et al., "OctoMap: an efficient probabilistic 3D mapping framework based on octrees" (2013) 34 *Autonomous Robots* 189–206. https://doi.org/10.1007/s10514-012-9321-0.
+- Bewley, A. et al., "Simple online and realtime tracking", *IEEE ICIP* (2016). https://doi.org/10.1109/ICIP.2016.7533003.

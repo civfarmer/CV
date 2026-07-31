@@ -267,3 +267,13 @@ Syntetos, A. A., Boylan, J. E., & Croston, J. D. (2005). On the categorization o
 Tashman, L. J. (2000). Out-of-sample tests of forecasting accuracy: An analysis and review. *International Journal of Forecasting*, 16(4), 437–450. https://doi.org/10.1016/S0169-2070(00)00065-0
 
 Winters, P. R. (1960). Forecasting sales by exponentially weighted moving averages. *Management Science*, 6(3), 324–342. https://doi.org/10.1287/mnsc.6.3.324
+
+
+---
+
+## Further reading and points of disagreement (July 2026 addendum)
+
+Two strands of the forecast-evaluation literature bear directly on the design choices here and should be named. First, the proper-scoring-rule framework of Gneiting and Raftery is the canonical answer to the question this paper's backtesting protocol raises implicitly: point-error metrics such as MASE reward the median or mean under specific loss functions, and a system that issues intervals should ultimately be scored with proper rules (interval or CRPS scoring) rather than point metrics alone — an upgrade path this framework accommodates. Second, the M-competition record, most recently the M4 findings, is a standing caution against method complexity: simple and combined statistical baselines remain hard to beat, which is precisely why this paper benchmarks against naïve and seasonal-naïve baselines before anything else. The disagreement to acknowledge is between in-sample sophistication and out-of-sample humility; the design lands with the latter, and the cited canon is the reason.
+
+- Gneiting, T. & Raftery, A. E., "Strictly proper scoring rules, prediction, and estimation" (2007) 102 *Journal of the American Statistical Association* 359–378. https://doi.org/10.1198/016214506000001437.
+- Makridakis, S., Spiliotis, E. & Assimakopoulos, V., "The M4 Competition: 100,000 time series and 61 forecasting methods" (2020) 36 *International Journal of Forecasting* 54–74. https://doi.org/10.1016/j.ijforecast.2019.04.014.
