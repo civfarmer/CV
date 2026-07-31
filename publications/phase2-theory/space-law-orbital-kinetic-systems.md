@@ -424,3 +424,16 @@ The policy machinery has understood this, in its way. Having failed for forty ye
 
 — *Christopher I. V. Farmer, LL.M. (University of Worcester) · Independent Researcher · civfarmer@gmail.com*
 
+
+
+---
+
+## Further reading and points of disagreement (July 2026 addendum)
+
+Two positions bracket this paper's thesis and deserve express acknowledgement. On the permissive side, Bourbonnière and Lee's study of conventional weapons in orbit concludes that placement is not per se prohibited and that use would be governed by the law of armed conflict — a conclusion consistent with Part 3's reading of Article IV, though this paper reaches it through treaty interpretation rather than an armed-conflict frame, and draws a different remedial consequence. On the restrictive side, readings that inflate "peaceful purposes" into a general demilitarisation norm — surveyed critically by Su in the PPWT context — would dissolve the legal gap this paper identifies; six decades of unprotested military use, set out in Part 4, is the state-practice answer. The annual open-source counterspace assessments of the Secure World Foundation supply the empirical record that makes the gap practically significant rather than academic, the standard treatise treatment provides the doctrinal baseline, and the Cosmos 954 settlement remains the only worked precedent for compensation after a hazardous re-entry — a reminder that the ancillary regime does operate when engaged.
+
+- Bourbonnière, M. & Lee, R. J., "Legality of the deployment of conventional weapons in Earth orbit: balancing space law and the law of armed conflict" (2007) 18 *European Journal of International Law* 873–901. https://doi.org/10.1093/ejil/chm051.
+- Su, J., "The 'peaceful purposes' principle in outer space and the Russia–China PPWT Proposal" (2010) 26 *Space Policy* 81–90. https://doi.org/10.1016/j.spacepol.2010.02.008.
+- Weeden, B. & Samson, V. (eds), *Global Counterspace Capabilities: An Open Source Assessment* (Secure World Foundation 2025). https://swfound.org/counterspace/.
+- Lyall, F. & Larsen, P. B., *Space Law: A Treatise*, 2nd edition (Routledge 2018).
+- Protocol between Canada and the USSR in respect of the claim for damages caused by "Cosmos 954" (2 April 1981) 20 ILM 689.

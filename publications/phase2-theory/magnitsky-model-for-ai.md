@@ -303,3 +303,17 @@ This is not a claim that designation is a panacea. Part 7 conceded its coerciven
 
 — *Christopher I. V. Farmer, LL.M. (University of Worcester) · Independent Researcher · civfarmer@gmail.com*
 
+
+
+---
+
+## Further reading and points of disagreement (July 2026 addendum)
+
+Part 7 already concedes the strongest objections to designation as an instrument; this addendum anchors that concession to the literature a reviewer would expect and states why the thesis survives it. The empirical sanctions-scepticism canon — Hufbauer and colleagues' comprehensive survey, Drezner's "sanctions sometimes smart" reassessment, and the UN targeted-sanctions data assembled by Biersteker and colleagues, in which coercion succeeds in a clear minority of episodes — cuts against any claim that designation reliably changes a determined actor's behaviour. This paper makes no such claim. The cascade argued in Part 4 operates through constraint and signal — raising the cost of access to indispensable market nodes and hardening a norm by attaching consequences — which is precisely the mode the targeted-sanctions data reports as most effective. The secondary-sanctions critique of Ruys and Ryngaert warns against jurisdictional overreach; the mechanism of Part 5 is drafted inside an established nexus for that reason. And the attribution difficulties that motivate Part 3 are the same ones the Tallinn Manual project documents for cyber operations, which is why conduct-triggered designation deliberately does not wait for state attribution. On the AI-governance side, the NIST AI Risk Management Framework is the natural domestic hook for the "deployer responsibility" predicate developed here.
+
+- Hufbauer, G. C., Schott, J. J., Elliott, K. A. & Oegg, B., *Economic Sanctions Reconsidered*, 3rd edition (Peterson Institute for International Economics 2007).
+- Drezner, D. W., "Sanctions sometimes smart: targeted sanctions in theory and practice" (2011) 13 *International Studies Review* 96–108. https://doi.org/10.1111/j.1468-2486.2010.01001.x.
+- Biersteker, T. J., Eckert, S. E. & Tourinho, M. (eds), *Targeted Sanctions: The Impacts and Effectiveness of United Nations Action* (Cambridge University Press 2016). https://doi.org/10.1017/CBO9781316460290.
+- Ruys, T. & Ryngaert, C., "Secondary sanctions: a weapon out of control? The international legality of, and European responses to, US secondary sanctions" (2020) *British Yearbook of International Law*. https://doi.org/10.1093/bybil/braa007.
+- Schmitt, M. N. (ed), *Tallinn Manual 2.0 on the International Law Applicable to Cyber Operations* (Cambridge University Press 2017). https://doi.org/10.1017/9781316822524.
+- National Institute of Standards and Technology, *Artificial Intelligence Risk Management Framework (AI RMF 1.0)* (2023). https://www.nist.gov/itl/ai-risk-management-framework.

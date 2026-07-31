@@ -451,3 +451,23 @@ That verdict is not a failure of magnetic control but a correct identification o
 [^satsearch]: Representative flight-magnetorquer capabilities: CubeSat magnetorquers deliver ~0.1–1.5 A·m²; dedicated torque rods on larger platforms reach tens to a few hundred A·m². Compiled from manufacturer specifications surveyed in the open literature (e.g., satsearch magnetorquer product overview, 2019) and consistent with the survey figures in [^ovchinnikov]. Used in §2.2 only to establish the scale of flown hardware against which the large-structure distributed dipole is compared.
 
 [^glaser]: P. E. Glaser, "Power from the Sun: Its Future," *Science* **162**(3856), 857–861 (1968). DOI 10.1126/science.162.3856.857. The original solar-power-satellite proposal; the NASA/DOE reference design (a ~10 km × 5 km on-orbit structure) is the canonical example of the multi-kilometre structure class considered here. Cited solely to fix the physical scale of the generic large structure; no application-specific content is used.
+
+
+---
+
+## Consolidated bibliography note (July 2026 addendum)
+
+This web edition documents its sources in the numbered notes above. The revised manuscript edition (v1.1.0, in the ARGUS-PD publication package and available as a PDF from the drafts section) carries a consolidated thirty-entry reference list and adds the following literatures to those already cited here: flight-demonstrated alternative propellantless actuators (IKAROS solar-sail attitude effects; solar-sailing theory; very-low-orbit aerodynamics; bare electrodynamic tethers), the momentum-management pedigree (orbit-averaged unloading; Space Station momentum management), global magnetic attitude stabilisation results, the IGRF-13 lineage of the field model, the 45.5 T HTS demonstration used to bound a superconducting-loop objection, and the large-space-structures identification literature (dynamics and control survey; eigensystem realisation).
+
+- Tsuda, Y. et al., "Flight status of IKAROS deep space solar sail demonstrator", *Acta Astronautica* 69, 833–840 (2011). https://doi.org/10.1016/j.actaastro.2011.06.005.
+- McInnes, C. R., *Solar Sailing: Technology, Dynamics and Mission Applications* (Springer 1999). https://doi.org/10.1007/978-1-4471-3992-8.
+- Crisp, N. H. et al., "The benefits of very low earth orbit for earth observation missions", *Progress in Aerospace Sciences* 117, 100619 (2020). https://doi.org/10.1016/j.paerosci.2020.100619.
+- Sanmartín, J. R., Martínez-Sánchez, M. & Ahedo, E., "Bare wire anodes for electrodynamic tethers", *Journal of Propulsion and Power* 9, 353–360 (1993). https://doi.org/10.2514/3.23629.
+- Camillo, P. J. & Markley, F. L., "Orbit-averaged behavior of magnetic control laws for momentum unloading", *Journal of Guidance and Control* 3, 563–568 (1980). https://doi.org/10.2514/3.19725.
+- Wie, B. et al., "New approach to attitude/momentum control for the Space Station", *Journal of Guidance, Control, and Dynamics* 12, 714–722 (1989). https://doi.org/10.2514/3.20466.
+- Lovera, M. & Astolfi, A., "Global magnetic attitude control of inertially pointing spacecraft", *Journal of Guidance, Control, and Dynamics* 28, 1065–1072 (2005). https://doi.org/10.2514/1.11844.
+- Celani, F., "Robust three-axis attitude stabilization for inertial pointing spacecraft using magnetorquers", *Acta Astronautica* 107, 87–96 (2015). https://doi.org/10.1016/j.actaastro.2014.11.027.
+- Alken, P. et al., "International Geomagnetic Reference Field: the thirteenth generation", *Earth, Planets and Space* 73, 49 (2021). https://doi.org/10.1186/s40623-020-01288-x.
+- Hahn, S. et al., "45.5-tesla direct-current magnetic field generated with a high-temperature superconducting magnet", *Nature* 570, 496–499 (2019). https://doi.org/10.1038/s41586-019-1293-1.
+- Nurre, G. S., Ryan, R. S., Scofield, H. N. & Sims, J. L., "Dynamics and control of large space structures", *Journal of Guidance, Control, and Dynamics* 7, 514–526 (1984). https://doi.org/10.2514/3.19890.
+- Juang, J.-N. & Pappa, R. S., "An eigensystem realization algorithm for modal parameter identification and model reduction", *Journal of Guidance, Control, and Dynamics* 8, 620–627 (1985). https://doi.org/10.2514/3.20031.

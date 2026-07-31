@@ -378,7 +378,14 @@
 <p>[18] ChainAware.ai. <em>Forensic vs AI-Powered Blockchain Analysis.</em> https://chainaware.ai/blog/forensic-crypto-analytics-versus-ai-based-crypto-analytics/</p>
 <hr>
 <p><em>This is a preprint describing a working reference system; it has been submitted and is pending peer review. Private-party data referenced herein is synthetic and labelled; regulatory, sanctions and enforcement reference data are real, dated and source-linked as described in §6. The system is expressly not a system of record and does not constitute legal advice.</em></p>
-    </article>
+    <hr>
+<h2 id="addendum-2026">Further reading and points of disagreement (July 2026 addendum)</h2>
+<p>The probabilistic baseline this architecture deliberately departs from has a canon, and honesty requires citing it: Fellegi and Sunter's theory of record linkage is the mathematically optimal treatment of matching under uncertainty, and nothing in this paper disputes its optimality <em>for coverage</em>. The disagreement is about the objective function. Probabilistic linkage maximises expected match quality; the peel-chain method maximises defensibility — byte-for-byte reproducibility under an explicit conservation invariant — and accepts reduced coverage as the price, surfacing every unresolved gap rather than imputing across it. In evidentiary settings that trade is the right one, and the reproducible-computational-research norms articulated by Sandve and colleagues state the general case for it. Where coverage matters more than defensibility, the correct tool is the probabilistic canon, used with its assumptions declared.</p>
+<ul class="addendum-refs">
+<li>Fellegi, I. P. &amp; Sunter, A. B., "A theory for record linkage" (1969) 64 <em>Journal of the American Statistical Association</em> 1183–1210. <a href="https://doi.org/10.1080/01621459.1969.10501049" rel="noopener">https://doi.org/10.1080/01621459.1969.10501049</a>.</li>
+<li>Sandve, G. K., Nekrutenko, A., Taylor, J. &amp; Hovig, E., "Ten simple rules for reproducible computational research" (2013) 9 <em>PLOS Computational Biology</em> e1003285. <a href="https://doi.org/10.1371/journal.pcbi.1003285" rel="noopener">https://doi.org/10.1371/journal.pcbi.1003285</a>.</li>
+</ul>
+</article>
     <footer class="paperfoot">
       <span>&copy; <span id="yr">2026</span> Christopher I. V. Farmer</span>
       <span>&middot;</span>
