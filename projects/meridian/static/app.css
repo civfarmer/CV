@@ -323,17 +323,3 @@ body::before {
 .static-banner { background: color-mix(in srgb, var(--accent) 14%, var(--surface));
   border-bottom: 1px solid var(--line); color: var(--ink);
   padding: .45rem 1.2rem; font-size: .85rem; }
-
-/* ---- horizontal-overflow guard (2026-07-28 bug fix) ---------------------
-   `.shell` used `grid-template-columns: 215px 1fr`; a `1fr` track is
-   `minmax(auto,1fr)`, so the track could never shrink below the min-content
-   width of `main`. Long sector labels, wide tables and nowrap chips therefore
-   pushed the whole document past the viewport (e.g. 1215 px at a 390 px
-   viewport). `minmax(0,…)` lets the track shrink so `.table-wrap`'s existing
-   `overflow-x:auto` does its job, and long tokens/chips wrap instead of
-   stretching the page. Desktop layout is unchanged. */
-.shell { grid-template-columns: minmax(0,215px) minmax(0,1fr); }
-@media (max-width: 900px) { .shell { grid-template-columns: minmax(0,1fr); } }
-main, .card, .poster, .poster-grid, .kpi { min-width: 0; }
-.poster p, .poster h3, .card p, .kpi { overflow-wrap: anywhere; }
-.chip { white-space: normal; max-width: 100%; overflow-wrap: anywhere; }
