@@ -147,6 +147,9 @@
   /* Projects */
   .pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;margin-top:26px}
   .pgrid .pcard{order:5}
+  html[data-lens="legal"] .pcard[data-project="sanctions"]{order:1}
+  html[data-lens="hybrid"] .pcard[data-project="sanctions"]{order:2}
+  html[data-lens="governance"] .pcard[data-project="sanctions"]{order:3}
   html[data-lens="legal"] .pcard[data-project="fris"],html[data-lens="research"] .pcard[data-project="fris"]{order:1}
   html[data-lens="legal"] .pcard[data-project="meridian"],html[data-lens="research"] .pcard[data-project="meridian"]{order:2}
   html[data-lens="governance"] .pcard[data-project="meridian"]{order:1}
@@ -397,7 +400,7 @@
           <button data-lens="research">Research</button>
         </div>
         <div class="htag" id="heroTag">Target roles: strategic operator across legal, risk &amp; technology transformation — I own the outcome end to end and build the systems that deliver it.</div>
-        <p class="lead" id="heroLead">A <b>strategic operator</b> across <b>legal, risk and technology transformation</b>: I take the exposure end to end — own the legal and regulatory position, redesign the operating model around it, and write the software that makes the control real. <b>Six working platforms</b> run <b>live on this page</b> — financial-crime forensics, AI-governance and export-control screening, cross-border data transfer, forecasting and delivery — alongside board-level ownership of an eight-site operating model through restructuring, funders and regulators. LL.M. in international law (dissertation 100%), ~6 years owning legal, compliance &amp; operations, Python/SQL, and a Swiss B permit — work-authorised, no sponsorship needed.</p>
+        <p class="lead" id="heroLead">A <b>strategic operator</b> across <b>legal, risk and technology transformation</b>: I take the exposure end to end — own the legal and regulatory position, redesign the operating model around it, and write the software that makes the control real. <b>Seven working platforms</b> run <b>live on this page</b> — financial-crime forensics, AI-governance and export-control screening, cross-border data transfer, forecasting and delivery — alongside board-level ownership of an eight-site operating model through restructuring, funders and regulators. LL.M. in international law (dissertation 100%), ~6 years owning legal, compliance &amp; operations, Python/SQL, and a Swiss B permit — work-authorised, no sponsorship needed.</p>
         <p class="lead" style="margin-top:10px">Sharpest where the risk is regulatory — <b style="color:var(--ink)">sanctions and financial-crime exposure</b>, <b style="color:var(--ink)">cross-border data transfer</b> and <b style="color:var(--ink)">audit-ready control frameworks</b> — built as an enabler, not a blocker. One CV covers the whole picture; the case studies and publications carry the specialist depth behind it.</p>
         <p class="focus" id="heroFocus"></p>
         <div class="cta">
@@ -405,7 +408,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg> Download CV</button>
           <button class="btn primary" onclick="show('projects')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-            See the six platforms</button>
+            See the seven platforms</button>
           <button class="btn" onclick="show('warroom')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg> Crisis case studies</button>
           <a class="btn" href="https://www.linkedin.com/in/civfarmer" target="_blank" rel="noopener">
@@ -433,9 +436,9 @@
     <section class="view" id="v-projects">
       <div class="wrap pad">
         <div class="eyebrow">Portfolio — live regulatory tooling</div>
-        <h2 class="h-sec">Six platforms I designed and built</h2>
-        <p class="lead" style="margin-top:12px">For a RegTech or legal-engineering team, this is the part of the portfolio that carries the weight: working tools where I own both the regulatory reasoning and the code that runs it — <b>FRIS</b>, <b>Frontier</b> and <b>Sentinel</b> are the compliance-tech proof; <b>Meridian</b>, <b>Vantage</b> and <b>Helm</b> extend the range. Each opens <b>right here in the page</b> — click a card to launch it, read a short <b>“How it’s built”</b> note, or pop it out to a new tab.</p>
-        <p class="lead" style="margin-top:10px">Architected and built by me — AI-assisted, never AI-designed; the analysis engines, data models and interfaces are mine. <b>All six run client-side</b> — everything (including a locally-vendored React where it is used) computes entirely in your browser, so <b>no subject data ever leaves the page</b>. All data is synthetic or a dated, frozen local dataset.</p>
+        <h2 class="h-sec">Seven platforms I designed and built</h2>
+        <p class="lead" style="margin-top:12px">For a RegTech or legal-engineering team, this is the part of the portfolio that carries the weight: working tools where I own both the regulatory reasoning and the code that runs it — <b>FRIS</b>, <b>Frontier</b>, <b>Sentinel</b> and the <b>Sanctions Suite</b> are the compliance-tech proof; <b>Meridian</b>, <b>Vantage</b> and <b>Helm</b> extend the range. Each opens <b>right here in the page</b> — click a card to launch it, read a short <b>“How it’s built”</b> note, or pop it out to a new tab.</p>
+        <p class="lead" style="margin-top:10px">Architected and built by me — AI-assisted, never AI-designed; the analysis engines, data models and interfaces are mine. <b>All seven run client-side</b> — everything (including a locally-vendored React where it is used) computes entirely in your browser, so <b>no subject data ever leaves the page</b>. All data is synthetic or a dated, frozen local dataset.</p>
         <div class="pgrid" id="pgrid">
 
           <article class="pcard" data-project="fris" data-href="projects/fris/FRIS-Standalone.html" data-title="FRIS — Forensic &amp; Regulatory Intelligence Suite" data-icon="assets/img/fris-crest.png">
@@ -457,11 +460,11 @@
             </div>
           </article>
 
-          <article class="pcard" data-project="sanctions" data-href="projects/sanctions-suite/index.html" data-title="Sanctions Suite — four offline screening tools" data-icon="assets/img/fris-crest.png">
+          <article class="pcard" data-project="sanctions" data-href="projects/sanctions-suite/index.html" data-title="Sanctions Suite — four offline screening tools" data-icon="assets/img/sanctions-crest.svg">
             <div class="pmedia">
               <span class="badge">Sanctions screening &amp; exposure</span><span class="live">&#9654; Live demo</span>
               <img class="shot" src="case-studies/img/sanctions-suite.png" alt="Sentinel Screen returning designated Rosneft entities with scores, list labels and sanctions programmes" loading="lazy">
-              <video class="demo" muted loop playsinline preload="metadata" data-src="projects/sanctions-suite/demo.mp4"></video>
+              <video class="demo" muted loop playsinline preload="metadata" data-src="projects/sanctions-suite/demo.mp4"></video>              <img class="pcrest" src="assets/img/sanctions-crest.svg" alt="">
             </div>
             <div class="pbody">
               <h3>Sanctions Suite <span class="sub">Screening, exposure, vessels, portfolio</span></h3>
@@ -792,7 +795,7 @@
         </div>
         <div class="footer">
           <span>© <span id="yr"></span> Christopher I. V. Farmer</span>
-          <span class="mono">Built &amp; integrated in-house · FRIS · Meridian · Vantage · Helm · Frontier · Sentinel</span>
+          <span class="mono">Built &amp; integrated in-house · FRIS · Sanctions Suite · Meridian · Vantage · Helm · Frontier · Sentinel</span>
         </div>
       </div>
     </section>
@@ -934,7 +937,7 @@
   appv.addEventListener('click', function(e){ if(e.target===appv) closeApp(); });
 
   var NOTE = { sanctions:'Runs offline · demo subset of the 2026-08-02 OpenSanctions snapshot', fris:'Runs offline · synthetic data', meridian:'Runs offline · frozen real dataset (2026-07-19)', vantage:'Runs offline · synthetic data', helm:'Runs offline · synthetic data', frontier:'Runs offline · decision-support, not legal advice', sentinel:'Runs offline · decision-support, not legal advice', morris:'Client build · design & estimator preview with demo data' };
-  var TECH = {
+  var TECH = { sanctions:{title:"Sanctions Suite — how it's built",html:"<p>A Python builder streams a dated OpenSanctions snapshot (292,861 entities, 93 sources) into deterministic data packs; four single-file browser tools read those packs and never touch the network again. The build stamp comes from the data rather than the clock, so the same snapshot reproduces byte-identical packs, and the builder aborts rather than emit a short pack if a row count disagrees with the snapshot's own index.</p><p>Matching is deterministic token-set overlap after Unicode normalisation, with one rule shared by the builder and all four tools so the suite cannot give two answers for the same pair of names. A lone token may only carry a match if it is rare in the corpus — that is what separates a designated <i>Rosneft</i> subsidiary from a coincidental surname.</p><p><b>Stack:</b> Python 3 (standard library only) · vanilla JavaScript · no framework, no CDN, no runtime dependency. 82 self-tests run inside the pages themselves.</p>"},
     fris:{ title:"FRIS — how it’s built", icon:'assets/img/fris-crest.png', html:
       '<span class="mine">Built by me · vanilla JS · runs offline</span>'+
       '<p>No framework and no network — FRIS runs entirely in the browser.</p>'+
@@ -1035,8 +1038,8 @@
      lenses are the specialist lanes underneath it. */
   var LENS={
     operator:{tag:'Target roles: strategic operator across legal, risk &amp; technology transformation — I own the outcome end to end and build the systems that deliver it.',
-      lead:'A <b>strategic operator</b> across <b>legal, risk and technology transformation</b>: I take the exposure end to end — own the legal and regulatory position, redesign the operating model around it, and write the software that makes the control real. <b>Six working platforms</b> run <b>live on this page</b> — financial-crime forensics, AI-governance and export-control screening, cross-border data transfer, forecasting and delivery — alongside board-level ownership of an eight-site operating model through restructuring, funders and regulators. LL.M. in international law (dissertation 100%), ~6 years owning legal, compliance &amp; operations, Python/SQL, and a Swiss B permit — work-authorised, no sponsorship needed.',
-      focus:'Start with <a data-go="projects">Projects</a> — the six platforms <i>are</i> the credential — then <a data-go="experience">Experience</a> and the <a data-go="warroom">War Room</a>.'},
+      lead:'A <b>strategic operator</b> across <b>legal, risk and technology transformation</b>: I take the exposure end to end — own the legal and regulatory position, redesign the operating model around it, and write the software that makes the control real. <b>Seven working platforms</b> run <b>live on this page</b> — financial-crime forensics, AI-governance and export-control screening, cross-border data transfer, forecasting and delivery — alongside board-level ownership of an eight-site operating model through restructuring, funders and regulators. LL.M. in international law (dissertation 100%), ~6 years owning legal, compliance &amp; operations, Python/SQL, and a Swiss B permit — work-authorised, no sponsorship needed.',
+      focus:'Start with <a data-go="projects">Projects</a> — the seven platforms <i>are</i> the credential — then <a data-go="experience">Experience</a> and the <a data-go="warroom">War Room</a>.'},
     hybrid:{tag:'Target roles: RegTech / legal engineering &amp; regulatory product — a legal-compliance operator who builds the tooling, not just specs it.',
       lead:'A legal-compliance operator who <b>builds the regulatory tooling</b> — I own the compliance outcome and write the software that operationalises it. <b>FRIS</b> (a 23-engine financial-crime forensic suite), <b>Sentinel</b> (EU AI Act + dual-use export-control screening) and <b>Frontier</b> (cross-border data-transfer &amp; Schrems II TIA) all open and run <b>in this page</b> — demos, not slides. Behind them: an LL.M. in international law, ~6 years owning legal, compliance &amp; operations, working Python and SQL, and a Swiss B permit already in hand — no sponsorship to arrange.',
       focus:'Open <a data-go="projects">Projects</a> first — that is where the evidence sits — then <a data-go="expertise">Expertise</a> and <a data-go="experience">Experience</a>.'},
@@ -1101,7 +1104,7 @@
     funding:{title:'£200k secured · £500k+ in bids authored', kicker:'Red Spark Learning C.I.C. · ESF, Lottery &amp; competitive bids',
       body:'<p>I secured £200,000 in European Social Fund and National Lottery grant funding and authored more than £500,000 of competitive bids, taking the total value I have won or written past £700,000.</p><p>Because grant compliance, eligibility evidence and reporting were designed into the process from the outset rather than bolted on afterwards, funding-exception rates stayed below one per cent across the portfolio — which is what keeps a funder confident enough to renew.</p>',
       actions:[{label:'See the role — Experience', view:'experience'}]},
-    platforms:{title:'Six working platforms', kicker:'Designed &amp; built by me',
+    platforms:{title:'Seven working platforms', kicker:'Designed &amp; built by me',
       body:'<p>These are six working systems I designed and built myself: <b>FRIS</b>, a 23-engine forensic-intelligence suite for beneficial-ownership tracing and financial-crime screening; <b>Meridian</b>, a provenance-first regulatory and market-intelligence platform; <b>Vantage</b>, a dependency-free forecasting engine tested across five industries; <b>Helm</b>, a scheduler that turns a written brief into a costed, sequenced project plan; <b>Frontier</b>, a cross-border data-transfer assessor that resolves the lawful basis under EU GDPR, the Swiss FADP and UK GDPR, runs a Schrems II transfer-impact assessment and exports an audit-ready control record; and <b>Sentinel</b>, an AI-governance and export-control readiness assessor that classifies a deployment under the EU AI Act, screens it for dual-use export exposure (EU Reg. 2021/821, Wassenaar, with a US ITAR/EAR flag), and writes the same kind of exportable record.</p><p>Each one runs inside this portfolio, so the claim can be tested rather than taken on trust.</p><p>Alongside these, a commercial client build — website, cost estimator and client portal for a UK construction firm — is live in production.</p>',
       actions:[{label:'Explore the platforms — Projects', view:'projects'}]},
     cost:{title:'&minus;30% operating cost', kicker:'Red Spark Learning C.I.C. · paper-to-cloud',

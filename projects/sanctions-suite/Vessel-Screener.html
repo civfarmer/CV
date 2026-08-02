@@ -44,6 +44,7 @@
   <h1>Vessel &amp; Trade Screener</h1>
   <span class="tag" id="verTag">loading…</span><span class="tag">offline</span>
   <span class="spacer"></span>
+  <a class="tag" href="index.html" style="text-decoration:none">← Suite</a>
   <button class="ghost noprint" id="themeBtn">Theme</button>
   <button class="ghost noprint" id="selfTestBtn">Self-test</button>
 </header>
@@ -380,6 +381,19 @@
     var fr=new FileReader(); fr.onload=function(){ document.getElementById("batch").value=String(fr.result); }; fr.readAsText(f);
   });
   setProvenance();
+})();
+</script>
+<script>
+/* Portfolio theme protocol: the app viewer passes ?theme= and broadcasts cf-theme. */
+(function(){
+  try{
+    var q=new URLSearchParams(location.search).get("theme");
+    if(q) document.documentElement.setAttribute("data-theme", q);
+  }catch(e){}
+  addEventListener("message", function(ev){
+    if(ev && ev.data && ev.data.type==="cf-theme" && ev.data.theme)
+      document.documentElement.setAttribute("data-theme", ev.data.theme);
+  });
 })();
 </script>
 </body>
