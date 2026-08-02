@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vessel &amp; Trade Screener — offline</title>
+<style>
+  :root{--bg:#0b0f17;--surface:#131b2a;--surface2:#182133;--ink:#e9eef7;--ink2:#aab7cc;--muted:#7d8ba3;
+    --line:#233145;--accent:#43b3a6;--accent-ink:#84d6ca;--bad:#e0574a;--warn:#e0a13a;--good:#43c59e;
+    --mono:ui-monospace,'Cascadia Code',Consolas,monospace;--sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  html[data-theme="light"]{--bg:#f4f1ec;--surface:#fff;--surface2:#faf7f2;--ink:#221e18;--ink2:#4c473e;
+    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55}
+  header{border-bottom:1px solid var(--line);padding:14px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--surface)}
+  h1{font-size:1.05rem;margin:0}
+  .tag{font-size:.7rem;padding:2px 8px;border:1px solid var(--line);border-radius:99px;color:var(--muted)}
+  .spacer{flex:1}
+  button{background:var(--accent);color:#04211e;border:0;border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer;font-size:.86rem}
+  button.ghost{background:transparent;color:var(--ink2);border:1px solid var(--line)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  main{padding:20px;max-width:1180px;margin:0 auto}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+  label{display:block;font-size:.72rem;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.06em}
+  input,textarea{width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px 10px;font-family:inherit}
+  textarea{min-height:90px;font-family:var(--mono);font-size:.8rem}
+  table{width:100%;border-collapse:collapse;font-size:.85rem}
+  th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-size:.7rem;text-transform:uppercase}
+  .pill{display:inline-block;font-size:.68rem;padding:1px 7px;border-radius:99px;border:1px solid var(--line);margin:1px 3px 1px 0}
+  .flag{background:rgba(224,87,74,.15);border-color:var(--bad);color:var(--bad)}
+  .ok{background:rgba(67,197,158,.13);border-color:var(--good);color:var(--good)}
+  .muted{color:var(--muted);font-size:.8rem}
+  .mono{font-family:var(--mono);font-size:.78rem}
+  .banner{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:.78rem;color:var(--ink2);margin-bottom:16px}
+  .chain{border-left:3px solid var(--bad);padding-left:10px;margin:6px 0}
+  .grid{display:grid;grid-template-columns:330px 1fr;gap:20px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  @media print{.noprint{display:none!important}body{background:#fff;color:#000}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Vessel &amp; Trade Screener</h1>
+  <span class="tag" id="verTag">loading…</span><span class="tag">offline</span>
+  <span class="spacer"></span>
+  <button class="ghost noprint" id="themeBtn">Theme</button>
+  <button class="ghost noprint" id="selfTestBtn">Self-test</button>
+</header>
+<main>
+  <div class="banner" id="provenance">Loading data pack…</div>
+  <div class="grid">
+    <div>
+      <div class="card">
+        <strong style="font-size:.9rem">Single lookup</strong>
+        <label for="q">IMO / MMSI / call sign / registration / name</label>
+        <input id="q" placeholder="IMO9422964 or ABRAU" autocomplete="off">
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button id="runBtn">Screen</button>
+          <button class="ghost" id="allBtn">Browse all</button>
+        </div>
+      </div>
+      <div class="card">
+        <strong style="font-size:.9rem">Manifest batch</strong>
+        <div class="muted">One vessel per line — IMO numbers or names. Handles a pasted cargo manifest column.</div>
+        <label for="batch">Paste</label>
+        <textarea id="batch" placeholder="IMO9422964&#10;9526905&#10;Some Vessel Name"></textarea>
+        <label for="file">…or a CSV/TXT file</label>
+        <input type="file" id="file" accept=".csv,.txt">
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button id="batchBtn">Screen manifest</button>
+          <button class="ghost" id="csvBtn" disabled>Export CSV</button>
+        </div>
+      </div>
+    </div>
+    <div><div class="card" id="out"><div class="muted">Results appear here. Fully offline.</div></div></div>
+  </div>
+</main>
+<script src="packs/pack-manifest.js"></script>
+<script src="packs/pack-vessels.js"></script>
+<script>
+"use strict";
+(function(){
+  var P = (window.PACK_VESSELS && window.PACK_VESSELS.meta && window.PACK_VESSELS.vessels)
+          ? window.PACK_VESSELS : null;
+  var V = P ? P.vessels : [];
+  var lastRows = null;
+
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+  // Unicode-aware, matching the other tools: an ASCII-only filter returned a
+  // confident "NOT LISTED" for any name typed in a non-Latin script.
+  function norm(s){
+    if(!s) return "";
+    try{ s = s.normalize("NFKD").replace(/\p{M}/gu,""); }catch(e){ s = s.normalize("NFKD"); }
+    s = s.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu," ");
+    return s.split(/\s+/).filter(Boolean).join(" ");
+  }
+  function normId(s){ return (s||"").toUpperCase().replace(/[^A-Z0-9]/g,""); }
+
+  // An IMO is exactly 7 digits. Anchoring stops a longer number (an 8-digit
+  // bill-of-lading, a 9-digit MMSI) being read as an IMO it happens to contain.
+  function imoDigits(s){ var m = normId(s).match(/(?:^|[^0-9])(\d{7})(?![0-9])/); return m?m[1]:""; }
+  function digitsOnly(s){ return String(s||"").replace(/\D/g,""); }
+
+  function idsOf(v){
+    var out=[];
+    ["imo","mmsi","cs","reg"].forEach(function(k){ if(v[k]) out.push(v[k]); });
+    return out;
+  }
+  // kind: 3 = identifier, 2 = exact name/alias, 1 = partial name
+  function lookup(query){
+    var q = String(query||"").trim();
+    if(!q) return [];
+    var qd = imoDigits(q), qn = norm(q), qid = normId(q), qdig = digitsOnly(q);
+    var qt = qn.split(" ").filter(Boolean);
+    var res = [];
+    for(var i=0;i<V.length;i++){
+      var v = V[i], why = null, kind = 0;
+      if(qd && v.imo && imoDigits(v.imo)===qd){ why = "IMO "+digitsOnly(v.imo); kind = 3; }
+      // MMSI is compared on digits so "MMSI 572469210" works, not just the bare number.
+      if(!why && v.mmsi && qdig && digitsOnly(v.mmsi) && digitsOnly(v.mmsi)===qdig){ why = "MMSI "+digitsOnly(v.mmsi); kind = 3; }
+      if(!why && qid && qid.length>=4){
+        var ids = idsOf(v).map(normId);
+        if(ids.indexOf(qid)>=0){ why = "identifier "+qid; kind = 3; }
+      }
+      if(!why && qt.length){
+        var names = [v.n].concat(v.al||[]);
+        for(var j=0;j<names.length;j++){
+          var nn = norm(names[j]);
+          if(!nn) continue;
+          if(nn===qn){ why = (j===0?"name ":"former/alias name ")+names[j]; kind = 2; break; }
+          // Whole-token containment, and only for multi-token listed names.
+          // Raw substring matching flagged "LADY MARIA" against a vessel called
+          // "Aria"; single-token names like "ORION" are too generic to claim a
+          // match inside "NORDIC ORION", which is a different ship.
+          var nt = nn.split(" ").filter(Boolean);
+          if(nt.length>=2 && nt.length<=qt.length &&
+             nt.every(function(t){ return qt.indexOf(t)>=0; })){
+            why = "partial name "+names[j]; kind = 1; break;
+          }
+        }
+      }
+      if(why) res.push({v:v, why:why, kind:kind, exact:kind>=2});
+    }
+    res.sort(function(a,b){
+      if(a.kind!==b.kind) return b.kind-a.kind;
+      var x=String(a.v.n), y=String(b.v.n);
+      if(x!==y) return x<y ? -1 : 1;
+      return String(a.v.i)<String(b.v.i) ? -1 : 1;
+    });
+    return res.slice(0,60);
+  }
+  function designated(v){ return !!((v.sanc && v.sanc.length) || v.tgt); }
+
+  function vesselCard(x){
+    var v = x.v;
+    var h = '<div class="card" style="margin-bottom:12px">';
+    h += '<div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">'+
+         '<strong style="font-size:1rem">'+esc(v.n)+'</strong>'+
+         (designated(v) ? '<span class="pill flag">LISTED</span>'
+                        : '<span class="pill" style="border-color:var(--warn);color:var(--warn)">RELATED — not itself designated</span>')+
+         '<span class="pill">'+esc(v.s)+'</span>'+
+         (v.flag?'<span class="pill">flag '+esc(v.flag)+'</span>':'')+
+         '<span class="muted">matched on '+esc(x.why)+'</span></div>';
+    h += '<table style="margin-top:8px"><tbody>';
+    if(v.imo)  h += '<tr><th>IMO</th><td class="mono">'+esc(v.imo)+'</td></tr>';
+    if(v.mmsi) h += '<tr><th>MMSI</th><td class="mono">'+esc(v.mmsi)+'</td></tr>';
+    if(v.cs)   h += '<tr><th>Call sign</th><td class="mono">'+esc(v.cs)+'</td></tr>';
+    if(v.reg)  h += '<tr><th>Registration</th><td class="mono">'+esc(v.reg)+'</td></tr>';
+    if(v.typ)  h += '<tr><th>Type</th><td>'+esc(v.typ)+'</td></tr>';
+    if(v.al&&v.al.length) h += '<tr><th>Former / alias names</th><td>'+esc(v.al.join(" · "))+'</td></tr>';
+    if(v.pg&&v.pg.length) h += '<tr><th>Programmes</th><td>'+v.pg.map(function(p){return '<span class="pill">'+esc(p)+'</span>'}).join("")+'</td></tr>';
+    if(v.ds&&v.ds.length) h += '<tr><th>Sources</th><td class="muted">'+esc(v.ds.join("; "))+'</td></tr>';
+    h += '</tbody></table>';
+    if(v.sanc&&v.sanc.length){
+      h += '<div style="margin-top:8px"><strong style="font-size:.85rem">Listing records</strong>';
+      v.sanc.forEach(function(s){
+        h += '<div class="chain"><div>'+esc(s.pr||s.pi||"(programme not stated)")+'</div>'+
+             '<div class="muted">'+esc(s.au||"")+(s.sd?" · listed "+esc(s.sd):"")+(s.ed?" · ends "+esc(s.ed):"")+'</div>'+
+             (s.u?'<div class="mono" style="word-break:break-all">'+esc(s.u)+'</div>':'')+'</div>';
+      });
+      h += '</div>';
+    }
+    if(v.own&&v.own.length){
+      var ctl = v.own.filter(function(o){return o.ctl;}), oth = v.own.filter(function(o){return !o.ctl;});
+      if(ctl.length){
+        h += '<div style="margin-top:8px"><strong style="font-size:.85rem">Ownership / control (direct records only)</strong>';
+        ctl.forEach(function(o){
+          h += '<div class="chain" style="border-left-color:'+(o.z?'var(--bad)':'var(--line)')+'">'+
+               '<strong>'+esc(o.n)+'</strong> '+(o.z?'<span class="pill flag">sanctioned</span>':'')+
+               '<div class="muted">'+esc(o.r||o.t)+'</div></div>';
+        });
+        h += '</div>';
+      }
+      if(oth.length){
+        h += '<div style="margin-top:8px"><strong style="font-size:.85rem">Other recorded links</strong>';
+        oth.forEach(function(o){
+          h += '<div class="chain" style="border-left-color:'+(o.z?'var(--bad)':'var(--line)')+'">'+
+               '<strong>'+esc(o.n)+'</strong> '+(o.z?'<span class="pill flag">sanctioned</span>':'')+
+               '<div class="muted">'+esc(o.r||o.t)+'</div></div>';
+        });
+        h += '</div>';
+      }
+      h += '<div class="muted">These are direct records only — one hop. Use Exposure-Graph for indirect control.</div>';
+    } else {
+      h += '<div class="muted" style="margin-top:8px">No ownership record in this dataset. Absence of a chain is not evidence of independent ownership.</div>';
+    }
+    if(v.nt) h += '<details style="margin-top:6px"><summary class="muted">Listing note</summary><div class="muted">'+esc(v.nt)+'</div></details>';
+    if(v.u)  h += '<div class="mono" style="margin-top:6px;word-break:break-all">'+esc(v.u)+'</div>';
+    return h+'</div>';
+  }
+
+  function runSingle(){
+    if(!P) return;
+    var q = document.getElementById("q").value.trim();
+    if(!q){ alert("Enter an IMO, MMSI, call sign, registration or name."); return; }
+    var r = lookup(q);
+    lastRows = [{query:q, hits:r}];
+    document.getElementById("csvBtn").disabled = false;
+    if(!r.length){
+      document.getElementById("out").innerHTML =
+        '<div class="card"><span class="pill ok">NOT LISTED</span><p><strong>'+esc(q)+'</strong> does not appear among the '+
+        V.length.toLocaleString()+' sanctioned vessels and aircraft in this snapshot.</p>'+
+        '<p class="muted">This covers vessels and aircraft designated in the source lists. It does not cover ownership-level exposure of an unlisted vessel — screen the owner in Sentinel, and the ownership graph in Exposure.</p></div>';
+      return;
+    }
+    document.getElementById("out").innerHTML =
+      '<div style="margin-bottom:8px"><strong>'+r.length+'</strong> match(es) for <strong>'+esc(q)+'</strong></div>' +
+      r.map(vesselCard).join("");
+  }
+
+  function parseLines(t){ return t.split(/\r?\n/).map(function(l){return l.trim().replace(/^["']|["']$/g,"")}).filter(Boolean); }
+
+  function runBatch(){
+    if(!P) return;
+    var rows = parseLines(document.getElementById("batch").value);
+    if(!rows.length){ alert("Paste a manifest first."); return; }
+    var res = rows.map(function(q){ return {query:q, hits:lookup(q)}; });
+    lastRows = res;
+    document.getElementById("csvBtn").disabled = false;
+    var flagged = res.filter(function(r){return r.hits.length});
+    var h = '<div style="margin-bottom:10px"><strong>'+res.length+'</strong> screened · '+
+      '<strong style="color:'+(flagged.length?'var(--bad)':'var(--good)')+'">'+flagged.length+'</strong> listed · '+
+      (res.length-flagged.length)+' not listed</div>';
+    h += '<table><thead><tr><th>Input</th><th>Status</th><th>Vessel</th><th>Flag</th><th>Programmes</th><th>Sanctioned owner</th></tr></thead><tbody>';
+    res.forEach(function(r){
+      var t = r.hits[0];
+      var ownFlag = t && (t.v.own||[]).some(function(o){return o.z;});
+      h += '<tr><td class="mono">'+esc(r.query)+'</td>'+
+        '<td>'+(t?(designated(t.v)?'<span class="pill flag">LISTED</span>':'<span class="pill" style="border-color:var(--warn);color:var(--warn)">related</span>')
+                 :'<span class="pill ok">not listed</span>')+'</td>'+
+        '<td>'+(t?esc(t.v.n)+'<div class="muted">'+esc(t.why)+'</div>':'—')+'</td>'+
+        '<td>'+(t?esc(t.v.flag||""):"")+'</td>'+
+        '<td>'+(t?(t.v.pg||[]).map(function(p){return '<span class="pill">'+esc(p)+'</span>'}).join(""):"")+'</td>'+
+        '<td>'+(t?(ownFlag?'<span class="pill flag">yes</span>':'<span class="muted">none recorded</span>'):"")+'</td></tr>';
+    });
+    document.getElementById("out").innerHTML = h+'</tbody></table>';
+  }
+
+  function browseAll(){
+    if(!P) return;
+    var h = '<div style="margin-bottom:8px"><strong>'+V.length.toLocaleString()+'</strong> sanctioned vessels and aircraft in this snapshot</div>';
+    h += '<table><thead><tr><th>Name</th><th>Type</th><th>IMO</th><th>Flag</th><th>Programmes</th><th>Owners</th></tr></thead><tbody>';
+    V.slice(0,600).forEach(function(v){
+      h += '<tr><td><strong>'+esc(v.n)+'</strong></td><td>'+esc(v.s)+'</td><td class="mono">'+esc(v.imo||"")+'</td>'+
+        '<td>'+esc(v.flag||"")+'</td><td>'+(v.pg||[]).slice(0,3).map(function(p){return '<span class="pill">'+esc(p)+'</span>'}).join("")+'</td>'+
+        '<td>'+((v.own||[]).length||"")+'</td></tr>';
+    });
+    h += '</tbody></table>';
+    if(V.length>600) h += '<div class="muted">Showing first 600 by name. Use search for the rest.</div>';
+    document.getElementById("out").innerHTML = h;
+  }
+
+  function csvCell(v){
+    var s=String(v==null?"":v);
+    if(/^[=+\-@\t\r]/.test(s)) s="'"+s;     // neutralise spreadsheet formula injection
+    return '"'+s.replace(/"/g,'""')+'"';
+  }
+  function exportCsv(){
+    if(!lastRows) return;
+    var m = P.meta, when = new Date().toISOString();
+    var rows=[["input","status","vessel","schema","imo","mmsi","flag","programmes","sanctioned_owner",
+      "sources","matched_on","snapshot_version","screened_utc","licence","attribution"]];
+    lastRows.forEach(function(r){
+      if(!r.hits.length){ rows.push([r.query,"not listed","","","","","","","","","",m.snapshot_version,when,m.licence,m.attribution]); }
+      else r.hits.forEach(function(x){
+        var v=x.v;
+        rows.push([r.query,designated(v)?"LISTED":"related",v.n,v.s,v.imo||"",v.mmsi||"",v.flag||"",(v.pg||[]).join(" "),
+          (v.own||[]).filter(function(o){return o.z}).map(function(o){return o.n}).join("; "),
+          (v.ds||[]).join(" "),x.why,m.snapshot_version,when,m.licence,m.attribution]);
+      });
+    });
+    var csv = rows.map(function(r){return r.map(csvCell).join(",")}).join("\r\n");
+    var b=new Blob([csv],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");
+    a.href=URL.createObjectURL(b); a.download="vessel-screening-"+new Date().toISOString().slice(0,19).replace(/[:T]/g,"-")+".csv";
+    document.body.appendChild(a); a.click(); setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1000);
+  }
+
+  function setProvenance(){
+    var el=document.getElementById("provenance");
+    if(!P){ el.innerHTML='<strong style="color:var(--bad)">Data pack not found.</strong> Run 01-build\\BUILD-ALL.cmd, then reopen.'; return; }
+    document.getElementById("verTag").textContent = P.meta.snapshot_version||"unknown";
+    var nv=V.filter(function(v){return v.s==="Vessel"}).length, na=V.length-nv;
+    var pre = P.meta.demo_subset
+      ? '<div style="color:var(--warn);margin-bottom:6px"><strong>Public demo.</strong> Vessel and aircraft coverage here is complete; the screening corpus behind the other tools is a subset.</div>' : '';
+    el.innerHTML=pre+'<strong>Dataset:</strong> OpenSanctions snapshot <span class="mono">'+esc(P.meta.snapshot_version)+
+      '</span> · '+nv.toLocaleString()+' vessels, '+na.toLocaleString()+' aircraft · built <span class="mono">'+esc(P.meta.generated_utc)+
+      '</span>.<br>Point-in-time: this is the position as at the snapshot date. '+esc(P.meta.attribution||"");
+  }
+
+  function selfTest(){
+    var out=[],pass=0,fail=0;
+    function ok(n,c,d){ (c?pass++:fail++); out.push((c?"PASS  ":"FAIL  ")+n+(d?"  — "+d:"")); }
+    ok("pack loaded", !!P && V.length>0, V.length+" vessels/aircraft");
+    ok("manifest present", !!window.PACK_MANIFEST);
+    ok("IMO digits extracted", imoDigits("IMO9422964")==="9422964", imoDigits("IMO9422964"));
+    ok("IMO matches without prefix", imoDigits("9422964")==="9422964");
+    ok("8-digit number is not read as an IMO", imoDigits("94229640")==="", '"'+imoDigits("94229640")+'"');
+    ok("9-digit MMSI is not read as an IMO", imoDigits("273441050")==="");
+    ok("bill-of-lading number is not read as an IMO", imoDigits("BL/94229641/2024")==="");
+    ok("html escaping", esc("<b>")==="&lt;b&gt;");
+    ok("csv formula neutralised", csvCell("=cmd|calc").indexOf("'=")===1);
+    ok("substring across words does not match", (function(){
+      var fake={i:"x",n:"Aria",s:"Vessel",al:[],sanc:[{}],tgt:1};
+      var save=V; V=[fake];
+      var r=lookup("LADY MARIA");
+      V=save; return r.length===0; })());
+    ok("whole-token partial still matches", (function(){
+      var fake={i:"x",n:"NORDIC ORION",s:"Vessel",al:[],sanc:[{}],tgt:1};
+      var save=V; V=[fake];
+      var r=lookup("MV NORDIC ORION");
+      V=save; return r.length===1; })());
+    var withImo=null;
+    for(var i=0;i<V.length&&!withImo;i++){ if(V[i].imo) withImo=V[i]; }
+    if(withImo){
+      var r1=lookup(withImo.imo);
+      ok("vessel found by its own IMO", r1.some(function(x){return x.v.i===withImo.i;}), withImo.imo+" → "+withImo.n);
+      var r1b=lookup(imoDigits(withImo.imo));
+      ok("same vessel found by bare digits", r1b.some(function(x){return x.v.i===withImo.i;}));
+    } else { ok("vessel with IMO present", false, "none in pack"); }
+    var withMmsi=null;
+    for(var mi=0;mi<V.length&&!withMmsi;mi++){ if(V[mi].mmsi) withMmsi=V[mi]; }
+    if(withMmsi){
+      var rm=lookup("MMSI "+digitsOnly(withMmsi.mmsi));
+      ok("vessel found by prefixed MMSI", rm.some(function(x){return x.v.i===withMmsi.i;}),
+         "MMSI "+digitsOnly(withMmsi.mmsi));
+    }
+    var withAlias=null;
+    for(var ai=0;ai<V.length&&!withAlias;ai++){ if((V[ai].al||[]).length) withAlias=V[ai]; }
+    if(withAlias){
+      var ra=lookup(withAlias.al[0]);
+      ok("exact former name ranks first", ra.length && ra[0].v.i===withAlias.i,
+         '"'+withAlias.al[0]+'" → '+(ra.length?ra[0].v.n:"none"));
+    }
+    var first=V[0];
+    if(first){
+      var r2=lookup(first.n);
+      ok("vessel found by its own name", r2.some(function(x){return x.v.i===first.i;}), first.n);
+    }
+    ok("nonsense not found", lookup("zzzz nonexistent vessel 12345").length===0);
+    var a=JSON.stringify(lookup(first?first.n:"x").map(function(x){return x.v.i}));
+    var b=JSON.stringify(lookup(first?first.n:"x").map(function(x){return x.v.i}));
+    ok("lookup deterministic", a===b);
+    ok("batch parser strips quotes", parseLines('"IMO123"\nABC').join("|")==="IMO123|ABC");
+    document.getElementById("out").innerHTML='<strong>Self-test</strong><pre class="mono" style="white-space:pre-wrap;margin-top:8px">'+
+      esc(out.join("\n")+"\n\n"+pass+" passed, "+fail+" failed.")+'</pre>';
+  }
+
+  document.getElementById("runBtn").onclick=runSingle;
+  document.getElementById("batchBtn").onclick=runBatch;
+  document.getElementById("allBtn").onclick=browseAll;
+  document.getElementById("csvBtn").onclick=exportCsv;
+  document.getElementById("selfTestBtn").onclick=selfTest;
+  document.getElementById("themeBtn").onclick=function(){var r=document.documentElement;
+    r.setAttribute("data-theme", r.getAttribute("data-theme")==="dark"?"light":"dark");};
+  document.getElementById("q").addEventListener("keydown",function(e){ if(e.key==="Enter") runSingle(); });
+  document.getElementById("file").addEventListener("change",function(e){
+    var f=e.target.files&&e.target.files[0]; if(!f) return;
+    var fr=new FileReader(); fr.onload=function(){ document.getElementById("batch").value=String(fr.result); }; fr.readAsText(f);
+  });
+  setProvenance();
+})();
+</script>
+</body>
+</html>

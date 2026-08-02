@@ -457,6 +457,25 @@
             </div>
           </article>
 
+          <article class="pcard" data-project="sanctions" data-href="projects/sanctions-suite/index.html" data-title="Sanctions Suite — four offline screening tools" data-icon="assets/img/fris-crest.png">
+            <div class="pmedia">
+              <span class="badge">Sanctions screening &amp; exposure</span><span class="live">&#9654; Live demo</span>
+              <img class="shot" src="case-studies/img/sanctions-suite.png" alt="Sentinel Screen returning designated Rosneft entities with scores, list labels and sanctions programmes" loading="lazy">
+              <video class="demo" muted loop playsinline preload="metadata" data-src="projects/sanctions-suite/demo.mp4"></video>
+            </div>
+            <div class="pbody">
+              <h3>Sanctions Suite <span class="sub">Screening, exposure, vessels, portfolio</span></h3>
+              <p>Four tools on one dated, checksummed OpenSanctions snapshot — <b>308,597 designated entities</b>, 12,113 ownership and association records, 2,347 vessels and aircraft. Screen a name or a manifest, trace a counterparty's route to a designated party, and produce a <b>dated attestation</b> with source checksums. No API, no subscription, no data leaving the page.</p>
+              <div class="tags"><span class="tag">Python pipeline</span><span class="tag">Vanilla JS</span><span class="tag">Deterministic matching</span><span class="tag">Offline</span></div>
+              <div class="pactions">
+                <button class="plink" data-open>Open <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button>
+                <a class="plink ghost" data-newtab href="projects/sanctions-suite/index.html" target="_blank" rel="noopener">New tab</a>
+                <a class="plink ghost" href="case-studies/sanctions-suite.html" target="_blank" rel="noopener">Case study</a>
+                <span class="note">Runs offline · demo subset of a real snapshot</span>
+              </div>
+            </div>
+          </article>
+
           <article class="pcard" data-project="meridian" data-href="projects/meridian/index.html" data-title="Meridian — Regulatory &amp; Market Intelligence" data-icon="assets/img/meridian-logo.png">
             <div class="pmedia" style="background:radial-gradient(120% 120% at 80% 0,rgba(212,178,76,.18),transparent 55%),var(--bg2)">
               <span class="badge">Regulatory &amp; market intelligence</span><span class="live">&#9654; Live demo</span>
@@ -914,7 +933,7 @@
   window.closeApp=function(){ if(avtimer) clearTimeout(avtimer); appv.classList.remove('on'); avframe.src='about:blank'; document.body.style.overflow='';_bgInert(false);_restoreFocus(); };
   appv.addEventListener('click', function(e){ if(e.target===appv) closeApp(); });
 
-  var NOTE = { fris:'Runs offline · synthetic data', meridian:'Runs offline · frozen real dataset (2026-07-19)', vantage:'Runs offline · synthetic data', helm:'Runs offline · synthetic data', frontier:'Runs offline · decision-support, not legal advice', sentinel:'Runs offline · decision-support, not legal advice', morris:'Client build · design & estimator preview with demo data' };
+  var NOTE = { sanctions:'Runs offline · demo subset of the 2026-08-02 OpenSanctions snapshot', fris:'Runs offline · synthetic data', meridian:'Runs offline · frozen real dataset (2026-07-19)', vantage:'Runs offline · synthetic data', helm:'Runs offline · synthetic data', frontier:'Runs offline · decision-support, not legal advice', sentinel:'Runs offline · decision-support, not legal advice', morris:'Client build · design & estimator preview with demo data' };
   var TECH = {
     fris:{ title:"FRIS — how it’s built", icon:'assets/img/fris-crest.png', html:
       '<span class="mine">Built by me · vanilla JS · runs offline</span>'+

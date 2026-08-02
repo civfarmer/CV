@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sanctions Suite — four offline screening tools</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{--bg:#0b0f17;--surface:#131b2a;--surface2:#182133;--ink:#e9eef7;--ink2:#aab7cc;--muted:#7d8ba3;
+    --line:#233145;--accent:#43b3a6;--accent-ink:#84d6ca;--gold:#d4b24c;--bad:#e0574a;--warn:#e0a13a;--good:#43c59e;
+    --mono:ui-monospace,'Cascadia Code',Consolas,monospace;--sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  html[data-theme="light"]{--bg:#f4f1ec;--surface:#fff;--surface2:#faf7f2;--ink:#221e18;--ink2:#4c473e;
+    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6}
+  header{border-bottom:1px solid var(--line);padding:16px 22px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--surface)}
+  h1{font-size:1.1rem;margin:0}
+  .tag{font-size:.7rem;padding:2px 9px;border:1px solid var(--line);border-radius:99px;color:var(--muted)}
+  .spacer{flex:1}
+  a.btn{background:transparent;color:var(--ink2);border:1px solid var(--line);border-radius:8px;padding:7px 13px;
+    font-size:.84rem;text-decoration:none}
+  main{padding:26px 22px 60px;max-width:1060px;margin:0 auto}
+  .lead{color:var(--ink2);max-width:74ch}
+  .note{background:var(--surface2);border:1px solid var(--line);border-left:3px solid var(--warn);
+    border-radius:10px;padding:12px 14px;margin:20px 0;font-size:.87rem;color:var(--ink2)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:22px}
+  .tool{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;
+    flex-direction:column;text-decoration:none;color:inherit;transition:border-color .15s,transform .15s}
+  .tool:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .tool h2{font-size:1rem;margin:0 0 4px}
+  .tool .k{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--accent-ink);margin-bottom:8px}
+  .tool p{margin:0 0 12px;font-size:.87rem;color:var(--ink2);flex:1}
+  .tool .go{font-size:.82rem;color:var(--accent-ink);font-weight:600}
+  .pills{margin-top:10px}
+  .pill{display:inline-block;font-size:.68rem;padding:1px 8px;border-radius:99px;border:1px solid var(--line);
+    margin:2px 4px 2px 0;color:var(--muted)}
+  footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);font-size:.8rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Sanctions Suite</h1>
+  <span class="tag">four offline tools</span>
+  <span class="tag">no network calls</span>
+  <span class="spacer"></span>
+  <a class="btn" href="../../case-studies/sanctions-suite.html">Case study</a>
+  <a class="btn" href="../../index.html">Portfolio</a>
+</header>
+<main>
+  <p class="lead">Four screening tools built on a single dated OpenSanctions snapshot. Each one opens as a
+  self-contained page, runs entirely in your browser, and answers a real question with real data — no server,
+  no API call, nothing typed here ever leaves the machine.</p>
+
+  <div class="note"><strong>This is the public demo.</strong> It carries a 12,544-record subset of the
+  308,597-entity production corpus, so it loads quickly over the web. Vessels, the relationship graph and the
+  company screening are complete. The full build runs locally from the same pipeline — every tool states which
+  corpus it is using, and a nil result in the demo is not a screening result.</div>
+
+  <div class="grid">
+    <a class="tool" href="Sentinel-Screen.html">
+      <div class="k">Screening desk</div>
+      <h2>Sentinel Screen</h2>
+      <p>Screen a name, an identifier or a pasted list against sanctions, crime and PEP records. Produces a
+      dated, checksum-stamped attestation for a compliance file.</p>
+      <div class="pills"><span class="pill">batch CSV</span><span class="pill">attestation</span><span class="pill">PEP overlay</span></div>
+      <div class="go">Open →</div>
+    </a>
+    <a class="tool" href="Exposure-Graph.html">
+      <div class="k">Ownership &amp; association</div>
+      <h2>Exposure Graph</h2>
+      <p>Walk 12,113 relationship records to find the shortest route from a counterparty to a designated party —
+      each hop carrying its own source.</p>
+      <div class="pills"><span class="pill">shortest paths</span><span class="pill">SVG map</span><span class="pill">dossier export</span></div>
+      <div class="go">Open →</div>
+    </a>
+    <a class="tool" href="Vessel-Screener.html">
+      <div class="k">Maritime &amp; aviation</div>
+      <h2>Vessel &amp; Trade Screener</h2>
+      <p>Screen an IMO, MMSI, call sign or a pasted manifest against 2,347 designated vessels and aircraft,
+      with ownership chains and sanctioned owners flagged.</p>
+      <div class="pills"><span class="pill">IMO / MMSI</span><span class="pill">manifest batch</span><span class="pill">ownership</span></div>
+      <div class="go">Open →</div>
+    </a>
+    <a class="tool" href="Meridian-Sanctions-Console.html">
+      <div class="k">Portfolio screening</div>
+      <h2>Meridian Sanctions Console</h2>
+      <p>1,317 tracked companies pre-screened against the snapshot, with a review queue filterable by score
+      band — candidates for adjudication, never findings.</p>
+      <div class="pills"><span class="pill">1,317 companies</span><span class="pill">score bands</span><span class="pill">CSV export</span></div>
+      <div class="go">Open →</div>
+    </a>
+  </div>
+
+  <footer>
+    Data: <strong>OpenSanctions</strong> (opensanctions.org), licensed CC BY-NC 4.0 — non-commercial use with
+    attribution. Business use requires a licence from OpenSanctions. Point-in-time: every answer states the
+    snapshot it came from. Candidates require human adjudication; absence of a match is not clearance.
+  </footer>
+</main>
+</body>
+</html>

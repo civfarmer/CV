@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sentinel Screen — offline sanctions, crime and PEP screening desk</title>
+<style>
+  :root{--bg:#0b0f17;--surface:#131b2a;--surface2:#182133;--ink:#e9eef7;--ink2:#aab7cc;--muted:#7d8ba3;
+    --line:#233145;--accent:#43b3a6;--accent-ink:#84d6ca;--gold:#d4b24c;--bad:#e0574a;--warn:#e0a13a;
+    --good:#43c59e;--radius:12px;--mono:ui-monospace,'Cascadia Code',Consolas,monospace;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  html[data-theme="light"]{--bg:#f4f1ec;--surface:#fff;--surface2:#faf7f2;--ink:#221e18;--ink2:#4c473e;
+    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f;--gold:#836819}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55}
+  header{border-bottom:1px solid var(--line);padding:14px 20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:var(--surface)}
+  h1{font-size:1.05rem;margin:0;letter-spacing:.02em}
+  .tag{font-size:.7rem;padding:2px 8px;border:1px solid var(--line);border-radius:99px;color:var(--muted)}
+  .spacer{flex:1}
+  button{background:var(--accent);color:#04211e;border:0;border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer;font-size:.86rem}
+  button.ghost{background:transparent;color:var(--ink2);border:1px solid var(--line)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  main{padding:20px;max-width:1240px;margin:0 auto}
+  .grid{display:grid;grid-template-columns:340px 1fr;gap:20px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:16px}
+  label{display:block;font-size:.75rem;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.06em}
+  input,textarea,select{width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--ink);
+    border-radius:8px;padding:8px 10px;font-family:inherit;font-size:.9rem}
+  textarea{min-height:120px;font-family:var(--mono);font-size:.8rem}
+  table{width:100%;border-collapse:collapse;font-size:.85rem}
+  th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em}
+  .pill{display:inline-block;font-size:.68rem;padding:1px 7px;border-radius:99px;border:1px solid var(--line);margin:1px 3px 1px 0;white-space:nowrap}
+  .p-S{background:rgba(224,87,74,.15);border-color:var(--bad);color:var(--bad)}
+  .p-C{background:rgba(224,161,58,.15);border-color:var(--warn);color:var(--warn)}
+  .p-P{background:rgba(67,179,166,.15);border-color:var(--accent);color:var(--accent-ink)}
+  .p-U{background:rgba(224,161,58,.2);border-color:var(--warn);color:var(--warn)}
+  .score{font-family:var(--mono);font-weight:700}
+  .s-hi{color:var(--bad)}.s-md{color:var(--warn)}.s-lo{color:var(--muted)}
+  .muted{color:var(--muted);font-size:.8rem}
+  .mono{font-family:var(--mono);font-size:.78rem}
+  .clear{padding:12px;border:1px dashed var(--line);border-radius:8px;color:var(--good);font-size:.9rem}
+  .banner{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:.78rem;color:var(--ink2);margin-bottom:16px}
+  .warnbar{background:rgba(224,87,74,.12);border:1px solid var(--bad);color:var(--bad);border-radius:8px;padding:10px 12px;font-size:.82rem;margin-bottom:16px}
+  details{margin-top:8px}
+  summary{cursor:pointer;color:var(--accent-ink);font-size:.82rem}
+  .rowline{border-left:3px solid var(--line);padding-left:10px;margin:10px 0}
+  .rowline.hit{border-left-color:var(--bad)}
+  .rowline.clearrow{border-left-color:var(--good)}
+  @media print{header button,.noprint{display:none!important}body{background:#fff;color:#000}.card{border-color:#999;break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Sentinel Screen</h1>
+  <span class="tag" id="verTag">loading…</span>
+  <span class="tag">offline</span>
+  <span class="spacer"></span>
+  <button class="ghost noprint" id="themeBtn">Theme</button>
+  <button class="ghost noprint" id="selfTestBtn">Self-test</button>
+</header>
+<main>
+  <div id="warn"></div>
+  <div class="banner" id="provenance">Loading data pack…</div>
+  <div class="grid">
+    <div>
+      <div class="card">
+        <strong style="font-size:.9rem">Single subject</strong>
+        <label for="q">Name</label>
+        <input id="q" placeholder="e.g. Rosneft, or KUAJIEN, Michael" autocomplete="off">
+        <label for="qc">Country (optional — ISO-2 code or country name)</label>
+        <input id="qc" placeholder="ru or Russia" autocomplete="off">
+        <label for="qd">Date of birth (optional, YYYY or YYYY-MM-DD)</label>
+        <input id="qd" placeholder="1979" autocomplete="off">
+        <label for="qid">Identifier (optional: IMO, passport, LEI, tax no.)</label>
+        <input id="qid" placeholder="IMO9422964" autocomplete="off">
+        <label for="thr">Match threshold</label>
+        <select id="thr">
+          <option value="0.55">Wide (0.55) — more noise, fewer misses</option>
+          <option value="0.65" selected>Standard (0.65)</option>
+          <option value="0.80">Tight (0.80) — near-exact only</option>
+        </select>
+        <label><input type="checkbox" id="usePeps" style="width:auto"> include PEP list (loads a large extra pack)</label>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button id="runBtn">Screen</button>
+          <button class="ghost" id="clearBtn">Clear</button>
+        </div>
+      </div>
+      <div class="card">
+        <strong style="font-size:.9rem">Batch</strong>
+        <div class="muted">One name per line. A CSV is only treated as a table when its first row has a
+          <span class="mono">name</span>-style header — otherwise every line is screened verbatim, so
+          "SURNAME, Forename" stays intact.</div>
+        <label for="batch">Paste list</label>
+        <textarea id="batch" placeholder="Rosneft&#10;KUAJIEN, Michael&#10;Acme Trading Ltd"></textarea>
+        <label for="file">…or choose a CSV/TXT file</label>
+        <input type="file" id="file" accept=".csv,.txt">
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button id="batchBtn">Screen batch</button>
+          <button class="ghost" id="csvBtn" disabled>Export CSV</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" id="resultCard">
+        <div class="muted">Results will appear here. Everything runs locally: no network calls, no data leaves this machine.</div>
+      </div>
+      <div class="card noprint">
+        <strong style="font-size:.9rem">Attestation</strong>
+        <div class="muted">A dated, checksum-stamped record of exactly what was screened and what was found.</div>
+        <label for="att">Matter / reference (optional)</label>
+        <input id="att" placeholder="Client 1043 — onboarding">
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button id="attBtn" disabled>Build attestation</button>
+          <button class="ghost" id="printBtn" disabled>Print / save as PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="packs/pack-manifest.js"></script>
+<script src="packs/pack-sentinel-core.js"></script>
+<script>
+"use strict";
+(function(){
+  var CORE = (window.PACK_SENTINEL_CORE && window.PACK_SENTINEL_CORE.meta && window.PACK_SENTINEL_CORE.recs)
+             ? window.PACK_SENTINEL_CORE : null;
+  var PEPS = null, DETAIL = null;
+  var pepState = "idle", pepQueue = [];      // idle | loading | ready | failed
+  var pepIdx = null, idIndex = null;
+  var lastRun = null;
+
+  var NOISE = new Set(("ltd limited llc inc incorporated corp corporation co company plc gmbh ag sa sarl sas bv nv oy ab as aps spa srl pte pty kft zrt doo ooo oao pao zao jsc ojsc pjsc cjsc llp lp trust holding holdings group the and of").split(" "));
+
+  // ISO-2 -> name, so a country filter compares codes exactly instead of by substring.
+  var ISO = {ad:"andorra",ae:"united arab emirates",af:"afghanistan",al:"albania",am:"armenia",ao:"angola",ar:"argentina",at:"austria",au:"australia",az:"azerbaijan",ba:"bosnia and herzegovina",bd:"bangladesh",be:"belgium",bg:"bulgaria",bh:"bahrain",bo:"bolivia",br:"brazil",by:"belarus",ca:"canada",cd:"congo democratic republic",cf:"central african republic",ch:"switzerland",ci:"cote divoire",cl:"chile",cm:"cameroon",cn:"china",co:"colombia",cr:"costa rica",cu:"cuba",cy:"cyprus",cz:"czechia",de:"germany",dk:"denmark",do:"dominican republic",dz:"algeria",ec:"ecuador",ee:"estonia",eg:"egypt",er:"eritrea",es:"spain",et:"ethiopia",fi:"finland",fr:"france",gb:"united kingdom",ge:"georgia",gh:"ghana",gr:"greece",gt:"guatemala",hk:"hong kong",hn:"honduras",hr:"croatia",ht:"haiti",hu:"hungary",id:"indonesia",ie:"ireland",il:"israel",in:"india",iq:"iraq",ir:"iran",is:"iceland",it:"italy",jo:"jordan",jp:"japan",ke:"kenya",kg:"kyrgyzstan",kh:"cambodia",kp:"north korea",kr:"south korea",kw:"kuwait",kz:"kazakhstan",lb:"lebanon",lk:"sri lanka",lr:"liberia",lt:"lithuania",lu:"luxembourg",lv:"latvia",ly:"libya",ma:"morocco",md:"moldova",me:"montenegro",mk:"north macedonia",ml:"mali",mm:"myanmar",mn:"mongolia",mt:"malta",mu:"mauritius",mx:"mexico",my:"malaysia",mz:"mozambique",ng:"nigeria",ni:"nicaragua",nl:"netherlands",no:"norway",np:"nepal",nz:"new zealand",om:"oman",pa:"panama",pe:"peru",ph:"philippines",pk:"pakistan",pl:"poland",ps:"palestine",pt:"portugal",py:"paraguay",qa:"qatar",ro:"romania",rs:"serbia",ru:"russia",rw:"rwanda",sa:"saudi arabia",sd:"sudan",se:"sweden",sg:"singapore",si:"slovenia",sk:"slovakia",sn:"senegal",so:"somalia",ss:"south sudan",sv:"el salvador",sy:"syria",td:"chad",th:"thailand",tj:"tajikistan",tm:"turkmenistan",tn:"tunisia",tr:"turkey",tw:"taiwan",tz:"tanzania",ua:"ukraine",ug:"uganda",us:"united states",uy:"uruguay",uz:"uzbekistan",ve:"venezuela",vn:"vietnam",ye:"yemen",za:"south africa",zw:"zimbabwe"};
+  var NAME2ISO = (function(){ var m={}; for(var k in ISO){ m[ISO[k]]=k; } return m; })();
+  // Everyday aliases, so "USA" or "UK" are not silently ignored.
+  var CALIAS = {usa:"us","u s a":"us",america:"us","united states of america":"us",uk:"gb",
+    "u k":"gb",britain:"gb","great britain":"gb",england:"gb",scotland:"gb",wales:"gb",
+    "south korea":"kr","republic of korea":"kr","north korea":"kp",dprk:"kp",
+    "russian federation":"ru",uae:"ae","emirates":"ae",holland:"nl",
+    "czech republic":"cz",burma:"mm",persia:"ir",turkiye:"tr",
+    "hong kong sar":"hk","ivory coast":"ci","cote d ivoire":"ci"};
+
+  // Unicode-aware: MUST mirror norm() in build_packs.py, or Cyrillic/Arabic
+  // names index under tokens the query can never produce.
+  function norm(s){
+    if(!s) return "";
+    try{ s = s.normalize("NFKD").replace(/\p{M}/gu,""); }catch(e){ s = s.normalize("NFKD"); }
+    s = s.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu," ");
+    return s.split(/\s+/).filter(Boolean).join(" ");
+  }
+  // "Ltd" and "Limited" are the same legal form spelled two ways; canonicalising
+  // them means that difference alone cannot sink a match.
+  var FORM = {limited:"ltd",ltd:"ltd",incorporated:"inc",inc:"inc",corporation:"corp",corp:"corp",
+    company:"co",co:"co",llc:"llc",plc:"plc",gmbh:"gmbh",ag:"ag",sarl:"sarl",bv:"bv",nv:"nv"};
+  function toks(s,dropNoise){
+    var t = norm(s).split(" ").filter(Boolean);   // single characters kept: initials matter
+    t = t.map(function(x){ return FORM[x] || x; });
+    if(dropNoise){
+      var core = t.filter(function(x){return !NOISE.has(x)});
+      if(core.length) return core;
+    }
+    return t;
+  }
+  // Masked identifiers ("**********0211") collide once punctuation is stripped.
+  function cleanId(s){
+    if(!s) return "";
+    if(/[*#xX]/.test(s)) return "";
+    var v = String(s).toUpperCase().replace(/[^A-Z0-9]/g,"");
+    return v.length>=6 ? v : "";
+  }
+  function esc(s){
+    return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});
+  }
+  function arr(v){ return Array.isArray(v) ? v : []; }
+  function listLabel(l){
+    var a = arr(l);
+    if(!a.length) return "Unknown";
+    var names = a.map(function(x){ return x==="S"?"Sanctions":x==="C"?"Crime":x==="P"?"PEP":"Unknown"; });
+    return names.join(" + ");
+  }
+  function listClass(l){
+    var a = arr(l);
+    if(a.indexOf("S")>=0) return "S";
+    if(a.indexOf("C")>=0) return "C";
+    if(a.indexOf("P")>=0) return "P";
+    return "U";
+  }
+
+  // Words too common in entity names to carry a containment match alone.
+  // MUST match GENERIC in build_packs.py.
+  var GENERIC = new Set(("bank national international global general private equity capital invest investment investments partners management services service solutions systems industries industrial enterprise enterprises development energy petroleum oil gas mining shipping marine logistics transport trade trading commercial finance financial insurance media technology technologies tech electronics engineering construction properties property real estate state united central eastern western northern southern new first union credit fund assets asset").split(" "));
+
+  // Document frequency of a token in the loaded corpus — the rarity signal the
+  // containment rule depends on.
+  function docFreq(t){
+    var p = CORE && CORE.idx ? CORE.idx[t] : null;
+    return p ? p.length : 0;
+  }
+  function rareCutoff(){
+    if(!CORE || !CORE.recs) return 150;
+    return Math.max(50, Math.round(CORE.recs.length * 0.0005));
+  }
+
+  function score(queryName, rec){
+    var qF = new Set(toks(queryName,false)), qC = new Set(toks(queryName,true));
+    var names = [rec.n].concat(arr(rec.a));
+    var best = 0, bestName = rec.n;
+    for(var i=0;i<names.length;i++){
+      var rF = new Set(toks(names[i],false)), rC = new Set(toks(names[i],true));
+      if(!rF.size) continue;
+      var shared = 0; rC.forEach(function(t){ if(qC.has(t)) shared++; });
+      if(!shared) continue;
+      var inter = 0; rF.forEach(function(t){ if(qF.has(t)) inter++; });
+      var uni = new Set(Array.from(qF).concat(Array.from(rF))).size;
+      var jac = uni ? inter/uni : 0;
+      // Strict-subset containment ("Sberbank" -> "Sberbank of Russia"), guarded
+      // so it cannot fire on a short common word, on a lone surname against a
+      // person's full name, on purely generic business words, or on one token
+      // diluted inside a three-word name. Mirrors match_score() in the builder.
+      var sc = jac;
+      var small = qC.size <= rC.size ? qC : rC;
+      var minCore = Math.min(qC.size, rC.size);
+      if(minCore >= 1 && shared === minCore && qC.size !== rC.size){
+        var notAllGeneric = false;
+        small.forEach(function(t){ if(!GENERIC.has(t)) notAllGeneric = true; });
+        // A single token may carry a containment match only if it is RARE in the
+        // corpus. Rarity, not length or entity type, is what separates
+        // "Rosneft" -> "ROSNEFT TRADING S.A." (df 5, a real designated
+        // subsidiary) from "Johnson" -> "RICHARD CLARK JOHNSON" (df in the
+        // hundreds, coincidence). An absolute guard suppressed both.
+        var distinctive = small.size >= 2;
+        if(!distinctive){
+          var only = Array.from(small)[0];
+          distinctive = (docFreq(only) <= rareCutoff()) && only.length >= 4;
+        }
+        if(distinctive && notAllGeneric) sc = Math.max(sc, 0.95);
+      }
+      if(sc > best){ best = sc; bestName = names[i]; }
+    }
+    return {score:best, via:bestName};
+  }
+
+  function candidates(pack, idx, queryName){
+    var ts = toks(queryName,true);
+    if(!ts.length) return [];
+    var seen = Object.create(null), any=false;
+    for(var i=0;i<ts.length;i++){
+      var p = idx[ts[i]];
+      if(p){ any=true; for(var j=0;j<p.length;j++){ seen[p[j]]=(seen[p[j]]||0)+1; } }
+    }
+    if(!any) return [];
+    var out = Object.keys(seen).map(Number);
+    out.sort(function(a,b){ return (seen[b]-seen[a]) || (a-b); });
+    return out;
+  }
+
+  function getIdIndex(){
+    if(idIndex) return idIndex;
+    idIndex = Object.create(null);
+    var recs = CORE.recs;
+    for(var i=0;i<recs.length;i++){
+      var xs = arr(recs[i].x);
+      for(var j=0;j<xs.length;j++){
+        var k = cleanId(xs[j]);
+        if(!k) continue;
+        (idIndex[k] || (idIndex[k]=[])).push(i);
+      }
+    }
+    return idIndex;
+  }
+  function getPepIdx(){
+    if(pepIdx || !PEPS) return pepIdx;
+    pepIdx = Object.create(null);
+    var recs = PEPS.recs;
+    for(var i=0;i<recs.length;i++){
+      var names = [recs[i].n].concat(arr(recs[i].a));
+      for(var k=0;k<names.length;k++){
+        var ts = toks(names[k],true);
+        for(var j=0;j<ts.length;j++){
+          (pepIdx[ts[j]] || (pepIdx[ts[j]]=[])).push(i);
+        }
+      }
+    }
+    return pepIdx;
+  }
+
+  function screenOne(q, opts, pepsActive){
+    var thr = opts.threshold, wantId = cleanId(opts.identifier);
+    var hits = [];
+    function consider(rec, sc, via, reason){ hits.push({rec:rec, score:sc, via:via, reason:reason}); }
+
+    if(wantId){
+      var positions = getIdIndex()[wantId];
+      if(positions){
+        // Some published "identifiers" (regional registration codes, free text)
+        // are not unique keys. Flag that rather than presenting a shared code as
+        // a confident 1.00 identity match.
+        var shared = positions.length > 1;
+        positions.forEach(function(p){
+          consider(CORE.recs[p], 1,
+            "identifier "+wantId+(shared?" — shared by "+positions.length+" entities in this snapshot":""),
+            shared ? "identifier-nonunique" : "identifier");
+        });
+      }
+    }
+    if(q){
+      var cand = candidates(CORE, CORE.idx, q);
+      for(var k=0;k<cand.length;k++){
+        var rec = CORE.recs[cand[k]];
+        if(!rec) continue;
+        var s = score(q, rec);
+        if(s.score >= thr) consider(rec, s.score, s.via, "name");
+      }
+      if(pepsActive && PEPS){
+        var pidx = getPepIdx();
+        var pc = candidates(PEPS, pidx, q);
+        for(var m=0;m<pc.length;m++){
+          var prec = PEPS.recs[pc[m]];
+          if(!prec) continue;
+          var ps = score(q, prec);
+          if(ps.score >= thr) consider(prec, ps.score, ps.via, "name");
+        }
+      }
+    }
+    var countryUnknown = false;
+    if(opts.country){
+      var raw = norm(opts.country);
+      var code = (raw.length===2 && ISO[raw]) ? raw : (NAME2ISO[raw] || CALIAS[raw] || "");
+      if(!code) countryUnknown = true;
+      hits.forEach(function(h){
+        var cs = arr(h.rec.c).map(function(x){ return String(x).toLowerCase(); });
+        h.countryMatch = code ? (cs.indexOf(code)>=0) : null;
+      });
+    }
+    if(opts.dob){
+      var d = String(opts.dob).trim();
+      hits.forEach(function(h){
+        var b = h.rec.b || "";
+        if(!b){ h.dobMatch = null; return; }
+        if(d.length>=10 && b.length>=10) h.dobMatch = (b.slice(0,10)===d.slice(0,10)) ? "exact" : "differs";
+        else h.dobMatch = (b.slice(0,4)===d.slice(0,4)) ? "year" : "differs";
+      });
+    }
+    // The same entity can appear in both the core and PEP packs with different
+    // labels. Keeping only the higher-scoring copy discarded the other label and
+    // could present a SANCTIONED party as merely politically exposed, so the
+    // labels are unioned onto whichever copy is kept.
+    var byId = Object.create(null);
+    hits.forEach(function(h){
+      var cur = byId[h.rec.i];
+      if(!cur){ byId[h.rec.i] = h; return; }
+      var merged = arr(cur.rec.l).concat(arr(h.rec.l)).filter(function(v,i,a){ return a.indexOf(v)===i; });
+      var keep = (h.score > cur.score) ? h : cur;
+      var other = (keep===h) ? cur : h;
+      keep = {rec:Object.assign({}, keep.rec, {l:merged}), score:keep.score, via:keep.via,
+              reason:keep.reason, countryMatch:keep.countryMatch, dobMatch:keep.dobMatch,
+              alt:(other.rec.n!==keep.rec.n ? other.rec.n : null)};
+      byId[h.rec.i] = keep;
+    });
+    var list = Object.keys(byId).map(function(k){ return byId[k]; });
+    list.sort(function(a,b){
+      if(b.score !== a.score) return b.score - a.score;
+      var x=String(a.rec.i), y=String(b.rec.i);        // codepoint order, locale-independent
+      return x<y ? -1 : x>y ? 1 : 0;
+    });
+    var capped = list.length > 200;
+    var nearMisses = 0;
+    if(!list.length && q){
+      var qc = toks(q, true);
+      if(qc.length === 1) nearMisses = docFreq(qc[0]);
+    }
+    return {hits:list.slice(0,200), truncated:capped, total:list.length,
+            nearMisses:nearMisses, countryUnknown:countryUnknown};
+  }
+
+  function scoreClass(s){ return s>=0.85?"s-hi":(s>=0.65?"s-md":"s-lo"); }
+  function coverageText(pepsActive){
+    var n = CORE.recs.length.toLocaleString()+" sanctions and crime records";
+    if(pepsActive && PEPS) n += " plus "+PEPS.recs.length.toLocaleString()+" PEP records";
+    return n;
+  }
+
+  function renderHits(q, res, pepsActive){
+    var hits = res.hits;
+    if(!hits.length){
+      // A single-token query that has candidates but no scored match must not be
+      // reported as a clean "no match" — a surname-only wire is the commonest
+      // partial-data input in AML work.
+      if(res.nearMisses){
+        return '<div class="warnbar"><strong>Inconclusive — not a clear result.</strong> "'+esc(q)+
+          '" is a single-token query. '+res.nearMisses+' record(s) in this snapshot contain that token, '+
+          'but none scored as a match on its own. Add a forename, a second name element or an identifier '+
+          'before treating this as clear.</div>';
+      }
+      return '<div class="clear"><strong>No match.</strong> "'+esc(q)+'" was screened against '+
+        coverageText(pepsActive)+' and produced no result at or above the selected threshold.</div>';
+    }
+    var h = "";
+    if(res.countryUnknown) h += '<div class="warnbar">Country filter not applied: that country was not recognised, so no country comparison was performed.</div>';
+    if(res.truncated) h += '<div class="warnbar">Showing the 200 highest-scoring of '+res.total+' results — narrow the query or raise the threshold. Exports carry a TRUNCATED row.</div>';
+    h += '<table><thead><tr><th>Score</th><th>Name / matched via</th><th>List</th><th>Type</th><th>Country</th><th>Programmes</th><th>Sources</th></tr></thead><tbody>';
+    hits.forEach(function(x){
+      var r = x.rec;
+      var detail = (DETAIL && DETAIL.detail) ? arr(DETAIL.detail[r.i]) : [];
+      h += '<tr><td class="score '+scoreClass(x.score)+'">'+x.score.toFixed(2)+'</td>';
+      h += '<td><strong>'+esc(r.n)+'</strong>';
+      if(x.via && x.via!==r.n) h += '<div class="muted">via '+esc(x.via)+'</div>';
+      if(x.alt) h += '<div class="muted">also recorded as '+esc(x.alt)+'</div>';
+      if(x.reason==="identifier-nonunique") h += '<div class="muted" style="color:var(--warn)">identifier is not a unique key in this snapshot — verify before relying on it</div>';
+      if(r.b){
+        var dl = x.dobMatch==="exact" ? ' ✓ matches query' :
+                 x.dobMatch==="year"  ? ' — same year only, day/month unverified' :
+                 x.dobMatch==="differs" ? ' — differs from query' : '';
+        h += '<div class="muted">DOB '+esc(r.b)+dl+'</div>';
+      }
+      if(arr(r.x).length) h += '<div class="mono">'+esc(arr(r.x).slice(0,4).join(" · "))+'</div>';
+      if(detail.length){
+        h += '<details><summary>'+detail.length+' listing record(s)</summary>';
+        detail.forEach(function(d){
+          h += '<div class="rowline"><div>'+esc(d.pr||d.pi||"(programme not stated)")+'</div>'+
+               '<div class="muted">'+esc(d.au||"")+(d.sd?' · listed '+esc(d.sd):'')+(d.ed?' · ends '+esc(d.ed):'')+'</div>'+
+               (d.u?'<div class="mono">'+esc(d.u)+'</div>':'')+'</div>';
+        });
+        h += '</details>';
+      } else if(!DETAIL){
+        h += '<div class="muted"><em>listing detail pack not loaded</em></div>';
+      }
+      h += '</td>';
+      h += '<td><span class="pill p-'+listClass(r.l)+'">'+esc(listLabel(r.l))+'</span></td>';
+      h += '<td>'+esc(r.s||"")+'</td>';
+      h += '<td>'+esc(arr(r.c).join(", "))+(x.countryMatch===true?' ✓':(x.countryMatch===false?' <span class="muted">(differs)</span>':''))+'</td>';
+      h += '<td>'+arr(r.p).map(function(p){return '<span class="pill">'+esc(p)+'</span>'}).join("")+'</td>';
+      h += '<td class="muted">'+esc(arr(r.d).join("; "))+'</td></tr>';
+    });
+    return h+'</tbody></table>';
+  }
+
+  function loadScript(src, done){
+    var s = document.createElement("script");
+    s.src = src;
+    s.onload = function(){ done(true); };
+    s.onerror = function(){ done(false); };
+    document.head.appendChild(s);
+  }
+  function ensurePeps(cb){
+    if(pepState==="ready"){ cb(true); return; }
+    if(pepState==="failed"){ cb(false); return; }
+    pepQueue.push(cb);
+    if(pepState==="loading") return;
+    pepState = "loading";
+    document.getElementById("runBtn").disabled = true;
+    document.getElementById("batchBtn").disabled = true;
+    loadScript("packs/pack-sentinel-peps.js", function(okLoad){
+      PEPS = okLoad ? (window.PACK_SENTINEL_PEPS || null) : null;
+      pepState = PEPS ? "ready" : "failed";
+      document.getElementById("runBtn").disabled = false;
+      document.getElementById("batchBtn").disabled = false;
+      if(!PEPS) alert("PEP pack could not be loaded (packs/pack-sentinel-peps.js). The screen will run WITHOUT PEP data.");
+      var q = pepQueue.slice(); pepQueue = [];
+      q.forEach(function(fn){ fn(!!PEPS); });
+    });
+  }
+  var detailTried = false;
+  function ensureDetail(cb){
+    if(DETAIL || window.PACK_SENTINEL_DETAIL){ DETAIL = window.PACK_SENTINEL_DETAIL; cb(); return; }
+    if(detailTried){ cb(); return; }          // do not re-inject a missing pack on every screen
+    detailTried = true;
+    loadScript("packs/pack-sentinel-detail.js", function(){ DETAIL = window.PACK_SENTINEL_DETAIL||null; cb(); });
+  }
+
+  function currentOpts(){
+    return {threshold: parseFloat(document.getElementById("thr").value),
+      country: document.getElementById("qc").value.trim(),
+      dob: document.getElementById("qd").value.trim(),
+      identifier: document.getElementById("qid").value.trim(),
+      peps: document.getElementById("usePeps").checked};
+  }
+
+  function runSingle(){
+    if(!CORE) return;
+    var q = document.getElementById("q").value.trim();
+    var o = currentOpts();
+    if(!q && !o.identifier){ alert("Enter a name or an identifier."); return; }
+    var go = function(pepsActive){
+      ensureDetail(function(){
+        var res = screenOne(q, o, pepsActive);
+        lastRun = {rows:[{query:q||o.identifier, res:res}], opts:o, pepsActive:pepsActive, when:new Date().toISOString()};
+        document.getElementById("resultCard").innerHTML =
+          '<div style="margin-bottom:10px"><strong>'+esc(q||o.identifier)+'</strong> '+
+          '<span class="muted">— '+res.total+' result(s) at threshold '+o.threshold+
+          (pepsActive?' including PEPs':(o.peps?' — PEP pack unavailable':''))+'</span></div>' +
+          renderHits(q||o.identifier, res, pepsActive);
+        document.getElementById("attBtn").disabled = false;
+        document.getElementById("csvBtn").disabled = false;
+      });
+    };
+    if(o.peps) ensurePeps(go); else go(false);
+  }
+
+  function splitLine(line, delim){
+    var out=[],cur="",q=false;
+    for(var i=0;i<line.length;i++){
+      var c=line[i];
+      if(q){ if(c==='"'){ if(line[i+1]==='"'){cur+='"';i++;} else q=false; } else cur+=c; }
+      else { if(c==='"') q=true; else if(c===delim){ out.push(cur); cur=""; } else cur+=c; }
+    }
+    out.push(cur);
+    return out;
+  }
+  var HEADER_RE = /^(name|full[_ ]?name|subject|counterparty|entity|company|vessel)$/i;
+  function parseList(text){
+    // Newlines inside quoted fields must not split a row, or one subject becomes
+    // two fabricated ones.
+    var src = text.replace(/^﻿/,"").replace(/"(?:[^"]|"")*"/g, function(m){
+      return m.replace(/\r?\n/g, " ");
+    });
+    var lines = src.split(/\r?\n/).map(function(l){return l.trim()}).filter(Boolean);
+    if(!lines.length) return [];
+    // A single-column file whose first row is a header must not screen the header.
+    if(HEADER_RE.test(lines[0].replace(/^"|"$/g,"").trim())) return lines.slice(1).map(function(l){
+      return l.replace(/^"|"$/g,"").trim(); }).filter(Boolean);
+    // Only treat as a table if row 1 really is a header. Otherwise every line is a
+    // name — "KUAJIEN, Michael" must not be split into a surname.
+    var delims = [",",";","\t"];
+    for(var d=0; d<delims.length; d++){
+      var cols = splitLine(lines[0], delims[d]).map(function(c){return c.trim().replace(/^"|"$/g,"")});
+      if(cols.length<2) continue;
+      var ni = -1;
+      for(var i=0;i<cols.length;i++){ if(HEADER_RE.test(cols[i])){ ni=i; break; } }
+      if(ni>=0){
+        var out=[];
+        for(var r=1;r<lines.length;r++){
+          var v=(splitLine(lines[r], delims[d])[ni]||"").trim().replace(/^"|"$/g,"");
+          if(v) out.push(v);
+        }
+        return out;
+      }
+    }
+    return lines.map(function(l){ return l.replace(/^"|"$/g,"").trim(); }).filter(Boolean);
+  }
+
+  function runBatch(){
+    if(!CORE) return;
+    var names = parseList(document.getElementById("batch").value);
+    if(!names.length){ alert("Paste a list, or load a file, first."); return; }
+    if(names.length>5000){ alert("This batch has "+names.length+" rows; the cap is 5000 in one run."); return; }
+    var o = currentOpts();
+    var go = function(pepsActive){
+      ensureDetail(function(){
+        // Chunked so the tab stays responsive and shows progress: measured
+        // throughput is ~55 ms/row, so a full batch is minutes, not seconds.
+        var rows = [], i = 0, CH = 25;
+        document.getElementById("batchBtn").disabled = true;
+        var step = function(){
+          var end = Math.min(i+CH, names.length);
+          for(; i<end; i++) rows.push({query:names[i], res:screenOne(names[i],o,pepsActive)});
+          if(i < names.length){
+            document.getElementById("resultCard").innerHTML =
+              '<div class="muted">Screening '+i+' of '+names.length+'…</div>';
+            setTimeout(step, 0);
+            return;
+          }
+          document.getElementById("batchBtn").disabled = false;
+          finish();
+        };
+        var finish = function(){
+        lastRun = {rows:rows, opts:o, pepsActive:pepsActive, when:new Date().toISOString()};
+        var withHits = rows.filter(function(r){return r.res.hits.length});
+        var h = '<div style="margin-bottom:12px"><strong>'+rows.length+'</strong> subjects screened against '+
+          coverageText(pepsActive)+' · <strong style="color:'+(withHits.length?'var(--bad)':'var(--good)')+'">'+
+          withHits.length+'</strong> with at least one result · '+(rows.length-withHits.length)+' clear</div>';
+        h += '<table><thead><tr><th>Subject</th><th>Result</th><th>Best</th><th>Top match</th></tr></thead><tbody>';
+        rows.forEach(function(r){
+          var top = r.res.hits[0];
+          var statusCell = top ? '<span class="pill p-S">'+r.res.total+' hit(s)</span>'
+            : (r.res.nearMisses ? '<span class="pill p-U">inconclusive</span>'
+                                : '<span class="pill" style="color:var(--good);border-color:var(--good)">clear</span>');
+          h += '<tr><td><strong>'+esc(r.query)+'</strong></td>'+
+            '<td>'+statusCell+'</td>'+
+            '<td class="score '+(top?scoreClass(top.score):'')+'">'+(top?top.score.toFixed(2):'—')+'</td>'+
+            '<td>'+(top?esc(top.rec.n)+' <span class="muted">('+esc(listLabel(top.rec.l))+')</span>'
+                      :(r.res.nearMisses?'<span class="muted">single-token query — '+r.res.nearMisses+' record(s) contain it</span>'
+                                        :'<span class="muted">no match</span>'))+'</td></tr>';
+        });
+        document.getElementById("resultCard").innerHTML = h+'</tbody></table>';
+        document.getElementById("attBtn").disabled = false;
+        document.getElementById("csvBtn").disabled = false;
+        };
+        step();
+      });
+    };
+    if(o.peps) ensurePeps(go); else go(false);
+  }
+
+  function csvCell(v){
+    var s = String(v==null?"":v);
+    if(/^[=+\-@\t\r]/.test(s)) s = "'"+s;      // neutralise spreadsheet formula injection
+    return '"'+s.replace(/"/g,'""')+'"';
+  }
+  function exportCsv(){
+    if(!lastRun) return;
+    var m = CORE.meta, when = lastRun.when;
+    var rows = [["subject","result","best_score","match_name","match_id","list","schema","countries",
+      "programmes","sources","snapshot_version","screened_utc","licence","attribution"]];
+    lastRun.rows.forEach(function(r){
+      if(!r.res.hits.length){
+        rows.push([r.query, r.res.nearMisses ? "inconclusive - single-token query" : "clear",
+          "","","","","","","","",m.snapshot_version,when,m.licence,m.attribution]);
+      } else {
+        r.res.hits.forEach(function(h){
+          rows.push([r.query,"hit",h.score.toFixed(3),h.rec.n,h.rec.i,listLabel(h.rec.l),h.rec.s||"",
+            arr(h.rec.c).join(" "),arr(h.rec.p).join(" "),arr(h.rec.d).join(" "),
+            m.snapshot_version,when,m.licence,m.attribution]);
+        });
+        // The on-screen cap must never silently shorten an export.
+        if(r.res.truncated){
+          rows.push([r.query,"TRUNCATED","","showing "+r.res.hits.length+" of "+r.res.total+" results",
+            "","","","","",  "",m.snapshot_version,when,m.licence,m.attribution]);
+        }
+      }
+    });
+    download("sentinel-screening-"+when.slice(0,19).replace(/[:T]/g,"-")+".csv",
+      rows.map(function(r){ return r.map(csvCell).join(","); }).join("\r\n"), "text/csv");
+  }
+  function download(name, text, mime){
+    var blob = new Blob([text], {type:(mime||"text/plain")+";charset=utf-8"});
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+
+  function buildAttestation(){
+    if(!lastRun) return;
+    var m = CORE.meta, ref = document.getElementById("att").value.trim();
+    var man = window.PACK_MANIFEST || null;
+    var total = lastRun.rows.length;
+    var withHits = lastRun.rows.filter(function(r){return r.res.hits.length}).length;
+    var ds = m.datasets || {};
+    var h = '<div class="card"><h2 style="margin:0 0 4px">Screening attestation</h2>'+
+      '<div class="muted">Generated '+esc(lastRun.when)+' — offline, on this machine.</div>';
+    if(m.sample_build) h += '<div class="warnbar">SAMPLE BUILD — the packs were built with truncated data and are not valid for screening.</div>';
+    if(ref) h += '<p><strong>Matter reference:</strong> '+esc(ref)+'</p>';
+    h += '<table><tbody>'+
+      '<tr><th>Dataset</th><td>OpenSanctions consolidated collections</td></tr>'+
+      '<tr><th>Sanctions snapshot</th><td class="mono">'+esc((ds.sanctions&&ds.sanctions.version)||m.snapshot_version)+'</td></tr>'+
+      '<tr><th>Crime snapshot</th><td class="mono">'+esc((ds.crime&&ds.crime.version)||"n/a")+'</td></tr>'+
+      '<tr><th>PEP snapshot</th><td class="mono">'+esc((ds.peps&&ds.peps.version)||"n/a")+(lastRun.pepsActive?"":" — NOT searched in this run")+'</td></tr>'+
+      '<tr><th>Records searched</th><td>'+CORE.recs.length.toLocaleString()+' distinct sanctions + crime entities'+
+        (lastRun.pepsActive&&PEPS?', '+PEPS.recs.length.toLocaleString()+' PEP records':'; PEP list not searched')+'</td></tr>'+
+      '<tr><th>Subjects screened</th><td>'+total+'</td></tr>'+
+      '<tr><th>Subjects with results</th><td>'+withHits+'</td></tr>'+
+      '<tr><th>Method</th><td>Deterministic token-set matching (Unicode-normalised, accent-folded), threshold '+
+        esc(lastRun.opts.threshold)+'. Identifier matches are exact-string on unmasked identifiers of six or more characters. '+
+        'Only candidate records sharing at least one name token are scored.</td></tr>'+
+      '</tbody></table>';
+    if(man && man.sources){
+      h += '<h3 style="font-size:.9rem;margin-top:14px">Source file checksums (SHA-256)</h3><table><tbody>';
+      Object.keys(man.sources).sort().forEach(function(k){
+        h += '<tr><th style="white-space:nowrap">'+esc(k)+'</th><td class="mono" style="word-break:break-all">'+esc(man.sources[k].sha256)+'</td></tr>';
+      });
+      h += '</tbody></table>';
+    } else {
+      h += '<p class="muted"><strong>Source checksums unavailable:</strong> pack-manifest.js was not loaded, so source integrity could not be evidenced.</p>';
+    }
+    h += '<h3 style="font-size:.9rem;margin-top:14px">Results</h3>';
+    lastRun.rows.forEach(function(r){
+      h += '<div class="rowline '+(r.res.hits.length?'hit':'clearrow')+'"><strong>'+esc(r.query)+'</strong> — '+
+        (r.res.hits.length? r.res.total+' result(s); highest score '+r.res.hits[0].score.toFixed(2) : 'no match at threshold')+'</div>';
+      if(r.res.hits.length){
+        var shown = r.res.hits.slice(0,25);
+        h += '<table><thead><tr><th>Score</th><th>Name</th><th>List</th><th>Programmes</th><th>Record id</th></tr></thead><tbody>';
+        shown.forEach(function(x){
+          h += '<tr><td class="score">'+x.score.toFixed(2)+'</td><td>'+esc(x.rec.n)+'</td><td>'+esc(listLabel(x.rec.l))+'</td>'+
+            '<td>'+esc(arr(x.rec.p).join(", "))+'</td><td class="mono">'+esc(x.rec.i)+'</td></tr>';
+        });
+        h += '</tbody></table>';
+        if(r.res.total > shown.length) h += '<div class="muted">Showing the '+shown.length+' highest-scoring of '+r.res.total+' results.</div>';
+      }
+    });
+    h += '<h3 style="font-size:.9rem;margin-top:14px">Statement and limits</h3>'+
+      '<p style="font-size:.85rem">This attestation records an automated name and identifier screen against the stated '+
+      'snapshots, as at their snapshot dates. It is evidence of the search performed, not a legal opinion, and not '+
+      'confirmation that a subject is or is not sanctioned today. Positive results require human adjudication. A nil '+
+      'result means no record scored at or above the threshold: it does not exclude exposure through aliases or spellings '+
+      'not held in this pack, transliteration, or ownership and control that the source data does not record. Alias, '+
+      'identifier and programme lists are capped per record in this pack.</p>'+
+      '<p class="muted">'+esc(m.attribution||"")+' '+esc(m.licence||"")+'</p></div>';
+    document.getElementById("resultCard").innerHTML = h;
+    document.getElementById("printBtn").disabled = false;
+  }
+
+  function selfTest(){
+    var out=[],pass=0,fail=0;
+    function ok(n,c,d){ (c?pass++:fail++); out.push((c?"PASS  ":"FAIL  ")+n+(d?"  — "+d:"")); }
+    try{
+      ok("pack loaded", !!CORE, CORE?CORE.recs.length+" distinct entities":"NOT LOADED");
+      ok("manifest present", !!window.PACK_MANIFEST);
+      if(CORE && window.PACK_MANIFEST)
+        ok("pack matches manifest build", CORE.meta.built_from_snapshot===window.PACK_MANIFEST.built_from_snapshot,
+           CORE.meta.built_from_snapshot);
+      if(CORE && CORE.meta.sample_build) ok("NOT a sample build", false, "sample packs are not valid for screening");
+      if(CORE && CORE.meta.demo_subset) ok("demo subset is declared in the pack", !!CORE.meta.demo_note,
+        CORE.meta.demo_records+" of "+CORE.meta.full_records+" records");
+      ok("normalisation folds accents", norm("Ćurić Ölçü")==="curic olcu", norm("Ćurić Ölçü"));
+      ok("Cyrillic survives normalisation", norm("Роснефть")==="роснефть", norm("Роснефть"));
+      ok("Arabic survives normalisation", norm("محمد").length>0, norm("محمد"));
+      ok("single-character tokens kept", toks("S M A",false).length===3);
+      ok("noise words dropped for recall", toks("Acme Holdings Ltd",true).join(",")==="acme");
+      ok("legal form is not a free match", score("American International Group",{n:"AMERICAN INTERNATIONAL INC",a:[]}).score < 0.65,
+         "scored "+score("American International Group",{n:"AMERICAN INTERNATIONAL INC",a:[]}).score.toFixed(2));
+      ok("Ltd/Limited spelling variant matches", score("Acme Trading Ltd",{n:"Acme Trading Limited",a:[]}).score >= 0.99,
+         "scored "+score("Acme Trading Ltd",{n:"Acme Trading Limited",a:[]}).score.toFixed(2));
+      ok("different legal forms do not match on form alone", score("Acme Trading Ltd",{n:"Acme Trading LLC",a:[]}).score < 0.65,
+         "scored "+score("Acme Trading Ltd",{n:"Acme Trading LLC",a:[]}).score.toFixed(2));
+      ok("subset name surfaces", score("Sberbank",{n:"Sberbank of Russia",a:[]}).score >= 0.65,
+         "scored "+score("Sberbank",{n:"Sberbank of Russia",a:[]}).score.toFixed(2));
+      ok("single common word does not match everything", score("Bank",{n:"Bank of China",a:[]}).score < 0.65,
+         "scored "+score("Bank",{n:"Bank of China",a:[]}).score.toFixed(2));
+      ok("purely generic tokens do not carry a match",
+         score("Private Equity",{n:"Private Equity Group Holdings",a:[],s:"Company"}).score < 0.65);
+      // Rarity, not length or entity type, decides a single-token containment.
+      ok("common token does not carry a containment match", (function(){
+        var t=null, dfMax=rareCutoff();
+        for(var k in CORE.idx){ if(CORE.idx[k].length > dfMax*4){ t=k; break; } }
+        if(!t) return true;
+        return score(t,{n:t+" alpha beta gamma",a:[],s:"Person"}).score < 0.65;
+      })(), "cutoff df="+rareCutoff());
+      ok("rare token does carry a containment match", (function(){
+        var t=null;
+        for(var k in CORE.idx){ if(CORE.idx[k].length===1 && k.length>=6){ t=k; break; } }
+        if(!t) return true;
+        // Extra tokens must be non-noise, or both core sets collapse to {t}
+        // and the rule under test never fires.
+        return score(t,{n:t+" alpha beta",a:[],s:"Company"}).score >= 0.65;
+      })());
+      ok("dedup unions list labels rather than discarding one", (function(){
+        var a={i:"X",n:"Test Entity",a:[],l:["S"],s:"Company"};
+        var b={i:"X",n:"Test Entity",a:[],l:["P"],s:"Person"};
+        var saveP=PEPS; PEPS={recs:[b],meta:{}};
+        var savePidx=pepIdx; pepIdx=null;
+        var saveRecs=CORE.recs, saveIdx=CORE.idx;
+        CORE.recs=[a]; CORE.idx={test:[0],entity:[0]};
+        var r=screenOne("Test Entity",{threshold:0.65,country:"",dob:"",identifier:"",peps:true},true);
+        CORE.recs=saveRecs; CORE.idx=saveIdx; PEPS=saveP; pepIdx=savePidx;
+        return r.hits.length===1 && listLabel(r.hits[0].rec.l).indexOf("Sanctions")>=0
+                                 && listLabel(r.hits[0].rec.l).indexOf("PEP")>=0;
+      })());
+      ok("single-token no-match is flagged inconclusive, not clear", (function(){
+        var t=null;
+        for(var k in CORE.idx){ if(CORE.idx[k].length>rareCutoff()*4 && k.length>=5){ t=k; break; } }
+        if(!t) return true;
+        var r=screenOne(t,{threshold:0.99,country:"",dob:"",identifier:"",peps:false},false);
+        // Either it matched something, or it must be reported as inconclusive —
+        // never as a silent clear.
+        return r.hits.length>0 || r.nearMisses>0;
+      })());
+      ok("newline inside a quoted field does not fabricate rows",
+         parseList('name,country\n"Smith,\nJohn",GB\nAcme,FR').length===2,
+         JSON.stringify(parseList('name,country\n"Smith,\nJohn",GB\nAcme,FR')));
+      ok("one-column csv header is not screened",
+         parseList("name\nAcme\nBeta").join("|")==="Acme|Beta");
+      ok("country alias recognised", (function(){
+        var r=screenOne("",{threshold:0.65,country:"USA",dob:"",identifier:"",peps:false},false);
+        return r.countryUnknown===false;
+      })());
+      ok("unrecognised country is reported, not ignored", (function(){
+        var r=screenOne("",{threshold:0.65,country:"Wakanda",dob:"",identifier:"",peps:false},false);
+        return r.countryUnknown===true;
+      })());
+      ok("exact name scores 1.00", Math.abs(score("Rosneft",{n:"Rosneft",a:[]}).score-1)<1e-9);
+      ok("unrelated name scores 0", score("zzzzq nonexistent",{n:"Rosneft",a:[]}).score===0);
+      ok("masked identifier refused", cleanId("**********0211")==="" && cleanId("0211")==="");
+      ok("real identifier accepted", cleanId("IMO 9422964")==="IMO9422964");
+      ok("html escaping", esc('<img src=x onerror=1>').indexOf("<")===-1);
+      ok("csv formula neutralised", csvCell("=cmd|calc").indexOf("'=")===1);
+      ok("surname-comma line not split", parseList("KUAJIEN, Michael\nSmith, John").join("|")==="KUAJIEN, Michael|Smith, John");
+      ok("csv with name header still parsed", parseList("name,country\nAcme,GB\nBeta,FR").join("|")==="Acme|Beta");
+      ok("semicolon csv parsed", parseList("name;country\nAcme;GB").join("|")==="Acme");
+      ok("BOM stripped", parseList("﻿Acme\nBeta").join("|")==="Acme|Beta");
+      ok("country name maps to ISO code", NAME2ISO["russia"]==="ru" && NAME2ISO["ukraine"]==="ua");
+      if(CORE){
+        var probe=null;
+        for(var pi=0; pi<CORE.recs.length && !probe; pi++){ if(toks(CORE.recs[pi].n,true).length>=2) probe=CORE.recs[pi]; }
+        if(probe){
+          var d1=screenOne(probe.n,{threshold:0.65,country:"",dob:"",identifier:"",peps:false},false);
+          ok("record found by its own name", d1.hits.some(function(h){return h.rec.i===probe.i;}), '"'+probe.n+'" → '+d1.total+" hit(s)");
+        }
+        var idProbe=null;
+        for(var qi=0; qi<CORE.recs.length && !idProbe; qi++){ if(arr(CORE.recs[qi].x).length) idProbe=CORE.recs[qi]; }
+        if(idProbe){
+          var d2=screenOne("",{threshold:0.65,country:"",dob:"",identifier:idProbe.x[0],peps:false},false);
+          ok("record found by its own identifier", d2.hits.some(function(h){return h.rec.i===idProbe.i;}), idProbe.x[0]);
+        }
+        // Non-Latin round trip: the defect that made 5,289 records unfindable.
+        var cyr=null;
+        for(var ci=0; ci<CORE.recs.length && !cyr; ci++){ if(/[Ѐ-ӿ؀-ۿ]/.test(CORE.recs[ci].n)) cyr=CORE.recs[ci]; }
+        if(cyr){
+          var d3=screenOne(cyr.n,{threshold:0.65,country:"",dob:"",identifier:"",peps:false},false);
+          ok("non-Latin record found by its own name", d3.hits.some(function(h){return h.rec.i===cyr.i;}), cyr.n.slice(0,40));
+        }
+        ok("nonsense returns no result", screenOne("qqqxxzz impossible 9999",{threshold:0.65,country:"",dob:"",identifier:"",peps:false},false).hits.length===0);
+        var a=JSON.stringify(screenOne(probe?probe.n:"x",{threshold:0.65,country:"",dob:"",identifier:"",peps:false},false).hits.map(function(x){return x.rec.i+":"+x.score}));
+        var b=JSON.stringify(screenOne(probe?probe.n:"x",{threshold:0.65,country:"",dob:"",identifier:"",peps:false},false).hits.map(function(x){return x.rec.i+":"+x.score}));
+        ok("results are deterministic", a===b);
+        ok("multi-list entity labelled once", (function(){
+          for(var i=0;i<CORE.recs.length;i++){ if(arr(CORE.recs[i].l).length>1) return listLabel(CORE.recs[i].l).indexOf("+")>0; }
+          return true; })());
+      }
+    }catch(err){
+      fail++; out.push("FAIL  self-test threw: "+(err&&err.message?err.message:String(err)));
+    }
+    document.getElementById("resultCard").innerHTML =
+      '<strong>Self-test</strong><pre class="mono" style="white-space:pre-wrap;margin-top:8px">'+
+      esc(out.join("\n")+"\n\n"+pass+" passed, "+fail+" failed.")+'</pre>';
+  }
+
+  function setProvenance(){
+    var el=document.getElementById("provenance"), w=document.getElementById("warn");
+    if(!CORE){
+      el.innerHTML='<strong style="color:var(--bad)">Data pack not found or malformed.</strong> Run 01-build\\BUILD-ALL.cmd, then reopen this page.';
+      return;
+    }
+    var m=CORE.meta, ds=m.datasets||{};
+    document.getElementById("verTag").textContent=m.snapshot_version||"unknown";
+    if(m.sample_build) w.innerHTML='<div class="warnbar"><strong>SAMPLE BUILD.</strong> These packs were built from truncated data with <code>--sample</code> and must not be used for screening.</div>';
+    else if(m.demo_subset) w.innerHTML='<div class="warnbar" style="border-color:var(--warn);color:var(--warn);background:rgba(224,161,58,.10)"><strong>Public demo subset.</strong> '+
+      esc(m.demo_note||"")+' Everything below is real, verified data and the logic is identical — only the corpus is smaller, so a nil result here is not a screening result.</div>';
+    if(window.PACK_MANIFEST && window.PACK_MANIFEST.built_from_snapshot!==m.built_from_snapshot)
+      w.innerHTML+='<div class="warnbar"><strong>Pack mismatch.</strong> This pack was built from a different snapshot than the manifest — re-run BUILD-ALL.cmd.</div>';
+    el.innerHTML='<strong>Dataset:</strong> OpenSanctions · sanctions <span class="mono">'+esc((ds.sanctions&&ds.sanctions.version)||"?")+
+      '</span>, crime <span class="mono">'+esc((ds.crime&&ds.crime.version)||"?")+
+      '</span>, PEP <span class="mono">'+esc((ds.peps&&ds.peps.version)||"?")+'</span> · '+
+      CORE.recs.length.toLocaleString()+' distinct sanctions + crime entities loaded.<br>'+
+      '<strong>Point-in-time:</strong> answers state the position as at those snapshot dates, not today. '+esc(m.attribution||"");
+  }
+
+  document.getElementById("runBtn").onclick=runSingle;
+  document.getElementById("batchBtn").onclick=runBatch;
+  document.getElementById("csvBtn").onclick=exportCsv;
+  document.getElementById("attBtn").onclick=buildAttestation;
+  document.getElementById("printBtn").onclick=function(){ window.print(); };
+  document.getElementById("selfTestBtn").onclick=selfTest;
+  document.getElementById("clearBtn").onclick=function(){
+    ["q","qc","qd","qid","att","batch"].forEach(function(id){ document.getElementById(id).value=""; });
+    document.getElementById("resultCard").innerHTML='<div class="muted">Cleared.</div>';
+    lastRun=null;
+    document.getElementById("attBtn").disabled=true;
+    document.getElementById("csvBtn").disabled=true;
+    document.getElementById("printBtn").disabled=true;
+  };
+  document.getElementById("q").addEventListener("keydown",function(e){ if(e.key==="Enter") runSingle(); });
+  document.getElementById("file").addEventListener("change",function(e){
+    var f=e.target.files&&e.target.files[0]; if(!f) return;
+    var fr=new FileReader();
+    fr.onload=function(){ document.getElementById("batch").value=String(fr.result); };
+    fr.readAsText(f);
+  });
+  document.getElementById("themeBtn").onclick=function(){
+    var r=document.documentElement;
+    r.setAttribute("data-theme", r.getAttribute("data-theme")==="dark"?"light":"dark");
+  };
+  setProvenance();
+})();
+</script>
+</body>
+</html>

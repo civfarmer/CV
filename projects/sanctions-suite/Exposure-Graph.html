@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exposure Graph — offline ownership and association explorer</title>
+<style>
+  :root{--bg:#0b0f17;--surface:#131b2a;--surface2:#182133;--ink:#e9eef7;--ink2:#aab7cc;--muted:#7d8ba3;
+    --line:#233145;--accent:#43b3a6;--accent-ink:#84d6ca;--bad:#e0574a;--warn:#e0a13a;--good:#43c59e;
+    --mono:ui-monospace,'Cascadia Code',Consolas,monospace;--sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  html[data-theme="light"]{--bg:#f4f1ec;--surface:#fff;--surface2:#faf7f2;--ink:#221e18;--ink2:#4c473e;
+    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55}
+  header{border-bottom:1px solid var(--line);padding:14px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--surface)}
+  h1{font-size:1.05rem;margin:0}
+  .tag{font-size:.7rem;padding:2px 8px;border:1px solid var(--line);border-radius:99px;color:var(--muted)}
+  .spacer{flex:1}
+  button{background:var(--accent);color:#04211e;border:0;border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer;font-size:.86rem}
+  button.ghost{background:transparent;color:var(--ink2);border:1px solid var(--line)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  main{padding:20px;max-width:1240px;margin:0 auto}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+  label{display:block;font-size:.72rem;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.06em}
+  input,select{width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px 10px;font-family:inherit}
+  table{width:100%;border-collapse:collapse;font-size:.85rem}
+  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-size:.7rem;text-transform:uppercase}
+  .pill{display:inline-block;font-size:.68rem;padding:1px 7px;border-radius:99px;border:1px solid var(--line);margin:1px 3px 1px 0}
+  .flag{background:rgba(224,87,74,.15);border-color:var(--bad);color:var(--bad)}
+  .ok{background:rgba(67,197,158,.13);border-color:var(--good);color:var(--good)}
+  .muted{color:var(--muted);font-size:.8rem}
+  .mono{font-family:var(--mono);font-size:.78rem}
+  .banner{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:.78rem;color:var(--ink2);margin-bottom:16px}
+  .hop{border-left:3px solid var(--accent);padding:6px 0 6px 12px;margin:0}
+  .hop.sanc{border-left-color:var(--bad)}
+  .res{cursor:pointer;padding:7px 8px;border-bottom:1px solid var(--line)}
+  .res:hover{background:var(--surface2)}
+  .grid{display:grid;grid-template-columns:330px 1fr;gap:20px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  svg{width:100%;height:auto;background:var(--surface2);border-radius:8px;border:1px solid var(--line)}
+  @media print{.noprint{display:none!important}body{background:#fff;color:#000}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Exposure Graph</h1>
+  <span class="tag" id="verTag">loading…</span><span class="tag">offline</span>
+  <span class="spacer"></span>
+  <button class="ghost noprint" id="themeBtn">Theme</button>
+  <button class="ghost noprint" id="selfTestBtn">Self-test</button>
+</header>
+<main>
+  <div class="banner" id="provenance">Loading data pack…</div>
+  <div class="grid">
+    <div>
+      <div class="card">
+        <strong style="font-size:.9rem">Find an entity</strong>
+        <label for="q">Name</label>
+        <input id="q" placeholder="company or person name" autocomplete="off">
+        <label for="depth">Search depth (hops)</label>
+        <select id="depth">
+          <option value="1">1 — direct links only</option>
+          <option value="2" selected>2 — standard</option>
+          <option value="3">3 — wide</option>
+          <option value="4">4 — very wide (slower)</option>
+        </select>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button id="searchBtn">Search</button>
+          <button class="ghost" id="dossierBtn" disabled>Export dossier</button>
+        </div>
+      </div>
+      <div class="card"><div id="hits"><div class="muted">Search results appear here.</div></div></div>
+    </div>
+    <div><div class="card" id="out"><div class="muted">Select an entity to map its ownership and association exposure.</div></div></div>
+  </div>
+</main>
+<script src="packs/pack-manifest.js"></script>
+<script src="packs/pack-exposure.js"></script>
+<script>
+"use strict";
+(function(){
+  var P = (window.PACK_EXPOSURE && window.PACK_EXPOSURE.meta && window.PACK_EXPOSURE.nodes
+           && window.PACK_EXPOSURE.edges) ? window.PACK_EXPOSURE : null;
+  var NODES = P ? P.nodes : {}, EDGES = P ? P.edges : [], NAMEIDX = P ? P.nameidx : {};
+  var ADJ = null, current = null, currentPaths = null, currentResult = null;
+
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+  // Unicode-aware — an ASCII-only filter made every Cyrillic, Arabic and CJK
+  // entity unsearchable while its tokens sat in the index.
+  function norm(s){
+    if(!s) return "";
+    try{ s = s.normalize("NFKD").replace(/\p{M}/gu,""); }catch(e){ s = s.normalize("NFKD"); }
+    s = s.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu," ");
+    return s.split(/\s+/).filter(Boolean).join(" ");
+  }
+  function toks(s){ return norm(s).split(" ").filter(Boolean); }
+
+  function buildAdj(){
+    if(ADJ) return ADJ;
+    ADJ = Object.create(null);
+    for(var i=0;i<EDGES.length;i++){
+      var e = EDGES[i];
+      (ADJ[e.a] || (ADJ[e.a]=[])).push({o:e.b, e:i, dir:"out"});
+      if(e.b !== e.a)   // a self-loop must not be counted twice
+        (ADJ[e.b] || (ADJ[e.b]=[])).push({o:e.a, e:i, dir:"in"});
+    }
+    return ADJ;
+  }
+
+  function isSanctioned(id){
+    var n = NODES[id];
+    return !!(n && (n.z===1 || (n.t||[]).indexOf("sanction")>=0));
+  }
+
+  function search(q){
+    var ts = toks(q);
+    if(!ts.length) return [];
+    var counts = Object.create(null);
+    ts.forEach(function(t){
+      var ids = NAMEIDX[t];
+      if(ids) ids.forEach(function(id){ counts[id]=(counts[id]||0)+1; });
+    });
+    var out = Object.keys(counts);
+    var totalFound = out.length;
+    var qn = norm(q);
+    out.sort(function(a,b){
+      var d = counts[b]-counts[a];
+      if(d) return d;
+      var an=norm((NODES[a]||{}).n||""), bn=norm((NODES[b]||{}).n||"");
+      var ae=(an===qn?0:1), be=(bn===qn?0:1);
+      if(ae!==be) return ae-be;
+      if(an!==bn) return an<bn ? -1 : 1;
+      return a<b ? -1 : a>b ? 1 : 0;
+    });
+    var top = out.slice(0,50);
+    top.total = totalFound;              // so the UI can say "showing 50 of N"
+    return top;
+  }
+
+  // Breadth-first search to sanctioned nodes.
+  // Depth is recorded per node, and equal-depth rediscovery is allowed through,
+  // so ALL shortest routes are reported — including parallel relationships
+  // between the same pair (a directorship AND a 75% ownership are both material).
+  // Only first discovery expands, which keeps the search linear and cycle-safe.
+  function pathsToSanctioned(startId, maxDepth, maxPaths){
+    var adj = buildAdj();
+    var dist = Object.create(null); dist[startId]=0;
+    var frontier = [{id:startId, path:[]}];
+    var found = [], truncated = false, allTargets = Object.create(null);
+    for(var d=0; d<maxDepth && frontier.length; d++){
+      var next = [];
+      for(var i=0;i<frontier.length;i++){
+        var cur = frontier[i];
+        var links = adj[cur.id] || [];
+        for(var j=0;j<links.length;j++){
+          var l = links[j];
+          if(l.o === startId) continue;
+          var known = dist[l.o];
+          if(known !== undefined && known < d+1) continue;   // shorter route exists
+          var path = cur.path.concat([{from:cur.id, to:l.o, edge:EDGES[l.e], dir:l.dir}]);
+          if(known === undefined){ dist[l.o] = d+1; next.push({id:l.o, path:path}); }
+          if(isSanctioned(l.o)){
+            allTargets[l.o] = 1;              // counted before the cap, so the
+            if(found.length >= maxPaths){ truncated = true; }   // headline number
+            else found.push({target:l.o, path:path});           // is never understated
+          }
+        }
+      }
+      frontier = next;
+    }
+    found.sort(function(a,b){
+      if(a.path.length!==b.path.length) return a.path.length-b.path.length;
+      var x=String(a.target), y=String(b.target);
+      if(x!==y) return x<y ? -1 : 1;
+      var ea=a.path.map(function(s){return s.edge.t+s.edge.r}).join(">");
+      var eb=b.path.map(function(s){return s.edge.t+s.edge.r}).join(">");
+      return ea<eb ? -1 : ea>eb ? 1 : 0;
+    });
+    return {paths:found, truncated:truncated, targetCount:Object.keys(allTargets).length};
+  }
+
+  function nodeLabel(id){
+    var n = NODES[id];
+    return (n && n.n) ? n.n : "(unnamed entity "+id+")";
+  }
+
+  // Source "role" strings are themselves directional ("Owned or Controlled By").
+  // Pasting them onto an already-directional verb produced self-contradictions
+  // like "X owns / controls (Owned or Controlled By) Y", and reversed nonsense
+  // on the inbound traversal. Directional roles are therefore suppressed and the
+  // verb carries the direction; other roles are kept as a qualifier.
+  var DIRECTIONAL_ROLE = /^(owned or controlled by|property in the interest of|owns, controls, or operates|acting for or on behalf of|leader or official of|providing support to|family member of|associated individual|associated entity)$/i;
+  function relPhrase(step){
+    var e = step.edge, t = e.t;
+    var role = (e.r && !DIRECTIONAL_ROLE.test(String(e.r).trim())) ? " ("+e.r+")" : "";
+    var pct = e.p ? " ["+e.p+"]" : "";
+    var forward = step.dir==="out";
+    var map = {
+      ownership: forward ? "owns / controls" : "is owned or controlled by",
+      directorship: forward ? "is a director of" : "has as director",
+      family: forward ? "is a family member of" : "has as family member",
+      associate: "is associated with",
+      representation: forward ? "acts for" : "is represented by",
+      employment: forward ? "is employed by" : "employs",
+      membership: forward ? "is a member of" : "has as member",
+      succession: forward ? "precedes" : "succeeds",
+      link: "is linked to"
+    };
+    return (map[t]||t)+role+pct;
+  }
+  function sourceNote(step){
+    var e = step.edge;
+    if(e.r && DIRECTIONAL_ROLE.test(String(e.r).trim())){
+      return 'source records: "'+nodeLabel(step.dir==="out"?step.to:step.from)+'" '+e.r+' "'+
+             nodeLabel(step.dir==="out"?step.from:step.to)+'"';
+    }
+    return "";
+  }
+  function designation(id){
+    var n = NODES[id] || {};
+    var bits = [];
+    if((n.pg||[]).length) bits.push((n.pg||[]).join(", "));
+    if((n.au||[]).length) bits.push((n.au||[]).join("; "));
+    return bits.join(" · ");
+  }
+
+  function drawGraph(id, paths){
+    var W=680, cx=W/2, rowH=74;
+    var rows = [[{id:id, root:true}]];
+    var placed = Object.create(null); placed[id]=true;
+    paths.slice(0,6).forEach(function(p){
+      p.path.forEach(function(step, di){
+        if(!rows[di+1]) rows[di+1]=[];
+        if(!placed[step.to]){ placed[step.to]=true; rows[di+1].push({id:step.to, via:step}); }
+      });
+    });
+    var H = Math.max(160, rows.length*rowH+40);
+    var pos = Object.create(null);
+    var s = '<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="exposure graph">'+
+      '<defs><marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">'+
+      '<path d="M0,0 L10,5 L0,10 z" fill="#7d8ba3"/></marker>'+
+      '<marker id="arwS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">'+
+      '<path d="M0,0 L10,5 L0,10 z" fill="#e0574a"/></marker></defs>';
+    rows.forEach(function(row,ri){
+      var y = 34+ri*rowH;
+      row.forEach(function(cell,ci){
+        var x = row.length===1 ? cx : (W/(row.length+1))*(ci+1);
+        pos[cell.id]={x:x,y:y};
+      });
+    });
+    // edges first
+    rows.forEach(function(row,ri){
+      if(!ri) return;
+      row.forEach(function(cell){
+        if(!cell.via) return;
+        var a=pos[cell.via.from], b=pos[cell.id];
+        if(!a||!b) return;
+        var sanc = isSanctioned(cell.id);
+        // Draw in the real direction of the relationship, not the walk order.
+        var fwd = cell.via.dir==="out";
+        var x1=(fwd?a.x:b.x), y1=(fwd?a.y+12:b.y-14), x2=(fwd?b.x:a.x), y2=(fwd?b.y-14:a.y+12);
+        s += '<line x1="'+x1.toFixed(1)+'" y1="'+y1+'" x2="'+x2.toFixed(1)+'" y2="'+y2+'" stroke="'+
+             (sanc?'#e0574a':'#2c3d54')+'" stroke-width="1.5" marker-end="url(#'+(sanc?'arwS':'arw')+')"/>';
+        var mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+        s += '<text x="'+mx.toFixed(1)+'" y="'+my.toFixed(1)+'" fill="#7d8ba3" font-size="9" text-anchor="middle">'+
+             esc(cell.via.edge.t)+'</text>';
+      });
+    });
+    // nodes
+    Object.keys(pos).forEach(function(nid){
+      var p=pos[nid], sanc=isSanctioned(nid), root=(nid===id);
+      var label=nodeLabel(nid); if(label.length>26) label=label.slice(0,25)+"…";
+      s += '<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y+'" r="'+(root?9:7)+'" fill="'+
+           (sanc?'#e0574a':(root?'#43b3a6':'#182133'))+'" stroke="'+(root?'#84d6ca':'#233145')+'" stroke-width="2"/>';
+      s += '<text x="'+p.x.toFixed(1)+'" y="'+(p.y+22)+'" fill="#aab7cc" font-size="10" text-anchor="middle">'+esc(label)+'</text>';
+    });
+    return s+'</svg>';
+  }
+
+  function showEntity(id){
+    var n = NODES[id];
+    if(!n) return;
+    current = id;
+    var depth = parseInt(document.getElementById("depth").value,10);
+    var result = pathsToSanctioned(id, depth, 40);
+    var paths = result.paths;
+    currentPaths = paths; currentResult = result;
+    document.getElementById("dossierBtn").disabled = false;
+
+    var adj = buildAdj();
+    var direct = (adj[id]||[]).length;
+    var h = '<div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">'+
+      '<strong style="font-size:1.05rem">'+esc(n.n)+'</strong>'+
+      (isSanctioned(id)?'<span class="pill flag">DIRECTLY SANCTIONED</span>':'')+
+      '<span class="pill">'+esc(n.s||"entity")+'</span>'+
+      (n.c&&n.c.length?'<span class="pill">'+esc(n.c.join(", "))+'</span>':'')+
+      '</div><div class="mono muted">'+esc(id)+'</div>';
+
+    if(isSanctioned(id)){
+      h += '<p><span class="pill flag">This entity is itself designated in the source data.</span></p>';
+    }
+    h += '<p class="muted">'+direct+' direct relationship(s) recorded · searched to '+depth+' hop(s)</p>';
+
+    if(!paths.length){
+      h += '<div class="card" style="border-color:var(--good)"><strong style="color:var(--good)">No route to a sanctioned entity found within '+depth+' hop(s).</strong>'+
+        '<div class="muted">This means no ownership, directorship, family, association or representation record in this dataset connects the entity to a designated party within that distance. '+
+        'It is not a clean bill of health: the dataset records relationships that sources disclose, and undisclosed or indirect control will not appear.</div></div>';
+    } else {
+      var shortest = paths[0].path.length;
+      h += '<div class="card" style="border-color:var(--bad)"><strong style="color:var(--bad)">'+
+        result.targetCount+' sanctioned entit'+(result.targetCount===1?'y':'ies')+' reachable via '+
+        paths.length+(result.truncated?'+':'')+' route'+(paths.length===1?'':'s')+
+        ' — shortest is '+shortest+' hop'+(shortest>1?'s':'')+'.</strong>'+
+        (result.truncated?'<div class="muted">Route list truncated at 40; increase specificity or reduce depth to see the rest.</div>':'')+
+        '</div>';
+      h += drawGraph(id, paths);
+      h += '<h3 style="font-size:.9rem;margin-top:14px">Routes</h3>';
+      paths.slice(0,20).forEach(function(p,i){
+        h += '<div class="card" style="margin-bottom:10px;padding:12px"><strong>Route '+(i+1)+'</strong> — '+p.path.length+' hop'+(p.path.length>1?'s':'')+
+          ' to <strong style="color:var(--bad)">'+esc(nodeLabel(p.target))+'</strong>';
+        p.path.forEach(function(step){
+          var note = sourceNote(step);
+          h += '<div class="hop'+(isSanctioned(step.to)?' sanc':'')+'">'+
+            esc(nodeLabel(step.from))+' <span class="muted">'+esc(relPhrase(step))+'</span> '+
+            '<strong>'+esc(nodeLabel(step.to))+'</strong>'+
+            (isSanctioned(step.to)?' <span class="pill flag">sanctioned</span>':'')+
+            (note?'<div class="muted">'+esc(note)+'</div>':'')+
+            '<div class="mono muted">source: '+esc(step.edge.d||"unstated")+'</div></div>';
+        });
+        var dg = designation(p.target);
+        if(dg) h += '<div class="muted">Designation of '+esc(nodeLabel(p.target))+': '+esc(dg)+'</div>';
+        h += '</div>';
+      });
+      if(paths.length>20) h += '<div class="muted">Showing the 20 shortest routes of '+paths.length+'.</div>';
+    }
+    document.getElementById("out").innerHTML = h;
+  }
+
+  function doSearch(){
+    if(!P) return;
+    var q=document.getElementById("q").value.trim();
+    if(!q){ alert("Enter a name."); return; }
+    var ids=search(q);
+    var el=document.getElementById("hits");
+    if(!ids.length){ el.innerHTML='<div class="muted">No entity of that name in the relationship graph. Note this graph holds only entities that have at least one recorded relationship — screen names in Sentinel instead.</div>'; return; }
+    el.innerHTML = '<div class="muted" style="margin-bottom:6px">'+
+      (ids.total && ids.total>ids.length ? 'showing '+ids.length+' of '+ids.total+' matches'
+                                         : ids.length+' match(es)')+'</div>' +
+      ids.map(function(id){
+        var n=NODES[id];
+        return '<div class="res" data-id="'+esc(id)+'"><strong>'+esc(n.n)+'</strong>'+
+          (isSanctioned(id)?' <span class="pill flag">sanctioned</span>':'')+
+          '<div class="muted">'+esc(n.s||"")+(n.c&&n.c.length?" · "+esc(n.c.join(", ")):"")+'</div></div>';
+      }).join("");
+    Array.prototype.forEach.call(el.querySelectorAll(".res"), function(d){
+      d.onclick=function(){ showEntity(d.getAttribute("data-id")); };
+    });
+    if(ids.length===1) showEntity(ids[0]);
+  }
+
+  function exportDossier(){
+    if(!current) return;
+    var n=NODES[current], m=P.meta;
+    var L=[];
+    L.push("EXPOSURE DOSSIER");
+    L.push("Subject: "+n.n);
+    L.push("Entity id: "+current);
+    L.push("Type: "+(n.s||"")+"   Countries: "+((n.c||[]).join(", ")||"not stated"));
+    L.push("Directly sanctioned: "+(isSanctioned(current)?"YES":"no"));
+    L.push("");
+    L.push("Dataset: OpenSanctions snapshot "+m.snapshot_version+" (built "+m.generated_utc+")");
+    L.push("Generated: "+new Date().toISOString()+" — offline");
+    L.push("");
+    if(!currentPaths || !currentPaths.length){
+      L.push("No route to a sanctioned entity within the searched depth.");
+    } else {
+      L.push((currentResult?currentResult.targetCount:"?")+" sanctioned entities reachable via "+
+             currentPaths.length+(currentResult&&currentResult.truncated?"+ (truncated)":"")+
+             " route(s). Shortest: "+currentPaths[0].path.length+" hop(s).");
+      currentPaths.slice(0,25).forEach(function(p,i){
+        L.push("");
+        L.push("Route "+(i+1)+" ("+p.path.length+" hops) -> "+nodeLabel(p.target));
+        p.path.forEach(function(s,si){
+          L.push("  "+(si+1)+". "+nodeLabel(s.from)+"  "+relPhrase(s)+"  "+nodeLabel(s.to)+
+                 (isSanctioned(s.to)?"  [SANCTIONED]":"")+"   (source: "+(s.edge.d||"unstated")+")");
+          var note=sourceNote(s);
+          if(note) L.push("      "+note);
+        });
+        var dg=designation(p.target);
+        if(dg) L.push("      designation: "+dg);
+      });
+      if(currentPaths.length>25) L.push("");
+      if(currentPaths.length>25) L.push("(showing the 25 shortest of "+currentPaths.length+" routes)");
+    }
+    L.push("");
+    L.push("LIMITS: relationship data reflects what sources disclose. Absence of a route is not proof of independence.");
+    L.push(m.attribution||"");
+    L.push(m.licence||"");
+    var text=L.join("\r\n");
+    var b=new Blob([text],{type:"text/plain;charset=utf-8"}),a=document.createElement("a");
+    a.href=URL.createObjectURL(b);
+    a.download="exposure-dossier-"+String(n.n).replace(/[^A-Za-z0-9]+/g,"-").slice(0,40)+".txt";
+    document.body.appendChild(a); a.click(); setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1000);
+  }
+
+  function setProvenance(){
+    var el=document.getElementById("provenance");
+    if(!P){ el.innerHTML='<strong style="color:var(--bad)">Data pack not found.</strong> Run 01-build\\BUILD-ALL.cmd, then reopen.'; return; }
+    document.getElementById("verTag").textContent=P.meta.snapshot_version||"unknown";
+    var pre = P.meta.demo_subset
+      ? '<div style="color:var(--warn);margin-bottom:6px"><strong>Public demo subset.</strong> '+esc(P.meta.demo_note||"")+'</div>' : '';
+    el.innerHTML=pre+'<strong>Dataset:</strong> OpenSanctions snapshot <span class="mono">'+esc(P.meta.snapshot_version)+'</span> · '+
+      Object.keys(NODES).length.toLocaleString()+' entities with relationships · '+EDGES.length.toLocaleString()+
+      ' recorded links (ownership, directorship, family, association, representation).<br>'+
+      'Only entities that appear in at least one relationship are in this graph. '+esc(P.meta.attribution||"");
+  }
+
+  function selfTest(){
+    var out=[],pass=0,fail=0;
+    function ok(n,c,d){ (c?pass++:fail++); out.push((c?"PASS  ":"FAIL  ")+n+(d?"  — "+d:"")); }
+    ok("pack loaded", !!P && EDGES.length>0, EDGES.length+" edges / "+Object.keys(NODES).length+" nodes");
+    ok("manifest present", !!window.PACK_MANIFEST);
+    ok("html escaping", esc("<b>")==="&lt;b&gt;");
+    var adj=buildAdj();
+    ok("adjacency built both ways", Object.keys(adj).length>0);
+    var e0=EDGES[0];
+    if(e0){
+      var fwd=(adj[e0.a]||[]).some(function(l){return l.o===e0.b;});
+      var rev=(adj[e0.b]||[]).some(function(l){return l.o===e0.a;});
+      ok("edge traversable in both directions", fwd&&rev);
+    }
+    // find a node with a sanctioned neighbour: 1-hop path must be found
+    var probe=null, target=null;
+    for(var i=0;i<EDGES.length&&!probe;i++){
+      if(isSanctioned(EDGES[i].b) && !isSanctioned(EDGES[i].a)){ probe=EDGES[i].a; target=EDGES[i].b; }
+      else if(isSanctioned(EDGES[i].a) && !isSanctioned(EDGES[i].b)){ probe=EDGES[i].b; target=EDGES[i].a; }
+    }
+    if(probe){
+      var p1=pathsToSanctioned(probe,1,10).paths;
+      ok("1-hop exposure detected", p1.length>0 && p1[0].path.length===1, nodeLabel(probe)+" → "+nodeLabel(target));
+      var p2=pathsToSanctioned(probe,3,60).paths;
+      ok("deeper search finds at least as many", p2.length>=p1.length, p1.length+" → "+p2.length);
+      ok("shortest path first", p2.length<2 || p2[0].path.length<=p2[p2.length-1].path.length);
+      var a=JSON.stringify(pathsToSanctioned(probe,2,20).paths.map(function(x){return x.target}));
+      var b=JSON.stringify(pathsToSanctioned(probe,2,20).paths.map(function(x){return x.target}));
+      ok("paths deterministic", a===b);
+    } else { ok("probe node with sanctioned neighbour", false, "none found in pack"); }
+    ok("no path from isolated id", pathsToSanctioned("__does_not_exist__",3,5).paths.length===0);
+    // Parallel relationships between the same pair must BOTH be reported: a
+    // directorship and a 75% ownership are materially different facts.
+    ok("parallel edges both reported", (function(){
+      var sN=NODES, sE=EDGES, sA=ADJ;
+      NODES={A:{n:"A",s:"Company",t:[],c:[],z:0}, S:{n:"S",s:"Company",t:["sanction"],c:[],z:1}};
+      EDGES=[{a:"A",b:"S",t:"directorship",r:"",p:"",d:"ds1"},{a:"A",b:"S",t:"ownership",r:"",p:"75%",d:"ds2"}];
+      ADJ=null;
+      var r=pathsToSanctioned("A",1,10);
+      var types=r.paths.map(function(p){return p.path[0].edge.t;}).sort().join(",");
+      NODES=sN; EDGES=sE; ADJ=sA;
+      return r.paths.length===2 && types==="directorship,ownership" && r.targetCount===1;
+    })());
+    ok("equal-length alternative routes both reported", (function(){
+      var sN=NODES, sE=EDGES, sA=ADJ;
+      NODES={A:{n:"A",s:"",t:[],c:[],z:0},B:{n:"B",s:"",t:[],c:[],z:0},C:{n:"C",s:"",t:[],c:[],z:0},S:{n:"S",s:"",t:["sanction"],c:[],z:1}};
+      EDGES=[{a:"A",b:"B",t:"ownership",r:"",p:"",d:"d"},{a:"B",b:"S",t:"ownership",r:"",p:"",d:"d"},
+             {a:"A",b:"C",t:"directorship",r:"",p:"",d:"d"},{a:"C",b:"S",t:"family",r:"",p:"",d:"d"}];
+      ADJ=null;
+      var r=pathsToSanctioned("A",2,10);
+      NODES=sN; EDGES=sE; ADJ=sA;
+      return r.paths.length===2 && r.targetCount===1;
+    })());
+    ok("self-loop not double counted", (function(){
+      var sE=EDGES, sA=ADJ;
+      EDGES=[{a:"X",b:"X",t:"link",r:"",p:"",d:"d"}]; ADJ=null;
+      var n=(buildAdj()["X"]||[]).length;
+      EDGES=sE; ADJ=sA;
+      return n===1;
+    })());
+    ok("directional role not pasted onto verb", (function(){
+      var p=relPhrase({dir:"out",edge:{t:"ownership",r:"Owned or Controlled By",p:"",d:""}});
+      return p.indexOf("Owned or Controlled By")<0;
+    })());
+    ok("non-directional role retained", relPhrase({dir:"out",edge:{t:"family",r:"son",p:"",d:""}}).indexOf("son")>0);
+    var anyName=null;
+    for(var k in NODES){ if(NODES[k].n && toks(NODES[k].n).length>=2){ anyName=k; break; } }
+    if(anyName) ok("entity found by its own name", search(NODES[anyName].n).indexOf(anyName)>=0, NODES[anyName].n);
+    ok("svg renders", drawGraph(anyName||"x", []).indexOf("<svg")===0);
+    document.getElementById("out").innerHTML='<strong>Self-test</strong><pre class="mono" style="white-space:pre-wrap;margin-top:8px">'+
+      esc(out.join("\n")+"\n\n"+pass+" passed, "+fail+" failed.")+'</pre>';
+  }
+
+  document.getElementById("searchBtn").onclick=doSearch;
+  document.getElementById("dossierBtn").onclick=exportDossier;
+  document.getElementById("selfTestBtn").onclick=selfTest;
+  document.getElementById("themeBtn").onclick=function(){var r=document.documentElement;
+    r.setAttribute("data-theme", r.getAttribute("data-theme")==="dark"?"light":"dark");};
+  document.getElementById("q").addEventListener("keydown",function(e){ if(e.key==="Enter") doSearch(); });
+  document.getElementById("depth").addEventListener("change",function(){ if(current) showEntity(current); });
+  setProvenance();
+})();
+</script>
+</body>
+</html>
