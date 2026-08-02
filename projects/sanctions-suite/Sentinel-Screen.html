@@ -475,11 +475,14 @@
   }
 
   function currentOpts(){
+    // The PEP control is absent on builds that do not ship the PEP pack, so it
+    // must never be dereferenced unguarded.
+    var cb = document.getElementById("usePeps");
     return {threshold: parseFloat(document.getElementById("thr").value),
       country: document.getElementById("qc").value.trim(),
       dob: document.getElementById("qd").value.trim(),
       identifier: document.getElementById("qid").value.trim(),
-      peps: document.getElementById("usePeps").checked};
+      peps: !!(cb && cb.checked)};
   }
 
   function runSingle(){
@@ -780,6 +783,13 @@
       ok("real identifier accepted", cleanId("IMO 9422964")==="IMO9422964");
       ok("html escaping", esc('<img src=x onerror=1>').indexOf("<")===-1);
       ok("csv formula neutralised", csvCell("=cmd|calc").indexOf("'=")===1);
+      // Regression guard: the PEP control is removed on demo builds, and both
+      // primary actions must still work without it.
+      ok("options read safely when the PEP control is absent", (function(){
+        var cb=document.getElementById("usePeps");
+        var o=currentOpts();
+        return o && o.peps===false || (cb && typeof o.peps==="boolean");
+      })());
       ok("surname-comma line not split", parseList("KUAJIEN, Michael\nSmith, John").join("|")==="KUAJIEN, Michael|Smith, John");
       ok("csv with name header still parsed", parseList("name,country\nAcme,GB\nBeta,FR").join("|")==="Acme|Beta");
       ok("semicolon csv parsed", parseList("name;country\nAcme;GB").join("|")==="Acme");
@@ -886,10 +896,10 @@
 (function(){
   try{
     var q=new URLSearchParams(location.search).get("theme");
-    if(q) document.documentElement.setAttribute("data-theme", q);
+    if(q==="light"||q==="dark") document.documentElement.setAttribute("data-theme", q);
   }catch(e){}
   addEventListener("message", function(ev){
-    if(ev && ev.data && ev.data.type==="cf-theme" && ev.data.theme)
+    if(ev && ev.data && ev.data.type==="cf-theme" && (ev.data.theme==="light"||ev.data.theme==="dark"))
       document.documentElement.setAttribute("data-theme", ev.data.theme);
   });
 })();

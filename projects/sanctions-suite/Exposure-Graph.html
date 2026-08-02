@@ -506,10 +506,10 @@
 (function(){
   try{
     var q=new URLSearchParams(location.search).get("theme");
-    if(q) document.documentElement.setAttribute("data-theme", q);
+    if(q==="light"||q==="dark") document.documentElement.setAttribute("data-theme", q);
   }catch(e){}
   addEventListener("message", function(ev){
-    if(ev && ev.data && ev.data.type==="cf-theme" && ev.data.theme)
+    if(ev && ev.data && ev.data.type==="cf-theme" && (ev.data.theme==="light"||ev.data.theme==="dark"))
       document.documentElement.setAttribute("data-theme", ev.data.theme);
   });
 })();

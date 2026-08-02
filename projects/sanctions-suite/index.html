@@ -60,9 +60,10 @@
     <a class="tool" href="Sentinel-Screen.html">
       <div class="k">Screening desk</div>
       <h2>Sentinel Screen</h2>
-      <p>Screen a name, an identifier or a pasted list against sanctions, crime and PEP records. Produces a
-      dated, checksum-stamped attestation for a compliance file.</p>
-      <div class="pills"><span class="pill">batch CSV</span><span class="pill">attestation</span><span class="pill">PEP overlay</span></div>
+      <p>Screen a name, an identifier or a pasted list against sanctions and crime records. Produces a
+      dated, checksum-stamped attestation for a compliance file. The 771,755-record PEP overlay ships with the
+      local build only.</p>
+      <div class="pills"><span class="pill">batch CSV</span><span class="pill">attestation</span><span class="pill">PEP overlay (local build)</span></div>
       <div class="go">Open →</div>
     </a>
     <a class="tool" href="Exposure-Graph.html">
@@ -97,5 +98,18 @@
     snapshot it came from. Candidates require human adjudication; absence of a match is not clearance.
   </footer>
 </main>
+<script>
+/* Portfolio theme protocol: the app viewer passes ?theme= and broadcasts cf-theme. */
+(function(){
+  try{
+    var q=new URLSearchParams(location.search).get("theme");
+    if(q==="light"||q==="dark") document.documentElement.setAttribute("data-theme", q);
+  }catch(e){}
+  addEventListener("message", function(ev){
+    if(ev && ev.data && ev.data.type==="cf-theme" && (ev.data.theme==="light"||ev.data.theme==="dark"))
+      document.documentElement.setAttribute("data-theme", ev.data.theme);
+  });
+})();
+</script>
 </body>
 </html>
