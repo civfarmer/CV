@@ -371,8 +371,9 @@
     L.push("Type: "+(n.s||"")+"   Countries: "+((n.c||[]).join(", ")||"not stated"));
     L.push("Directly sanctioned: "+(isSanctioned(current)?"YES":"no"));
     L.push("");
-    L.push("Dataset: OpenSanctions snapshot "+m.snapshot_version+" (built "+m.generated_utc+")");
+    L.push("Dataset: OpenSanctions snapshot "+m.snapshot_version+" (built from "+(m.built_from_snapshot||m.snapshot_version)+")");
     L.push("Generated: "+new Date().toISOString()+" — offline");
+    if(m.demo_subset) L.push("CORPUS: "+(m.demo_note||"demo subset"));
     L.push("");
     if(!currentPaths || !currentPaths.length){
       L.push("No route to a sanctioned entity within the searched depth.");

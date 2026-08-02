@@ -167,15 +167,16 @@
   function exportCsv(){
     if(!P || !P.available) return;
     var rows=[["company_id","company","domicile","sector","status","score","match_name","match_id","list",
-      "programmes","score_band","snapshot_version","exported_utc","licence","attribution"]];
+      "programmes","score_band","snapshot_version","exported_utc","corpus","licence","attribution"]];
     var m=P.meta, when=new Date().toISOString();
+    var corpus = m.demo_subset ? ("DEMO SUBSET: "+m.demo_records+" of "+m.full_records+" records") : "full build";
     var band=document.getElementById("minScore").value;
     filtered().forEach(function(c){
       if(!c.h.length){ rows.push([c.id,c.n,c.dom,c.sec,
-        c.belowBand?"below selected score band":"no match","","","","","",band,m.snapshot_version,when,m.licence,m.attribution]); }
+        c.belowBand?"below selected score band":"no match","","","","","",band,m.snapshot_version,when,corpus,m.licence,m.attribution]); }
       else c.h.forEach(function(h){
         rows.push([c.id,c.n,c.dom,c.sec,"review",h.sc.toFixed(3),h.n,h.id,
-          listLabel(h.l),arr(h.p).join(" "),m.snapshot_version,when,m.licence,m.attribution]);
+          listLabel(h.l),arr(h.p).join(" "),band,m.snapshot_version,when,corpus,m.licence,m.attribution]);
       });
     });
     var csv=rows.map(function(r){return r.map(csvCell).join(",")}).join("\r\n");
@@ -195,7 +196,7 @@
       pre+='<div style="color:var(--bad)"><strong>Pack mismatch — re-run BUILD-ALL.cmd.</strong></div>';
     if(P.error) pre+='<div style="color:var(--warn)"><strong>Build note:</strong> '+esc(P.error)+'</div>';
     el.innerHTML=pre+'<strong>Screening:</strong> Meridian company register against the OpenSanctions consolidated snapshot '+
-      '<span class="mono">'+esc(P.meta.snapshot_version)+'</span>, built <span class="mono">'+esc(P.meta.generated_utc)+'</span>.<br>'+
+      '<span class="mono">'+esc(P.meta.snapshot_version)+'</span>, built <span class="mono">'+esc(P.meta.built_from_snapshot||P.meta.snapshot_version)+'</span>.<br>'+
       '<strong>These are candidates, not findings.</strong> Every row in the review queue is an automated name similarity that requires human adjudication; '+
       'a company sharing a name with a designated party is not thereby sanctioned. '+esc(P.meta.attribution||"");
   }
@@ -214,6 +215,17 @@
     ok("html escaping", esc("<b>")==="&lt;b&gt;");
     ok("csv formula neutralised", csvCell("=cmd|calc").indexOf("'=")===1);
     ok("multi-list label joins", listLabel(["S","C"])==="Sanctions + Crime");
+    ok("every CSV row has the same column count as the header", (function(){
+      if(!P||!P.available) return true;
+      var rows=[["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o"]];
+      var m2=P.meta, when="t", band="0.62";
+      var corpus2 = m2.demo_subset ? "x" : "full build";
+      var n=rows[0].length, ok2=true;
+      filtered().forEach(function(c){
+        if(!c.h.length){ if(15!==n) ok2=false; }
+        else c.h.forEach(function(){ if(15!==n) ok2=false; });
+      });
+      return ok2; })());
     if(C.length){
       ok("companies in stable case-folded order", (function(){
         for(var i=1;i<C.length;i++){
