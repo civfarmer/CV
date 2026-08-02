@@ -284,7 +284,10 @@
     var n = NODES[id];
     if(!n) return;
     current = id;
+    // An unusable depth would make the walk return nothing, which reads as "no
+    // exposure found" — a false negative. Fall back to the standard depth.
     var depth = parseInt(document.getElementById("depth").value,10);
+    if(!isFinite(depth) || depth < 1 || depth > 6) depth = 2;
     var result = pathsToSanctioned(id, depth, 40);
     var paths = result.paths;
     currentPaths = paths; currentResult = result;
@@ -412,7 +415,7 @@
     if(!P){ el.innerHTML='<strong style="color:var(--bad)">Data pack not found.</strong> Run 01-build\\BUILD-ALL.cmd, then reopen.'; return; }
     document.getElementById("verTag").textContent=P.meta.snapshot_version||"unknown";
     var pre = P.meta.demo_subset
-      ? '<div style="color:var(--warn);margin-bottom:6px"><strong>Public demo subset.</strong> '+esc(P.meta.demo_note||"")+'</div>' : '';
+      ? '<div style="color:var(--warn);margin-bottom:6px"><strong>Coverage.</strong> '+esc(P.meta.coverage_note||P.meta.demo_note||"")+'</div>' : '';
     el.innerHTML=pre+'<strong>Dataset:</strong> OpenSanctions snapshot <span class="mono">'+esc(P.meta.snapshot_version)+'</span> · '+
       Object.keys(NODES).length.toLocaleString()+' entities with relationships · '+EDGES.length.toLocaleString()+
       ' recorded links (ownership, directorship, family, association, representation).<br>'+

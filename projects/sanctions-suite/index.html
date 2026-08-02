@@ -41,6 +41,7 @@
 <header>
   <h1>Sanctions Suite</h1>
   <span class="tag">four offline tools</span>
+  <span class="tag">full corpus</span>
   <span class="tag">no network calls</span>
   <span class="spacer"></span>
   <a class="btn" href="../../case-studies/sanctions-suite.html" target="_top">Case study</a>
@@ -51,18 +52,20 @@
   self-contained page, runs entirely in your browser, and answers a real question with real data — no server,
   no API call, nothing typed here ever leaves the machine.</p>
 
-  <div class="note"><strong>This is the public demo.</strong> It carries a 12,544-record subset of the
-  308,597-entity production corpus, so it loads quickly over the web. Vessels, the relationship graph and the
-  company screening are complete. The full build runs locally from the same pipeline — every tool states which
-  corpus it is using, and a nil result in the demo is not a screening result.</div>
+  <div class="note"><strong>These are the working tools, not demonstrations.</strong> They carry the complete
+  corpus — all <strong>308,597</strong> sanctions and crime entities, all 12,113 relationship records and all
+  2,347 designated vessels and aircraft from the 2 August 2026 snapshot. Screening one name loads about
+  55&nbsp;MB once, then everything runs from memory with the network disconnected. The only component held back
+  is the 771,755-record PEP overlay, which is a 141&nbsp;MB pack that cannot be published here; it runs in the
+  local build and every tool says so rather than hiding it.</div>
 
   <div class="grid">
     <a class="tool" href="Sentinel-Screen.html">
       <div class="k">Screening desk</div>
       <h2>Sentinel Screen</h2>
-      <p>Screen a name, an identifier or a pasted list against sanctions and crime records. Produces a
-      dated, checksum-stamped attestation for a compliance file. The 771,755-record PEP overlay ships with the
-      local build only.</p>
+      <p>Screen a name, an identifier or a pasted list against all 308,597 sanctions and crime entities.
+      Produces a dated, checksum-stamped attestation for a compliance file. The 771,755-record PEP overlay
+      runs in the local build.</p>
       <div class="pills"><span class="pill">batch CSV</span><span class="pill">attestation</span><span class="pill">PEP overlay (local build)</span></div>
       <div class="go">Open →</div>
     </a>

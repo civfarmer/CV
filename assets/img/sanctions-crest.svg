@@ -1,8 +1,54 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Sanctions Suite crest">
-<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-<stop offset="0" stop-color="#43b3a6"/><stop offset="1" stop-color="#0d5f57"/></linearGradient></defs>
-<path d="M32 3 58 12v20c0 15-11 25-26 29C17 57 6 47 6 32V12z" fill="none" stroke="url(#g)" stroke-width="3"/>
-<circle cx="32" cy="29" r="10" fill="none" stroke="#84d6ca" stroke-width="2.4"/>
-<path d="M39.4 36.4 49 46" stroke="#84d6ca" stroke-width="3" stroke-linecap="round"/>
-<path d="M24 29h16M32 21v16" stroke="#d4b24c" stroke-width="1.8" stroke-linecap="round" opacity=".9"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Sanctions Suite crest">
+  <defs>
+    <!-- userSpaceOnUse: an objectBoundingBox gradient is undefined on a zero-area
+         bounding box, so every perfectly horizontal or vertical stroke (the crown
+         bar, the beam of the scales) silently vanished in every browser. -->
+    <linearGradient id="sg" gradientUnits="userSpaceOnUse" x1="60" y1="4" x2="60" y2="116">
+      <stop offset="0" stop-color="#e6cf8f"/>
+      <stop offset="1" stop-color="#c79f36"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#sg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="60" cy="60" r="54"/>
+    <circle cx="60" cy="60" r="50" stroke-width="1"/>
+
+    <!-- crown finial -->
+    <path d="M51 15 L53 8 L57 12 L60 5 L63 12 L67 8 L69 15 Z" stroke-width="1.6"/>
+    <path d="M50 17 L70 17" stroke-width="1.6"/>
+    <circle cx="53" cy="7" r="1.1" fill="url(#sg)" stroke="none"/>
+    <circle cx="60" cy="4" r="1.2" fill="url(#sg)" stroke="none"/>
+    <circle cx="67" cy="7" r="1.1" fill="url(#sg)" stroke="none"/>
+
+    <!-- LEFT STAG supporter (head faces inward; body sweeps down behind shield) -->
+    <g id="stag">
+      <path d="M23 52 C26 49 30 49 33 52 C36 55 39 60 43 64 C44 65 43 67 41 66 C38 65 35 65 32 66 C28 66 24 63 23 58 C22 55 22 54 23 52 Z"/>
+      <path d="M31 50 C30 46 28 44 24 43 C28 44 32 46 33 50"/>
+      <path d="M25 64 C21 72 20 82 25 92 C27 96 31 99 36 100"/>
+      <path d="M32 66 C31 74 33 84 39 93"/>
+      <path d="M30 50 C26 42 21 37 16 22"/>
+      <path d="M24 40 C22 34 22 31 24 27"/>
+      <path d="M19 32 C17 27 17 24 19 20"/>
+      <path d="M16 22 C15 19 16 17 19 16"/>
+      <path d="M16 22 C14 20 12 20 11 23"/>
+      <path d="M34 50 C35 42 36 36 40 25 C41 22 43 20 46 19"/>
+      <path d="M36 37 C34 33 34 30 36 26"/>
+      <path d="M39 28 C38 25 38 22 40 19"/>
+      <circle cx="32" cy="58" r="1.4" fill="url(#sg)" stroke="none"/>
+      <circle cx="42" cy="64" r="0.9" fill="url(#sg)" stroke="none"/>
+    </g>
+    <use href="#stag" transform="translate(120,0) scale(-1,1)"/>
+
+    <!-- central shield -->
+    <path d="M45 45 L75 45 L75 64 C75 79 68 89 60 95 C52 89 45 79 45 64 Z"/>
+    <path d="M48 48 L72 48 L72 64 C72 77 66 85 60 91 C54 85 48 77 48 64 Z" stroke-width="0.8"/>
+
+    <!-- emblem: screening lens over a ledger, for sanctions search -->
+    <circle cx="58" cy="62" r="8.5" stroke-width="1.6"/>
+    <path d="M64 68 L69.5 73.5" stroke-width="2.2"/>
+    <path d="M52.5 58 H63.5" stroke-width="1.1"/>
+    <path d="M52.5 62 H63.5" stroke-width="1.1"/>
+    <path d="M52.5 66 H60" stroke-width="1.1"/>
+    <line x1="54" y1="80" x2="66" y2="80" stroke="#43b3a6" stroke-width="1.2"/>
+    <circle cx="60" cy="52" r="1.3" fill="url(#sg)" stroke="none"/>
+  </g>
 </svg>
