@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian Global Sanctions Console — offline</title>
+<style>
+  :root{--bg:#0b0f17;--surface:#131b2a;--surface2:#182133;--ink:#e9eef7;--ink2:#aab7cc;--muted:#7d8ba3;
+    --line:#233145;--accent:#43b3a6;--accent-ink:#84d6ca;--bad:#e0574a;--warn:#e0a13a;--good:#43c59e;
+    --mono:ui-monospace,'Cascadia Code',Consolas,monospace;--sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  html[data-theme="light"]{--bg:#f4f1ec;--surface:#fff;--surface2:#faf7f2;--ink:#221e18;--ink2:#4c473e;
+    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55}
+  header{border-bottom:1px solid var(--line);padding:14px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--surface)}
+  h1{font-size:1.05rem;margin:0}
+  .tag{font-size:.7rem;padding:2px 8px;border:1px solid var(--line);border-radius:99px;color:var(--muted)}
+  .spacer{flex:1}
+  button{background:var(--accent);color:#04211e;border:0;border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer;font-size:.86rem}
+  button.ghost{background:transparent;color:var(--ink2);border:1px solid var(--line)}
+  main{padding:20px;max-width:1240px;margin:0 auto}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px}
+  .kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .kpi .v{font-size:1.6rem;font-weight:700;line-height:1.1}
+  .kpi .l{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+  .kpi.alert .v{color:var(--bad)}
+  input,select{background:var(--surface2);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:.9rem}
+  table{width:100%;border-collapse:collapse;font-size:.85rem}
+  th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-size:.7rem;text-transform:uppercase}
+  .pill{display:inline-block;font-size:.68rem;padding:1px 7px;border-radius:99px;border:1px solid var(--line);margin:1px 3px 1px 0}
+  .p-S{background:rgba(224,87,74,.15);border-color:var(--bad);color:var(--bad)}
+  .p-C{background:rgba(224,161,58,.15);border-color:var(--warn);color:var(--warn)}
+  .ok{background:rgba(67,197,158,.13);border-color:var(--good);color:var(--good)}
+  .muted{color:var(--muted);font-size:.8rem}
+  .mono{font-family:var(--mono);font-size:.78rem}
+  .banner{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:.78rem;color:var(--ink2);margin-bottom:16px}
+  .score{font-family:var(--mono);font-weight:700}
+  @media print{.noprint{display:none!important}body{background:#fff;color:#000}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Meridian — Global Sanctions Console</h1>
+  <span class="tag" id="verTag">loading…</span><span class="tag">offline</span>
+  <span class="spacer"></span>
+  <button class="ghost noprint" id="themeBtn">Theme</button>
+  <button class="ghost noprint" id="selfTestBtn">Self-test</button>
+  <button class="ghost noprint" id="csvBtn">Export CSV</button>
+</header>
+<main>
+  <div class="banner" id="provenance">Loading data pack…</div>
+  <div class="kpis" id="kpis"></div>
+  <div class="card noprint">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <input id="q" placeholder="Filter companies…" style="flex:1;min-width:200px">
+      <select id="view">
+        <option value="hits" selected>Review queue — companies with a possible match</option>
+        <option value="all">All screened companies</option>
+        <option value="clear">Cleared companies</option>
+      </select>
+      <select id="minScore">
+        <option value="0.62">Score ≥ 0.62 (as built)</option>
+        <option value="0.75">Score ≥ 0.75</option>
+        <option value="0.9">Score ≥ 0.90</option>
+        <option value="1">Exact only (1.00)</option>
+      </select>
+    </div>
+  </div>
+  <div class="card" id="out"><div class="muted">Loading…</div></div>
+</main>
+<script src="packs/pack-manifest.js"></script>
+<script src="packs/pack-meridian.js"></script>
+<script>
+"use strict";
+(function(){
+  var P = (window.PACK_MERIDIAN && window.PACK_MERIDIAN.meta) ? window.PACK_MERIDIAN : null;
+  var C = P ? (P.companies||[]) : [];
+
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+  function norm(s){
+    var v = String(s==null?"":s);
+    try{ v = v.normalize("NFKD").replace(/\p{M}/gu,""); }catch(e){}
+    return v.toLowerCase();
+  }
+  function arr(v){ return Array.isArray(v)?v:(v?[v]:[]); }
+  function listLabel(l){
+    var a=arr(l); if(!a.length) return "Unknown";
+    return a.map(function(x){return x==="S"?"Sanctions":x==="C"?"Crime":x==="P"?"PEP":"Unknown";}).join(" + ");
+  }
+  function listClass(l){
+    var a=arr(l);
+    return a.indexOf("S")>=0?"S":a.indexOf("C")>=0?"C":a.indexOf("P")>=0?"P":"U";
+  }
+  function csvCell(v){
+    var s=String(v==null?"":v);
+    if(/^[=+\-@\t\r]/.test(s)) s="'"+s;
+    return '"'+s.replace(/"/g,'""')+'"';
+  }
+
+  function filtered(){
+    var q=norm(document.getElementById("q").value.trim());
+    var view=document.getElementById("view").value;
+    var min=parseFloat(document.getElementById("minScore").value);
+    return C.filter(function(c){
+      var hits=(c.h||[]).filter(function(h){return h.sc>=min;});
+      if(view==="hits" && !hits.length) return false;
+      if(view==="clear" && hits.length) return false;
+      if(q && norm(c.n).indexOf(q)<0 && norm(c.dom).indexOf(q)<0 && norm(c.sec).indexOf(q)<0) return false;
+      return true;
+    }).map(function(c){
+      var cc=Object.create(null);
+      cc.id=c.id; cc.n=c.n; cc.dom=c.dom; cc.jur=c.jur; cc.sec=c.sec;
+      cc.h=(c.h||[]).filter(function(h){return h.sc>=min;});
+      // Remember that candidates existed but fell below the band, so an export
+      // cannot present a filtered company as genuinely clear.
+      cc.belowBand=(c.h||[]).length && !cc.h.length;
+      return cc;
+    });
+  }
+
+  function render(){
+    if(!P || !P.available){
+      document.getElementById("out").innerHTML =
+        '<strong style="color:var(--bad)">Meridian company data not available.</strong>'+
+        '<div class="muted">The pack was built without access to meridian.db, or the build reported: '+
+        esc((P&&P.error)||"no error recorded")+'. Re-run 01-build\\BUILD-ALL.cmd on the machine holding Meridian.</div>';
+      return;
+    }
+    var rows=filtered();
+    var min=parseFloat(document.getElementById("minScore").value);
+    var h='<div class="muted" style="margin-bottom:8px">'+rows.length.toLocaleString()+' compan'+(rows.length===1?'y':'ies')+' shown</div>';
+    if(!rows.length){ document.getElementById("out").innerHTML=h+'<div class="muted">Nothing matches this filter.</div>'; return; }
+    h+='<table><thead><tr><th>Company</th><th>Domicile</th><th>Sector</th><th>Status</th><th>Best</th><th>Possible match</th><th>List</th><th>Programmes</th></tr></thead><tbody>';
+    rows.slice(0,800).forEach(function(c){
+      var t=c.h[0];
+      h+='<tr><td><strong>'+esc(c.n)+'</strong><div class="mono muted">'+esc(c.id)+'</div></td>'+
+        '<td>'+esc(c.dom||"")+'</td><td>'+esc(c.sec||"")+'</td>'+
+        '<td>'+(t?'<span class="pill p-'+listClass(t.l)+'">review</span>':'<span class="pill ok">no match</span>')+'</td>'+
+        '<td class="score">'+(t?t.sc.toFixed(2):'—')+'</td>'+
+        '<td>'+(t?esc(t.n)+(t.via&&t.via!==t.n?'<div class="muted">via '+esc(t.via)+'</div>':''):'<span class="muted">—</span>')+
+          (c.h.length>1?'<div class="muted">+'+(c.h.length-1)+' more</div>':'')+'</td>'+
+        '<td>'+(t?esc(listLabel(t.l)):"")+'</td>'+
+        '<td>'+(t?arr(t.p).slice(0,4).map(function(p){return '<span class="pill">'+esc(p)+'</span>'}).join(""):"")+'</td></tr>';
+    });
+    h+='</tbody></table>';
+    if(rows.length>800) h+='<div class="muted">Showing first 800. Narrow the filter to see the rest.</div>';
+    document.getElementById("out").innerHTML=h;
+  }
+
+  function renderKpis(){
+    var withHits=C.filter(function(c){return (c.h||[]).length;}).length;
+    var exact=C.filter(function(c){return (c.h||[]).some(function(h){return h.sc>=0.999;});}).length;
+    var sanc=C.filter(function(c){return (c.h||[]).some(function(h){return arr(h.l).indexOf("S")>=0;});}).length;
+    var k=[["Companies screened",C.length.toLocaleString(),false],
+           ["Review queue",withHits.toLocaleString(),withHits>0],
+           ["Exact-name matches",exact.toLocaleString(),exact>0],
+           ["Against sanctions list",sanc.toLocaleString(),sanc>0]];
+    document.getElementById("kpis").innerHTML=k.map(function(x){
+      return '<div class="kpi'+(x[2]?' alert':'')+'"><div class="v">'+x[1]+'</div><div class="l">'+x[0]+'</div></div>';
+    }).join("");
+  }
+
+  function exportCsv(){
+    if(!P || !P.available) return;
+    var rows=[["company_id","company","domicile","sector","status","score","match_name","match_id","list",
+      "programmes","score_band","snapshot_version","exported_utc","licence","attribution"]];
+    var m=P.meta, when=new Date().toISOString();
+    var band=document.getElementById("minScore").value;
+    filtered().forEach(function(c){
+      if(!c.h.length){ rows.push([c.id,c.n,c.dom,c.sec,
+        c.belowBand?"below selected score band":"no match","","","","","",band,m.snapshot_version,when,m.licence,m.attribution]); }
+      else c.h.forEach(function(h){
+        rows.push([c.id,c.n,c.dom,c.sec,"review",h.sc.toFixed(3),h.n,h.id,
+          listLabel(h.l),arr(h.p).join(" "),m.snapshot_version,when,m.licence,m.attribution]);
+      });
+    });
+    var csv=rows.map(function(r){return r.map(csvCell).join(",")}).join("\r\n");
+    var b=new Blob([csv],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");
+    a.href=URL.createObjectURL(b); a.download="meridian-sanctions-review-"+new Date().toISOString().slice(0,10)+".csv";
+    document.body.appendChild(a); a.click(); setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1000);
+  }
+
+  function setProvenance(){
+    var el=document.getElementById("provenance");
+    if(!P){ el.innerHTML='<strong style="color:var(--bad)">Data pack not found.</strong> Run 01-build\\BUILD-ALL.cmd, then reopen.'; return; }
+    document.getElementById("verTag").textContent=P.meta.snapshot_version||"unknown";
+    var pre="";
+    if(P.meta.sample_build) pre+='<div style="color:var(--bad)"><strong>SAMPLE BUILD — truncated data, not valid for screening.</strong></div>';
+    else if(P.meta.demo_subset) pre+='<div style="color:var(--warn)"><strong>Public demo subset.</strong> '+esc(P.meta.demo_note||"")+'</div>';
+    if(window.PACK_MANIFEST && window.PACK_MANIFEST.built_from_snapshot!==P.meta.built_from_snapshot)
+      pre+='<div style="color:var(--bad)"><strong>Pack mismatch — re-run BUILD-ALL.cmd.</strong></div>';
+    if(P.error) pre+='<div style="color:var(--warn)"><strong>Build note:</strong> '+esc(P.error)+'</div>';
+    el.innerHTML=pre+'<strong>Screening:</strong> Meridian company register against the OpenSanctions consolidated snapshot '+
+      '<span class="mono">'+esc(P.meta.snapshot_version)+'</span>, built <span class="mono">'+esc(P.meta.generated_utc)+'</span>.<br>'+
+      '<strong>These are candidates, not findings.</strong> Every row in the review queue is an automated name similarity that requires human adjudication; '+
+      'a company sharing a name with a designated party is not thereby sanctioned. '+esc(P.meta.attribution||"");
+  }
+
+  function selfTest(){
+    var out=[],pass=0,fail=0;
+    function ok(n,c,d){ (c?pass++:fail++); out.push((c?"PASS  ":"FAIL  ")+n+(d?"  — "+d:"")); }
+    ok("pack loaded", !!P);
+    ok("manifest present", !!window.PACK_MANIFEST);
+    if(P && window.PACK_MANIFEST)
+      ok("pack matches manifest build", P.meta.built_from_snapshot===window.PACK_MANIFEST.built_from_snapshot,
+         P.meta.built_from_snapshot);
+    if(P && P.meta.sample_build) ok("NOT a sample build", false, "sample packs are not valid for screening");
+    ok("meridian data available", !!(P&&P.available), P&&P.available?C.length+" companies":((P&&P.error)||"not available"));
+    ok("build error surfaced when present", !P || !P.error || document.getElementById("provenance").innerHTML.indexOf("Build note")>=0);
+    ok("html escaping", esc("<b>")==="&lt;b&gt;");
+    ok("csv formula neutralised", csvCell("=cmd|calc").indexOf("'=")===1);
+    ok("multi-list label joins", listLabel(["S","C"])==="Sanctions + Crime");
+    if(C.length){
+      ok("companies in stable case-folded order", (function(){
+        for(var i=1;i<C.length;i++){
+          var a=String(C[i-1].n).toLowerCase(), b=String(C[i].n).toLowerCase();
+          if(a>b) return false;
+        }
+        return true; })());
+      ok("hits sorted best-first", C.every(function(c){
+        var h=c.h||[]; for(var i=1;i<h.length;i++){ if(h[i-1].sc<h[i].sc) return false; } return true; }));
+      ok("all scores within range", C.every(function(c){ return (c.h||[]).every(function(h){return h.sc>=0 && h.sc<=1;}); }));
+      var q=document.getElementById("q").value; document.getElementById("q").value="";
+      var v=document.getElementById("view").value; document.getElementById("view").value="all";
+      var ms=document.getElementById("minScore").value; document.getElementById("minScore").value="1";
+      var exactOnly=filtered().filter(function(c){return c.h.length;});
+      ok("exact filter keeps only 1.00", exactOnly.every(function(c){ return c.h.every(function(h){return h.sc>=0.999;}); }), exactOnly.length+" companies");
+      document.getElementById("view").value="hits";
+      document.getElementById("minScore").value="0.62";
+      var hitsView=filtered();
+      ok("review queue excludes clear companies", hitsView.every(function(c){return c.h.length>0;}), hitsView.length+" in queue");
+      document.getElementById("q").value=q; document.getElementById("view").value=v; document.getElementById("minScore").value=ms;
+    }
+    document.getElementById("out").innerHTML='<strong>Self-test</strong><pre class="mono" style="white-space:pre-wrap;margin-top:8px">'+
+      esc(out.join("\n")+"\n\n"+pass+" passed, "+fail+" failed.")+'</pre>';
+  }
+
+  document.getElementById("q").addEventListener("input",render);
+  document.getElementById("view").addEventListener("change",render);
+  document.getElementById("minScore").addEventListener("change",render);
+  document.getElementById("csvBtn").onclick=exportCsv;
+  document.getElementById("selfTestBtn").onclick=selfTest;
+  document.getElementById("themeBtn").onclick=function(){var r=document.documentElement;
+    r.setAttribute("data-theme", r.getAttribute("data-theme")==="dark"?"light":"dark");};
+  setProvenance();
+  if(P&&P.available){ renderKpis(); } else { document.getElementById("csvBtn").disabled = true; }
+  render();
+})();
+</script>
+</body>
+</html>
