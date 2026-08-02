@@ -292,6 +292,9 @@
 
   function screenOne(q, opts, pepsActive){
     var thr = opts.threshold, wantId = cleanId(opts.identifier);
+    // An identifier that was refused (masked, or under six characters) was never
+    // searched — that must never be reported as a clean result.
+    var idRefused = !!(opts.identifier && !wantId);
     var hits = [];
     function consider(rec, sc, via, reason){ hits.push({rec:rec, score:sc, via:via, reason:reason}); }
 
@@ -376,7 +379,7 @@
       if(qc.length === 1) nearMisses = docFreq(qc[0]);
     }
     return {hits:list.slice(0,200), truncated:capped, total:list.length,
-            nearMisses:nearMisses, countryUnknown:countryUnknown};
+            nearMisses:nearMisses, countryUnknown:countryUnknown, idRefused:idRefused};
   }
 
   function scoreClass(s){ return s>=0.85?"s-hi":(s>=0.65?"s-md":"s-lo"); }
@@ -392,7 +395,7 @@
       // A single-token query that has candidates but no scored match must not be
       // reported as a clean "no match" — a surname-only wire is the commonest
       // partial-data input in AML work.
-      if(res.nearMisses){
+      if(res.idRefused || res.nearMisses){
         return '<div class="warnbar"><strong>Inconclusive — not a clear result.</strong> "'+esc(q)+
           '" is a single-token query. '+res.nearMisses+' record(s) in this snapshot contain that token, '+
           'but none scored as a match on its own. Add a forename, a second name element or an identifier '+
@@ -402,6 +405,7 @@
         coverageText(pepsActive)+' and produced no result at or above the selected threshold.</div>';
     }
     var h = "";
+    if(res.idRefused) h += '<div class="warnbar">The identifier supplied was not searched: it is masked or shorter than six characters, which cannot be matched reliably. Only the name was screened.</div>';
     if(res.countryUnknown) h += '<div class="warnbar">Country filter not applied: that country was not recognised, so no country comparison was performed.</div>';
     if(res.truncated) h += '<div class="warnbar">Showing the 200 highest-scoring of '+res.total+' results — narrow the query or raise the threshold. Exports carry a TRUNCATED row.</div>';
     h += '<table><thead><tr><th>Score</th><th>Name / matched via</th><th>List</th><th>Type</th><th>Country</th><th>Programmes</th><th>Sources</th></tr></thead><tbody>';
@@ -609,22 +613,23 @@
   function exportCsv(){
     if(!lastRun) return;
     var m = CORE.meta, when = lastRun.when;
+    var corpus = m.demo_subset ? ("DEMO SUBSET: "+m.demo_records+" of "+m.full_records+" records") : "full build";
     var rows = [["subject","result","best_score","match_name","match_id","list","schema","countries",
-      "programmes","sources","snapshot_version","screened_utc","licence","attribution"]];
+      "programmes","sources","snapshot_version","screened_utc","corpus","licence","attribution"]];
     lastRun.rows.forEach(function(r){
       if(!r.res.hits.length){
         rows.push([r.query, r.res.nearMisses ? "inconclusive - single-token query" : "clear",
-          "","","","","","","","",m.snapshot_version,when,m.licence,m.attribution]);
+          "","","","","","","","",m.snapshot_version,when,corpus,m.licence,m.attribution]);
       } else {
         r.res.hits.forEach(function(h){
           rows.push([r.query,"hit",h.score.toFixed(3),h.rec.n,h.rec.i,listLabel(h.rec.l),h.rec.s||"",
             arr(h.rec.c).join(" "),arr(h.rec.p).join(" "),arr(h.rec.d).join(" "),
-            m.snapshot_version,when,m.licence,m.attribution]);
+            m.snapshot_version,when,corpus,m.licence,m.attribution]);
         });
         // The on-screen cap must never silently shorten an export.
         if(r.res.truncated){
           rows.push([r.query,"TRUNCATED","","showing "+r.res.hits.length+" of "+r.res.total+" results",
-            "","","","","",  "",m.snapshot_version,when,m.licence,m.attribution]);
+            "","","","","",  "",m.snapshot_version,when,corpus,m.licence,m.attribution]);
         }
       }
     });
@@ -648,6 +653,7 @@
     var ds = m.datasets || {};
     var h = '<div class="card"><h2 style="margin:0 0 4px">Screening attestation</h2>'+
       '<div class="muted">Generated '+esc(lastRun.when)+' — offline, on this machine.</div>';
+    if(m.demo_subset) h += '<div class="warnbar">DEMO SUBSET — this screen covered '+m.demo_records+' of the '+m.full_records+' records in the production corpus. A nil result here is not a screening result.</div>';
     if(m.sample_build) h += '<div class="warnbar">SAMPLE BUILD — the packs were built with truncated data and are not valid for screening.</div>';
     if(ref) h += '<p><strong>Matter reference:</strong> '+esc(ref)+'</p>';
     h += '<table><tbody>'+
