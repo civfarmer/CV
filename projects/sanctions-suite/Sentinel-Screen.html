@@ -57,6 +57,7 @@
   <span class="tag" id="verTag">loading…</span>
   <span class="tag">offline</span>
   <span class="spacer"></span>
+  <a class="tag" href="index.html" style="text-decoration:none">← Suite</a>
   <button class="ghost noprint" id="themeBtn">Theme</button>
   <button class="ghost noprint" id="selfTestBtn">Self-test</button>
 </header>
@@ -81,7 +82,7 @@
           <option value="0.65" selected>Standard (0.65)</option>
           <option value="0.80">Tight (0.80) — near-exact only</option>
         </select>
-        <label><input type="checkbox" id="usePeps" style="width:auto"> include PEP list (loads a large extra pack)</label>
+        <label id="pepWrap"><input type="checkbox" id="usePeps" style="width:auto"> include PEP list (loads a large extra pack)</label>
         <div style="margin-top:12px;display:flex;gap:8px">
           <button id="runBtn">Screen</button>
           <button class="ghost" id="clearBtn">Clear</button>
@@ -865,7 +866,32 @@
     var r=document.documentElement;
     r.setAttribute("data-theme", r.getAttribute("data-theme")==="dark"?"light":"dark");
   };
+  // The web demo does not ship the 771,755-record PEP pack (141 MB, past
+  // GitHub's file limit). Offering the tickbox would fail with a 404 alert, so
+  // it is disabled and labelled when the pack is absent.
+  (function(){
+    var m = CORE && CORE.meta;
+    if(m && m.demo_subset){
+      var cb=document.getElementById("usePeps"), wrap=document.getElementById("pepWrap");
+      if(cb){ cb.checked=false; cb.disabled=true; }
+      if(wrap) wrap.innerHTML='<span class="muted">PEP overlay (771,755 records) is available in the local build only — '+
+        'the pack is 141 MB and is not published with the web demo.</span>';
+    }
+  })();
   setProvenance();
+})();
+</script>
+<script>
+/* Portfolio theme protocol: the app viewer passes ?theme= and broadcasts cf-theme. */
+(function(){
+  try{
+    var q=new URLSearchParams(location.search).get("theme");
+    if(q) document.documentElement.setAttribute("data-theme", q);
+  }catch(e){}
+  addEventListener("message", function(ev){
+    if(ev && ev.data && ev.data.type==="cf-theme" && ev.data.theme)
+      document.documentElement.setAttribute("data-theme", ev.data.theme);
+  });
 })();
 </script>
 </body>
