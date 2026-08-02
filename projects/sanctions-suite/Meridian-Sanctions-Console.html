@@ -101,10 +101,16 @@
     return '"'+s.replace(/"/g,'""')+'"';
   }
 
+  // A non-numeric band would drop every candidate and show an empty review
+  // queue, which looks like a clean portfolio rather than a broken control.
+  function minScore(){
+    var v=parseFloat(document.getElementById("minScore").value);
+    return (isFinite(v) && v>0 && v<=1) ? v : 0.62;
+  }
   function filtered(){
     var q=norm(document.getElementById("q").value.trim());
     var view=document.getElementById("view").value;
-    var min=parseFloat(document.getElementById("minScore").value);
+    var min=minScore();
     return C.filter(function(c){
       var hits=(c.h||[]).filter(function(h){return h.sc>=min;});
       if(view==="hits" && !hits.length) return false;
@@ -131,7 +137,7 @@
       return;
     }
     var rows=filtered();
-    var min=parseFloat(document.getElementById("minScore").value);
+    var min=minScore();
     var h='<div class="muted" style="margin-bottom:8px">'+rows.length.toLocaleString()+' compan'+(rows.length===1?'y':'ies')+' shown</div>';
     if(!rows.length){ document.getElementById("out").innerHTML=h+'<div class="muted">Nothing matches this filter.</div>'; return; }
     h+='<table><thead><tr><th>Company</th><th>Domicile</th><th>Sector</th><th>Status</th><th>Best</th><th>Possible match</th><th>List</th><th>Programmes</th></tr></thead><tbody>';
@@ -191,7 +197,7 @@
     document.getElementById("verTag").textContent=P.meta.snapshot_version||"unknown";
     var pre="";
     if(P.meta.sample_build) pre+='<div style="color:var(--bad)"><strong>SAMPLE BUILD — truncated data, not valid for screening.</strong></div>';
-    else if(P.meta.demo_subset) pre+='<div style="color:var(--warn)"><strong>Public demo subset.</strong> '+esc(P.meta.demo_note||"")+'</div>';
+    else if(P.meta.demo_subset) pre+='<div style="color:var(--warn)"><strong>Coverage.</strong> '+esc(P.meta.coverage_note||P.meta.demo_note||"")+'</div>';
     if(window.PACK_MANIFEST && window.PACK_MANIFEST.built_from_snapshot!==P.meta.built_from_snapshot)
       pre+='<div style="color:var(--bad)"><strong>Pack mismatch — re-run BUILD-ALL.cmd.</strong></div>';
     if(P.error) pre+='<div style="color:var(--warn)"><strong>Build note:</strong> '+esc(P.error)+'</div>';

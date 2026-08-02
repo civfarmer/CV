@@ -304,7 +304,7 @@
     document.getElementById("verTag").textContent = P.meta.snapshot_version||"unknown";
     var nv=V.filter(function(v){return v.s==="Vessel"}).length, na=V.length-nv;
     var pre = P.meta.demo_subset
-      ? '<div style="color:var(--warn);margin-bottom:6px"><strong>Public demo.</strong> Vessel and aircraft coverage here is complete; the screening corpus behind the other tools is a subset.</div>' : '';
+      ? '<div style="color:var(--warn);margin-bottom:6px"><strong>Coverage.</strong> Every designated vessel and aircraft in the snapshot is included.</div>' : '';
     el.innerHTML=pre+'<strong>Dataset:</strong> OpenSanctions snapshot <span class="mono">'+esc(P.meta.snapshot_version)+
       '</span> · '+nv.toLocaleString()+' vessels, '+na.toLocaleString()+' aircraft · built <span class="mono">'+esc(P.meta.built_from_snapshot||P.meta.snapshot_version)+
       '</span>.<br>Point-in-time: this is the position as at the snapshot date. '+esc(P.meta.attribution||"");

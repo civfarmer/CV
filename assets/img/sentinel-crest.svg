@@ -1,6 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Sentinel crest">
   <defs>
-    <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
+    <!-- userSpaceOnUse: an objectBoundingBox gradient is undefined on a zero-area
+         bounding box, so every perfectly horizontal or vertical stroke (the crown
+         bar, the beam of the scales) silently vanished in every browser. -->
+    <linearGradient id="sg" gradientUnits="userSpaceOnUse" x1="60" y1="4" x2="60" y2="116">
       <stop offset="0" stop-color="#e6cf8f"/>
       <stop offset="1" stop-color="#c79f36"/>
     </linearGradient>
@@ -39,21 +42,25 @@
     <path d="M45 45 L75 45 L75 64 C75 79 68 89 60 95 C52 89 45 79 45 64 Z"/>
     <path d="M48 48 L72 48 L72 64 C72 77 66 85 60 91 C54 85 48 77 48 64 Z" stroke-width="0.8"/>
 
-    <!-- sentinel eye: vigilance over an AI node, with a screening scan-line -->
-    <path d="M49 62 C54 54 66 54 71 62"/>
-    <path d="M49 62 C54 70 66 70 71 62"/>
-    <circle cx="60" cy="62" r="5"/>
-    <line x1="49" y1="62" x2="71" y2="62" stroke="#43b3a6" stroke-width="1" stroke-dasharray="2 2"/>
-    <!-- neural iris nodes -->
-    <circle cx="52" cy="56" r="0.9" fill="url(#sg)" stroke="none"/>
-    <circle cx="68" cy="56" r="0.9" fill="url(#sg)" stroke="none"/>
-    <line x1="54.5" y1="58" x2="57.8" y2="61" stroke-width="0.8"/>
-    <line x1="65.5" y1="58" x2="62.2" y2="61" stroke-width="0.8"/>
-    <!-- screening checkpoint below the eye -->
-    <path d="M53 82 L60 76 L67 82"/>
-    <line x1="55" y1="86" x2="65" y2="86" stroke="#43b3a6" stroke-width="1.4"/>
-    <!-- focal pupil / node -->
-    <circle cx="60" cy="62" r="2" fill="#0b0f17" stroke="#d4b24c" stroke-width="1.4"/>
-    <circle cx="60" cy="62" r="0.8" fill="#43b3a6" stroke="none"/>
+    <!-- Sentinel emblem: padlock over scales, as on the brand crest — control
+         actually held, and judgement applied to it. The eye motif that stood
+         here belongs to FRIS and did not match this project's own mark. -->
+    <!-- padlock -->
+    <path d="M56.5 55 V52.5 a3.5 3.5 0 0 1 7 0 V55" stroke-width="1.4"/>
+    <rect x="54" y="55" width="12" height="9" rx="1.8" stroke-width="1.4"/>
+    <circle cx="60" cy="58.6" r="1.5" fill="#0b0f17" stroke="url(#sg)" stroke-width="1.1"/>
+    <line x1="60" y1="60" x2="60" y2="61.8" stroke-width="1.2"/>
+    <!-- balance beneath the lock -->
+    <line x1="60" y1="64" x2="60" y2="82" stroke-width="1.5"/>
+    <line x1="51.5" y1="69" x2="68.5" y2="69" stroke-width="1.5"/>
+    <path d="M48.2 69 A3.8 3.8 0 0 0 55.8 69" stroke-width="1.2"/>
+    <path d="M64.2 69 A3.8 3.8 0 0 0 71.8 69" stroke-width="1.2"/>
+    <line x1="52" y1="69" x2="52" y2="66.6" stroke-width="0.9"/>
+    <line x1="68" y1="69" x2="68" y2="66.6" stroke-width="0.9"/>
+    <circle cx="52" cy="69" r="1" fill="url(#sg)" stroke="none"/>
+    <circle cx="68" cy="69" r="1" fill="url(#sg)" stroke="none"/>
+    <path d="M54.5 82 L65.5 82" stroke-width="1.8"/>
+    <path d="M56.5 78.5 L63.5 78.5" stroke-width="1.2"/>
+    <line x1="56" y1="85.5" x2="64" y2="85.5" stroke="#43b3a6" stroke-width="1.2"/>
   </g>
 </svg>

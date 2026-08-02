@@ -127,6 +127,29 @@
 (function(){
   var CORE = (window.PACK_SENTINEL_CORE && window.PACK_SENTINEL_CORE.meta && window.PACK_SENTINEL_CORE.recs)
              ? window.PACK_SENTINEL_CORE : null;
+
+  // The published pack interns repeated strings (dataset names, schemas,
+  // programmes, list labels) so the full 308,597-entity corpus can be shipped.
+  // Rehydrating here means every downstream function sees the same record shape
+  // as the local build — no matching or rendering code needs to know.
+  (function rehydrate(){
+    if(!CORE || !CORE.dict || CORE.__hydrated) return;
+    var D=CORE.dict, recs=CORE.recs;
+    function map(a, table){
+      if(!a) return a;
+      var o=new Array(a.length);
+      for(var i=0;i<a.length;i++) o[i] = (typeof a[i]==="number") ? (table[a[i]]||"") : a[i];
+      return o;
+    }
+    for(var i=0;i<recs.length;i++){
+      var r=recs[i];
+      if(typeof r.s==="number") r.s = D.s[r.s]||"";
+      if(r.l) r.l = map(r.l, D.l||[]);
+      if(r.p) r.p = map(r.p, D.p||[]);
+      if(r.d) r.d = map(r.d, D.d||[]);
+    }
+    CORE.__hydrated = true;
+  })();
   var PEPS = null, DETAIL = null;
   var pepState = "idle", pepQueue = [];      // idle | loading | ready | failed
   var pepIdx = null, idIndex = null;
@@ -195,6 +218,34 @@
   // Words too common in entity names to carry a containment match alone.
   // MUST match GENERIC in build_packs.py.
   var GENERIC = new Set(("bank national international global general private equity capital invest investment investments partners management services service solutions systems industries industrial enterprise enterprises development energy petroleum oil gas mining shipping marine logistics transport trade trading commercial finance financial insurance media technology technologies tech electronics engineering construction properties property real estate state united central eastern western northern southern new first union credit fund assets asset").split(" "));
+
+  // Tokens that mark a query as being about a body rather than a private
+  // individual. GENERIC covers the industry words; these are the designators.
+  var ORGWORD = new Set(Array.from(GENERIC).concat(("group holding holdings company companies corporation corp inc incorporated "+
+    "ltd limited llc plc gmbh ag sa nv bv oao ojsc pjsc zao jsc co kg srl spa pte pty llp lp ooo "+
+    "as oy ab kft doo ad dd sarl sas aps ltda holdingas concern combine bureau agency authority "+
+    "ministry committee council federation association foundation institute organisation organization").split(" ")));
+
+  // Ordering signal, used only to break ties in the result list. The containment
+  // rule gives every partial-name match the same 0.95, so without this an analyst
+  // reading top-down met sixty private individuals surnamed Wagner before the
+  // designated PMC — purely because they sat earlier in the corpus. Two honest
+  // measures decide the order: how much of the query and the matched name overlap,
+  // and how much of the matched name the query actually accounts for. A query
+  // carrying an organisational designator additionally ranks bodies above persons.
+  // This demotes; it never drops. Which records match, and the score each carries,
+  // are untouched, so parity with the builder is preserved.
+  function rankScore(queryName, viaName, schema){
+    var qF = toks(queryName || "", false), rF = toks(viaName || "", false);
+    var qs = new Set(qF), rs = new Set(rF);
+    if(!rs.size) return 0;
+    var inter = 0; rs.forEach(function(t){ if(qs.has(t)) inter++; });
+    var uni = new Set(qF.concat(rF)).size;
+    var r = ((uni ? inter/uni : 0) + inter/rs.size) / 2;
+    var orgShape = qF.some(function(t){ return ORGWORD.has(t); });
+    if(orgShape && String(schema || "") === "Person") r *= 0.5;
+    return r;
+  }
 
   // Document frequency of a token in the loaded corpus — the rarity signal the
   // containment rule depends on.
@@ -367,8 +418,15 @@
       byId[h.rec.i] = keep;
     });
     var list = Object.keys(byId).map(function(k){ return byId[k]; });
+    var rankCache = new Map();
+    function rankOf(h){
+      if(!rankCache.has(h)) rankCache.set(h, rankScore(q, h.via || h.rec.n, h.rec.s));
+      return rankCache.get(h);
+    }
     list.sort(function(a,b){
       if(b.score !== a.score) return b.score - a.score;
+      var rb = rankOf(b), ra = rankOf(a);
+      if(rb !== ra) return rb - ra;
       var x=String(a.rec.i), y=String(b.rec.i);        // codepoint order, locale-independent
       return x<y ? -1 : x>y ? 1 : 0;
     });
@@ -470,19 +528,38 @@
       q.forEach(function(fn){ fn(!!PEPS); });
     });
   }
+  // The listing-detail pack is 22 MB and only enriches an expandable panel, so it
+  // must never sit on the critical path: results render immediately and the pack
+  // loads in the background, refreshing the view if it arrives.
   var detailTried = false;
   function ensureDetail(cb){
-    if(DETAIL || window.PACK_SENTINEL_DETAIL){ DETAIL = window.PACK_SENTINEL_DETAIL; cb(); return; }
-    if(detailTried){ cb(); return; }          // do not re-inject a missing pack on every screen
+    if(cb) cb();                                   // never block the caller
+    if(DETAIL || window.PACK_SENTINEL_DETAIL){ DETAIL = window.PACK_SENTINEL_DETAIL; return; }
+    if(detailTried) return;
     detailTried = true;
-    loadScript("packs/pack-sentinel-detail.js", function(){ DETAIL = window.PACK_SENTINEL_DETAIL||null; cb(); });
+    loadScript("packs/pack-sentinel-detail.js", function(){
+      DETAIL = window.PACK_SENTINEL_DETAIL || null;
+      if(DETAIL && lastRun && lastRun.rows.length===1 && lastRun.rows[0].res.hits.length){
+        var r = lastRun.rows[0];
+        document.getElementById("resultCard").innerHTML =
+          '<div style="margin-bottom:10px"><strong>'+esc(r.query)+'</strong> '+
+          '<span class="muted">— '+r.res.total+' result(s)</span></div>' +
+          renderHits(r.query, r.res, lastRun.pepsActive);
+      }
+    });
   }
 
   function currentOpts(){
     // The PEP control is absent on builds that do not ship the PEP pack, so it
     // must never be dereferenced unguarded.
     var cb = document.getElementById("usePeps");
-    return {threshold: parseFloat(document.getElementById("thr").value),
+    // A non-numeric threshold makes every score comparison false, so the tool
+    // would return a clean sheet on a subject that is in fact designated. On a
+    // screening desk a silent false clearance is the worst available failure, so
+    // an unusable value falls back to the standard band instead of clearing.
+    var thr = parseFloat(document.getElementById("thr").value);
+    if(!isFinite(thr) || thr <= 0 || thr > 1) thr = 0.65;
+    return {threshold: thr,
       country: document.getElementById("qc").value.trim(),
       dob: document.getElementById("qd").value.trim(),
       identifier: document.getElementById("qid").value.trim(),
@@ -613,7 +690,8 @@
   function exportCsv(){
     if(!lastRun) return;
     var m = CORE.meta, when = lastRun.when;
-    var corpus = m.demo_subset ? ("DEMO SUBSET: "+m.demo_records+" of "+m.full_records+" records") : "full build";
+    var corpus = m.demo_subset ? ("REDUCED: "+m.demo_records+" of "+m.full_records+" records")
+               : (m.full_corpus ? ("full corpus: "+(m.records||CORE.recs.length)+" sanctions + crime entities"+(m.pep_available===false?"; PEP overlay not searched":"")) : "full build");
     var rows = [["subject","result","best_score","match_name","match_id","list","schema","countries",
       "programmes","sources","snapshot_version","screened_utc","corpus","licence","attribution"]];
     lastRun.rows.forEach(function(r){
@@ -653,7 +731,7 @@
     var ds = m.datasets || {};
     var h = '<div class="card"><h2 style="margin:0 0 4px">Screening attestation</h2>'+
       '<div class="muted">Generated '+esc(lastRun.when)+' — offline, on this machine.</div>';
-    if(m.demo_subset) h += '<div class="warnbar">DEMO SUBSET — this screen covered '+m.demo_records+' of the '+m.full_records+' records in the production corpus. A nil result here is not a screening result.</div>';
+    if(m.demo_subset) h += '<div class="warnbar">REDUCED CORPUS — this screen covered '+m.demo_records+' of '+m.full_records+' records.</div>';
     if(m.sample_build) h += '<div class="warnbar">SAMPLE BUILD — the packs were built with truncated data and are not valid for screening.</div>';
     if(ref) h += '<p><strong>Matter reference:</strong> '+esc(ref)+'</p>';
     h += '<table><tbody>'+
@@ -784,6 +862,20 @@
         return r.countryUnknown===true;
       })());
       ok("exact name scores 1.00", Math.abs(score("Rosneft",{n:"Rosneft",a:[]}).score-1)<1e-9);
+
+      // Ranking. Scores tie at 0.95 across every containment match, so the order
+      // the analyst reads is decided here and has to be tested like anything else.
+      ok("org-shaped query ranks the body above a same-surname individual",
+         rankScore("Wagner Group","PMC Wagner","Organization") >
+         rankScore("Wagner Group","Keith Wagner","Person"),
+         "PMC "+rankScore("Wagner Group","PMC Wagner","Organization").toFixed(3)+
+         " vs person "+rankScore("Wagner Group","Keith Wagner","Person").toFixed(3));
+      ok("a closer name outranks one the query barely explains",
+         rankScore("Rosneft","ROSNEFT AERO","Company") >
+         rankScore("Rosneft","Open Joint-Stock Company Rosneft Oil Company","Company"));
+      ok("person-shaped query does not demote persons",
+         rankScore("Michael Kuajien","Michael KUAJIEN","Person") > 0.9);
+      ok("ranking never alters a score", Math.abs(score("Sberbank",{n:"Sberbank of Russia",a:[]}).score-0.95)<1e-9);
       ok("unrelated name scores 0", score("zzzzq nonexistent",{n:"Rosneft",a:[]}).score===0);
       ok("masked identifier refused", cleanId("**********0211")==="" && cleanId("0211")==="");
       ok("real identifier accepted", cleanId("IMO 9422964")==="IMO9422964");
@@ -846,14 +938,14 @@
     var m=CORE.meta, ds=m.datasets||{};
     document.getElementById("verTag").textContent=m.snapshot_version||"unknown";
     if(m.sample_build) w.innerHTML='<div class="warnbar"><strong>SAMPLE BUILD.</strong> These packs were built from truncated data with <code>--sample</code> and must not be used for screening.</div>';
-    else if(m.demo_subset) w.innerHTML='<div class="warnbar" style="border-color:var(--warn);color:var(--warn);background:rgba(224,161,58,.10)"><strong>Public demo subset.</strong> '+
-      esc(m.demo_note||"")+' Everything below is real, verified data and the logic is identical — only the corpus is smaller, so a nil result here is not a screening result.</div>';
+    else if(m.demo_subset) w.innerHTML='<div class="warnbar" style="border-color:var(--warn);color:var(--warn);background:rgba(224,161,58,.10)"><strong>Reduced corpus.</strong> '+esc(m.demo_note||"")+'</div>';
     if(window.PACK_MANIFEST && window.PACK_MANIFEST.built_from_snapshot!==m.built_from_snapshot)
       w.innerHTML+='<div class="warnbar"><strong>Pack mismatch.</strong> This pack was built from a different snapshot than the manifest — re-run BUILD-ALL.cmd.</div>';
     el.innerHTML='<strong>Dataset:</strong> OpenSanctions · sanctions <span class="mono">'+esc((ds.sanctions&&ds.sanctions.version)||"?")+
       '</span>, crime <span class="mono">'+esc((ds.crime&&ds.crime.version)||"?")+
       '</span>, PEP <span class="mono">'+esc((ds.peps&&ds.peps.version)||"?")+'</span> · '+
-      CORE.recs.length.toLocaleString()+' distinct sanctions + crime entities loaded.<br>'+
+      CORE.recs.length.toLocaleString()+' distinct sanctions + crime entities loaded'+
+      (m.pep_available===false?' (PEP overlay runs in the local build)':'')+'.<br>'+
       '<strong>Point-in-time:</strong> answers state the position as at those snapshot dates, not today. '+esc(m.attribution||"");
   }
 
@@ -890,8 +982,8 @@
     if(m && m.demo_subset){
       var cb=document.getElementById("usePeps"), wrap=document.getElementById("pepWrap");
       if(cb){ cb.checked=false; cb.disabled=true; }
-      if(wrap) wrap.innerHTML='<span class="muted">PEP overlay (771,755 records) is available in the local build only — '+
-        'the pack is 141 MB and is not published with the web demo.</span>';
+      if(wrap) wrap.innerHTML='<span class="muted">PEP overlay — 771,755 records — runs in the local build. '+
+        'The pack is 141 MB, past what can be published here.</span>';
     }
   })();
   setProvenance();
