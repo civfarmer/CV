@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Veritas — offline citation and authority verifier</title>
+<script>
+(function(){try{var q=new URLSearchParams(location.search).get("theme");
+if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q);}catch(e){}})();
+</script>
+<style>
+  :root{--bg:#0b0f17;--surface:#131b2a;--surface2:#182133;--ink:#e9eef7;--ink2:#aab7cc;--muted:#7d8ba3;
+    --line:#233145;--accent:#43b3a6;--accent-ink:#84d6ca;--gold:#d4b24c;--bad:#e0574a;--warn:#e0a13a;
+    --good:#43c59e;--radius:12px;--mono:ui-monospace,'Cascadia Code',Consolas,monospace;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  html[data-theme="light"]{--bg:#f4f1ec;--surface:#fff;--surface2:#faf7f2;--ink:#221e18;--ink2:#4c473e;
+    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f;--gold:#836819;
+    --good:#0f7a5a;--warn:#8a5a10;--bad:#a32a1e}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55}
+  header{border-bottom:1px solid var(--line);padding:14px 20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:var(--surface)}
+  h1{font-size:1.05rem;margin:0;letter-spacing:.02em}
+  .tag{font-size:.7rem;padding:2px 8px;border:1px solid var(--line);border-radius:99px;color:var(--muted)}
+  .spacer{flex:1}
+  button{background:var(--accent);color:#04211e;border:0;border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer;font-size:.86rem}
+  button.ghost{background:transparent;color:var(--ink2);border:1px solid var(--line)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  main{padding:20px;max-width:1280px;margin:0 auto}
+  .grid{display:grid;grid-template-columns:360px 1fr;gap:20px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:16px}
+  label{display:block;font-size:.72rem;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.06em}
+  input,select,textarea{width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--ink);
+    border-radius:8px;padding:8px 10px;font-family:inherit;font-size:.9rem}
+  textarea{min-height:230px;font-family:var(--mono);font-size:.78rem}
+  table{width:100%;border-collapse:collapse;font-size:.85rem}
+  th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em}
+  .pill{display:inline-block;font-size:.66rem;padding:1px 7px;border-radius:99px;border:1px solid var(--line);margin:1px 3px 1px 0;white-space:nowrap;color:var(--muted)}
+  .v-ok{border-color:var(--good);color:var(--good)}
+  .v-check{border-color:var(--warn);color:var(--warn)}
+  .v-bad{border-color:var(--bad);color:var(--bad)}
+  .v-out{border-color:var(--line);color:var(--muted)}
+  .muted{color:var(--muted);font-size:.8rem}
+  .mono{font-family:var(--mono);font-size:.78rem}
+  .banner{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:.78rem;color:var(--ink2);margin-bottom:16px}
+  .warnbar{background:rgba(224,87,74,.12);border:1px solid var(--bad);color:var(--bad);border-radius:8px;padding:10px 12px;font-size:.82rem;margin-bottom:16px}
+  .notebar{background:var(--surface2);border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:8px;padding:10px 12px;font-size:.8rem;color:var(--ink2);margin-bottom:14px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+  .kpi{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .kpi .v{font-size:1.35rem;font-weight:700;line-height:1.1;font-family:var(--mono)}
+  .kpi .l{font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  @media print{header button,.noprint{display:none!important}body{background:#fff;color:#000}.card{border-color:#999;break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Veritas</h1>
+  <span class="tag" id="verTag">loading…</span>
+  <span class="tag">offline</span>
+  <span class="spacer"></span>
+  <a class="tag" href="index.html" data-keep-theme style="text-decoration:none">← Suite</a>
+  <button class="ghost noprint" id="themeBtn">Theme</button>
+  <button class="ghost noprint" id="selfTestBtn">Self-test</button>
+</header>
+<main>
+  <div id="warn"></div>
+  <div class="banner" id="provenance">Loading data packs…</div>
+  <div class="grid">
+    <div>
+      <div class="card">
+        <strong style="font-size:.9rem">Text to check</strong>
+        <div class="muted">Paste a bibliography, a table of authorities, a set of footnotes,
+          or a whole filing. Every citation found is checked; nothing leaves this machine.</div>
+        <label for="src">Input</label>
+        <textarea id="src" placeholder="Ayinde v London Borough of Haringey [2025] EWHC 1383 (Admin)&#10;Harber v HMRC [2023] UKFTT 1007 (TC)&#10;Smith v Jones [2021] EWHC 9999 (KB)&#10;10.1257/aer.20180338"></textarea>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button id="runBtn">Check</button>
+          <button class="ghost" id="clearBtn">Clear</button>
+          <button class="ghost" id="csvBtn" disabled>Export CSV</button>
+        </div>
+      </div>
+      <div class="card noprint">
+        <strong style="font-size:.9rem">Verification certificate</strong>
+        <div class="muted">A dated, checksum-stamped record of what was checked, against which
+          corpora, and what each check returned.</div>
+        <label for="ref">Matter / reference (optional)</label>
+        <input id="ref" placeholder="Skeleton argument, claim 2026/0417">
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button id="attBtn" disabled>Build certificate</button>
+          <button class="ghost" id="printBtn" disabled>Print / save as PDF</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" id="out">
+        <div class="muted">Results appear here.</div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="packs/pack-veritas-cases.js"></script>
+<script src="packs/pack-veritas-retractions.js"></script>
+<script>
+"use strict";
+(function(){
+  var CASES = (window.PACK_VERITAS_CASES && window.PACK_VERITAS_CASES.cases) ? window.PACK_VERITAS_CASES : null;
+  var RETR  = (window.PACK_VERITAS_RETRACTIONS && window.PACK_VERITAS_RETRACTIONS.retractions) ? window.PACK_VERITAS_RETRACTIONS : null;
+  var META  = CASES ? CASES.meta : (RETR ? RETR.meta : {});
+  var lastRun = null;
+
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+
+  // ---- canonical forms -----------------------------------------------------
+  // These must mirror build_veritas.py exactly. A verifier whose index is keyed
+  // one way and whose queries are keyed another reports real authorities as
+  // missing, which is the single failure that would make it worse than useless.
+  function normNcn(s){
+    s = String(s||"").toUpperCase().replace(/[\[\]()]/g," ").replace(/[^A-Z0-9 ]+/g," ");
+    var parts = s.split(/\s+/).filter(Boolean), year="", words=[], num="";
+    for(var i=0;i<parts.length;i++){
+      var p = parts[i];
+      if(!year && /^(19|20)\d{2}$/.test(p)) year = p;
+      else if(/^\d{1,5}$/.test(p)){ if(!num) num = String(parseInt(p,10)); }
+      else if(/^[A-Z]+$/.test(p)) words.push(p);
+    }
+    // Practitioners write the division either side of the number — "EWHC 1383
+    // (Admin)" and "EWHC (Admin) 1383" are the same judgment. Position is
+    // therefore not used to tell court from division: the first alphabetic token
+    // after the year is the court, everything else is a division, and divisions
+    // are sorted so their order cannot change the key.
+    var court = words.length ? [words[0]] : [];
+    var div = words.slice(1).sort();
+    return [year].concat(court, num?[num]:[], div).join(" ").trim();
+  }
+  function normName(s){
+    s = String(s||"").toLowerCase().replace(/&/g," and ");
+    s = s.replace(/\b(r|regina|rex)\b/g,"r").replace(/[^a-z0-9 ]+/g," ");
+    s = s.replace(/\b(v|vs|versus)\b/g,"v");
+    s = s.replace(/\b(ltd|limited|plc|llp|inc|co|company|and others|anor|ors|others)\b/g," ");
+    return s.replace(/\s+/g," ").trim();
+  }
+
+  var byKey = {};
+  if(CASES){ for(var i=0;i<CASES.cases.length;i++){ byKey[CASES.cases[i].k] = CASES.cases[i]; } }
+  var byDoi = {};
+  if(RETR){ for(var j=0;j<RETR.retractions.length;j++){ byDoi[RETR.retractions[j].d] = RETR.retractions[j]; } }
+
+  // ---- extraction ----------------------------------------------------------
+  var NCN_RE = /(?:\[\s*((?:19|20)\d{2})\s*\]|\(\s*((?:19|20)\d{2})\s*\))\s*([A-Z][A-Za-z]{1,9})\s*(?:\(([A-Za-z ]{1,24})\)\s*)?(\d{1,5})(?:\s*\(([A-Za-z ]{1,24})\))?/g;
+  var DOI_RE = /\b10\.\d{4,9}\/[^\s"'<>,;)\]]+/g;
+
+  // A case name is a party string: "A v B", "R (X) v Y", "Re Z", "In re Z".
+  // Anything else preceding a citation is prose and is not a name.
+  function caseNameBefore(s){
+    s = String(s||"").replace(/[,;:\u2014\-\s]+$/,"").trim();
+    if(!s) return "";
+    var tail = s.slice(-200);
+    var m = tail.match(/((?:R\s*\([^)]{1,60}\)\s*)?[A-Z][^,;]{0,80}?\s+v\.?\s+[A-Z][^,;]{0,80})$/);
+    if(m) return m[1].trim();
+    m = tail.match(/((?:In\s+re|Re)\s+[A-Z][^,;]{0,60})$/i);
+    if(m) return m[1].trim();
+    return "";
+  }
+
+  function extract(text){
+    var out = [], seen = {};
+    var lines = String(text||"").split(/\r?\n/);
+    for(var li=0; li<lines.length; li++){
+      var line = lines[li];
+      NCN_RE.lastIndex = 0;
+      var m;
+      while((m = NCN_RE.exec(line))){
+        var raw = m[0];
+        var key = normNcn(raw);
+        if(!key) continue;
+        // The case name, where the citation was written after one. Only text
+        // shaped like a case name is taken: an earlier version grabbed whatever
+        // prose preceded the citation, so "and again [2025] EWHC 1383" was read
+        // as a case called "and again" and counted as a separate authority.
+        var before = caseNameBefore(line.slice(0, m.index));
+        var id = "ncn:" + key + "|" + normName(before);
+        if(seen[id]) continue; seen[id] = 1;
+        out.push({type:"case", raw:raw, key:key, name:before, line:li+1});
+      }
+      DOI_RE.lastIndex = 0;
+      while((m = DOI_RE.exec(line))){
+        var d = m[0].replace(/[.,;]+$/,"").toLowerCase();
+        var id2 = "doi:" + d;
+        if(seen[id2]) continue; seen[id2] = 1;
+        out.push({type:"doi", raw:d, key:d, line:li+1});
+      }
+    }
+    return out;
+  }
+
+  // ---- verification --------------------------------------------------------
+  // Four verdicts, and the distinction between the middle two is the whole point
+  // of the instrument. "Not in the index" is not "does not exist".
+  function checkCase(c){
+    var hit = byKey[c.key];
+    var parts = c.key.split(" ");
+    var year = parseInt(parts[0], 10);
+    var token = parts[1] || "";
+    var env = (CASES && CASES.envelope) ? CASES.envelope[token] : null;
+
+    if(hit){
+      var res = {verdict:"confirmed", found:hit};
+      if(c.name){
+        var a = normName(c.name), b = normName(hit.t);
+        if(a && b && a.indexOf(b) < 0 && b.indexOf(a) < 0 && overlap(a,b) < 0.34){
+          res.verdict = "mismatch";
+          res.note = "The citation resolves, but to a different case. A real citation carried by " +
+                     "the wrong name is the commonest shape of a fabricated authority.";
+        }
+      }
+      return res;
+    }
+    if(!token || !/^[A-Z]+$/.test(token)){
+      return {verdict:"malformed", note:"No recognisable court identifier in the citation."};
+    }
+    if(!env){
+      return {verdict:"outside", note:"The court identifier “" + token + "” does not appear " +
+              "anywhere in this index. It may be a court this corpus does not carry, or it may not be " +
+              "a court identifier at all. Check a law report."};
+    }
+    if(year && (year < env.from || year > env.to)){
+      return {verdict:"outside", note:"This index holds " + token + " only for " + env.from + " to " +
+              env.to + ". A citation from " + year + " falls outside the corpus and cannot be checked here."};
+    }
+    return {verdict:"absent", note:"Within the years this index covers for " + token + " (" + env.from +
+            " to " + env.to + ", " + env.n.toLocaleString() + " judgments), no judgment carries this " +
+            "citation. Verify against a law report before relying on it."};
+  }
+  function overlap(a,b){
+    var A = a.split(" ").filter(Boolean), B = {}, n = 0;
+    b.split(" ").forEach(function(t){ B[t] = 1; });
+    A.forEach(function(t){ if(B[t]) n++; });
+    return A.length ? n / A.length : 0;
+  }
+  function checkDoi(d){
+    var hit = byDoi[d.key];
+    if(hit) return {verdict:"retracted", found:hit,
+      note:"This work is recorded as " + (hit.n || "retracted") + (hit.r ? " on " + hit.r : "") +
+           (hit.w ? ". Reason: " + hit.w : ".")};
+    return {verdict:"unchecked",
+      note:"Not present in the retraction corpus, which is the only claim this instrument makes " +
+           "about a DOI. It does not confirm that the work exists or that the citation is accurate."};
+  }
+
+  function run(){
+    var text = document.getElementById("src").value;
+    var items = extract(text);
+    var rows = items.map(function(it){
+      var r = (it.type === "case") ? checkCase(it) : checkDoi(it);
+      return {item: it, result: r};
+    });
+    lastRun = {rows: rows, when: new Date().toISOString(), chars: text.length};
+    document.getElementById("out").innerHTML = render(rows);
+    document.getElementById("csvBtn").disabled = rows.length === 0;
+    document.getElementById("attBtn").disabled = rows.length === 0;
+    document.getElementById("printBtn").disabled = rows.length === 0;
+  }
+
+  var LABEL = {confirmed:["v-ok","confirmed"], mismatch:["v-bad","name mismatch"],
+    absent:["v-bad","not in corpus"], outside:["v-out","outside corpus"],
+    malformed:["v-check","malformed"], retracted:["v-bad","RETRACTED"],
+    unchecked:["v-out","no retraction recorded"]};
+
+  function render(rows){
+    if(!rows.length){
+      return '<div class="notebar"><strong>No citation found in that text.</strong> Veritas reads ' +
+        'neutral citations in the usual forms and DOIs. It does not yet parse law report citations ' +
+        '(<span class="mono">[1932] AC 562</span>) or foreign neutral citations, and says so rather ' +
+        'than passing them silently.</div>';
+    }
+    var n = function(v){ return rows.filter(function(r){ return r.result.verdict === v; }).length; };
+    var h = '<div class="kpis">' +
+      kpi("Citations found", rows.length, false) +
+      kpi("Confirmed", n("confirmed"), false) +
+      kpi("Require checking", n("absent") + n("mismatch") + n("malformed"), (n("absent")+n("mismatch"))>0) +
+      kpi("Retracted", n("retracted"), n("retracted") > 0) +
+      '</div>';
+    if(n("absent") + n("mismatch") + n("retracted") > 0){
+      h += '<div class="warnbar"><strong>' + (n("absent")+n("mismatch")+n("retracted")) +
+        ' citation(s) did not verify.</strong> Each is set out below with what the corpus does and ' +
+        'does not cover. Absence from the corpus is not proof of fabrication; it is a direction to ' +
+        'check the law report before the citation is relied on.</div>';
+    }
+    h += '<table><thead><tr><th>Line</th><th>Citation</th><th>Verdict</th><th>What the corpus says</th></tr></thead><tbody>';
+    rows.forEach(function(r){
+      var lab = LABEL[r.result.verdict] || ["v-out", r.result.verdict];
+      var detail = "";
+      if(r.result.found && r.item.type === "case"){
+        detail = '<strong>' + esc(r.result.found.t) + '</strong><div class="muted">' +
+          esc(r.result.found.c) + (r.result.found.d ? ' &middot; ' + esc(r.result.found.d) : '') + '</div>';
+      } else if(r.result.found){
+        detail = '<strong>' + esc(r.result.found.t) + '</strong><div class="muted">' +
+          esc(r.result.found.j) + '</div>';
+      }
+      if(r.result.note) detail += '<div class="muted">' + esc(r.result.note) + '</div>';
+      h += '<tr><td class="mono">' + r.item.line + '</td>' +
+        '<td><span class="mono">' + esc(r.item.raw) + '</span>' +
+        (r.item.name ? '<div class="muted">' + esc(r.item.name.slice(0,90)) + '</div>' : '') + '</td>' +
+        '<td><span class="pill ' + lab[0] + '">' + esc(lab[1]) + '</span></td>' +
+        '<td>' + detail + '</td></tr>';
+    });
+    return h + '</tbody></table>';
+  }
+  function kpi(l,v,alert){ return '<div class="kpi"><div class="v"' + (alert?' style="color:var(--bad)"':'') +
+    '>' + esc(String(v)) + '</div><div class="l">' + esc(l) + '</div></div>'; }
+
+  // ---- exports -------------------------------------------------------------
+  function csvCell(v){ var s = String(v==null?"":v);
+    if(/^[=+\-@\t\r]/.test(s)) s = "'"+s; return '"'+s.replace(/"/g,'""')+'"'; }
+  function buildCsvRows(){
+    var rows = [["line","type","citation","given_name","verdict","resolved_name","court","date","note",
+      "case_corpus","case_corpus_sha256","retraction_corpus","retraction_corpus_sha256","checked_utc"]];
+    lastRun.rows.forEach(function(r){
+      rows.push([r.item.line, r.item.type, r.item.raw, r.item.name||"", r.result.verdict,
+        (r.result.found && r.result.found.t) || "", (r.result.found && r.result.found.c) || "",
+        (r.result.found && (r.result.found.d || r.result.found.r)) || "", r.result.note||"",
+        META.fcl_records||"", META.fcl_sha256||"", META.retraction_records||"",
+        META.retraction_sha256||"", lastRun.when]);
+    });
+    return rows;
+  }
+  function exportCsv(){
+    if(!lastRun) return;
+    var csv = buildCsvRows().map(function(r){ return r.map(csvCell).join(","); }).join("\r\n");
+    var b = new Blob([csv], {type:"text/csv;charset=utf-8"}), a = document.createElement("a");
+    a.href = URL.createObjectURL(b); a.download = "veritas-" + lastRun.when.slice(0,10) + ".csv";
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+
+  function certificate(){
+    if(!lastRun) return;
+    var rows = lastRun.rows;
+    var n = function(v){ return rows.filter(function(r){ return r.result.verdict === v; }).length; };
+    var h = '<h2 style="font-size:1.05rem;margin-top:0">Citation verification certificate</h2>';
+    h += '<div class="muted">Generated ' + esc(lastRun.when) + ' &mdash; offline, on this machine. ' +
+      'Reference: ' + esc(document.getElementById("ref").value || "(none given)") + '</div>';
+    h += '<h3 style="font-size:.9rem">Corpora relied on</h3><div class="muted">' +
+      esc(META.fcl_source||"") + ' &mdash; ' + (META.fcl_records||0).toLocaleString() + ' judgments, ' +
+      esc(META.fcl_year_from||"") + ' to ' + esc(META.fcl_year_to||"") + ', SHA-256 <span class="mono">' +
+      esc(String(META.fcl_sha256||"").slice(0,40)) + '&hellip;</span>. ' + esc(META.fcl_licence||"") +
+      '<br>' + esc(META.retraction_source||"") + ' &mdash; ' + (META.retraction_records||0).toLocaleString() +
+      ' records, SHA-256 <span class="mono">' + esc(String(META.retraction_sha256||"").slice(0,40)) +
+      '&hellip;</span></div>';
+    h += '<h3 style="font-size:.9rem">Result</h3><div class="muted">' + rows.length +
+      ' citation(s) extracted from ' + lastRun.chars.toLocaleString() + ' characters. ' +
+      n("confirmed") + ' confirmed against the case corpus; ' + n("absent") + ' absent from it; ' +
+      n("mismatch") + ' resolving to a differently named case; ' + n("outside") +
+      ' falling outside its coverage; ' + n("retracted") + ' recorded as retracted.</div>';
+    var flagged = rows.filter(function(r){ return ["absent","mismatch","retracted","malformed"].indexOf(r.result.verdict) >= 0; });
+    if(flagged.length){
+      h += '<table style="margin-top:8px"><thead><tr><th>Citation</th><th>Verdict</th><th>Note</th></tr></thead><tbody>';
+      flagged.forEach(function(r){
+        h += '<tr><td class="mono">' + esc(r.item.raw) + '</td><td>' + esc((LABEL[r.result.verdict]||["",""])[1]) +
+          '</td><td class="muted">' + esc(r.result.note||"") + '</td></tr>';
+      });
+      h += '</tbody></table>';
+    }
+    h += '<h3 style="font-size:.9rem">Limits of this certificate</h3><div class="muted">' +
+      esc(META.coverage_warning||"") + ' A DOI not present in the retraction corpus is not thereby ' +
+      'confirmed to exist: this instrument holds no index of extant publications, and makes no claim ' +
+      'about one. Nothing here is a substitute for reading the authority. It is not legal advice.</div>';
+    document.getElementById("out").innerHTML = h;
+  }
+
+  function setProvenance(){
+    var el = document.getElementById("provenance");
+    if(!CASES && !RETR){
+      document.getElementById("warn").innerHTML = '<div class="warnbar"><strong>Data packs not found.</strong> ' +
+        'Veritas reads <span class="mono">packs/pack-veritas-cases.js</span> and ' +
+        '<span class="mono">packs/pack-veritas-retractions.js</span>. Run ' +
+        '<span class="mono">01-build/build_veritas.py</span> and reload.</div>';
+      el.textContent = "No data pack loaded.";
+      ["runBtn","csvBtn","attBtn","printBtn"].forEach(function(id){
+        var b = document.getElementById(id); if(b) b.disabled = true; });
+      return;
+    }
+    document.getElementById("verTag").textContent =
+      (META.fcl_records||0).toLocaleString() + " judgments";
+    el.innerHTML = '<strong>Corpora:</strong> ' + esc(META.fcl_source||"") + ' &mdash; ' +
+      (META.fcl_records||0).toLocaleString() + ' judgments, ' + esc(META.fcl_year_from||"") + '&ndash;' +
+      esc(META.fcl_year_to||"") + '. ' + esc(META.retraction_source||"") + ' &mdash; ' +
+      (META.retraction_records||0).toLocaleString() + ' records.<br>' +
+      '<span style="color:var(--warn)">' + esc(META.coverage_warning||"") + '</span>';
+  }
+
+  // ---- self-test -----------------------------------------------------------
+  function selfTest(){
+    var pass = 0, out = [];
+    function ok(name, cond, detail){
+      if(cond){ pass++; out.push('<div style="color:var(--good)">PASS ' + esc(name) + '</div>'); }
+      else out.push('<div style="color:var(--bad)">FAIL ' + esc(name) + (detail?' — '+esc(detail):"") + '</div>');
+    }
+    ok("case pack loaded", !!CASES && CASES.cases.length > 100, CASES ? CASES.cases.length + " cases" : "none");
+    ok("retraction pack loaded", !!RETR && RETR.retractions.length > 1000,
+       RETR ? RETR.retractions.length + " retractions" : "none");
+    ok("both packs describe the same build",
+       !CASES || !RETR || CASES.meta.fcl_sha256 === RETR.meta.fcl_sha256);
+
+    // Canonicalisation. Every one of these is a form a real practitioner writes.
+    var forms = ["[2025] EWHC 1383 (Admin)", "[2025] EWHC 1383 (ADMIN)", "[2025] EWHC (Admin) 1383",
+                 "  [2025]  EWHC  1383  (Admin) ", "[2025] EWHC 01383 (Admin)"];
+    var keys = forms.map(normNcn);
+    ok("the same citation written five ways gives one key",
+       keys.every(function(k){ return k === keys[0]; }), keys.join(" | "));
+    ok("different citations give different keys",
+       normNcn("[2025] EWHC 1383 (Admin)") !== normNcn("[2025] EWHC 1384 (Admin)"));
+    ok("division is not confused with court",
+       normNcn("[2025] EWHC 1383 (Admin)") !== normNcn("[2025] EWHC 1383 (Ch)"));
+
+    ok("extraction finds a citation with a case name", (function(){
+      var e = extract("Ayinde v London Borough of Haringey [2025] EWHC 1383 (Admin)");
+      return e.length === 1 && e[0].type === "case" && /haringey/i.test(e[0].name); })());
+    ok("extraction finds a DOI", (function(){
+      var e = extract("see 10.1257/aer.20180338 for the argument");
+      return e.some(function(x){ return x.type === "doi" && x.key === "10.1257/aer.20180338"; }); })());
+    ok("trailing punctuation is not swallowed into a DOI", (function(){
+      var e = extract("(10.1257/aer.20180338).");
+      var d = e.filter(function(x){ return x.type === "doi"; })[0];
+      return d && d.key === "10.1257/aer.20180338"; })());
+    ok("the same citation twice is reported once",
+       extract("[2025] EWHC 1383 (Admin) and again [2025] EWHC 1383 (Admin)").length === 1);
+    ok("line numbers are reported", (function(){
+      var e = extract("nothing here\n[2025] UKSC 1");
+      return e.length === 1 && e[0].line === 2; })());
+
+    // The verdicts, which are the whole product.
+    ok("a citation in the corpus is confirmed", (function(){
+      var c = CASES.cases[Math.floor(CASES.cases.length/2)];
+      return checkCase({key: c.k, name: c.t}).verdict === "confirmed"; })());
+    ok("a real citation carried by the wrong name is caught", (function(){
+      var c = CASES.cases[Math.floor(CASES.cases.length/2)];
+      return checkCase({key: c.k, name: "Entirely Fictitious Claimant v Nobody At All"}).verdict === "mismatch"; })());
+    ok("an invented citation inside the covered years is flagged absent", (function(){
+      var tok = Object.keys(CASES.envelope)[0];
+      var env = CASES.envelope[tok];
+      var key = normNcn("[" + env.to + "] " + tok + " 99999");
+      return checkCase({key: key, name: ""}).verdict === "absent"; })());
+    ok("a citation outside the corpus is NOT called false", (function(){
+      var r = checkCase({key: normNcn("[1932] AC 562"), name: "Donoghue v Stevenson"});
+      return r.verdict === "outside" || r.verdict === "malformed"; })());
+    ok("an unknown court identifier is reported as outside, not absent",
+       checkCase({key: normNcn("[2025] ZZZZ 1"), name: ""}).verdict === "outside");
+    ok("a retracted DOI is caught", (function(){
+      if(!RETR.retractions.length) return true;
+      var d = RETR.retractions[0].d;
+      return checkDoi({key: d}).verdict === "retracted"; })());
+    ok("an unretracted DOI is not asserted to exist", (function(){
+      var r = checkDoi({key:"10.9999/definitely-not-a-real-doi"});
+      return r.verdict === "unchecked" && /does not confirm/.test(r.note); })());
+
+    ok("every case carries a canonical key equal to its own citation",
+       CASES.cases.slice(0,2000).every(function(c){ return normNcn(c.n) === c.k; }),
+       "browser and builder canonicalisation must agree");
+    ok("the coverage envelope covers every indexed court token",
+       CASES.cases.slice(0,2000).every(function(c){
+         var t = c.k.split(" ")[1]; return !t || !!CASES.envelope[t]; }));
+    ok("the coverage warning is carried in the pack", /not the whole of the law/i.test(META.coverage_warning||""));
+
+    ok("CSV rows all carry the header's column count", (function(){
+      lastRun = {rows: [{item:{line:1,type:"case",raw:"[2025] UKSC 1",name:"A v B"},
+                         result:{verdict:"absent",note:"n"}}], when:"t", chars:1};
+      var rows = buildCsvRows(), n2 = rows[0].length;
+      return rows.every(function(r){ return r.length === n2; }); })());
+    ok("CSV neutralises spreadsheet formulae", csvCell("=cmd|calc").indexOf("'=") === 1);
+    ok("markup in a case name cannot reach the page",
+       esc('<img src=x onerror=alert(1)>').indexOf("<") < 0);
+
+    document.getElementById("out").innerHTML =
+      '<h2 style="font-size:1rem;margin-top:0">Self-test</h2>' + out.join("") +
+      '<div style="margin-top:10px"><strong>' + pass + ' passed, ' + (out.length - pass) + ' failed.</strong></div>';
+  }
+
+  document.getElementById("runBtn").onclick = run;
+  document.getElementById("clearBtn").onclick = function(){
+    document.getElementById("src").value = "";
+    document.getElementById("out").innerHTML = '<div class="muted">Results appear here.</div>';
+  };
+  document.getElementById("csvBtn").onclick = exportCsv;
+  document.getElementById("attBtn").onclick = certificate;
+  document.getElementById("printBtn").onclick = function(){ window.print(); };
+  document.getElementById("selfTestBtn").onclick = selfTest;
+  document.getElementById("themeBtn").onclick = function(){
+    var d = document.documentElement;
+    d.setAttribute("data-theme", d.getAttribute("data-theme") === "light" ? "dark" : "light");
+  };
+  setProvenance();
+})();
+</script>
+<script>
+(function(){try{
+  var q=new URLSearchParams(location.search).get("theme");
+  if(q!=="light"&&q!=="dark") return;
+  Array.prototype.forEach.call(document.querySelectorAll('a[data-keep-theme], a.tool'), function(a){
+    var h=a.getAttribute("href")||"";
+    if(!h || /^(https?:|#|mailto:)/.test(h) || h.indexOf("theme=")>=0) return;
+    a.setAttribute("href", h+(h.indexOf("?")>=0?"&":"?")+"theme="+q);
+  });
+}catch(e){}})();
+addEventListener("message", function(ev){
+  if(ev && ev.data && ev.data.type==="cf-theme" && (ev.data.theme==="light"||ev.data.theme==="dark"))
+    document.documentElement.setAttribute("data-theme", ev.data.theme);
+});
+</script>
+</body>
+</html>

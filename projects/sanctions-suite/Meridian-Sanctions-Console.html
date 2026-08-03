@@ -9,7 +9,7 @@
     --line:#233145;--accent:#43b3a6;--accent-ink:#84d6ca;--bad:#e0574a;--warn:#e0a13a;--good:#43c59e;
     --mono:ui-monospace,'Cascadia Code',Consolas,monospace;--sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
   html[data-theme="light"]{--bg:#f4f1ec;--surface:#fff;--surface2:#faf7f2;--ink:#221e18;--ink2:#4c473e;
-    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f}
+    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f--good:#0f7a5a;--warn:#8a5a10;--bad:#a32a1e;}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55}
   header{border-bottom:1px solid var(--line);padding:14px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--surface)}
@@ -39,13 +39,20 @@
   .score{font-family:var(--mono);font-weight:700}
   @media print{.noprint{display:none!important}body{background:#fff;color:#000}}
 </style>
+<script>
+/* The theme has to be applied before anything heavy loads. The data packs below
+   are blocking scripts — 55 MB in Sentinel's case — and a theme read placed after
+   them leaves a light-mode visitor staring at a dark page for the whole download. */
+(function(){try{var q=new URLSearchParams(location.search).get("theme");
+if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q);}catch(e){}})();
+</script>
 </head>
 <body>
 <header>
   <h1>Meridian — Global Sanctions Console</h1>
   <span class="tag" id="verTag">loading…</span><span class="tag">offline</span>
   <span class="spacer"></span>
-  <a class="tag" href="index.html" style="text-decoration:none">← Suite</a>
+  <a class="tag" href="index.html" data-keep-theme style="text-decoration:none">← Suite</a>
   <button class="ghost noprint" id="themeBtn">Theme</button>
   <button class="ghost noprint" id="selfTestBtn">Self-test</button>
   <button class="ghost noprint" id="csvBtn">Export CSV</button>
@@ -145,10 +152,15 @@
       var t=c.h[0];
       h+='<tr><td><strong>'+esc(c.n)+'</strong><div class="mono muted">'+esc(c.id)+'</div></td>'+
         '<td>'+esc(c.dom||"")+'</td><td>'+esc(c.sec||"")+'</td>'+
-        '<td>'+(t?'<span class="pill p-'+listClass(t.l)+'">review</span>':'<span class="pill ok">no match</span>')+'</td>'+
+        '<td>'+(t?'<span class="pill p-'+listClass(t.l)+'">review</span>'
+              :(c.belowBand?'<span class="pill p-U">below band</span>':'<span class="pill ok">no match</span>'))+'</td>'+
         '<td class="score">'+(t?t.sc.toFixed(2):'—')+'</td>'+
         '<td>'+(t?esc(t.n)+(t.via&&t.via!==t.n?'<div class="muted">via '+esc(t.via)+'</div>':''):'<span class="muted">—</span>')+
-          (c.h.length>1?'<div class="muted">+'+(c.h.length-1)+' more</div>':'')+'</td>'+
+          (function(){
+            var shown=c.h.length, real=(c.ht&&c.ht>shown)?c.ht:shown;
+            if(real<=1) return '';
+            return '<div class="muted">+'+(real-1)+' more'+(real>shown?' (only '+shown+' carried in this pack)':'')+'</div>';
+          })()+'</td>'+
         '<td>'+(t?esc(listLabel(t.l)):"")+'</td>'+
         '<td>'+(t?arr(t.p).slice(0,4).map(function(p){return '<span class="pill">'+esc(p)+'</span>'}).join(""):"")+'</td></tr>';
     });
@@ -158,11 +170,15 @@
   }
 
   function renderKpis(){
-    var withHits=C.filter(function(c){return (c.h||[]).length;}).length;
-    var exact=C.filter(function(c){return (c.h||[]).some(function(h){return h.sc>=0.999;});}).length;
-    var sanc=C.filter(function(c){return (c.h||[]).some(function(h){return arr(h.l).indexOf("S")>=0;});}).length;
+    // Computed at the selected band, so the strip cannot contradict the table
+    // directly beneath it.
+    var min=minScore();
+    var at=function(c){ return (c.h||[]).filter(function(h){return h.sc>=min;}); };
+    var withHits=C.filter(function(c){return at(c).length;}).length;
+    var exact=C.filter(function(c){return at(c).some(function(h){return h.sc>=0.999;});}).length;
+    var sanc=C.filter(function(c){return at(c).some(function(h){return arr(h.l).indexOf("S")>=0;});}).length;
     var k=[["Companies screened",C.length.toLocaleString(),false],
-           ["Review queue",withHits.toLocaleString(),withHits>0],
+           ["Review queue at \u2265"+min.toFixed(2),withHits.toLocaleString(),withHits>0],
            ["Exact-name matches",exact.toLocaleString(),exact>0],
            ["Against sanctions list",sanc.toLocaleString(),sanc>0]];
     document.getElementById("kpis").innerHTML=k.map(function(x){
@@ -170,13 +186,23 @@
     }).join("");
   }
 
-  function exportCsv(){
-    if(!P || !P.available) return;
+  // Built as a named function so the column-parity self-test can exercise the
+  // real export rather than a hand-written stand-in. The previous guard compared
+  // a literal 15 against a literal 15 and would have passed the very five-column
+  // shift it was added to catch.
+  function corpusLabel(){
+    var m=P.meta;
+    if(m.demo_subset) return "DEMO SUBSET: "+m.demo_records+" of "+m.full_records+" records";
+    if(m.full_corpus) return "full corpus: "+(m.records||"")+" sanctions + crime entities"+
+      (m.pep_available===false ? "; PEP overlay not searched" : "");
+    return "full build";
+  }
+  function buildCsvRows(){
     var rows=[["company_id","company","domicile","sector","status","score","match_name","match_id","list",
       "programmes","score_band","snapshot_version","exported_utc","corpus","licence","attribution"]];
     var m=P.meta, when=new Date().toISOString();
-    var corpus = m.demo_subset ? ("DEMO SUBSET: "+m.demo_records+" of "+m.full_records+" records") : "full build";
-    var band=document.getElementById("minScore").value;
+    var corpus = corpusLabel();
+    var band=String(minScore());
     filtered().forEach(function(c){
       if(!c.h.length){ rows.push([c.id,c.n,c.dom,c.sec,
         c.belowBand?"below selected score band":"no match","","","","","",band,m.snapshot_version,when,corpus,m.licence,m.attribution]); }
@@ -185,6 +211,11 @@
           listLabel(h.l),arr(h.p).join(" "),band,m.snapshot_version,when,corpus,m.licence,m.attribution]);
       });
     });
+    return rows;
+  }
+  function exportCsv(){
+    if(!P || !P.available) return;
+    var rows=buildCsvRows();
     var csv=rows.map(function(r){return r.map(csvCell).join(",")}).join("\r\n");
     var b=new Blob([csv],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");
     a.href=URL.createObjectURL(b); a.download="meridian-sanctions-review-"+new Date().toISOString().slice(0,10)+".csv";
@@ -197,7 +228,7 @@
     document.getElementById("verTag").textContent=P.meta.snapshot_version||"unknown";
     var pre="";
     if(P.meta.sample_build) pre+='<div style="color:var(--bad)"><strong>SAMPLE BUILD — truncated data, not valid for screening.</strong></div>';
-    else if(P.meta.demo_subset) pre+='<div style="color:var(--warn)"><strong>Coverage.</strong> '+esc(P.meta.coverage_note||P.meta.demo_note||"")+'</div>';
+    else if(P.meta.coverage_note) pre+='<div class="muted"><strong>Coverage.</strong> '+esc(P.meta.coverage_note)+'</div>';
     if(window.PACK_MANIFEST && window.PACK_MANIFEST.built_from_snapshot!==P.meta.built_from_snapshot)
       pre+='<div style="color:var(--bad)"><strong>Pack mismatch — re-run BUILD-ALL.cmd.</strong></div>';
     if(P.error) pre+='<div style="color:var(--warn)"><strong>Build note:</strong> '+esc(P.error)+'</div>';
@@ -223,15 +254,10 @@
     ok("multi-list label joins", listLabel(["S","C"])==="Sanctions + Crime");
     ok("every CSV row has the same column count as the header", (function(){
       if(!P||!P.available) return true;
-      var rows=[["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o"]];
-      var m2=P.meta, when="t", band="0.62";
-      var corpus2 = m2.demo_subset ? "x" : "full build";
-      var n=rows[0].length, ok2=true;
-      filtered().forEach(function(c){
-        if(!c.h.length){ if(15!==n) ok2=false; }
-        else c.h.forEach(function(){ if(15!==n) ok2=false; });
-      });
-      return ok2; })());
+      var rows=buildCsvRows();
+      var n=rows[0].length;
+      return rows.length>1 && rows.every(function(r){ return r.length===n; });
+    })(), "header "+buildCsvRows()[0].length+" cols, "+(buildCsvRows().length-1)+" data rows");
     if(C.length){
       ok("companies in stable case-folded order", (function(){
         for(var i=1;i<C.length;i++){
@@ -259,7 +285,8 @@
 
   document.getElementById("q").addEventListener("input",render);
   document.getElementById("view").addEventListener("change",render);
-  document.getElementById("minScore").addEventListener("change",render);
+  // The KPI strip is band-dependent, so it has to be recomputed with the table.
+  document.getElementById("minScore").addEventListener("change",function(){ render(); renderKpis(); });
   document.getElementById("csvBtn").onclick=exportCsv;
   document.getElementById("selfTestBtn").onclick=selfTest;
   document.getElementById("themeBtn").onclick=function(){var r=document.documentElement;
@@ -281,6 +308,20 @@
       document.documentElement.setAttribute("data-theme", ev.data.theme);
   });
 })();
+</script>
+<script>
+/* Carry the viewer's theme across every internal hop, so a light-mode visitor
+   who opens a tool from the suite index does not land on a dark page. */
+(function(){try{
+  var q=new URLSearchParams(location.search).get("theme");
+  if(q!=="light"&&q!=="dark") return;
+  var sel='a.tool, a[data-keep-theme], a[href$=".html"]:not([target="_blank"])';
+  Array.prototype.forEach.call(document.querySelectorAll(sel), function(a){
+    var h=a.getAttribute("href")||"";
+    if(!h || /^(https?:|#|mailto:)/.test(h) || h.indexOf("theme=")>=0) return;
+    a.setAttribute("href", h+(h.indexOf("?")>=0?"&":"?")+"theme="+q);
+  });
+}catch(e){}})();
 </script>
 </body>
 </html>

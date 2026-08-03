@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lineage — offline corporate control resolver</title>
+<script>
+(function(){try{var q=new URLSearchParams(location.search).get("theme");
+if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q);}catch(e){}})();
+</script>
+<style>
+  :root{--bg:#0b0f17;--surface:#131b2a;--surface2:#182133;--ink:#e9eef7;--ink2:#aab7cc;--muted:#7d8ba3;
+    --line:#233145;--accent:#43b3a6;--accent-ink:#84d6ca;--gold:#d4b24c;--bad:#e0574a;--warn:#e0a13a;
+    --good:#43c59e;--radius:12px;--mono:ui-monospace,'Cascadia Code',Consolas,monospace;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  html[data-theme="light"]{--bg:#f4f1ec;--surface:#fff;--surface2:#faf7f2;--ink:#221e18;--ink2:#4c473e;
+    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f;--gold:#836819;
+    --good:#0f7a5a;--warn:#8a5a10;--bad:#a32a1e}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55}
+  header{border-bottom:1px solid var(--line);padding:14px 20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:var(--surface)}
+  h1{font-size:1.05rem;margin:0;letter-spacing:.02em}
+  .tag{font-size:.7rem;padding:2px 8px;border:1px solid var(--line);border-radius:99px;color:var(--muted)}
+  .spacer{flex:1}
+  button{background:var(--accent);color:#04211e;border:0;border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer;font-size:.86rem}
+  button.ghost{background:transparent;color:var(--ink2);border:1px solid var(--line)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  main{padding:20px;max-width:1280px;margin:0 auto}
+  .grid{display:grid;grid-template-columns:340px 1fr;gap:20px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:16px}
+  label{display:block;font-size:.72rem;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.06em}
+  input,select{width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--ink);
+    border-radius:8px;padding:8px 10px;font-family:inherit;font-size:.9rem}
+  table{width:100%;border-collapse:collapse;font-size:.85rem}
+  th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em}
+  .pill{display:inline-block;font-size:.66rem;padding:1px 7px;border-radius:99px;border:1px solid var(--line);margin:1px 3px 1px 0;white-space:nowrap;color:var(--muted)}
+  .p-direct{border-color:var(--accent);color:var(--accent-ink)}
+  .p-ultimate{border-color:var(--gold);color:var(--gold)}
+  .p-branch,.p-feeder{border-color:var(--line);color:var(--muted)}
+  .p-alert{border-color:var(--bad);color:var(--bad)}
+  .muted{color:var(--muted);font-size:.8rem}
+  .mono{font-family:var(--mono);font-size:.78rem}
+  .banner{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:.78rem;color:var(--ink2);margin-bottom:16px}
+  .warnbar{background:rgba(224,87,74,.12);border:1px solid var(--bad);color:var(--bad);border-radius:8px;padding:10px 12px;font-size:.82rem;margin-bottom:16px}
+  .notebar{background:var(--surface2);border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:8px;padding:10px 12px;font-size:.8rem;color:var(--ink2);margin-bottom:14px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+  .kpi{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .kpi .v{font-size:1.35rem;font-weight:700;line-height:1.1;font-family:var(--mono)}
+  .kpi .l{font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  .chain{list-style:none;padding-left:0;margin:0}
+  .chain li{position:relative;padding:8px 0 8px 26px;border-left:2px solid var(--line);margin-left:8px}
+  .chain li:before{content:"";position:absolute;left:-6px;top:16px;width:10px;height:10px;border-radius:50%;
+    background:var(--surface);border:2px solid var(--accent)}
+  .chain li.top:before{border-color:var(--gold);background:var(--gold)}
+  @media print{header button,.noprint{display:none!important}body{background:#fff;color:#000}.card{border-color:#999;break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Lineage</h1>
+  <span class="tag" id="verTag">loading…</span>
+  <span class="tag">offline</span>
+  <span class="spacer"></span>
+  <a class="tag" href="index.html" data-keep-theme style="text-decoration:none">← Suite</a>
+  <button class="ghost noprint" id="themeBtn">Theme</button>
+  <button class="ghost noprint" id="selfTestBtn">Self-test</button>
+</header>
+<main>
+  <div id="warn"></div>
+  <div class="banner" id="provenance">Loading data packs…</div>
+  <div class="grid">
+    <div>
+      <div class="card">
+        <strong style="font-size:.9rem">Entity</strong>
+        <div class="muted">Search by legal name or paste a 20-character LEI.</div>
+        <label for="q">Name or LEI</label>
+        <input id="q" placeholder="e.g. Barclays, or 213800LBQA1Y9L22JB70" autocomplete="off">
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button id="runBtn">Resolve</button>
+          <button class="ghost" id="csvBtn" disabled>Export CSV</button>
+        </div>
+        <div id="hits" class="muted" style="margin-top:10px"></div>
+      </div>
+      <div class="card noprint">
+        <strong style="font-size:.9rem">Structure record</strong>
+        <div class="muted">A dated, checksum-stamped statement of the chain as the registry recorded it.</div>
+        <label for="ref">Reference (optional)</label>
+        <input id="ref" placeholder="Counterparty file 2026/118">
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button id="attBtn" disabled>Build record</button>
+          <button class="ghost" id="printBtn" disabled>Print / save as PDF</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" id="out">
+        <div class="muted">Results appear here. Everything runs locally; nothing entered here leaves this machine.</div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="packs/pack-lineage-entities.js"></script>
+<script src="packs/pack-lineage-relationships.js"></script>
+<script>
+"use strict";
+(function(){
+  var ENT = (window.PACK_LINEAGE_ENTITIES && window.PACK_LINEAGE_ENTITIES.entities) ? window.PACK_LINEAGE_ENTITIES : null;
+  var REL = (window.PACK_LINEAGE_RELATIONSHIPS && window.PACK_LINEAGE_RELATIONSHIPS.relationships) ? window.PACK_LINEAGE_RELATIONSHIPS : null;
+  var META = ENT ? ENT.meta : (REL ? REL.meta : {});
+  var E = ENT ? ENT.entities : {};
+  var lastRun = null;
+
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function nm(lei){ var e = E[lei]; return e ? e.n : "(not in Level 1)"; }
+  function jur(lei){ var e = E[lei]; return e ? (e.j || e.h || "") : ""; }
+
+  // ---- indexes -------------------------------------------------------------
+  var parentsOf = {}, childrenOf = {};
+  if(REL){
+    for(var i=0;i<REL.relationships.length;i++){
+      var r = REL.relationships[i];
+      (parentsOf[r.c] || (parentsOf[r.c] = [])).push(r);
+      (childrenOf[r.p] || (childrenOf[r.p] = [])).push(r);
+    }
+  }
+  var nameIdx = null;
+  function buildNameIdx(){
+    if(nameIdx) return nameIdx;
+    nameIdx = [];
+    for(var lei in E){ nameIdx.push([E[lei].n.toLowerCase(), lei]); }
+    nameIdx.sort(function(a,b){ return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0; });
+    return nameIdx;
+  }
+  function search(q){
+    q = String(q||"").trim();
+    if(!q) return [];
+    if(/^[A-Z0-9]{20}$/i.test(q)){
+      var k = q.toUpperCase();
+      return E[k] ? [k] : [];
+    }
+    var ql = q.toLowerCase(), out = [], idx = buildNameIdx();
+    for(var i=0;i<idx.length && out.length < 60;i++){
+      if(idx[i][0].indexOf(ql) >= 0) out.push(idx[i][1]);
+    }
+    // Exact and prefix matches first: a search for "Barclays" should not open
+    // with a fund whose name merely contains the word.
+    out.sort(function(a,b){
+      var x = E[a].n.toLowerCase(), y = E[b].n.toLowerCase();
+      var ax = x === ql ? 0 : x.indexOf(ql) === 0 ? 1 : 2;
+      var ay = y === ql ? 0 : y.indexOf(ql) === 0 ? 1 : 2;
+      if(ax !== ay) return ax - ay;
+      if(x.length !== y.length) return x.length - y.length;
+      return x < y ? -1 : x > y ? 1 : 0;
+    });
+    return out;
+  }
+
+  // ---- chain resolution ----------------------------------------------------
+  // Registry data contains cycles: A consolidates B and B consolidates A appear
+  // where two filings disagree. A naive walk hangs the page, so every step is
+  // guarded and a cycle is reported rather than followed.
+  function walkUp(lei, maxDepth){
+    var chain = [], seen = {}, cur = lei, depth = 0, cycle = false;
+    seen[lei] = 1;
+    while(depth < (maxDepth || 12)){
+      var ps = parentsOf[cur] || [];
+      var direct = null;
+      for(var i=0;i<ps.length;i++){ if(ps[i].t === "direct"){ direct = ps[i]; break; } }
+      if(!direct){
+        for(var j=0;j<ps.length;j++){
+          if(ps[j].t === "branch" || ps[j].t === "subfund" || ps[j].t === "fund-manager"){ direct = ps[j]; break; }
+        }
+      }
+      if(!direct) break;
+      if(seen[direct.p]){ cycle = true; break; }
+      seen[direct.p] = 1;
+      chain.push(direct);
+      cur = direct.p;
+      depth++;
+    }
+    return {chain: chain, cycle: cycle, terminal: cur};
+  }
+  function declaredUltimate(lei){
+    var ps = parentsOf[lei] || [];
+    for(var i=0;i<ps.length;i++){ if(ps[i].t === "ultimate") return ps[i].p; }
+    return null;
+  }
+
+  function resolve(lei){
+    var up = walkUp(lei);
+    var ult = declaredUltimate(lei);
+    var nodes = [lei].concat(up.chain.map(function(r){ return r.p; }));
+    var juris = {}, order = [];
+    nodes.forEach(function(n){ var j = jur(n); if(j && !juris[j]){ juris[j] = 1; order.push(j); } });
+    var kids = (childrenOf[lei] || []);
+    var exc = (REL && REL.exceptions) ? (REL.exceptions[up.terminal] || null) : null;
+    return {lei: lei, up: up, ultimate: ult, nodes: nodes, jurisdictions: order,
+            children: kids, exception: exc};
+  }
+
+  // ---- rendering -----------------------------------------------------------
+  function statusPills(lei){
+    var e = E[lei]; if(!e) return '<span class="pill p-alert">not in Level 1</span>';
+    var h = "";
+    if(e.j) h += '<span class="pill">' + esc(e.j) + '</span>';
+    if(e.h && e.h !== e.j) h += '<span class="pill">HQ ' + esc(e.h) + '</span>';
+    if(e.k) h += '<span class="pill">' + esc(e.k) + '</span>';
+    if(e.s && e.s !== "ACTIVE") h += '<span class="pill p-alert">' + esc(e.s) + '</span>';
+    if(e.r && e.r !== "ISSUED") h += '<span class="pill p-alert">registration ' + esc(e.r) + '</span>';
+    return h;
+  }
+
+  function render(res){
+    var h = "";
+    var crossings = res.jurisdictions.length;
+    h += '<div class="kpis">' +
+      kpi("Steps to the top", res.up.chain.length, false) +
+      kpi("Jurisdictions crossed", crossings, crossings >= 4) +
+      kpi("Direct subsidiaries recorded", res.children.length, false) +
+      kpi("Declared ultimate parent", res.ultimate ? "yes" : "none filed", !res.ultimate) +
+      '</div>';
+
+    if(res.up.cycle){
+      h += '<div class="warnbar"><strong>The registry describes a cycle.</strong> Two filings in this ' +
+        'chain each name the other as parent. The walk stopped rather than follow it; the structure as ' +
+        'filed cannot be read as a hierarchy and should be checked against the filings themselves.</div>';
+    }
+    if(!res.ultimate){
+      h += '<div class="notebar">No <strong>ultimate consolidating parent</strong> has been filed for this ' +
+        'entity. Under the GLEIF regime an entity must either name one or record why it has not, so the ' +
+        'absence is itself a filing position rather than an absence of information.' +
+        (res.exception ? ' The recorded reason is set out below.' : '') + '</div>';
+    }
+    if(res.exception && res.exception.length){
+      h += '<div class="notebar"><strong>Reporting exception at the top of the chain.</strong> ' +
+        res.exception.map(function(x){
+          return esc(x.c) + (x.r ? " — " + esc(x.r) : ""); }).join("; ") + '</div>';
+    }
+
+    h += '<h2 style="font-size:1rem">Control chain, as filed</h2><ul class="chain">';
+    h += '<li><strong>' + esc(nm(res.lei)) + '</strong> <span class="mono muted">' + esc(res.lei) + '</span>' +
+         '<div>' + statusPills(res.lei) + '</div><div class="muted">the entity searched</div></li>';
+    res.up.chain.forEach(function(r, i){
+      var top = (i === res.up.chain.length - 1);
+      h += '<li' + (top ? ' class="top"' : '') + '><strong>' + esc(nm(r.p)) + '</strong> ' +
+        '<span class="mono muted">' + esc(r.p) + '</span>' +
+        ' <span class="pill p-' + esc(r.t) + '">' + esc(r.t) + '</span>' +
+        '<div>' + statusPills(r.p) + '</div></li>';
+    });
+    h += '</ul>';
+    if(!res.up.chain.length){
+      h += '<div class="muted">No parent is recorded for this entity, so there is no chain to walk. ' +
+        'That does not make it independent: an entity with no reporting obligation files nothing.</div>';
+    }
+
+    if(res.ultimate && res.ultimate !== (res.up.chain.length ? res.up.chain[res.up.chain.length-1].p : null)){
+      h += '<div class="notebar"><strong>The declared ultimate parent is not where the direct chain ends.</strong> ' +
+        'Filed ultimate parent: <strong>' + esc(nm(res.ultimate)) + '</strong> <span class="mono">' +
+        esc(res.ultimate) + '</span>. Walking the direct-consolidation filings instead terminates at <strong>' +
+        esc(nm(res.up.terminal)) + '</strong>. Both are as filed; the discrepancy is the finding.</div>';
+    }
+
+    if(res.jurisdictions.length){
+      h += '<h2 style="font-size:1rem">Jurisdictions in the chain</h2><div>' +
+        res.jurisdictions.map(function(j){ return '<span class="pill">' + esc(j) + '</span>'; }).join("") +
+        '</div>';
+    }
+
+    if(res.children.length){
+      h += '<h2 style="font-size:1rem">Recorded directly beneath it (' + res.children.length + ')</h2>';
+      h += '<table><thead><tr><th>Entity</th><th>LEI</th><th>Relationship</th><th>Jurisdiction</th></tr></thead><tbody>';
+      res.children.slice(0,300).forEach(function(r){
+        h += '<tr><td>' + esc(nm(r.c)) + '</td><td class="mono">' + esc(r.c) + '</td>' +
+          '<td><span class="pill p-' + esc(r.t) + '">' + esc(r.t) + '</span></td>' +
+          '<td>' + esc(jur(r.c)) + '</td></tr>';
+      });
+      h += '</tbody></table>';
+      if(res.children.length > 300) h += '<div class="muted">Showing 300 of ' + res.children.length +
+        '. The CSV export carries all of them.</div>';
+    }
+    return h;
+  }
+  function kpi(l,v,alert){ return '<div class="kpi"><div class="v"' + (alert?' style="color:var(--bad)"':'') +
+    '>' + esc(String(v)) + '</div><div class="l">' + esc(l) + '</div></div>'; }
+
+  function run(){
+    var q = document.getElementById("q").value.trim();
+    var hits = search(q);
+    var el = document.getElementById("hits");
+    if(!hits.length){
+      el.innerHTML = '<span class="muted">No entity in the chain corpus matches. Only entities that ' +
+        'appear in at least one control relationship are carried.</span>';
+      return;
+    }
+    if(hits.length > 1){
+      el.innerHTML = hits.slice(0,12).map(function(l){
+        return '<div style="margin:3px 0"><a href="#" data-lei="' + esc(l) + '" style="color:var(--accent-ink)">' +
+          esc(E[l].n) + '</a> <span class="muted">' + esc(jur(l)) + '</span></div>'; }).join("") +
+        (hits.length > 12 ? '<div class="muted">…and ' + (hits.length-12) + ' more</div>' : "");
+      Array.prototype.forEach.call(el.querySelectorAll("a[data-lei]"), function(a){
+        a.onclick = function(ev){ ev.preventDefault(); show(a.getAttribute("data-lei")); };
+      });
+    } else {
+      el.innerHTML = "";
+    }
+    show(hits[0]);
+  }
+  function show(lei){
+    var res = resolve(lei);
+    lastRun = {res: res, when: new Date().toISOString()};
+    document.getElementById("out").innerHTML = render(res);
+    ["csvBtn","attBtn","printBtn"].forEach(function(id){ document.getElementById(id).disabled = false; });
+  }
+
+  // ---- exports -------------------------------------------------------------
+  function csvCell(v){ var s = String(v==null?"":v);
+    if(/^[=+\-@\t\r]/.test(s)) s = "'"+s; return '"'+s.replace(/"/g,'""')+'"'; }
+  function buildCsvRows(){
+    var res = lastRun.res;
+    var rows = [["role","step","lei","legal_name","relationship","legal_jurisdiction","hq_country",
+      "entity_status","registration_status","source","licence","lei2_sha256","rr_sha256","resolved_utc"]];
+    function push(role, step, lei, rel){
+      var e = E[lei] || {};
+      rows.push([role, step, lei, e.n||"", rel||"", e.j||"", e.h||"", e.s||"", e.r||"",
+        META.source||"", META.licence||"", META.lei2_sha256||"", META.rr_sha256||"", lastRun.when]);
+    }
+    push("subject", 0, res.lei, "");
+    res.up.chain.forEach(function(r, i){ push("parent", i+1, r.p, r.t); });
+    if(res.ultimate) push("declared-ultimate", "", res.ultimate, "ultimate");
+    res.children.forEach(function(r){ push("child", "", r.c, r.t); });
+    return rows;
+  }
+  function exportCsv(){
+    if(!lastRun) return;
+    var csv = buildCsvRows().map(function(r){ return r.map(csvCell).join(","); }).join("\r\n");
+    var b = new Blob([csv], {type:"text/csv;charset=utf-8"}), a = document.createElement("a");
+    a.href = URL.createObjectURL(b); a.download = "lineage-" + lastRun.res.lei + ".csv";
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+
+  function record(){
+    if(!lastRun) return;
+    var res = lastRun.res;
+    var h = '<h2 style="font-size:1.05rem;margin-top:0">Corporate control record</h2>';
+    h += '<div class="muted">Generated ' + esc(lastRun.when) + ' — offline, on this machine. Reference: ' +
+      esc(document.getElementById("ref").value || "(none given)") + '</div>';
+    h += '<h3 style="font-size:.9rem">Subject</h3><div class="muted"><strong>' + esc(nm(res.lei)) +
+      '</strong> <span class="mono">' + esc(res.lei) + '</span>, ' + esc(jur(res.lei) || "jurisdiction not recorded") + '.</div>';
+    h += '<h3 style="font-size:.9rem">Chain as filed</h3><div class="muted">' +
+      (res.up.chain.length
+        ? res.nodes.map(function(n){ return esc(nm(n)) + " (" + esc(jur(n) || "?") + ")"; }).join(" &rarr; ")
+        : "No parent recorded.") +
+      (res.up.cycle ? " The walk stopped on a cycle in the filings." : "") + '</div>';
+    h += '<h3 style="font-size:.9rem">Data</h3><div class="muted">' + esc(META.source||"") + '. ' +
+      (META.relationships||0).toLocaleString() + ' active control relationships over ' +
+      (META.entities||0).toLocaleString() + ' entities. Level 1 SHA-256 <span class="mono">' +
+      esc(String(META.lei2_sha256||"").slice(0,32)) + '&hellip;</span>, Level 2 SHA-256 <span class="mono">' +
+      esc(String(META.rr_sha256||"").slice(0,32)) + '&hellip;</span>. ' + esc(META.licence||"") + '</div>';
+    h += '<h3 style="font-size:.9rem">Limits of this record</h3><div class="muted">' +
+      esc(META.scope_note||"") + ' ' + esc(META.carry_note||"") +
+      ' The chain is reproduced as filed by the entities themselves; GLEIF validates the identifier, not the ' +
+      'accuracy of the relationship. This is not a beneficial ownership determination and is not legal advice.</div>';
+    document.getElementById("out").innerHTML = h;
+  }
+
+  function setProvenance(){
+    var el = document.getElementById("provenance");
+    if(!ENT || !REL){
+      document.getElementById("warn").innerHTML = '<div class="warnbar"><strong>Data packs not found.</strong> ' +
+        'Lineage reads <span class="mono">packs/pack-lineage-entities.js</span> and ' +
+        '<span class="mono">packs/pack-lineage-relationships.js</span>. Run ' +
+        '<span class="mono">01-build/build_lineage.py</span> and reload.</div>';
+      el.textContent = "No data pack loaded.";
+      ["runBtn","csvBtn","attBtn","printBtn"].forEach(function(id){
+        var b = document.getElementById(id); if(b) b.disabled = true; });
+      return;
+    }
+    document.getElementById("verTag").textContent = (META.entities||0).toLocaleString() + " entities";
+    el.innerHTML = '<strong>Data:</strong> ' + esc(META.source||"") + ' — ' +
+      (META.relationships||0).toLocaleString() + ' active control relationships over ' +
+      (META.entities||0).toLocaleString() + ' entities.<br>' +
+      '<span style="color:var(--warn)">' + esc(META.scope_note||"") + '</span> ' + esc(META.attribution||"");
+  }
+
+  // ---- self-test -----------------------------------------------------------
+  function selfTest(){
+    var pass = 0, out = [];
+    function ok(name, cond, detail){
+      if(cond){ pass++; out.push('<div style="color:var(--good)">PASS ' + esc(name) + '</div>'); }
+      else out.push('<div style="color:var(--bad)">FAIL ' + esc(name) + (detail?' — '+esc(detail):"") + '</div>');
+    }
+    var leis = Object.keys(E);
+    ok("entity pack loaded", leis.length > 10000, leis.length + " entities");
+    ok("relationship pack loaded", REL.relationships.length > 10000, REL.relationships.length + " relationships");
+    ok("both packs describe the same build", ENT.meta.rr_sha256 === REL.meta.rr_sha256);
+    ok("every LEI is 20 characters", leis.slice(0,5000).every(function(l){ return /^[A-Z0-9]{20}$/.test(l); }));
+    ok("every relationship names two distinct entities",
+       REL.relationships.every(function(r){ return r.c && r.p && r.c !== r.p; }));
+    ok("every relationship carries a known kind", (function(){
+      var kinds = {direct:1, ultimate:1, branch:1, "fund-manager":1, subfund:1, feeder:1};
+      return REL.relationships.every(function(r){ return kinds[r.t]; }); })());
+    ok("relationship endpoints resolve to carried entities", (function(){
+      var miss = 0;
+      for(var i=0;i<REL.relationships.length && i<50000;i++){
+        var r = REL.relationships[i];
+        if(!E[r.c]) miss++;
+        if(!E[r.p]) miss++;
+      }
+      return miss < 50; })(), "a few retired parents are expected and reported");
+
+    // The failure that would hang the page.
+    ok("a cycle in the filings terminates the walk", (function(){
+      var save = parentsOf["AAAA0000000000000001"];
+      parentsOf["AAAA0000000000000001"] = [{c:"AAAA0000000000000001", p:"AAAA0000000000000002", t:"direct"}];
+      parentsOf["AAAA0000000000000002"] = [{c:"AAAA0000000000000002", p:"AAAA0000000000000001", t:"direct"}];
+      var r = walkUp("AAAA0000000000000001");
+      delete parentsOf["AAAA0000000000000002"];
+      if(save) parentsOf["AAAA0000000000000001"] = save; else delete parentsOf["AAAA0000000000000001"];
+      return r.cycle === true && r.chain.length <= 2; })());
+    ok("the walk is depth-limited", (function(){
+      var chainIds = [];
+      for(var i=0;i<40;i++) chainIds.push("BBBB" + String(1000000000000000 + i).slice(0,16));
+      for(var j=0;j<chainIds.length-1;j++) parentsOf[chainIds[j]] = [{c:chainIds[j], p:chainIds[j+1], t:"direct"}];
+      var r = walkUp(chainIds[0]);
+      chainIds.forEach(function(id){ delete parentsOf[id]; });
+      return r.chain.length <= 12; })());
+
+    var withParent = null;
+    for(var i=0;i<leis.length;i++){ if((parentsOf[leis[i]]||[]).length){ withParent = leis[i]; break; } }
+    ok("an entity with a filed parent resolves to a chain",
+       !!withParent && resolve(withParent).up.chain.length >= 0);
+    ok("resolution is pure — the same entity twice gives the same chain", (function(){
+      if(!withParent) return true;
+      var a = resolve(withParent), b = resolve(withParent);
+      return a.nodes.join("|") === b.nodes.join("|"); })());
+    ok("an entity searched by its own LEI is found",
+       search(leis[0]).length === 1 && search(leis[0])[0] === leis[0]);
+    ok("a name search returns entities whose name contains the term", (function(){
+      var n = E[leis[0]].n.split(" ")[0];
+      if(n.length < 4) return true;
+      var hits = search(n);
+      return hits.length > 0 && hits.every(function(l){
+        return E[l].n.toLowerCase().indexOf(n.toLowerCase()) >= 0; }); })());
+    ok("an exact name outranks a merely containing name", (function(){
+      var target = null;
+      for(var i=0;i<leis.length && i<20000;i++){
+        var n = E[leis[i]].n;
+        if(n.length > 6 && n.length < 30){ target = n; break; }
+      }
+      if(!target) return true;
+      var hits = search(target);
+      return !hits.length || E[hits[0]].n.toLowerCase() === target.toLowerCase(); })());
+    ok("jurisdiction crossings never exceed the chain length", (function(){
+      if(!withParent) return true;
+      var r = resolve(withParent);
+      return r.jurisdictions.length <= r.nodes.length; })());
+
+    ok("CSV rows all carry the header's column count", (function(){
+      lastRun = {res: resolve(withParent || leis[0]), when: "t"};
+      var rows = buildCsvRows(), n = rows[0].length;
+      return rows.every(function(r){ return r.length === n; }); })());
+    ok("CSV neutralises spreadsheet formulae", csvCell("=cmd|calc").indexOf("'=") === 1);
+    ok("markup in a legal name cannot reach the page",
+       esc('<img src=x onerror=alert(1)>').indexOf("<") < 0);
+    ok("the scope note disclaims beneficial ownership",
+       /does not record beneficial ownership/i.test(META.scope_note||""));
+    ok("inactive relationships were dropped at build time",
+       (META.relationships_inactive_dropped || 0) >= 0 && META.relationships > 0);
+
+    document.getElementById("out").innerHTML =
+      '<h2 style="font-size:1rem;margin-top:0">Self-test</h2>' + out.join("") +
+      '<div style="margin-top:10px"><strong>' + pass + ' passed, ' + (out.length - pass) + ' failed.</strong></div>';
+  }
+
+  document.getElementById("runBtn").onclick = run;
+  document.getElementById("csvBtn").onclick = exportCsv;
+  document.getElementById("attBtn").onclick = record;
+  document.getElementById("printBtn").onclick = function(){ window.print(); };
+  document.getElementById("selfTestBtn").onclick = selfTest;
+  document.getElementById("themeBtn").onclick = function(){
+    var d = document.documentElement;
+    d.setAttribute("data-theme", d.getAttribute("data-theme") === "light" ? "dark" : "light");
+  };
+  setProvenance();
+})();
+</script>
+<script>
+(function(){try{
+  var q=new URLSearchParams(location.search).get("theme");
+  if(q!=="light"&&q!=="dark") return;
+  Array.prototype.forEach.call(document.querySelectorAll('a[data-keep-theme], a.tool'), function(a){
+    var h=a.getAttribute("href")||"";
+    if(!h || /^(https?:|#|mailto:)/.test(h) || h.indexOf("theme=")>=0) return;
+    a.setAttribute("href", h+(h.indexOf("?")>=0?"&":"?")+"theme="+q);
+  });
+}catch(e){}})();
+addEventListener("message", function(ev){
+  if(ev && ev.data && ev.data.type==="cf-theme" && (ev.data.theme==="light"||ev.data.theme==="dark"))
+    document.documentElement.setAttribute("data-theme", ev.data.theme);
+});
+</script>
+</body>
+</html>

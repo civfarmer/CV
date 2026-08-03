@@ -36,6 +36,13 @@
     margin:2px 4px 2px 0;color:var(--muted)}
   footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);font-size:.8rem;color:var(--muted)}
 </style>
+<script>
+/* The theme has to be applied before anything heavy loads. The data packs below
+   are blocking scripts — 55 MB in Sentinel's case — and a theme read placed after
+   them leaves a light-mode visitor staring at a dark page for the whole download. */
+(function(){try{var q=new URLSearchParams(location.search).get("theme");
+if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q);}catch(e){}})();
+</script>
 </head>
 <body>
 <header>
@@ -44,18 +51,22 @@
   <span class="tag">full corpus</span>
   <span class="tag">no network calls</span>
   <span class="spacer"></span>
-  <a class="btn" href="../../case-studies/sanctions-suite.html" target="_top">Case study</a>
-  <a class="btn" href="../../index.html" target="_top">Portfolio</a>
+  <a class="btn" href="../../case-studies/sanctions-suite.html" target="_blank" rel="noopener">Case study</a>
+  <a class="btn" href="../../index.html#projects" target="_top">Portfolio</a>
 </header>
 <main>
   <p class="lead">Four screening tools built on a single dated OpenSanctions snapshot. Each one opens as a
   self-contained page, runs entirely in your browser, and answers a real question with real data — no server,
-  no API call, nothing typed here ever leaves the machine.</p>
+  no API call, nothing typed here ever leaves the machine. That is the point rather than a constraint:
+  screening work is often done where the network is unavailable, untrusted, or where the query itself is the
+  sensitive part, and a tool that has to phone an API is no tool at all in those conditions.</p>
 
   <div class="note"><strong>These are the working tools, not demonstrations.</strong> They carry the complete
-  corpus — all <strong>308,597</strong> sanctions and crime entities, all 12,113 relationship records and all
-  2,347 designated vessels and aircraft from the 2 August 2026 snapshot. Screening one name loads about
-  55&nbsp;MB once, then everything runs from memory with the network disconnected. The only component held back
+  corpus — all <strong>308,597</strong> sanctions and crime entities (73,026 of them sanctions-listed, the
+  rest criminal, warrant and debarment records), all 12,113 relationship records and all
+  2,347 vessels and aircraft from the 2 August 2026 snapshot. Sentinel Screen pulls 55&nbsp;MB for its core
+  pack, the other three carry their own smaller ones — 87&nbsp;MB for the suite. Once a tool and its pack have
+  loaded, the machine can go off the network and that tool keeps answering. The only component held back
   is the 771,755-record PEP overlay, which is a 141&nbsp;MB pack that cannot be published here; it runs in the
   local build and every tool says so rather than hiding it.</div>
 
@@ -80,7 +91,7 @@
     <a class="tool" href="Vessel-Screener.html">
       <div class="k">Maritime &amp; aviation</div>
       <h2>Vessel &amp; Trade Screener</h2>
-      <p>Screen an IMO, MMSI, call sign or a pasted manifest against 2,347 designated vessels and aircraft,
+      <p>Screen an IMO, MMSI, call sign or a pasted manifest against 2,347 vessels and aircraft,
       with ownership chains and sanctioned owners flagged.</p>
       <div class="pills"><span class="pill">IMO / MMSI</span><span class="pill">manifest batch</span><span class="pill">ownership</span></div>
       <div class="go">Open →</div>
@@ -113,6 +124,20 @@
       document.documentElement.setAttribute("data-theme", ev.data.theme);
   });
 })();
+</script>
+<script>
+/* Carry the viewer's theme across every internal hop, so a light-mode visitor
+   who opens a tool from the suite index does not land on a dark page. */
+(function(){try{
+  var q=new URLSearchParams(location.search).get("theme");
+  if(q!=="light"&&q!=="dark") return;
+  var sel='a.tool, a[data-keep-theme], a[href$=".html"]:not([target="_blank"])';
+  Array.prototype.forEach.call(document.querySelectorAll(sel), function(a){
+    var h=a.getAttribute("href")||"";
+    if(!h || /^(https?:|#|mailto:)/.test(h) || h.indexOf("theme=")>=0) return;
+    a.setAttribute("href", h+(h.indexOf("?")>=0?"&":"?")+"theme="+q);
+  });
+}catch(e){}})();
 </script>
 </body>
 </html>
