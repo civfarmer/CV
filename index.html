@@ -150,6 +150,13 @@
   html[data-lens="legal"] .pcard[data-project="sanctions"]{order:0}
   html[data-lens="hybrid"] .pcard[data-project="sanctions"]{order:0}
   html[data-lens="governance"] .pcard[data-project="sanctions"]{order:0}
+  html[data-lens="research"] .pcard[data-project="sanctions"]{order:3}
+  html[data-lens="tech"] .pcard[data-project="sanctions"]{order:4}
+  html[data-lens="legal"] .pcard[data-project="groundtruth"]{order:0}
+  html[data-lens="governance"] .pcard[data-project="groundtruth"]{order:0}
+  html[data-lens="research"] .pcard[data-project="groundtruth"]{order:0}
+  html[data-lens="hybrid"] .pcard[data-project="groundtruth"]{order:1}
+  html[data-lens="tech"] .pcard[data-project="groundtruth"]{order:2}
   html[data-lens="legal"] .pcard[data-project="fris"],html[data-lens="research"] .pcard[data-project="fris"]{order:1}
   html[data-lens="legal"] .pcard[data-project="meridian"],html[data-lens="research"] .pcard[data-project="meridian"]{order:2}
   html[data-lens="governance"] .pcard[data-project="meridian"]{order:1}
@@ -161,13 +168,13 @@
   html[data-lens="hybrid"] .pcard[data-project="frontier"]{order:2}
   html[data-lens="legal"] .pcard[data-project="frontier"]{order:3}
   html[data-lens="governance"] .pcard[data-project="frontier"]{order:3}
-  html[data-lens="research"] .pcard[data-project="frontier"]{order:3}
-  html[data-lens="tech"] .pcard[data-project="frontier"]{order:4}
+  html[data-lens="research"] .pcard[data-project="frontier"]{order:4}
+  html[data-lens="tech"] .pcard[data-project="frontier"]{order:5}
   html[data-lens="hybrid"] .pcard[data-project="sentinel"]{order:3}
   html[data-lens="legal"] .pcard[data-project="sentinel"]{order:4}
   html[data-lens="governance"] .pcard[data-project="sentinel"]{order:4}
-  html[data-lens="research"] .pcard[data-project="sentinel"]{order:4}
-  html[data-lens="tech"] .pcard[data-project="sentinel"]{order:5}
+  html[data-lens="research"] .pcard[data-project="sentinel"]{order:5}
+  html[data-lens="tech"] .pcard[data-project="sentinel"]{order:6}
   .pcard{position:relative;display:flex;flex-direction:column;background:linear-gradient(180deg,var(--surface),var(--surface2));
     border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:.2s;text-align:left}
   .pcard:hover{transform:translateY(-3px);border-color:var(--line2);box-shadow:var(--shadow)}
@@ -400,7 +407,7 @@
           <button data-lens="research">Research</button>
         </div>
         <div class="htag" id="heroTag">Target roles: strategic operator across legal, risk &amp; technology transformation — I own the outcome end to end and build the systems that deliver it.</div>
-        <p class="lead" id="heroLead">A <b>strategic operator</b> across <b>legal, risk and technology transformation</b>: I take the exposure end to end — own the legal and regulatory position, redesign the operating model around it, and write the software that makes the control real. <b>Seven working platforms</b> run <b>live on this page</b> — financial-crime forensics, AI-governance and export-control screening, cross-border data transfer, forecasting and delivery — alongside board-level ownership of an eight-site operating model through restructuring, funders and regulators. LL.M. in international law (dissertation 100%), ~6 years owning legal, compliance &amp; operations, Python/SQL, and a Swiss B permit — work-authorised, no sponsorship needed.</p>
+        <p class="lead" id="heroLead">A <b>strategic operator</b> across <b>legal, risk and technology transformation</b>: I take the exposure end to end — own the legal and regulatory position, redesign the operating model around it, and write the software that makes the control real. <b>Eight working platforms</b> run <b>live on this page</b> — financial-crime forensics, AI-governance and export-control screening, cross-border data transfer, forecasting and delivery — alongside board-level ownership of an eight-site operating model through restructuring, funders and regulators. LL.M. in international law (dissertation 100%), ~6 years owning legal, compliance &amp; operations, Python/SQL, and a Swiss B permit — work-authorised, no sponsorship needed.</p>
         <p class="lead" style="margin-top:10px">Sharpest where the risk is regulatory — <b style="color:var(--ink)">sanctions and financial-crime exposure</b>, <b style="color:var(--ink)">cross-border data transfer</b> and <b style="color:var(--ink)">audit-ready control frameworks</b> — built as an enabler, not a blocker. One CV covers the whole picture; the case studies and publications carry the specialist depth behind it.</p>
         <p class="focus" id="heroFocus"></p>
         <div class="cta">
@@ -408,7 +415,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg> Download CV</button>
           <button class="btn primary" onclick="show('projects')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-            See the seven platforms</button>
+            See the eight platforms</button>
           <button class="btn" onclick="show('warroom')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg> Crisis case studies</button>
           <a class="btn" href="https://www.linkedin.com/in/civfarmer" target="_blank" rel="noopener">
@@ -421,7 +428,7 @@
           <div class="stat" data-metric="audit" tabindex="0" role="button" aria-haspopup="dialog" aria-label="100% audit pass — show details" title="What this means"><div class="n"><b>100%</b> audit</div><div class="l">Inspection pass — board, funders &amp; regulators</div></div>
           <div class="stat" data-metric="org" tabindex="0" role="button" aria-haspopup="dialog" aria-label="Eight-site organisation — show details" title="What this means"><div class="n"><b>8</b>-site org</div><div class="l">Legal, compliance &amp; operations owned end-to-end</div></div>
           <div class="stat" data-metric="funding" tabindex="0" role="button" aria-haspopup="dialog" aria-label="£200k secured; £500k+ in bids authored — show details" title="What this means"><div class="n"><b>£200k</b> secured</div><div class="l">+ £500k+ competitive bids authored — ESF, Lottery &amp; government</div></div>
-          <div class="stat" data-metric="platforms" tabindex="0" role="button" aria-haspopup="dialog" aria-label="Seven platforms — show details" title="What this means"><div class="n"><b>7</b> platforms</div><div class="l">Working legal-tech &amp; analytics systems built</div></div>
+          <div class="stat" data-metric="platforms" tabindex="0" role="button" aria-haspopup="dialog" aria-label="Eight platforms — show details" title="What this means"><div class="n"><b>8</b> platforms</div><div class="l">Working legal-tech &amp; analytics systems built</div></div>
         </div>
         <div class="impact">
           <div class="il" data-metric="cost" tabindex="0" role="button" aria-haspopup="dialog" aria-label="Minus 30% operating cost — show details" title="What this means"><b>&minus;30%</b> operating cost — paper-to-cloud in under 3 months</div>
@@ -436,7 +443,7 @@
     <section class="view" id="v-projects">
       <div class="wrap pad">
         <div class="eyebrow">Portfolio — live regulatory tooling</div>
-        <h2 class="h-sec">Seven platforms I designed and built</h2>
+        <h2 class="h-sec">Eight platforms I designed and built</h2>
         <p class="lead" style="margin-top:12px">For a RegTech or legal-engineering team, this is the part of the portfolio that carries the weight: working tools where I own both the regulatory reasoning and the code that runs it — <b>FRIS</b>, <b>Frontier</b>, <b>Sentinel</b> and the <b>Sanctions Suite</b> are the compliance-tech proof; <b>Meridian</b>, <b>Vantage</b> and <b>Helm</b> extend the range. Each opens <b>right here in the page</b> — click a card to launch it, read a short <b>“How it’s built”</b> note, or pop it out to a new tab.</p>
         <p class="lead" style="margin-top:10px">Architected and built by me — AI-assisted, never AI-designed; the analysis engines, data models and interfaces are mine. <b>All seven run client-side</b> — everything (including a locally-vendored React where it is used) computes entirely in your browser, so <b>no subject data ever leaves the page</b>. All data is synthetic or a dated, frozen local dataset.</p>
         <div class="pgrid" id="pgrid">
@@ -463,18 +470,37 @@
           <article class="pcard" data-project="sanctions" data-href="projects/sanctions-suite/index.html" data-title="Sanctions Suite — four offline screening tools" data-icon="assets/img/sanctions-crest.svg">
             <div class="pmedia">
               <span class="badge">Sanctions screening &amp; exposure</span><span class="live">&#9654; Live demo</span>
-              <img class="shot" src="case-studies/img/sanctions-suite.png" alt="Sentinel Screen returning designated Rosneft entities with scores, list labels and sanctions programmes" loading="lazy">
+              <img class="shot" src="case-studies/img/sanctions-suite.png" alt="Sentinel Screen returning eight sanctioned Rosneft entities with scores, list labels and sanctions programmes" loading="lazy">
               <video class="demo" muted loop playsinline preload="metadata" data-src="projects/sanctions-suite/demo.mp4"></video>              <img class="pcrest" src="assets/img/sanctions-crest.svg" alt="">
             </div>
             <div class="pbody">
               <h3>Sanctions Suite <span class="sub">Screening, exposure, vessels, portfolio</span></h3>
-              <p>Four tools on one dated, checksummed OpenSanctions snapshot — <b>308,597 designated entities</b>, 12,113 ownership and association records, 2,347 vessels and aircraft. Screen a name or a manifest, trace a counterparty's route to a designated party, and produce a <b>dated attestation</b> with source checksums. No API, no subscription, no data leaving the page.</p>
+              <p>Four tools on one dated, checksummed OpenSanctions snapshot — <b>308,597 sanctions and crime entities</b> (73,026 of them sanctions-listed), 12,113 ownership and association records, 2,347 vessels and aircraft. Screen a name or a manifest, trace a counterparty's route to a designated party, and produce a <b>dated attestation</b> with source checksums. No API, no subscription, no data leaving the page &mdash; so it still works where the network is unavailable, untrusted, or where the query itself is the sensitive part.</p>
               <div class="tags"><span class="tag">Python pipeline</span><span class="tag">Vanilla JS</span><span class="tag">Deterministic matching</span><span class="tag">Offline</span></div>
               <div class="pactions">
                 <button class="plink" data-open>Open <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button>
                 <a class="plink ghost" data-newtab href="projects/sanctions-suite/index.html" target="_blank" rel="noopener">New tab</a>
                 <a class="plink ghost" href="case-studies/sanctions-suite.html" target="_blank" rel="noopener">Case study</a>
-                <span class="note">Runs offline · demo subset of a real snapshot</span>
+                <span class="note">Runs air-gapped · OpenSanctions, CC BY-NC 4.0</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="pcard" data-project="groundtruth" data-href="projects/ground-truth/index.html" data-title="Ground Truth &mdash; three offline verification instruments" data-icon="assets/img/groundtruth-crest.svg">
+            <div class="pmedia">
+              <span class="badge">Verification &amp; economic security</span><span class="live">&#9654; Live demo</span>
+              <img class="shot" src="case-studies/img/ground-truth.png" alt="Chokepoint ranking the United States&rsquo; most concentrated production inputs, with supplier shares, world grip and exposure scores" loading="lazy">
+              <video class="demo" muted loop playsinline preload="metadata" data-src="projects/ground-truth/demo.mp4"></video>              <img class="pcrest" src="assets/img/groundtruth-crest.svg" alt="">
+            </div>
+            <div class="pbody">
+              <h3>Ground Truth <span class="sub">Chokepoint, Veritas, Lineage</span></h3>
+              <p>Three instruments that check a claim against the authoritative record with the network disconnected. <b>Chokepoint</b> scores economic coercion exposure across <b>323,929</b> importer-product cells of 2024 trade. <b>Veritas</b> tests whether a cited authority exists, resolves to the case it is attributed to, and has not been retracted. <b>Lineage</b> walks <b>479,762</b> filed corporate control relationships. Each states what it cannot see as plainly as what it can.</p>
+              <div class="tags"><span class="tag">Python pipeline</span><span class="tag">Vanilla JS</span><span class="tag">BACI &middot; GLEIF &middot; Find Case Law</span><span class="tag">Air-gapped</span></div>
+              <div class="pactions">
+                <button class="plink" data-open>Open <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button>
+                <a class="plink ghost" data-newtab href="projects/ground-truth/index.html" target="_blank" rel="noopener">New tab</a>
+                <a class="plink ghost" href="case-studies/ground-truth.html" target="_blank" rel="noopener">Case study</a>
+                <span class="note">Runs air-gapped &middot; dated open-data snapshots</span>
               </div>
             </div>
           </article>
@@ -936,8 +962,8 @@
   window.closeApp=function(){ if(avtimer) clearTimeout(avtimer); appv.classList.remove('on'); avframe.src='about:blank'; document.body.style.overflow='';_bgInert(false);_restoreFocus(); };
   appv.addEventListener('click', function(e){ if(e.target===appv) closeApp(); });
 
-  var NOTE = { sanctions:'Runs offline · demo subset of the 2026-08-02 OpenSanctions snapshot', fris:'Runs offline · synthetic data', meridian:'Runs offline · frozen real dataset (2026-07-19)', vantage:'Runs offline · synthetic data', helm:'Runs offline · synthetic data', frontier:'Runs offline · decision-support, not legal advice', sentinel:'Runs offline · decision-support, not legal advice', morris:'Client build · design & estimator preview with demo data' };
-  var TECH = { sanctions:{title:"Sanctions Suite — how it's built",icon:"assets/img/sanctions-crest.svg",html:"<p>A Python builder streams a dated OpenSanctions snapshot (292,861 entities, 93 sources) into deterministic data packs; four single-file browser tools read those packs and never touch the network again. The build stamp comes from the data rather than the clock, so the same snapshot reproduces byte-identical packs, and the builder aborts rather than emit a short pack if a row count disagrees with the snapshot's own index.</p><p>Matching is deterministic token-set overlap after Unicode normalisation, with one rule shared by the builder and all four tools so the suite cannot give two answers for the same pair of names. A lone token may only carry a match if it is rare in the corpus — that is what separates a designated <i>Rosneft</i> subsidiary from a coincidental surname.</p><p><b>Stack:</b> Python 3 (standard library only) · vanilla JavaScript · no framework, no CDN, no runtime dependency. 90 self-tests run inside the pages themselves.</p>"},
+  var NOTE = { groundtruth:'Runs air-gapped \u00b7 BACI, GLEIF, Find Case Law, Retraction Watch', sanctions:'Runs air-gapped · OpenSanctions snapshot, CC BY-NC 4.0', fris:'Runs offline · synthetic data', meridian:'Runs offline · frozen real dataset (2026-07-19)', vantage:'Runs offline · synthetic data', helm:'Runs offline · synthetic data', frontier:'Runs offline · decision-support, not legal advice', sentinel:'Runs offline · decision-support, not legal advice', morris:'Client build · design & estimator preview with demo data' };
+  var TECH = { groundtruth:{title:"Ground Truth \u2014 how it's built",icon:"assets/img/groundtruth-crest.svg",html:"<p>Three instruments over one idea: check the claim against the register, with the network off. A Python pipeline reduces four open corpora into deterministic packs \u2014 BACI 2024 bilateral trade at HS 6-digit (11,250,411 flows), the GLEIF Level 1 and Level 2 golden copy, the Find Case Law citation index, and the Retraction Watch corpus \u2014 and three single-file browser tools read those packs and never touch the network again.</p><p><b>Chokepoint</b> scores exposure as concentration multiplied by difficulty of substitution, where difficulty takes the worst of global supply grip, insufficient residual capacity, and concentration of the alternatives. It is deliberately not a weighted average: a weighted average lets a comfortable reading on one measure buy off a dangerous one. <b>Veritas</b> canonicalises neutral citations so the same judgment written five ways gives one key, and distinguishes \u2018absent from the corpus\u2019 from \u2018does not exist\u2019 \u2014 a verifier that calls <i>Donoghue v Stevenson</i> false teaches its user to ignore it. <b>Lineage</b> walks filed consolidation relationships, guarding against the cycles that real registry data contains.</p><p><b>Stack:</b> Python 3 with numpy and pandas at build time \u00b7 vanilla JavaScript at run time \u00b7 no framework, no CDN, no runtime dependency. 71 self-tests run inside the pages themselves.</p>"}, sanctions:{title:"Sanctions Suite — how it's built",icon:"assets/img/sanctions-crest.svg",html:"<p>A Python builder streams two dated OpenSanctions collections — sanctions (292,861 entities) and crime (522,965) — into deterministic data packs holding 308,597 distinct targets drawn from 147 source datasets; four single-file browser tools read those packs and never touch the network again. The build stamp comes from the data rather than the clock, so the same snapshot reproduces byte-identical packs, and the builder aborts rather than emit a short pack if a row count disagrees with the snapshot's own index.</p><p>Matching is deterministic token-set overlap after Unicode normalisation, with one rule shared by the builder and all four tools so the suite cannot give two answers for the same pair of names. A lone token may only carry a match if it is rare in the corpus — that is what separates a designated <i>Rosneft</i> subsidiary from a coincidental surname.</p><p><b>Stack:</b> Python 3 (standard library only) · vanilla JavaScript · no framework, no CDN, no runtime dependency. 104 self-tests run inside the pages themselves.</p>"},
     fris:{ title:"FRIS — how it’s built", icon:'assets/img/fris-crest.png', html:
       '<span class="mine">Built by me · vanilla JS · runs offline</span>'+
       '<p>No framework and no network — FRIS runs entirely in the browser.</p>'+
@@ -1038,8 +1064,8 @@
      lenses are the specialist lanes underneath it. */
   var LENS={
     operator:{tag:'Target roles: strategic operator across legal, risk &amp; technology transformation — I own the outcome end to end and build the systems that deliver it.',
-      lead:'A <b>strategic operator</b> across <b>legal, risk and technology transformation</b>: I take the exposure end to end — own the legal and regulatory position, redesign the operating model around it, and write the software that makes the control real. <b>Seven working platforms</b> run <b>live on this page</b> — financial-crime forensics, AI-governance and export-control screening, cross-border data transfer, forecasting and delivery — alongside board-level ownership of an eight-site operating model through restructuring, funders and regulators. LL.M. in international law (dissertation 100%), ~6 years owning legal, compliance &amp; operations, Python/SQL, and a Swiss B permit — work-authorised, no sponsorship needed.',
-      focus:'Start with <a data-go="projects">Projects</a> — the seven platforms <i>are</i> the credential — then <a data-go="experience">Experience</a> and the <a data-go="warroom">War Room</a>.'},
+      lead:'A <b>strategic operator</b> across <b>legal, risk and technology transformation</b>: I take the exposure end to end — own the legal and regulatory position, redesign the operating model around it, and write the software that makes the control real. <b>Eight working platforms</b> run <b>live on this page</b> — financial-crime forensics, AI-governance and export-control screening, cross-border data transfer, forecasting and delivery — alongside board-level ownership of an eight-site operating model through restructuring, funders and regulators. LL.M. in international law (dissertation 100%), ~6 years owning legal, compliance &amp; operations, Python/SQL, and a Swiss B permit — work-authorised, no sponsorship needed.',
+      focus:'Start with <a data-go="projects">Projects</a> — the eight platforms <i>are</i> the credential — then <a data-go="experience">Experience</a> and the <a data-go="warroom">War Room</a>.'},
     hybrid:{tag:'Target roles: RegTech / legal engineering &amp; regulatory product — a legal-compliance operator who builds the tooling, not just specs it.',
       lead:'A legal-compliance operator who <b>builds the regulatory tooling</b> — I own the compliance outcome and write the software that operationalises it. <b>FRIS</b> (a 23-engine financial-crime forensic suite), <b>Sentinel</b> (EU AI Act + dual-use export-control screening) and <b>Frontier</b> (cross-border data-transfer &amp; Schrems II TIA) all open and run <b>in this page</b> — demos, not slides. Behind them: an LL.M. in international law, ~6 years owning legal, compliance &amp; operations, working Python and SQL, and a Swiss B permit already in hand — no sponsorship to arrange.',
       focus:'Open <a data-go="projects">Projects</a> first — that is where the evidence sits — then <a data-go="expertise">Expertise</a> and <a data-go="experience">Experience</a>.'},
@@ -1104,7 +1130,7 @@
     funding:{title:'£200k secured · £500k+ in bids authored', kicker:'Red Spark Learning C.I.C. · ESF, Lottery &amp; competitive bids',
       body:'<p>I secured £200,000 in European Social Fund and National Lottery grant funding and authored more than £500,000 of competitive bids, taking the total value I have won or written past £700,000.</p><p>Because grant compliance, eligibility evidence and reporting were designed into the process from the outset rather than bolted on afterwards, funding-exception rates stayed below one per cent across the portfolio — which is what keeps a funder confident enough to renew.</p>',
       actions:[{label:'See the role — Experience', view:'experience'}]},
-    platforms:{title:'Seven working platforms', kicker:'Designed &amp; built by me',
+    platforms:{title:'Eight working platforms', kicker:'Designed &amp; built by me',
       body:'<p>These are seven working systems I designed and built myself — FRIS, the Sanctions Suite, Meridian, Vantage, Helm, Frontier and Sentinel: <b>FRIS</b>, a 23-engine forensic-intelligence suite for beneficial-ownership tracing and financial-crime screening; <b>Meridian</b>, a provenance-first regulatory and market-intelligence platform; <b>Vantage</b>, a dependency-free forecasting engine tested across five industries; <b>Helm</b>, a scheduler that turns a written brief into a costed, sequenced project plan; <b>Frontier</b>, a cross-border data-transfer assessor that resolves the lawful basis under EU GDPR, the Swiss FADP and UK GDPR, runs a Schrems II transfer-impact assessment and exports an audit-ready control record; and <b>Sentinel</b>, an AI-governance and export-control readiness assessor that classifies a deployment under the EU AI Act, screens it for dual-use export exposure (EU Reg. 2021/821, Wassenaar, with a US ITAR/EAR flag), and writes the same kind of exportable record.</p><p>Each one runs inside this portfolio, so the claim can be tested rather than taken on trust.</p><p>Alongside these, a commercial client build — website, cost estimator and client portal for a UK construction firm — is live in production.</p>',
       actions:[{label:'Explore the platforms — Projects', view:'projects'}]},
     cost:{title:'&minus;30% operating cost', kicker:'Red Spark Learning C.I.C. · paper-to-cloud',

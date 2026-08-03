@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ground Truth — three offline verification instruments</title>
+<meta name="robots" content="noindex">
+<script>
+(function(){try{var q=new URLSearchParams(location.search).get("theme");
+if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q);}catch(e){}})();
+</script>
+<style>
+  :root{--bg:#0b0f17;--surface:#131b2a;--surface2:#182133;--ink:#e9eef7;--ink2:#aab7cc;--muted:#7d8ba3;
+    --line:#233145;--accent:#43b3a6;--accent-ink:#84d6ca;--gold:#d4b24c;--bad:#e0574a;--warn:#e0a13a;--good:#43c59e;
+    --mono:ui-monospace,'Cascadia Code',Consolas,monospace;--sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  html[data-theme="light"]{--bg:#f4f1ec;--surface:#fff;--surface2:#faf7f2;--ink:#221e18;--ink2:#4c473e;
+    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6}
+  header{border-bottom:1px solid var(--line);padding:16px 22px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--surface)}
+  h1{font-size:1.1rem;margin:0}
+  .tag{font-size:.7rem;padding:2px 9px;border:1px solid var(--line);border-radius:99px;color:var(--muted)}
+  .spacer{flex:1}
+  a.btn{background:transparent;color:var(--ink2);border:1px solid var(--line);border-radius:8px;padding:7px 13px;font-size:.84rem;text-decoration:none}
+  main{padding:26px 22px 60px;max-width:1060px;margin:0 auto}
+  .lead{color:var(--ink2);max-width:74ch}
+  .note{background:var(--surface2);border:1px solid var(--line);border-left:3px solid var(--warn);
+    border-radius:10px;padding:12px 14px;margin:20px 0;font-size:.87rem;color:var(--ink2)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:22px}
+  .tool{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;
+    flex-direction:column;text-decoration:none;color:inherit;transition:border-color .15s,transform .15s}
+  .tool:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .tool h2{font-size:1rem;margin:0 0 4px}
+  .tool .k{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--accent-ink);margin-bottom:8px}
+  .tool p{margin:0 0 12px;font-size:.87rem;color:var(--ink2);flex:1}
+  .tool .go{font-size:.82rem;color:var(--accent-ink);font-weight:600}
+  .pills{margin-top:10px}
+  .pill{display:inline-block;font-size:.68rem;padding:1px 8px;border-radius:99px;border:1px solid var(--line);
+    margin:2px 4px 2px 0;color:var(--muted)}
+  footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);font-size:.8rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Ground Truth</h1>
+  <span class="tag">three offline instruments</span>
+  <span class="tag">no network calls</span>
+  <span class="spacer"></span>
+  <a class="btn" href="../../case-studies/ground-truth.html" target="_blank" rel="noopener">Case study</a>
+  <a class="btn" href="../../index.html#projects" target="_top">Portfolio</a>
+</header>
+<main>
+  <p class="lead">Three instruments that check a claim against the authoritative record, with the network
+  disconnected. Each opens as a self-contained page, carries its own dated corpus, and states what it
+  cannot see as plainly as what it can.</p>
+
+  <div class="note"><strong>Why offline is the point, not the constraint.</strong> These are the conditions
+  the work is actually done in: a network that is unavailable, a network that is not trusted, or a query
+  whose subject is itself the sensitive part &mdash; the counterparty you are checking, the authority you are
+  about to cite, the dependency you are about to disclose. An instrument that has to call an API leaks the
+  question even when it answers it correctly, and answers nothing at all when the line is down.</div>
+
+  <div class="grid">
+    <a class="tool" href="Chokepoint.html">
+      <div class="k">Economic security</div>
+      <h2>Chokepoint</h2>
+      <p>Where an economy&rsquo;s supply of a traded good is concentrated, and whether anyone else could
+      physically fill the gap. Exposure and its mirror &mdash; the leverage the same economy holds over
+      others &mdash; across 323,929 importer-product cells.</p>
+      <div class="pills"><span class="pill">BACI 2024</span><span class="pill">HS 6-digit</span><span class="pill">exposure &amp; leverage</span></div>
+      <div class="go">Open &rarr;</div>
+    </a>
+    <a class="tool" href="Veritas.html">
+      <div class="k">Authority</div>
+      <h2>Veritas</h2>
+      <p>Whether a cited authority exists, resolves to the case it is attributed to, and has not been
+      retracted. Checks neutral citations against Find Case Law and DOIs against the Retraction Watch
+      corpus, and refuses to call a citation false merely because it sits outside the corpus.</p>
+      <div class="pills"><span class="pill">Find Case Law</span><span class="pill">Retraction Watch</span><span class="pill">certificate output</span></div>
+      <div class="go">Open &rarr;</div>
+    </a>
+    <a class="tool" href="Lineage.html">
+      <div class="k">Corporate control</div>
+      <h2>Lineage</h2>
+      <p>Who consolidates whom, from the register regulators rely on. Walks 479,762 filed control
+      relationships across 350,169 entities, counts the jurisdictions a chain crosses, and reports where
+      the chain stops and why.</p>
+      <div class="pills"><span class="pill">GLEIF Level 1 &amp; 2</span><span class="pill">chain walk</span><span class="pill">jurisdiction crossings</span></div>
+      <div class="go">Open &rarr;</div>
+    </a>
+  </div>
+
+  <div class="note"><strong>What they refuse to do.</strong> Chokepoint will not read a dependency below
+  HS 6-digit resolution and says so rather than guessing. Veritas will not call an authority fabricated
+  because it predates its corpus &mdash; a verifier that cries wolf on <em>Donoghue v Stevenson</em> teaches
+  its user to ignore it. Lineage records accounting consolidation, which is not beneficial ownership, and
+  does not pretend to be. In each case the limit is stated in the tool, carried in the data pack, and
+  reproduced on every export.</div>
+
+  <footer>
+    Data: <strong>BACI</strong> (CEPII), Etalab Open Licence 2.0 &middot; <strong>Find Case Law</strong>
+    (The National Archives), Open Justice Licence, bulk extraction under a granted computational analysis
+    permission &middot; <strong>Retraction Watch</strong> via Crossref, CC0 &middot; <strong>GLEIF</strong>, CC0.
+    Every answer states the dated snapshot it came from and the checksum of the file it was built from.
+  </footer>
+</main>
+<script>
+(function(){try{
+  var q=new URLSearchParams(location.search).get("theme");
+  if(q!=="light"&&q!=="dark") return;
+  Array.prototype.forEach.call(document.querySelectorAll('a.tool'), function(a){
+    var h=a.getAttribute("href")||"";
+    if(!h || /^(https?:|#|mailto:)/.test(h) || h.indexOf("theme=")>=0) return;
+    a.setAttribute("href", h+(h.indexOf("?")>=0?"&":"?")+"theme="+q);
+  });
+}catch(e){}})();
+addEventListener("message", function(ev){
+  if(ev && ev.data && ev.data.type==="cf-theme" && (ev.data.theme==="light"||ev.data.theme==="dark"))
+    document.documentElement.setAttribute("data-theme", ev.data.theme);
+});
+</script>
+</body>
+</html>

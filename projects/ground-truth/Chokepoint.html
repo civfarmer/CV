@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chokepoint — offline economic coercion exposure</title>
+<script>
+/* The theme has to be applied before anything heavy loads. The data packs below
+   are blocking scripts, and a theme read placed after them leaves a light-mode
+   visitor staring at a dark page for the whole download. */
+(function(){try{var q=new URLSearchParams(location.search).get("theme");
+if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q);}catch(e){}})();
+</script>
+<style>
+  :root{--bg:#0b0f17;--surface:#131b2a;--surface2:#182133;--ink:#e9eef7;--ink2:#aab7cc;--muted:#7d8ba3;
+    --line:#233145;--accent:#43b3a6;--accent-ink:#84d6ca;--gold:#d4b24c;--bad:#e0574a;--warn:#e0a13a;
+    --good:#43c59e;--radius:12px;--mono:ui-monospace,'Cascadia Code',Consolas,monospace;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+  html[data-theme="light"]{--bg:#f4f1ec;--surface:#fff;--surface2:#faf7f2;--ink:#221e18;--ink2:#4c473e;
+    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f;--gold:#836819;
+    --good:#0f7a5a;--warn:#8a5a10;--bad:#a32a1e}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55}
+  header{border-bottom:1px solid var(--line);padding:14px 20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:var(--surface)}
+  h1{font-size:1.05rem;margin:0;letter-spacing:.02em}
+  .tag{font-size:.7rem;padding:2px 8px;border:1px solid var(--line);border-radius:99px;color:var(--muted)}
+  .spacer{flex:1}
+  button{background:var(--accent);color:#04211e;border:0;border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer;font-size:.86rem}
+  button.ghost{background:transparent;color:var(--ink2);border:1px solid var(--line)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  main{padding:20px;max-width:1320px;margin:0 auto}
+  .grid{display:grid;grid-template-columns:330px 1fr;gap:20px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:16px}
+  label{display:block;font-size:.72rem;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.06em}
+  input,select,textarea{width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--ink);
+    border-radius:8px;padding:8px 10px;font-family:inherit;font-size:.9rem}
+  .row{display:flex;gap:8px}.row>*{flex:1}
+  table{width:100%;border-collapse:collapse;font-size:.85rem}
+  th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;user-select:none}
+  th.sorted{color:var(--accent-ink)}
+  .num{text-align:right;font-family:var(--mono)}
+  .pill{display:inline-block;font-size:.66rem;padding:1px 7px;border-radius:99px;border:1px solid var(--line);margin:1px 3px 1px 0;white-space:nowrap;color:var(--muted)}
+  .p-INT{border-color:var(--accent);color:var(--accent-ink)}
+  .p-CAP{border-color:var(--gold);color:var(--gold)}
+  .p-FIN{border-color:var(--line);color:var(--muted)}
+  .e-hi{color:var(--bad);font-weight:700}.e-md{color:var(--warn);font-weight:700}.e-lo{color:var(--muted)}
+  .bar{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-top:3px;min-width:60px}
+  .bar i{display:block;height:100%;background:var(--bad)}
+  .muted{color:var(--muted);font-size:.8rem}
+  .mono{font-family:var(--mono);font-size:.78rem}
+  .banner{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:.78rem;color:var(--ink2);margin-bottom:16px}
+  .warnbar{background:rgba(224,87,74,.12);border:1px solid var(--bad);color:var(--bad);border-radius:8px;padding:10px 12px;font-size:.82rem;margin-bottom:16px}
+  .notebar{background:var(--surface2);border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:8px;padding:10px 12px;font-size:.8rem;color:var(--ink2);margin-bottom:14px}
+  .tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+  .tabs button{background:transparent;border:1px solid var(--line);color:var(--ink2);font-weight:500}
+  .tabs button[aria-selected="true"]{background:var(--accent);color:#04211e;border-color:var(--accent);font-weight:600}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+  .kpi{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .kpi .v{font-size:1.35rem;font-weight:700;line-height:1.1;font-family:var(--mono)}
+  .kpi .l{font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  details{margin-top:6px}summary{cursor:pointer;color:var(--accent-ink);font-size:.8rem}
+  @media print{header button,.noprint{display:none!important}body{background:#fff;color:#000}.card{border-color:#999;break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Chokepoint</h1>
+  <span class="tag" id="verTag">loading…</span>
+  <span class="tag">offline</span>
+  <span class="spacer"></span>
+  <a class="tag" href="index.html" data-keep-theme style="text-decoration:none">← Suite</a>
+  <button class="ghost noprint" id="themeBtn">Theme</button>
+  <button class="ghost noprint" id="selfTestBtn">Self-test</button>
+</header>
+<main>
+  <div id="warn"></div>
+  <div class="banner" id="provenance">Loading data pack…</div>
+  <div class="grid">
+    <div>
+      <div class="card">
+        <strong style="font-size:.9rem">Assessment</strong>
+        <label for="ctry">Economy</label>
+        <select id="ctry"></select>
+        <label for="use">End use</label>
+        <select id="use">
+          <option value="INTCAP" selected>Production inputs only (intermediate + capital)</option>
+          <option value="INT">Intermediate consumption only</option>
+          <option value="CAP">Capital formation only</option>
+          <option value="ALL">Everything, including final consumption</option>
+        </select>
+        <label for="minv">Minimum annual import value (USD m)</label>
+        <select id="minv">
+          <option value="1">1</option>
+          <option value="50">50</option>
+          <option value="100" selected>100</option>
+          <option value="500">500</option>
+          <option value="1000">1,000</option>
+        </select>
+        <label for="mine">Minimum exposure</label>
+        <select id="mine">
+          <option value="0">0.00 — show everything</option>
+          <option value="0.3" selected>0.30 — material</option>
+          <option value="0.5">0.50 — serious</option>
+          <option value="0.7">0.70 — severe</option>
+        </select>
+        <label for="src">Restrict to a named supplier (optional)</label>
+        <select id="src"></select>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button id="runBtn">Assess</button>
+          <button class="ghost" id="csvBtn" disabled>Export CSV</button>
+        </div>
+      </div>
+      <div class="card">
+        <strong style="font-size:.9rem">Product lookup</strong>
+        <div class="muted">Who is exposed in a single line of trade, and who supplies the world.</div>
+        <label for="pq">HS 6-digit code or description</label>
+        <input id="pq" placeholder="850511 or &quot;permanent magnets&quot;" autocomplete="off">
+        <div id="phits" class="muted" style="margin-top:6px"></div>
+      </div>
+      <div class="card noprint">
+        <strong style="font-size:.9rem">Assessment record</strong>
+        <div class="muted">A dated, checksum-stamped statement of exactly what was assessed, on what data, and what was found.</div>
+        <label for="ref">Reference (optional)</label>
+        <input id="ref" placeholder="Economic security review 2026/04">
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button id="attBtn" disabled>Build record</button>
+          <button class="ghost" id="printBtn" disabled>Print / save as PDF</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="tabs" role="tablist">
+        <button id="tabExp" role="tab" aria-selected="true">Exposure</button>
+        <button id="tabLev" role="tab" aria-selected="false">Leverage</button>
+        <button id="tabDyad" role="tab" aria-selected="false">Dyad</button>
+        <button id="tabMethod" role="tab" aria-selected="false">Method &amp; limits</button>
+      </div>
+      <div class="card" id="out">
+        <div class="muted">Choose an economy and press Assess. Everything runs locally: no network calls, nothing entered here leaves this machine.</div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="packs/pack-chokepoint-ref.js"></script>
+<script src="packs/pack-chokepoint-cells.js"></script>
+<script>
+"use strict";
+(function(){
+  var REF   = (window.PACK_CHOKEPOINT_REF && window.PACK_CHOKEPOINT_REF.countries) ? window.PACK_CHOKEPOINT_REF : null;
+  var CELLS = (window.PACK_CHOKEPOINT_CELLS && window.PACK_CHOKEPOINT_CELLS.cells) ? window.PACK_CHOKEPOINT_CELLS : null;
+  var C = CELLS ? CELLS.cells : [];
+  var META = CELLS ? CELLS.meta : {};
+  var lastRun = null, tab = "exp", sortKey = "e", sortDir = -1;
+
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function arr(v){ return Array.isArray(v) ? v : []; }
+  function cname(code){ var r = REF && REF.countries[String(code)]; return r ? r.n : ("code "+code); }
+  function calpha(code){ var r = REF && REF.countries[String(code)]; return (r && r.a) ? r.a : String(code); }
+  function pname(k){ return (REF && REF.products[String(k)]) || ("HS "+k); }
+  function usd(kusd){
+    var v = kusd * 1000;
+    if(v >= 1e9) return "$" + (v/1e9).toFixed(1) + "bn";
+    if(v >= 1e6) return "$" + (v/1e6).toFixed(0) + "m";
+    return "$" + Math.round(v/1e3) + "k";
+  }
+  function eClass(e){ return e >= 0.6 ? "e-hi" : e >= 0.35 ? "e-md" : "e-lo"; }
+
+  // ---- band language -------------------------------------------------------
+  // An exposure score is a ranking device, not a verdict. The wording below is
+  // deliberately about what can be said from trade data alone.
+  function band(e){
+    if(e >= 0.7) return "severe — concentrated supply with no physical substitute in the reference year";
+    if(e >= 0.5) return "serious — concentrated supply, substitution constrained";
+    if(e >= 0.3) return "material — concentration present, substitution possible at cost";
+    return "low — supply is dispersed or readily substitutable";
+  }
+
+  function currentOpts(){
+    var v = parseFloat(document.getElementById("minv").value);
+    var e = parseFloat(document.getElementById("mine").value);
+    // An unusable filter must not silently return an empty assessment, which on
+    // an exposure tool reads as "no exposure found".
+    if(!isFinite(v) || v < 0) v = 100;
+    if(!isFinite(e) || e < 0 || e > 1) e = 0.3;
+    var srcEl = document.getElementById("src");
+    return {
+      j: parseInt(document.getElementById("ctry").value, 10),
+      use: document.getElementById("use").value,
+      minv: v * 1000,                         // USD m -> thousand USD
+      mine: e,
+      src: srcEl && srcEl.value ? parseInt(srcEl.value, 10) : 0
+    };
+  }
+
+  function useMatch(u, mode){
+    if(mode === "ALL") return true;
+    if(mode === "INTCAP") return u === "INT" || u === "CAP";
+    return u === mode;
+  }
+
+  // ---- exposure ------------------------------------------------------------
+  function assess(o){
+    var rows = [], totalImports = 0, atRisk = 0;
+    for(var i=0;i<C.length;i++){
+      var c = C[i];
+      if(c.j !== o.j) continue;
+      if(!useMatch(c.u, o.use)) continue;
+      totalImports += c.v;
+      if(c.v < o.minv) continue;
+      if(c.e < o.mine) continue;
+      if(o.src){
+        var s = arr(c.s), found = false;
+        for(var q=0;q<s.length;q++){ if(s[q][0] === o.src){ found = true; break; } }
+        if(!found) continue;
+      }
+      rows.push(c);
+      atRisk += c.v;
+    }
+    rows.sort(cmp());
+    return {rows: rows, totalImports: totalImports, atRisk: atRisk, opts: o};
+  }
+
+  function cmp(){
+    return function(a,b){
+      var x = a[sortKey], y = b[sortKey];
+      if(typeof x === "string" || typeof y === "string"){
+        x = String(x); y = String(y);
+        return (x < y ? -1 : x > y ? 1 : 0) * sortDir;
+      }
+      if(x !== y) return (x - y) * sortDir;
+      // Stable, locale-independent secondary key so the same data always
+      // produces the same order — an assessment that reorders between runs
+      // cannot be checked by anybody.
+      return a.k - b.k;
+    };
+  }
+
+  // Leverage is the mirror of exposure and has to be computed the same way, or
+  // the two halves of the assessment disagree. A state holds leverage in a
+  // product where it is the leading supplier to importers who are themselves
+  // exposed in it.
+  function leverage(o){
+    var by = {};
+    for(var i=0;i<C.length;i++){
+      var c = C[i];
+      if(!useMatch(c.u, o.use)) continue;
+      if(c.v < o.minv) continue;
+      var s = arr(c.s);
+      if(!s.length || s[0][0] !== o.j) continue;
+      if(c.e < o.mine) continue;
+      var rec = by[c.k] || (by[c.k] = {k:c.k, u:c.u, n:0, v:0, worst:0, tops:[]});
+      rec.n += 1;
+      rec.v += c.v * s[0][1];
+      if(c.e > rec.worst) rec.worst = c.e;
+      rec.tops.push({j:c.j, v:c.v * s[0][1], e:c.e});
+    }
+    var out = Object.keys(by).map(function(k){ return by[k]; });
+    out.forEach(function(r){ r.tops.sort(function(a,b){ return b.v - a.v || a.j - b.j; }); });
+    out.sort(function(a,b){ return b.v - a.v || a.k - b.k; });
+    return out;
+  }
+
+  // A dyad view answers the only question a minister actually asks: if THAT
+  // state turned the tap off, what stops here.
+  function dyad(o, other){
+    var rows = [], exposedValue = 0, count = 0;
+    for(var i=0;i<C.length;i++){
+      var c = C[i];
+      if(c.j !== o.j) continue;
+      if(!useMatch(c.u, o.use)) continue;
+      if(c.v < o.minv) continue;
+      var s = arr(c.s), sh = 0;
+      for(var q=0;q<s.length;q++){ if(s[q][0] === other){ sh = s[q][1]; break; } }
+      if(!sh) continue;
+      var atRisk = c.v * sh;
+      rows.push({k:c.k, u:c.u, v:c.v, sh:sh, atRisk:atRisk, e:c.e, g:c.g, a:c.a, lead:s[0][0]});
+      exposedValue += atRisk; count++;
+    }
+    rows.sort(function(a,b){ return (b.e*b.atRisk) - (a.e*a.atRisk) || a.k - b.k; });
+    return {rows: rows, exposedValue: exposedValue, count: count};
+  }
+
+  // ---- rendering -----------------------------------------------------------
+  function suppliersCell(c){
+    return arr(c.s).slice(0,3).map(function(s){
+      return '<span class="pill">'+esc(calpha(s[0]))+' '+(s[1]*100).toFixed(0)+'%</span>';
+    }).join("");
+  }
+
+  function renderExposure(res){
+    var o = res.opts, h = "";
+    var share = res.totalImports > 0 ? (res.atRisk / res.totalImports) : 0;
+    h += '<div class="kpis">' +
+      kpi("Lines assessed", res.rows.length.toLocaleString(), res.rows.length>0) +
+      kpi("Value in those lines", usd(res.atRisk), false) +
+      kpi("Share of filtered imports", (share*100).toFixed(1)+"%", share>0.2) +
+      kpi("Severe lines (≥0.70)", res.rows.filter(function(c){return c.e>=0.7;}).length.toLocaleString(),
+          res.rows.filter(function(c){return c.e>=0.7;}).length>0) +
+      '</div>';
+    if(!res.rows.length){
+      return h + '<div class="notebar"><strong>No line meets these filters.</strong> That is a statement about the '+
+        'filters, not a finding of resilience. Lower the value floor or the exposure floor before treating '+
+        'this economy as unexposed in ' + esc(useLabel(o.use)) + '.</div>';
+    }
+    h += '<table><thead><tr>' +
+      th("k","Product") + th("u","Use") + th("v","Imports") + th("c1","CR1") +
+      th("g","Grip") + th("a","ASR") + th("e","Exposure") +
+      '<th>Leading suppliers</th></tr></thead><tbody>';
+    res.rows.slice(0,600).forEach(function(c){
+      h += '<tr>' +
+        '<td><strong>'+esc(pname(c.k)).slice(0,120)+'</strong><div class="mono muted">HS '+c.k+'</div></td>' +
+        '<td><span class="pill p-'+esc(c.u||"FIN")+'">'+esc(c.u||"—")+'</span></td>' +
+        '<td class="num">'+usd(c.v)+'</td>' +
+        '<td class="num">'+c.c1.toFixed(2)+'</td>' +
+        '<td class="num">'+c.g.toFixed(2)+'</td>' +
+        '<td class="num">'+(c.a>=99?"&ge;99":c.a.toFixed(1))+'</td>' +
+        '<td class="num '+eClass(c.e)+'">'+c.e.toFixed(2)+
+          '<div class="bar"><i style="width:'+Math.round(c.e*100)+'%"></i></div></td>' +
+        '<td>'+suppliersCell(c)+'</td></tr>';
+    });
+    h += '</tbody></table>';
+    if(res.rows.length > 600) h += '<div class="muted">Showing the first 600 of '+res.rows.length.toLocaleString()+
+      ' by the current sort. The CSV export carries all of them.</div>';
+    return h;
+  }
+
+  function renderLeverage(o){
+    var rows = leverage(o);
+    var h = '<div class="notebar">Leverage is the mirror of exposure: the lines in which <strong>'+
+      esc(cname(o.j))+'</strong> is the largest supplier to an importer that is itself exposed. '+
+      'It is what this economy could withhold, not what it would.</div>';
+    if(!rows.length) return h + '<div class="muted">No line at these filters.</div>';
+    var tot = rows.reduce(function(a,r){ return a + r.v; }, 0);
+    h += '<div class="kpis">' + kpi("Lines of leverage", rows.length.toLocaleString(), rows.length>0) +
+         kpi("Dependent import value", usd(tot), false) +
+         kpi("Dependent economies", (function(){ var s={}; rows.forEach(function(r){ r.tops.forEach(function(t){ s[t.j]=1; }); }); return Object.keys(s).length; })(), false) +
+         '</div>';
+    h += '<table><thead><tr><th>Product</th><th>Use</th><th class="num">Dependent value</th>' +
+         '<th class="num">Importers</th><th class="num">Worst exposure</th><th>Most dependent</th></tr></thead><tbody>';
+    rows.slice(0,400).forEach(function(r){
+      h += '<tr><td><strong>'+esc(pname(r.k)).slice(0,110)+'</strong><div class="mono muted">HS '+r.k+'</div></td>' +
+        '<td><span class="pill p-'+esc(r.u||"FIN")+'">'+esc(r.u||"—")+'</span></td>' +
+        '<td class="num">'+usd(r.v)+'</td><td class="num">'+r.n+'</td>' +
+        '<td class="num '+eClass(r.worst)+'">'+r.worst.toFixed(2)+'</td>' +
+        '<td>'+r.tops.slice(0,3).map(function(t){
+            return '<span class="pill">'+esc(calpha(t.j))+' '+usd(t.v)+'</span>'; }).join("")+'</td></tr>';
+    });
+    return h + '</tbody></table>';
+  }
+
+  function renderDyad(o){
+    var sel = document.getElementById("dyadOther");
+    var other = sel ? parseInt(sel.value,10) : 0;
+    var opts = countryOptions(other);
+    var h = '<div style="margin-bottom:12px">' +
+      '<label for="dyadOther">If this economy withheld supply</label>' +
+      '<select id="dyadOther" style="max-width:420px">'+opts+'</select></div>';
+    if(!other) return h + '<div class="muted">Choose a counterparty.</div>';
+    var d = dyad(o, other);
+    h += '<div class="kpis">' +
+      kpi("Lines supplied", d.count.toLocaleString(), d.count>0) +
+      kpi("Value from that source", usd(d.exposedValue), false) +
+      kpi("Severe lines", d.rows.filter(function(r){return r.e>=0.7;}).length, d.rows.filter(function(r){return r.e>=0.7;}).length>0) +
+      '</div>';
+    if(!d.rows.length) return h + '<div class="muted">No line at these filters.</div>';
+    h += '<table><thead><tr><th>Product</th><th>Use</th><th class="num">Imports</th>' +
+         '<th class="num">From source</th><th class="num">Value at risk</th><th class="num">Exposure</th>' +
+         '<th>Leader</th></tr></thead><tbody>';
+    d.rows.slice(0,400).forEach(function(r){
+      h += '<tr><td><strong>'+esc(pname(r.k)).slice(0,110)+'</strong><div class="mono muted">HS '+r.k+'</div></td>' +
+        '<td><span class="pill p-'+esc(r.u||"FIN")+'">'+esc(r.u||"—")+'</span></td>' +
+        '<td class="num">'+usd(r.v)+'</td>' +
+        '<td class="num">'+(r.sh*100).toFixed(0)+'%</td>' +
+        '<td class="num">'+usd(r.atRisk)+'</td>' +
+        '<td class="num '+eClass(r.e)+'">'+r.e.toFixed(2)+'</td>' +
+        '<td>'+esc(calpha(r.lead))+(r.lead===other?'':' <span class="muted">(not the source)</span>')+'</td></tr>';
+    });
+    return h + '</tbody></table>';
+  }
+
+  function renderMethod(){
+    return '<h2 style="font-size:1rem;margin-top:0">What the score is</h2>' +
+      '<p class="muted">Exposure is the product of two terms, not a weighted average of several. ' +
+      'A weighted average lets a comfortable reading on one measure buy off a dangerous reading on another, ' +
+      'which is what makes most composite indices useless for decision. A line scores high only when supply ' +
+      'is concentrated <em>and</em> the gap cannot be filled.</p>' +
+      '<table><tbody>' +
+      mrow("CR1","Share held by the single largest supplier of this product to this economy.") +
+      mrow("HHI","Herfindahl-Hirschman index of supplier shares, 0 to 1. Reported through the concentration term, which takes the greater of CR1 and HHI so a line cannot look safe merely because the leader is under half while the remainder is a duopoly.") +
+      mrow("Grip","The leading supplier's share of <em>world</em> exports of the product. This, not the buyer's own purchasing, decides whether a substitute exists at all. A buyer taking 100 per cent from a state holding four per cent of world supply can re-source within a quarter. A buyer taking 60 per cent from a state holding 85 per cent cannot re-source at any price.") +
+      mrow("ASR","Alternative supply ratio: exportable capacity of the rest of the world, excluding the leader, as a multiple of what this economy buys. Below 1, no combination of other suppliers could physically cover the loss within the reference year.") +
+      mrow("RCR","Replacement concentration: the HHI of that alternative set. Alternatives that all sit in one other state substitute one dependency for another.") +
+      mrow("Exposure","concentration &times; difficulty, where difficulty is the <em>worst</em> of global grip, insufficient residual capacity, and concentration of the alternatives. Those are not compensating conditions; a buyer facing any one of them is stuck.") +
+      '</tbody></table>' +
+      '<h2 style="font-size:1rem">What it cannot see</h2>' +
+      '<ul class="muted">' +
+      '<li><strong>The nomenclature is the ceiling.</strong> HS 6-digit is the finest resolution in the source. Where the decisive dependency sits inside a heading &mdash; extreme-ultraviolet lithography inside HS 848620, or a single qualified grade inside a chemical line &mdash; this instrument cannot see it and will under-read. It does not guess.</li>' +
+      '<li><strong>Origin is customs origin.</strong> Material that is processed in a third state and shipped on appears as coming from that state. Concentration measured on the last leg understates dependence where refining is more concentrated than shipping, which is the normal case in minerals.</li>' +
+      '<li><strong>Capacity is evidenced, not theoretical.</strong> Alternative supply counts only what a state actually exported in the reference year. Idle or mothballed capacity, and capacity that could be built, are excluded &mdash; deliberately, because coercion operates on the timescale of the former, not the latter.</li>' +
+      '<li><strong>Stockpiles, contracts and substitution in use are invisible.</strong> A strategic reserve, a long-term offtake, or an engineering change that designs the input out will all change the real answer and none of them appear in trade data.</li>' +
+      '<li><strong>Concentration is not consequence.</strong> Ranked on concentration alone the most exposed lines are pistachios and cut flowers. The end-use filter, from the UN Broad Economic Categories, restricts the default view to inputs that enter a production function. It is a coarse instrument and it is the analyst&rsquo;s job, not the tool&rsquo;s, to say whether a given line matters.</li>' +
+      '<li><strong>It is a photograph of a year that has already happened.</strong> Nothing here is a forecast.</li>' +
+      '</ul>' +
+      '<h2 style="font-size:1rem">Provenance</h2>' +
+      '<p class="muted">'+esc(META.attribution||"")+' Source file SHA-256 <span class="mono">'+
+      esc(String(META.source_sha256||"").slice(0,32))+'…</span>. '+
+      'End use: '+esc(META.enduse_source||"")+'</p>';
+  }
+  function mrow(k,v){ return '<tr><td style="width:110px"><strong>'+k+'</strong></td><td class="muted">'+v+'</td></tr>'; }
+  function kpi(l,v,alert){ return '<div class="kpi"><div class="v"'+(alert?' style="color:var(--bad)"':'')+'>'+esc(v)+'</div><div class="l">'+esc(l)+'</div></div>'; }
+  function th(key,label){
+    return '<th data-sort="'+key+'" class="'+(sortKey===key?"sorted":"")+'">'+esc(label)+
+           (sortKey===key ? (sortDir<0?" ↓":" ↑") : "")+'</th>';
+  }
+  function useLabel(u){
+    return u==="INTCAP" ? "production inputs" : u==="INT" ? "intermediate inputs" :
+           u==="CAP" ? "capital goods" : "all goods";
+  }
+
+  function render(){
+    var el = document.getElementById("out");
+    if(!CELLS){ return; }
+    if(tab === "method"){ el.innerHTML = renderMethod(); return; }
+    var o = currentOpts();
+    if(tab === "lev"){ el.innerHTML = renderLeverage(o); return; }
+    if(tab === "dyad"){ el.innerHTML = renderDyad(o); wireDyad(); return; }
+    var res = assess(o);
+    lastRun = {res: res, when: new Date().toISOString()};
+    el.innerHTML = renderExposure(res);
+    document.getElementById("csvBtn").disabled = false;
+    document.getElementById("attBtn").disabled = false;
+    document.getElementById("printBtn").disabled = false;
+    Array.prototype.forEach.call(el.querySelectorAll("th[data-sort]"), function(h){
+      h.onclick = function(){
+        var k = h.getAttribute("data-sort");
+        if(k === sortKey) sortDir = -sortDir; else { sortKey = k; sortDir = -1; }
+        render();
+      };
+    });
+  }
+  function wireDyad(){
+    var s = document.getElementById("dyadOther");
+    if(s) s.onchange = function(){ document.getElementById("out").innerHTML = renderDyad(currentOpts()); wireDyad(); };
+  }
+
+  // ---- product lookup ------------------------------------------------------
+  function productLookup(){
+    var q = document.getElementById("pq").value.trim();
+    var el = document.getElementById("phits");
+    if(!q || !REF){ el.innerHTML = ""; return; }
+    var codes = [];
+    if(/^\d{4,6}$/.test(q)){
+      var pref = q;
+      for(var k in REF.products){ if(k.indexOf(pref) === 0) codes.push(parseInt(k,10)); }
+    } else {
+      var ql = q.toLowerCase();
+      for(var k2 in REF.products){
+        if(String(REF.products[k2]).toLowerCase().indexOf(ql) >= 0){ codes.push(parseInt(k2,10)); }
+        if(codes.length > 40) break;
+      }
+    }
+    codes.sort(function(a,b){ return a-b; });
+    if(!codes.length){ el.innerHTML = '<span class="muted">No product matches.</span>'; return; }
+    el.innerHTML = codes.slice(0,12).map(function(k){
+      return '<div style="margin:4px 0"><a href="#" data-k="'+k+'" class="plink" style="color:var(--accent-ink)">HS '+k+'</a> '+
+             '<span class="muted">'+esc(pname(k)).slice(0,70)+'</span></div>';
+    }).join("") + (codes.length>12 ? '<div class="muted">…and '+(codes.length-12)+' more</div>' : "");
+    Array.prototype.forEach.call(el.querySelectorAll("a.plink"), function(a){
+      a.onclick = function(ev){ ev.preventDefault(); showProduct(parseInt(a.getAttribute("data-k"),10)); };
+    });
+  }
+  function showProduct(k){
+    var rows = C.filter(function(c){ return c.k === k; });
+    rows.sort(function(a,b){ return b.e - a.e || b.v - a.v || a.j - b.j; });
+    var world = (REF.world_by_product && REF.world_by_product[String(k)]) || 0;
+    var h = '<h2 style="font-size:1rem;margin-top:0">'+esc(pname(k))+'</h2>' +
+      '<div class="mono muted">HS '+k+' · world exports '+usd(world)+' in '+esc(String(META.year))+'</div>';
+    if(!rows.length) return void (document.getElementById("out").innerHTML = h +
+      '<div class="notebar">No importer buys at least '+usd(META.min_cell_kusd)+' of this line, so it carries no cell.</div>');
+    h += '<div class="muted" style="margin:10px 0">'+rows.length.toLocaleString()+' economies buy at least '+
+         usd(META.min_cell_kusd)+' of this line. Ranked by exposure.</div>';
+    h += '<table><thead><tr><th>Economy</th><th class="num">Imports</th><th class="num">CR1</th>'+
+         '<th class="num">Grip</th><th class="num">Exposure</th><th>Leading suppliers</th></tr></thead><tbody>';
+    rows.slice(0,60).forEach(function(c){
+      h += '<tr><td><strong>'+esc(cname(c.j))+'</strong> <span class="mono muted">'+esc(calpha(c.j))+'</span></td>'+
+        '<td class="num">'+usd(c.v)+'</td><td class="num">'+c.c1.toFixed(2)+'</td>'+
+        '<td class="num">'+c.g.toFixed(2)+'</td>'+
+        '<td class="num '+eClass(c.e)+'">'+c.e.toFixed(2)+'</td>'+
+        '<td>'+suppliersCell(c)+'</td></tr>';
+    });
+    document.getElementById("out").innerHTML = h + '</tbody></table>';
+  }
+
+  // ---- exports -------------------------------------------------------------
+  function csvCell(v){
+    var s = String(v==null?"":v);
+    if(/^[=+\-@\t\r]/.test(s)) s = "'"+s;
+    return '"'+s.replace(/"/g,'""')+'"';
+  }
+  function buildCsvRows(){
+    var o = lastRun.res.opts;
+    var rows = [["economy","economy_iso3","hs6","product","end_use","imports_usd","cr1","hhi",
+      "world_grip","alt_supply_ratio","replacement_hhi","exposure","band",
+      "supplier_1","share_1","supplier_2","share_2","supplier_3","share_3",
+      "source","source_version","reference_year","assessed_utc","licence"]];
+    lastRun.res.rows.forEach(function(c){
+      var s = arr(c.s);
+      rows.push([cname(o.j), calpha(o.j), c.k, pname(c.k), c.u||"", Math.round(c.v*1000),
+        c.c1, c.h, c.g, c.a, c.r, c.e, band(c.e).split(" — ")[0],
+        s[0]?calpha(s[0][0]):"", s[0]?s[0][1]:"", s[1]?calpha(s[1][0]):"", s[1]?s[1][1]:"",
+        s[2]?calpha(s[2][0]):"", s[2]?s[2][1]:"",
+        META.source||"", META.source_version||"", META.year||"", lastRun.when, META.licence||""]);
+    });
+    return rows;
+  }
+  function exportCsv(){
+    if(!lastRun) return;
+    var rows = buildCsvRows();
+    var csv = rows.map(function(r){ return r.map(csvCell).join(","); }).join("\r\n");
+    download(csv, "chokepoint-" + calpha(lastRun.res.opts.j) + "-" + lastRun.when.slice(0,10) + ".csv", "text/csv");
+  }
+  function download(text, name, mime){
+    var b = new Blob([text], {type: mime + ";charset=utf-8"}), a = document.createElement("a");
+    a.href = URL.createObjectURL(b); a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+
+  function buildRecord(){
+    if(!lastRun) return;
+    var o = lastRun.res.opts, res = lastRun.res;
+    var sev = res.rows.filter(function(c){ return c.e >= 0.7; });
+    var h = '<h2 style="font-size:1.05rem;margin-top:0">Economic coercion exposure — assessment record</h2>';
+    h += '<div class="muted">Generated '+esc(lastRun.when)+' — offline, on this machine. '+
+         'Reference: '+esc(document.getElementById("ref").value || "(none given)")+'</div>';
+    h += '<h3 style="font-size:.9rem">Subject and scope</h3><div class="muted">'+
+      'Economy: <strong>'+esc(cname(o.j))+'</strong> ('+esc(calpha(o.j))+'). '+
+      'End use: '+esc(useLabel(o.use))+'. Value floor '+usd(o.minv)+' per line. Exposure floor '+o.mine.toFixed(2)+'.'+
+      (o.src ? ' Restricted to lines supplied by '+esc(cname(o.src))+'.' : '')+'</div>';
+    h += '<h3 style="font-size:.9rem">Data</h3><div class="muted">'+esc(META.source||"")+'. '+
+      esc(META.rows_read ? META.rows_read.toLocaleString()+" bilateral flow records read; " : "")+
+      esc(META.cells ? META.cells.toLocaleString()+" importer-product cells carried." : "")+
+      ' Source file SHA-256 <span class="mono">'+esc(String(META.source_sha256||""))+'</span>. '+
+      esc(META.licence||"")+'</div>';
+    h += '<h3 style="font-size:.9rem">Findings</h3><div class="muted">'+
+      res.rows.length.toLocaleString()+' line(s) meet the filters, carrying '+usd(res.atRisk)+
+      ' of imports, '+((res.totalImports?res.atRisk/res.totalImports:0)*100).toFixed(1)+
+      ' per cent of this economy&rsquo;s filtered import value. '+sev.length+' line(s) score at or above 0.70.</div>';
+    if(sev.length){
+      h += '<table style="margin-top:8px"><thead><tr><th>Product</th><th class="num">Imports</th>'+
+           '<th class="num">Exposure</th><th>Assessment</th></tr></thead><tbody>';
+      sev.slice(0,25).forEach(function(c){
+        h += '<tr><td><strong>'+esc(pname(c.k))+'</strong><div class="mono muted">HS '+c.k+'</div></td>'+
+          '<td class="num">'+usd(c.v)+'</td><td class="num '+eClass(c.e)+'">'+c.e.toFixed(2)+'</td>'+
+          '<td class="muted">'+esc(band(c.e))+'; leading supplier '+esc(cname(arr(c.s)[0] ? arr(c.s)[0][0] : 0))+
+          ' at '+((arr(c.s)[0]?arr(c.s)[0][1]:0)*100).toFixed(0)+' per cent, holding '+
+          (c.g*100).toFixed(0)+' per cent of world exports.</td></tr>';
+      });
+      h += '</tbody></table>';
+    }
+    h += '<h3 style="font-size:.9rem">Limits of this record</h3><div class="muted">'+
+      'This is a ranking of dependency computed from customs-origin trade in '+esc(String(META.year))+
+      ', at HS 6-digit resolution. It does not observe sub-heading dependencies, transhipment and re-export, '+
+      'stockpiles, contractual commitments, idle capacity, or substitution in use. A low score is not '+
+      'resilience and a high score is not a prediction: both are prompts for enquiry against sources this '+
+      'instrument does not hold. It is not investment, legal or policy advice.</div>';
+    document.getElementById("out").innerHTML = h;
+  }
+
+  // ---- setup ---------------------------------------------------------------
+  function countryOptions(selected){
+    if(!REF) return "";
+    var seen = {}, list = [];
+    for(var i=0;i<C.length;i++){ if(!seen[C[i].j]){ seen[C[i].j]=1; list.push(C[i].j); } }
+    list.sort(function(a,b){ var x=cname(a), y=cname(b); return x<y?-1:x>y?1:0; });
+    return '<option value="">—</option>' + list.map(function(c){
+      return '<option value="'+c+'"'+(c===selected?' selected':'')+'>'+esc(cname(c))+' ('+esc(calpha(c))+')</option>';
+    }).join("");
+  }
+  function supplierOptions(){
+    var seen = {}, list = [];
+    for(var i=0;i<C.length;i++){
+      var s = arr(C[i].s);
+      for(var q=0;q<s.length;q++){ if(!seen[s[q][0]]){ seen[s[q][0]]=1; list.push(s[q][0]); } }
+    }
+    list.sort(function(a,b){ var x=cname(a), y=cname(b); return x<y?-1:x>y?1:0; });
+    return '<option value="">Any supplier</option>' + list.map(function(c){
+      return '<option value="'+c+'">'+esc(cname(c))+' ('+esc(calpha(c))+')</option>';
+    }).join("");
+  }
+
+  function setProvenance(){
+    var el = document.getElementById("provenance");
+    if(!CELLS){
+      document.getElementById("warn").innerHTML =
+        '<div class="warnbar"><strong>Data pack not found.</strong> Chokepoint reads '+
+        '<span class="mono">packs/pack-chokepoint-cells.js</span> and '+
+        '<span class="mono">packs/pack-chokepoint-ref.js</span> from the same folder. '+
+        'Run <span class="mono">01-build/build_chokepoint.py</span> and reload.</div>';
+      el.textContent = "No data pack loaded.";
+      ["runBtn","csvBtn","attBtn","printBtn"].forEach(function(id){
+        var b = document.getElementById(id); if(b) b.disabled = true; });
+      return;
+    }
+    document.getElementById("verTag").textContent = META.source_version || "unknown";
+    el.innerHTML = '<strong>Data:</strong> '+esc(META.source||"")+' · '+
+      (META.rows_read||0).toLocaleString()+' bilateral flows, '+
+      (META.cells||0).toLocaleString()+' importer-product cells above '+usd(META.min_cell_kusd||0)+
+      ' · end use from '+esc(String(META.enduse_source||"").split(".")[0])+
+      '.<br>Point-in-time: '+esc(META.point_in_time||"")+' '+esc(META.attribution||"");
+  }
+
+  // ---- self-test -----------------------------------------------------------
+  function selfTest(){
+    var pass = 0, out = [];
+    function ok(name, cond, detail){
+      if(cond){ pass++; out.push('<div style="color:var(--good)">PASS '+esc(name)+'</div>'); }
+      else out.push('<div style="color:var(--bad)">FAIL '+esc(name)+(detail?' — '+esc(detail):"")+'</div>');
+    }
+    ok("reference pack loaded", !!REF && !!REF.countries && !!REF.products);
+    ok("cell pack loaded", !!CELLS && C.length > 1000, C.length + " cells");
+    ok("packs describe the same build",
+       !REF || !CELLS || REF.meta.source_sha256 === META.source_sha256,
+       "ref " + String(REF && REF.meta.source_sha256).slice(0,10) + " vs cells " + String(META.source_sha256).slice(0,10));
+    ok("every cell carries a supplier list", C.every(function(c){ return arr(c.s).length > 0; }));
+    ok("supplier shares are ordered and bounded", C.every(function(c){
+      var s = arr(c.s);
+      for(var i=0;i<s.length;i++){ if(!(s[i][1] >= 0 && s[i][1] <= 1.0001)) return false;
+        if(i && s[i][1] > s[i-1][1] + 1e-9) return false; }
+      return true; }));
+    ok("CR1 equals the leading supplier's share", C.every(function(c){
+      return Math.abs(c.c1 - arr(c.s)[0][1]) < 1e-3; }));
+    ok("HHI is at least CR1 squared and at most 1", C.every(function(c){
+      return c.h <= 1.0001 && c.h >= c.c1*c.c1 - 1e-3; }));
+    ok("exposure never exceeds concentration", C.every(function(c){
+      return c.e <= Math.max(c.c1, c.h) + 1e-3; }));
+    ok("exposure is bounded 0..1", C.every(function(c){ return c.e >= -1e-9 && c.e <= 1.0001; }));
+    ok("world grip is bounded 0..1", C.every(function(c){ return c.g >= -1e-9 && c.g <= 1.0001; }));
+    ok("every cell clears the published value floor", C.every(function(c){ return c.v >= META.min_cell_kusd - 1e-6; }));
+    // The failure that matters: a filter that silently returns nothing.
+    var wide = assess({j: C[0].j, use:"ALL", minv:0, mine:0, src:0});
+    ok("the widest filter returns the whole economy", wide.rows.length > 0, wide.rows.length + " lines");
+    var narrow = assess({j: C[0].j, use:"ALL", minv:0, mine:1.01, src:0});
+    ok("an impossible floor returns nothing rather than everything", narrow.rows.length === 0);
+    ok("a bad filter value falls back rather than clearing", (function(){
+      var el = document.getElementById("mine"), old = el.value;
+      el.value = "not-a-number";
+      var o = currentOpts(); el.value = old;
+      return o.mine === 0.3; })());
+    // Leverage and exposure must agree: if A is exposed to B in a line, B must
+    // show leverage over A in that same line.
+    ok("leverage is the mirror of exposure", (function(){
+      var j = C[0].j;
+      var ex = assess({j:j, use:"ALL", minv:0, mine:0, src:0}).rows;
+      if(!ex.length) return true;
+      var c = null;
+      for(var i=0;i<ex.length;i++){ if(ex[i].e >= 0.5){ c = ex[i]; break; } }
+      if(!c) return true;
+      var lead = arr(c.s)[0][0];
+      var lev = leverage({j:lead, use:"ALL", minv:0, mine:0.5, src:0});
+      return lev.some(function(r){ return r.k === c.k; });
+    })());
+    ok("dyad value at risk never exceeds the line", (function(){
+      var j = C[0].j, o = {j:j, use:"ALL", minv:0, mine:0, src:0};
+      var lead = arr(C[0].s)[0][0];
+      return dyad(o, lead).rows.every(function(r){ return r.atRisk <= r.v + 1e-6; }); })());
+    ok("CSV rows all carry the header's column count", (function(){
+      lastRun = {res: assess({j:C[0].j, use:"ALL", minv:0, mine:0.9, src:0}), when:"t"};
+      var rows = buildCsvRows(), n = rows[0].length;
+      return rows.every(function(r){ return r.length === n; }); })());
+    ok("CSV neutralises spreadsheet formulae", csvCell("=cmd|calc").indexOf("'=") === 1);
+    ok("escaping neutralises markup", esc('<img src=x onerror=alert(1)>').indexOf("<") < 0);
+    ok("product names are present for cells", C.slice(0,500).every(function(c){ return !!pname(c.k); }));
+    ok("alpha-3 lookup resolves to a code that actually trades", (function(){
+      if(!REF.alpha3) return false;
+      var deu = REF.alpha3["DEU"];
+      return !!deu && C.some(function(c){ return c.j === deu; }); })());
+    ok("end use is one of the published values", C.every(function(c){
+      return c.u === "INT" || c.u === "CAP" || c.u === "FIN" || c.u === ""; }));
+    ok("the default view excludes final consumption", (function(){
+      return !useMatch("FIN","INTCAP") && useMatch("INT","INTCAP") && useMatch("CAP","INTCAP"); })());
+    ok("sorting is deterministic on ties", (function(){
+      var a = C.slice(0,50).slice().sort(cmp()), b = C.slice(0,50).slice().sort(cmp());
+      return a.every(function(x,i){ return x.k === b[i].k && x.j === b[i].j; }); })());
+    // Monotonicity. If two lines share a concentration, the one that is harder
+    // to substitute must not score lower — otherwise the ranking an analyst
+    // reads top-down is not ordered by the thing it claims to order by.
+    ok("exposure rises with difficulty at equal concentration", (function(){
+      var by = {};
+      for(var i=0;i<C.length && i<40000;i++){
+        var c = C[i], key = c.c1.toFixed(2);
+        (by[key] || (by[key] = [])).push(c);
+      }
+      var checked = 0;
+      for(var k in by){
+        var g = by[k];
+        if(g.length < 2) continue;
+        for(var a2=0;a2<g.length-1 && a2<40;a2++){
+          var x = g[a2], y = g[a2+1];
+          if(Math.abs(x.h - y.h) > 1e-6) continue;      // hold HHI constant too
+          if(x.g > y.g + 0.05 && x.e < y.e - 1e-6) return false;
+          checked++;
+        }
+      }
+      return checked >= 0; })());
+    ok("assessment is pure — the same filters give the same rows twice", (function(){
+      var o = {j: C[0].j, use:"INTCAP", minv:100000, mine:0.3, src:0};
+      var a3 = assess(o).rows, b3 = assess(o).rows;
+      return a3.length === b3.length && a3.every(function(r,i){ return r.k === b3[i].k; }); })());
+    ok("a line with no substitute anywhere scores at least its concentration times its grip",
+       C.every(function(c){ return c.e >= c.c1 * c.g - 1e-3 || c.h > c.c1; }));
+
+    document.getElementById("out").innerHTML =
+      '<h2 style="font-size:1rem;margin-top:0">Self-test</h2>' + out.join("") +
+      '<div style="margin-top:10px"><strong>' + pass + ' passed, ' + (out.length - pass) + ' failed.</strong></div>';
+  }
+
+  // ---- wiring --------------------------------------------------------------
+  if(CELLS && REF){
+    var sel = document.getElementById("ctry");
+    sel.innerHTML = countryOptions(REF.alpha3 ? REF.alpha3["DEU"] : 0);
+    document.getElementById("src").innerHTML = supplierOptions();
+  }
+  document.getElementById("runBtn").onclick = function(){ tab = "exp"; setTab(); render(); };
+  document.getElementById("csvBtn").onclick = exportCsv;
+  document.getElementById("attBtn").onclick = buildRecord;
+  document.getElementById("printBtn").onclick = function(){ window.print(); };
+  document.getElementById("selfTestBtn").onclick = selfTest;
+  document.getElementById("pq").addEventListener("input", productLookup);
+  document.getElementById("themeBtn").onclick = function(){
+    var d = document.documentElement;
+    d.setAttribute("data-theme", d.getAttribute("data-theme") === "light" ? "dark" : "light");
+  };
+  function setTab(){
+    [["exp","tabExp"],["lev","tabLev"],["dyad","tabDyad"],["method","tabMethod"]].forEach(function(p){
+      var b = document.getElementById(p[1]);
+      if(b) b.setAttribute("aria-selected", tab === p[0] ? "true" : "false");
+    });
+  }
+  [["exp","tabExp"],["lev","tabLev"],["dyad","tabDyad"],["method","tabMethod"]].forEach(function(p){
+    var b = document.getElementById(p[1]);
+    if(b) b.onclick = function(){ tab = p[0]; setTab(); render(); };
+  });
+  setProvenance();
+})();
+</script>
+<script>
+/* Carry the viewer's theme across every internal hop. */
+(function(){try{
+  var q=new URLSearchParams(location.search).get("theme");
+  if(q!=="light"&&q!=="dark") return;
+  Array.prototype.forEach.call(document.querySelectorAll('a[data-keep-theme], a.tool'), function(a){
+    var h=a.getAttribute("href")||"";
+    if(!h || /^(https?:|#|mailto:)/.test(h) || h.indexOf("theme=")>=0) return;
+    a.setAttribute("href", h+(h.indexOf("?")>=0?"&":"?")+"theme="+q);
+  });
+}catch(e){}})();
+</script>
+<script>
+addEventListener("message", function(ev){
+  if(ev && ev.data && ev.data.type==="cf-theme" && (ev.data.theme==="light"||ev.data.theme==="dark"))
+    document.documentElement.setAttribute("data-theme", ev.data.theme);
+});
+</script>
+</body>
+</html>

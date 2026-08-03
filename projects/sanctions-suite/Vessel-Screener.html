@@ -9,7 +9,7 @@
     --line:#233145;--accent:#43b3a6;--accent-ink:#84d6ca;--bad:#e0574a;--warn:#e0a13a;--good:#43c59e;
     --mono:ui-monospace,'Cascadia Code',Consolas,monospace;--sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
   html[data-theme="light"]{--bg:#f4f1ec;--surface:#fff;--surface2:#faf7f2;--ink:#221e18;--ink2:#4c473e;
-    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f}
+    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f--good:#0f7a5a;--warn:#8a5a10;--bad:#a32a1e;}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55}
   header{border-bottom:1px solid var(--line);padding:14px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--surface)}
@@ -38,13 +38,20 @@
   @media(max-width:900px){.grid{grid-template-columns:1fr}}
   @media print{.noprint{display:none!important}body{background:#fff;color:#000}}
 </style>
+<script>
+/* The theme has to be applied before anything heavy loads. The data packs below
+   are blocking scripts — 55 MB in Sentinel's case — and a theme read placed after
+   them leaves a light-mode visitor staring at a dark page for the whole download. */
+(function(){try{var q=new URLSearchParams(location.search).get("theme");
+if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q);}catch(e){}})();
+</script>
 </head>
 <body>
 <header>
   <h1>Vessel &amp; Trade Screener</h1>
   <span class="tag" id="verTag">loading…</span><span class="tag">offline</span>
   <span class="spacer"></span>
-  <a class="tag" href="index.html" style="text-decoration:none">← Suite</a>
+  <a class="tag" href="index.html" data-keep-theme style="text-decoration:none">← Suite</a>
   <button class="ghost noprint" id="themeBtn">Theme</button>
   <button class="ghost noprint" id="selfTestBtn">Self-test</button>
 </header>
@@ -110,10 +117,24 @@
     return out;
   }
   // kind: 3 = identifier, 2 = exact name/alias, 1 = partial name
+  // Manifests, bills of lading and charterparties write the ship type in front
+  // of the name — "MV ABADAN", "M/V ABADAN", "MT ABADAN". Left in place, that
+  // prefix makes the query multi-token while the listed name is one token, and
+  // 1,013 of the 2,347 designated hulls in this snapshot returned a confident
+  // NOT LISTED. The prefix is stripped, and a one-token listed name may then
+  // match as a whole token of the query — reported as a partial, never as exact.
+  var TYPE_PREFIX = /^(m\/?v|m\/?t|m\/?s|s\/?s|s\/?v|mv|mt|ms|ss|sv|msv|fv|tb|tug|fpso|lng|lpg|vlcc|barge|the)\s+/i;
+  function stripTypePrefix(s){
+    var out = String(s||"").trim(), n = 0;
+    while(n++ < 3 && TYPE_PREFIX.test(out)) out = out.replace(TYPE_PREFIX, "").trim();
+    return out || String(s||"").trim();
+  }
   function lookup(query){
-    var q = String(query||"").trim();
-    if(!q) return [];
-    var qd = imoDigits(q), qn = norm(q), qid = normId(q), qdig = digitsOnly(q);
+    var q0 = String(query||"").trim();
+    if(!q0) return [];
+    var q = stripTypePrefix(q0);
+    var prefixed = q !== q0;
+    var qd = imoDigits(q0), qn = norm(q), qid = normId(q), qdig = digitsOnly(q0);
     var qt = qn.split(" ").filter(Boolean);
     var res = [];
     for(var i=0;i<V.length;i++){
@@ -140,6 +161,13 @@
              nt.every(function(t){ return qt.indexOf(t)>=0; })){
             why = "partial name "+names[j]; kind = 1; break;
           }
+          // A one-token listed name is admitted only where the query itself was
+          // written with a ship-type prefix, i.e. it is a manifest line rather
+          // than a free-text name. That keeps "ORION" out of "NORDIC ORION"
+          // while letting "MV ABADAN" reach ABADAN.
+          if(prefixed && nt.length===1 && qt.indexOf(nt[0])>=0){
+            why = "name "+names[j]+" (ship-type prefix ignored)"; kind = 1; break;
+          }
         }
       }
       if(why) res.push({v:v, why:why, kind:kind, exact:kind>=2});
@@ -150,7 +178,11 @@
       if(x!==y) return x<y ? -1 : 1;
       return String(a.v.i)<String(b.v.i) ? -1 : 1;
     });
-    return res.slice(0,60);
+    var total = res.length;
+    res = res.slice(0,60);
+    res.total = total;
+    res.truncated = total > 60;
+    return res;
   }
   function designated(v){ return !!((v.sanc && v.sanc.length) || v.tgt); }
 
@@ -303,8 +335,12 @@
     if(!P){ el.innerHTML='<strong style="color:var(--bad)">Data pack not found.</strong> Run 01-build\\BUILD-ALL.cmd, then reopen.'; return; }
     document.getElementById("verTag").textContent = P.meta.snapshot_version||"unknown";
     var nv=V.filter(function(v){return v.s==="Vessel"}).length, na=V.length-nv;
-    var pre = P.meta.demo_subset
-      ? '<div style="color:var(--warn);margin-bottom:6px"><strong>Coverage.</strong> Every designated vessel and aircraft in the snapshot is included.</div>' : '';
+    // This was gated on demo_subset, so the reassurance appeared only on a
+    // reduced build, where it would have been false, and never on the full build,
+    // where it is true.
+    var pre = P.meta.full_corpus
+      ? '<div class="muted" style="margin-bottom:6px"><strong>Coverage.</strong> Every designated vessel and aircraft in the snapshot is included; rows are marked LISTED or RELATED.</div>'
+      : (P.meta.coverage_note ? '<div style="color:var(--warn);margin-bottom:6px"><strong>Coverage.</strong> '+esc(P.meta.coverage_note)+'</div>' : '');
     el.innerHTML=pre+'<strong>Dataset:</strong> OpenSanctions snapshot <span class="mono">'+esc(P.meta.snapshot_version)+
       '</span> · '+nv.toLocaleString()+' vessels, '+na.toLocaleString()+' aircraft · built <span class="mono">'+esc(P.meta.built_from_snapshot||P.meta.snapshot_version)+
       '</span>.<br>Point-in-time: this is the position as at the snapshot date. '+esc(P.meta.attribution||"");
@@ -315,6 +351,28 @@
     function ok(n,c,d){ (c?pass++:fail++); out.push((c?"PASS  ":"FAIL  ")+n+(d?"  — "+d:"")); }
     ok("pack loaded", !!P && V.length>0, V.length+" vessels/aircraft");
     ok("manifest present", !!window.PACK_MANIFEST);
+
+    // Manifest lines carry a ship-type prefix. Before this was handled, 1,013 of
+    // the designated hulls in this snapshot — every one with a single-token name —
+    // returned a confident NOT LISTED for "MV <name>".
+    ok("a ship-type prefix does not hide a designated hull", (function(){
+      var one = null;
+      for(var i=0;i<V.length;i++){
+        var n = norm(V[i].n||"");
+        if(n && n.split(" ").filter(Boolean).length===1 && designated(V[i])){ one = V[i]; break; }
+      }
+      if(!one) return true;
+      return ["MV ","M/V ","MT ","MS "].every(function(pfx){ return lookup(pfx+one.n).length>0; });
+    })());
+    ok("a single-token name still does not match inside a different ship's name",
+       (function(){
+         var r = lookup("NORDIC ORION");
+         return r.every(function(x){ return norm(x.v.n)!=="orion"; });
+       })());
+    ok("the result cap reports the true total", (function(){
+      var r = lookup("A");
+      return r.total !== undefined && r.total >= r.length;
+    })());
     ok("IMO digits extracted", imoDigits("IMO9422964")==="9422964", imoDigits("IMO9422964"));
     ok("IMO matches without prefix", imoDigits("9422964")==="9422964");
     ok("8-digit number is not read as an IMO", imoDigits("94229640")==="", '"'+imoDigits("94229640")+'"');
@@ -395,6 +453,20 @@
       document.documentElement.setAttribute("data-theme", ev.data.theme);
   });
 })();
+</script>
+<script>
+/* Carry the viewer's theme across every internal hop, so a light-mode visitor
+   who opens a tool from the suite index does not land on a dark page. */
+(function(){try{
+  var q=new URLSearchParams(location.search).get("theme");
+  if(q!=="light"&&q!=="dark") return;
+  var sel='a.tool, a[data-keep-theme], a[href$=".html"]:not([target="_blank"])';
+  Array.prototype.forEach.call(document.querySelectorAll(sel), function(a){
+    var h=a.getAttribute("href")||"";
+    if(!h || /^(https?:|#|mailto:)/.test(h) || h.indexOf("theme=")>=0) return;
+    a.setAttribute("href", h+(h.indexOf("?")>=0?"&":"?")+"theme="+q);
+  });
+}catch(e){}})();
 </script>
 </body>
 </html>

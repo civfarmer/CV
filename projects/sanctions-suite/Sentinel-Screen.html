@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sentinel Screen — offline sanctions, crime and PEP screening desk</title>
+<title>Sentinel Screen — offline sanctions and crime screening desk</title>
 <style>
   :root{--bg:#0b0f17;--surface:#131b2a;--surface2:#182133;--ink:#e9eef7;--ink2:#aab7cc;--muted:#7d8ba3;
     --line:#233145;--accent:#43b3a6;--accent-ink:#84d6ca;--gold:#d4b24c;--bad:#e0574a;--warn:#e0a13a;
     --good:#43c59e;--radius:12px;--mono:ui-monospace,'Cascadia Code',Consolas,monospace;
     --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
   html[data-theme="light"]{--bg:#f4f1ec;--surface:#fff;--surface2:#faf7f2;--ink:#221e18;--ink2:#4c473e;
-    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f;--gold:#836819}
+    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f;--gold:#836819--good:#0f7a5a;--warn:#8a5a10;--bad:#a32a1e;}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55}
   header{border-bottom:1px solid var(--line);padding:14px 20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:var(--surface)}
@@ -50,6 +50,13 @@
   .rowline.clearrow{border-left-color:var(--good)}
   @media print{header button,.noprint{display:none!important}body{background:#fff;color:#000}.card{border-color:#999;break-inside:avoid}}
 </style>
+<script>
+/* The theme has to be applied before anything heavy loads. The data packs below
+   are blocking scripts — 55 MB in Sentinel's case — and a theme read placed after
+   them leaves a light-mode visitor staring at a dark page for the whole download. */
+(function(){try{var q=new URLSearchParams(location.search).get("theme");
+if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q);}catch(e){}})();
+</script>
 </head>
 <body>
 <header>
@@ -57,7 +64,7 @@
   <span class="tag" id="verTag">loading…</span>
   <span class="tag">offline</span>
   <span class="spacer"></span>
-  <a class="tag" href="index.html" style="text-decoration:none">← Suite</a>
+  <a class="tag" href="index.html" data-keep-theme style="text-decoration:none">← Suite</a>
   <button class="ghost noprint" id="themeBtn">Theme</button>
   <button class="ghost noprint" id="selfTestBtn">Self-test</button>
 </header>
@@ -192,7 +199,10 @@
   // Masked identifiers ("**********0211") collide once punctuation is stripped.
   function cleanId(s){
     if(!s) return "";
-    if(/[*#xX]/.test(s)) return "";
+    // Only * and # are mask glyphs. X is an ordinary letter — every Spanish
+    // NIE begins with one — so treating it as a mask made ~6,000 identifiers
+    // unsearchable and reported them to the analyst as "masked".
+    if(/[*#]/.test(s) || /x{3,}/i.test(s)) return "";
     var v = String(s).toUpperCase().replace(/[^A-Z0-9]/g,"");
     return v.length>=6 ? v : "";
   }
@@ -221,10 +231,16 @@
 
   // Tokens that mark a query as being about a body rather than a private
   // individual. GENERIC covers the industry words; these are the designators.
-  var ORGWORD = new Set(Array.from(GENERIC).concat(("group holding holdings company companies corporation corp inc incorporated "+
-    "ltd limited llc plc gmbh ag sa nv bv oao ojsc pjsc zao jsc co kg srl spa pte pty llp lp ooo "+
-    "as oy ab kft doo ad dd sarl sas aps ltda holdingas concern combine bureau agency authority "+
-    "ministry committee council federation association foundation institute organisation organization").split(" ")));
+  // Designators only, and nothing shorter than three characters. An earlier
+  // version inherited GENERIC and every two-letter legal form, which meant "ad"
+  // (Salah ad Din), "as" (as-Sadr), "ab" (Ab Rahman), "co", "sa", "ag" and the
+  // rank "general" all marked a query as organisational — and so demoted exactly
+  // the designated persons a sanctions desk is looking for.
+  var ORGWORD = new Set(("group holding holdings company companies corporation corp inc incorporated "+
+    "ltd limited llc plc gmbh oao ojsc pjsc zao jsc srl spa pte pty llp ooo sarl sas aps ltda "+
+    "kft doo holdingas concern combine bureau agency authority ministry committee council "+
+    "federation association foundation institute organisation organization enterprise enterprises "+
+    "partnership consortium syndicate trust").split(" "));
 
   // Ordering signal, used only to break ties in the result list. The containment
   // rule gives every partial-name match the same 0.95, so without this an analyst
@@ -235,15 +251,17 @@
   // carrying an organisational designator additionally ranks bodies above persons.
   // This demotes; it never drops. Which records match, and the score each carries,
   // are untouched, so parity with the builder is preserved.
-  function rankScore(queryName, viaName, schema){
+  function rankScore(queryName, viaName, schema, applyShape){
     var qF = toks(queryName || "", false), rF = toks(viaName || "", false);
     var qs = new Set(qF), rs = new Set(rF);
     if(!rs.size) return 0;
     var inter = 0; rs.forEach(function(t){ if(qs.has(t)) inter++; });
     var uni = new Set(qF.concat(rF)).size;
     var r = ((uni ? inter/uni : 0) + inter/rs.size) / 2;
-    var orgShape = qF.some(function(t){ return ORGWORD.has(t); });
-    if(orgShape && String(schema || "") === "Person") r *= 0.5;
+    if(applyShape !== false){
+      var orgShape = qF.some(function(t){ return ORGWORD.has(t); });
+      if(orgShape && String(schema || "") === "Person") r *= 0.5;
+    }
     return r;
   }
 
@@ -418,25 +436,36 @@
       byId[h.rec.i] = keep;
     });
     var list = Object.keys(byId).map(function(k){ return byId[k]; });
-    var rankCache = new Map();
-    function rankOf(h){
-      if(!rankCache.has(h)) rankCache.set(h, rankScore(q, h.via || h.rec.n, h.rec.s));
-      return rankCache.get(h);
+    // Ranking is presentation, and presentation must never decide who is reported.
+    // Because the 200-row cap cuts the tail of whatever order it is given, the
+    // entity-shape demotion is kept out of the cut entirely: WHICH 200 records
+    // survive is decided without it, so a designated person can never be evicted
+    // by a query that happens to carry an organisational word. The demotion then
+    // orders the records that were retained.
+    var c1 = new Map(), c2 = new Map();
+    function nameOf(h){ return (h.reason==="identifier" || h.reason==="identifier-nonunique") ? h.rec.n : (h.via || h.rec.n); }
+    function rankKeep(h){ if(!c1.has(h)) c1.set(h, rankScore(q, nameOf(h), h.rec.s, false)); return c1.get(h); }
+    function rankShow(h){ if(!c2.has(h)) c2.set(h, rankScore(q, nameOf(h), h.rec.s, true)); return c2.get(h); }
+    function order(rank){
+      return function(a,b){
+        if(b.score !== a.score) return b.score - a.score;
+        var rb = rank(b), ra = rank(a);
+        if(rb !== ra) return rb - ra;
+        var x=String(a.rec.i), y=String(b.rec.i);      // codepoint order, locale-independent
+        return x<y ? -1 : x>y ? 1 : 0;
+      };
     }
-    list.sort(function(a,b){
-      if(b.score !== a.score) return b.score - a.score;
-      var rb = rankOf(b), ra = rankOf(a);
-      if(rb !== ra) return rb - ra;
-      var x=String(a.rec.i), y=String(b.rec.i);        // codepoint order, locale-independent
-      return x<y ? -1 : x>y ? 1 : 0;
-    });
-    var capped = list.length > 200;
+    list.sort(order(rankKeep));
+    var total = list.length;
+    var capped = total > 200;
+    list = list.slice(0, 200);
+    list.sort(order(rankShow));
     var nearMisses = 0;
     if(!list.length && q){
       var qc = toks(q, true);
       if(qc.length === 1) nearMisses = docFreq(qc[0]);
     }
-    return {hits:list.slice(0,200), truncated:capped, total:list.length,
+    return {hits:list, truncated:capped, total:total,
             nearMisses:nearMisses, countryUnknown:countryUnknown, idRefused:idRefused};
   }
 
@@ -453,14 +482,30 @@
       // A single-token query that has candidates but no scored match must not be
       // reported as a clean "no match" — a surname-only wire is the commonest
       // partial-data input in AML work.
-      if(res.idRefused || res.nearMisses){
-        return '<div class="warnbar"><strong>Inconclusive — not a clear result.</strong> "'+esc(q)+
-          '" is a single-token query. '+res.nearMisses+' record(s) in this snapshot contain that token, '+
-          'but none scored as a match on its own. Add a forename, a second name element or an identifier '+
-          'before treating this as clear.</div>';
+      var w = "";
+      if(res.idRefused){
+        w += '<div class="warnbar"><strong>Inconclusive — the identifier was not searched.</strong> '+
+          'It contains a mask character or is shorter than six characters, so it cannot be matched '+
+          'reliably. Only the name was screened. Supply the identifier in full before treating this '+
+          'as clear.</div>';
       }
+      if(res.nearMisses){
+        w += '<div class="warnbar"><strong>Inconclusive — not a clear result.</strong> "'+esc(q)+
+          '" reduces to a single distinguishing token. '+res.nearMisses+' record(s) in this snapshot '+
+          'contain that token, but none scored as a match on its own. Add a forename or a second name '+
+          'element before treating this as clear.</div>';
+      }
+      if(res.countryUnknown){
+        w += '<div class="warnbar">Country filter not applied: that country was not recognised, so no '+
+          'country comparison was performed.</div>';
+      }
+      if(w) return w;
+      // A nil result is not clearance, and must not be worded as though it were.
       return '<div class="clear"><strong>No match.</strong> "'+esc(q)+'" was screened against '+
-        coverageText(pepsActive)+' and produced no result at or above the selected threshold.</div>';
+        coverageText(pepsActive)+' and produced no result at or above the selected threshold. '+
+        '<span class="muted">This is not clearance: it records that nothing scored at or above the '+
+        'threshold in this snapshot. It does not exclude aliases, transliterations, or ownership and '+
+        'control that the source data does not record.</span></div>';
     }
     var h = "";
     if(res.idRefused) h += '<div class="warnbar">The identifier supplied was not searched: it is masked or shorter than six characters, which cannot be matched reliably. Only the name was screened.</div>';
@@ -656,21 +701,25 @@
         var finish = function(){
         lastRun = {rows:rows, opts:o, pepsActive:pepsActive, when:new Date().toISOString()};
         var withHits = rows.filter(function(r){return r.res.hits.length});
+        var incon = rows.filter(function(r){ return !r.res.hits.length && !isClear(r.res); });
         var h = '<div style="margin-bottom:12px"><strong>'+rows.length+'</strong> subjects screened against '+
           coverageText(pepsActive)+' · <strong style="color:'+(withHits.length?'var(--bad)':'var(--good)')+'">'+
-          withHits.length+'</strong> with at least one result · '+(rows.length-withHits.length)+' clear</div>';
+          withHits.length+'</strong> with at least one result · '+
+          (incon.length?'<strong style="color:var(--warn)">'+incon.length+'</strong> inconclusive · ':'')+
+          (rows.length-withHits.length-incon.length)+' clear</div>';
         h += '<table><thead><tr><th>Subject</th><th>Result</th><th>Best</th><th>Top match</th></tr></thead><tbody>';
         rows.forEach(function(r){
           var top = r.res.hits[0];
           var statusCell = top ? '<span class="pill p-S">'+r.res.total+' hit(s)</span>'
-            : (r.res.nearMisses ? '<span class="pill p-U">inconclusive</span>'
-                                : '<span class="pill" style="color:var(--good);border-color:var(--good)">clear</span>');
+            : (isClear(r.res) ? '<span class="pill" style="color:var(--good);border-color:var(--good)">clear</span>'
+                              : '<span class="pill p-U">inconclusive</span>');
           h += '<tr><td><strong>'+esc(r.query)+'</strong></td>'+
             '<td>'+statusCell+'</td>'+
             '<td class="score '+(top?scoreClass(top.score):'')+'">'+(top?top.score.toFixed(2):'—')+'</td>'+
             '<td>'+(top?esc(top.rec.n)+' <span class="muted">('+esc(listLabel(top.rec.l))+')</span>'
-                      :(r.res.nearMisses?'<span class="muted">single-token query — '+r.res.nearMisses+' record(s) contain it</span>'
-                                        :'<span class="muted">no match</span>'))+'</td></tr>';
+                      :(r.res.idRefused?'<span class="muted">identifier not searched — name only</span>'
+                       :(r.res.nearMisses?'<span class="muted">single-token query — '+r.res.nearMisses+' record(s) contain it</span>'
+                                        :'<span class="muted">no match</span>')))+'</td></tr>';
         });
         document.getElementById("resultCard").innerHTML = h+'</tbody></table>';
         document.getElementById("attBtn").disabled = false;
@@ -681,6 +730,18 @@
     };
     if(o.peps) ensurePeps(go); else go(false);
   }
+
+  // A subject is only "clear" when it was fully searched and nothing scored.
+  // A refused identifier or a single-token near miss is inconclusive, and the
+  // durable artefacts — the CSV and the attestation that goes on file — must say
+  // so in the same words the screen does.
+  function verdictOf(res){
+    if(res.hits.length) return "hit";
+    if(res.idRefused) return "inconclusive - identifier not searched";
+    if(res.nearMisses) return "inconclusive - single-token query";
+    return "clear";
+  }
+  function isClear(res){ return verdictOf(res)==="clear"; }
 
   function csvCell(v){
     var s = String(v==null?"":v);
@@ -696,7 +757,7 @@
       "programmes","sources","snapshot_version","screened_utc","corpus","licence","attribution"]];
     lastRun.rows.forEach(function(r){
       if(!r.res.hits.length){
-        rows.push([r.query, r.res.nearMisses ? "inconclusive - single-token query" : "clear",
+        rows.push([r.query, verdictOf(r.res),
           "","","","","","","","",m.snapshot_version,when,corpus,m.licence,m.attribution]);
       } else {
         r.res.hits.forEach(function(h){
@@ -758,8 +819,13 @@
     }
     h += '<h3 style="font-size:.9rem;margin-top:14px">Results</h3>';
     lastRun.rows.forEach(function(r){
-      h += '<div class="rowline '+(r.res.hits.length?'hit':'clearrow')+'"><strong>'+esc(r.query)+'</strong> — '+
-        (r.res.hits.length? r.res.total+' result(s); highest score '+r.res.hits[0].score.toFixed(2) : 'no match at threshold')+'</div>';
+      // An inconclusive subject must not print green on an attestation that goes
+      // on file: that is the document someone later relies on.
+      h += '<div class="rowline '+(isClear(r.res)?'clearrow':'hit')+'"><strong>'+esc(r.query)+'</strong> — '+
+        (r.res.hits.length ? r.res.total+' result(s); highest score '+r.res.hits[0].score.toFixed(2)
+         : (r.res.idRefused ? 'INCONCLUSIVE — the identifier supplied was masked or too short to search; only the name was screened'
+         : (r.res.nearMisses ? 'INCONCLUSIVE — single distinguishing token; '+r.res.nearMisses+' record(s) contain it, none scored as a match'
+         : 'no match at threshold')))+'</div>';
       if(r.res.hits.length){
         var shown = r.res.hits.slice(0,25);
         h += '<table><thead><tr><th>Score</th><th>Name</th><th>List</th><th>Programmes</th><th>Record id</th></tr></thead><tbody>';
@@ -876,6 +942,24 @@
       ok("person-shaped query does not demote persons",
          rankScore("Michael Kuajien","Michael KUAJIEN","Person") > 0.9);
       ok("ranking never alters a score", Math.abs(score("Sberbank",{n:"Sberbank of Russia",a:[]}).score-0.95)<1e-9);
+      ok("the cap is decided without the entity-shape demotion",
+         rankScore("Acme Group","Nur ad Din Muhammad","Person",false) ===
+         rankScore("Acme Group","Nur ad Din Muhammad","Company",false));
+      ok("name particles are not organisational designators",
+         !ORGWORD.has("ad") && !ORGWORD.has("as") && !ORGWORD.has("ab") &&
+         !ORGWORD.has("sa") && !ORGWORD.has("co") && !ORGWORD.has("general"));
+
+      // Verdicts. A refused identifier reaching an attestation as "clear" is the
+      // failure that puts a wrong answer permanently on a client file.
+      ok("a refused identifier is inconclusive, not clear",
+         verdictOf({hits:[],idRefused:true,nearMisses:0}) === "inconclusive - identifier not searched");
+      ok("a single-token near miss is inconclusive, not clear",
+         verdictOf({hits:[],idRefused:false,nearMisses:12}) === "inconclusive - single-token query");
+      ok("a fully searched nil result is clear",
+         verdictOf({hits:[],idRefused:false,nearMisses:0}) === "clear");
+      ok("X is a letter, not a mask glyph", cleanId("X1234567L") === "X1234567L",
+         "got \""+cleanId("X1234567L")+"\"");
+      ok("genuine masks are still refused", cleanId("**********0211")==="" && cleanId("####1234")==="");
       ok("unrelated name scores 0", score("zzzzq nonexistent",{n:"Rosneft",a:[]}).score===0);
       ok("masked identifier refused", cleanId("**********0211")==="" && cleanId("0211")==="");
       ok("real identifier accepted", cleanId("IMO 9422964")==="IMO9422964");
@@ -979,7 +1063,7 @@
   // it is disabled and labelled when the pack is absent.
   (function(){
     var m = CORE && CORE.meta;
-    if(m && m.demo_subset){
+    if(m && m.pep_available===false){
       var cb=document.getElementById("usePeps"), wrap=document.getElementById("pepWrap");
       if(cb){ cb.checked=false; cb.disabled=true; }
       if(wrap) wrap.innerHTML='<span class="muted">PEP overlay — 771,755 records — runs in the local build. '+
@@ -1001,6 +1085,20 @@
       document.documentElement.setAttribute("data-theme", ev.data.theme);
   });
 })();
+</script>
+<script>
+/* Carry the viewer's theme across every internal hop, so a light-mode visitor
+   who opens a tool from the suite index does not land on a dark page. */
+(function(){try{
+  var q=new URLSearchParams(location.search).get("theme");
+  if(q!=="light"&&q!=="dark") return;
+  var sel='a.tool, a[data-keep-theme], a[href$=".html"]:not([target="_blank"])';
+  Array.prototype.forEach.call(document.querySelectorAll(sel), function(a){
+    var h=a.getAttribute("href")||"";
+    if(!h || /^(https?:|#|mailto:)/.test(h) || h.indexOf("theme=")>=0) return;
+    a.setAttribute("href", h+(h.indexOf("?")>=0?"&":"?")+"theme="+q);
+  });
+}catch(e){}})();
 </script>
 </body>
 </html>

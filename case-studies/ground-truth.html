@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f17'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='27' font-weight='700' fill='%23d4b24c' text-anchor='middle'%3ECF%3C/text%3E%3C/svg%3E">
+<title>Ground Truth — three offline verification instruments | Christopher Farmer</title>
+<meta name="description" content="Case study: a four-tool offline sanctions screening suite built on a dated, checksummed OpenSanctions snapshot — screening desk with attestations, ownership-exposure graph, vessel screener and portfolio console.">
+<meta name="robots" content="noindex">
+<style>
+  /* Offline-first: font families fall back to system fonts. No network requests, no CDN. */
+  :root{
+    --bg:#0b0f17; --bg2:#0e1420; --surface:#131b2a; --surface2:#182133;
+    --ink:#e9eef7; --ink2:#aab7cc; --muted:#7d8ba3; --line:#233145; --line2:#2c3d54;
+    --accent:#43b3a6; --accent-ink:#84d6ca; --gold:#d4b24c; --gold-soft:#e6cf8f;
+    --good:#43c59e; --shadow:0 18px 50px -20px rgba(0,0,0,.7);
+    --radius:16px; --maxw:880px;
+    --font-display:'Zilla Slab',Georgia,'Times New Roman',serif;
+    --font-body:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --font-mono:'IBM Plex Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
+  }
+  html[data-theme="light"]{
+    --bg:#f4f1ec; --bg2:#ebe6dd; --surface:#ffffff; --surface2:#faf7f2;
+    --ink:#221e18; --ink2:#4c473e; --muted:#675f54; --line:#e7e1d6; --line2:#d9d2c5;
+    --accent:#0d5f57; --accent-ink:#0a463f; --gold:#836819; --gold-soft:#6f5714; --good:#0e7a52;
+    --shadow:0 18px 44px -24px rgba(15,30,60,.35);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:radial-gradient(1100px 700px at 78% -8%,rgba(67,179,166,.10),transparent 60%),var(--bg);
+    color:var(--ink);font-family:var(--font-body);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  a{color:var(--accent-ink);text-decoration:none}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+  ::selection{background:color-mix(in oklab,var(--accent) 32%,transparent)}
+  h1,h2,h3{font-family:var(--font-display);font-weight:600;line-height:1.15;margin:0}
+  .mono{font-family:var(--font-mono)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(18px,4vw,40px)}
+  .eyebrow{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+
+  .top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:12px clamp(18px,4vw,40px);background:color-mix(in oklab,var(--bg),transparent 8%);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:11px;color:var(--ink)}
+  .crest{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex:0 0 auto;
+    background:linear-gradient(145deg,#0e7b6f,#0b655b);color:#fff;font-family:var(--font-display);font-weight:700;font-size:15px;box-shadow:var(--shadow)}
+  .brand .nm{font-family:var(--font-display);font-weight:700;font-size:15px;line-height:1.05}
+  .brand .rl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+  .topacts{display:flex;align-items:center;gap:8px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:9px 14px;border-radius:10px;font-weight:600;font-size:13px;
+    border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer;transition:.16s;white-space:nowrap;font-family:var(--font-body)}
+  .btn:hover{border-color:var(--accent);transform:translateY(-1px)}
+  .btn svg{width:16px;height:16px}
+  .btn.icon{padding:9px;width:38px}
+  @media(max-width:640px){ .top .btn span.lbl{display:none} }
+
+  .case{padding:clamp(30px,5vw,56px) 0 10px}
+  .case h1{font-size:clamp(28px,4.6vw,42px);letter-spacing:-.015em;line-height:1.1;margin-top:10px}
+  .pos{font-family:var(--font-display);font-weight:600;font-size:clamp(15.5px,1.8vw,18.5px);color:var(--gold);margin:12px 0 0;max-width:38em}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}
+  .chip{font-family:var(--font-mono);font-size:10.5px;color:var(--ink2);background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:4px 8px}
+  .cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+  .plink{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;color:#20180a;
+    background:linear-gradient(145deg,var(--gold),var(--gold-soft));border:1px solid transparent;border-radius:10px;padding:10px 15px;transition:.16s}
+  html[data-theme="light"] .plink{color:#fff}
+  html[data-theme="light"] .plink.ghost{color:var(--accent-ink)}
+  .plink:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+  .plink svg{width:15px;height:15px}
+  .plink.ghost{color:var(--accent-ink);background:transparent;border-color:color-mix(in oklab,var(--accent) 40%,transparent)}
+  .plink.ghost:hover{background:color-mix(in oklab,var(--accent) 12%,transparent);border-color:var(--accent);box-shadow:none}
+
+  /* Screenshot figure */
+  figure.shot{margin:clamp(24px,4vw,36px) 0 0;padding:0}
+  figure.shot .ph{aspect-ratio:16/9;display:grid;place-items:center;gap:4px;text-align:center;padding:18px;
+    border:2px dashed var(--line2);border-radius:var(--radius);background:radial-gradient(120% 120% at 80% 0,rgba(67,179,166,.10),transparent 55%),var(--bg2);color:var(--muted)}
+  figure.shot .ph .tag{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.08em;color:var(--accent-ink)}
+  figure.shot .ph .hint{font-size:12.5px;max-width:46ch;align-self:start}
+  figure.shot figcaption{font-size:12px;color:var(--muted);margin-top:9px;font-style:italic}
+
+  section.sec{margin-top:clamp(28px,4.5vw,40px)}
+  section.sec h2{font-size:clamp(19px,2.5vw,24px);letter-spacing:-.005em;display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--line);padding-bottom:10px}
+  section.sec h2 .secno{font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;color:var(--gold);font-weight:500}
+  section.sec p{color:var(--ink2);font-size:14.8px;line-height:1.68;margin:14px 0 0;max-width:74ch}
+  section.sec p b{color:var(--ink)}
+  section.sec ul{margin:12px 0 0;padding-left:20px;color:var(--ink2);font-size:14.5px;line-height:1.62;max-width:72ch}
+  section.sec li{margin:7px 0}
+  section.sec li b{color:var(--ink)}
+
+  .status{display:flex;gap:12px;align-items:flex-start;margin-top:clamp(28px,4.5vw,40px);padding:16px 18px;border:1px solid var(--line2);border-left:3px solid var(--gold);
+    border-radius:12px;background:color-mix(in oklab,var(--gold) 7%,var(--surface));font-size:13.5px;color:var(--ink2)}
+  .status svg{width:19px;height:19px;color:var(--gold);flex:0 0 auto;margin-top:1px}
+  .status b{color:var(--ink)}
+  .status .k{display:block;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+
+  .pager{display:flex;justify-content:space-between;gap:12px;margin-top:clamp(30px,5vw,46px);flex-wrap:wrap}
+  .pager a{display:inline-flex;align-items:center;gap:9px;padding:11px 15px;border:1px solid var(--line2);border-radius:11px;color:var(--ink);font-weight:600;font-size:13.5px;background:var(--surface);transition:.16s}
+  .pager a:hover{border-color:var(--accent);transform:translateY(-1px)}
+  .pager a svg{width:15px;height:15px}
+  .pager a small{display:block;font-weight:500;font-size:10.5px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+
+  footer{margin:clamp(36px,6vw,60px) 0 40px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
+  footer a{color:var(--ink2)} footer a:hover{color:var(--accent-ink)}
+  footer .row{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center}
+
+  .cfside{display:none}
+  @media(min-width:1080px){
+    body{padding-left:280px}
+    .pubnav{display:none}
+    .cfside{position:fixed;left:0;top:0;bottom:0;width:280px;z-index:30;display:flex;flex-direction:column;gap:18px;
+      padding:22px 18px;background:var(--bg2);border-right:1px solid var(--line);overflow-y:auto}
+  }
+  .cfside .cfbrand{display:flex;align-items:center;gap:11px}
+  .cfside .cfbrand img{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:0 0 auto}
+  .cfside .cfbrand .nm{font-family:var(--font-display);font-weight:700;font-size:15.5px;color:var(--ink);line-height:1.1}
+  .cfside .cfbrand .rl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px;line-height:1.5}
+  .cfside nav{display:flex;flex-direction:column;gap:4px}
+  .cfside nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;color:var(--ink2);font-size:14px;font-weight:500;border:1px solid transparent;text-decoration:none}
+  .cfside nav a svg{width:18px;height:18px;flex:0 0 auto}
+  .cfside nav a:hover{background:var(--surface);color:var(--ink)}
+  .cfside nav a.on{background:var(--surface);border-color:var(--line);color:var(--ink)}
+  .cfside .cffoot{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+  .cfside .cfavail{font-size:12px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+  .cfside .cfdot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 10px var(--good);flex:0 0 auto;margin-top:4px}
+  .cfside .cfbtns{display:flex;gap:8px}
+  .cfside .cfcv{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:12px;font-weight:600;font-size:13px;
+    background:var(--accent);border:1px solid var(--accent);color:#fff;text-decoration:none}
+  .cfside .cfcv:hover{filter:brightness(1.08)}
+  .cfside .cftheme{width:40px;display:inline-flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer}
+  .cfside .cftheme svg{width:16px;height:16px}
+
+  /* ---- MOBILE MENU (matches the home page's drawer) -------------------------------------
+     Below 1080px the .cfside sidebar was simply hidden. Publications compensated with a
+     cramped uppercase .pubnav strip; the case-study pages had NO menu at all, so a phone
+     visitor was stranded with no way back. The sidebar now slides in as a drawer behind a
+     hamburger, exactly like index.html, so every page behaves the same way on a phone. */
+  .cftop{display:none;position:sticky;top:0;z-index:50;align-items:center;justify-content:space-between;
+    gap:12px;padding:10px clamp(14px,4vw,20px);background:color-mix(in oklab,var(--bg2),transparent 6%);
+    border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}
+  .cftop .cfb{display:flex;align-items:center;gap:10px;min-width:0;text-decoration:none;color:inherit}
+  .cftop .cfb img{width:32px;height:32px;border-radius:50%;object-fit:cover;flex:0 0 auto}
+  .cftop .cfb .nm{font-family:var(--font-display);font-weight:700;font-size:15px;color:var(--ink);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cfburger{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;flex:0 0 auto;
+    border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink2);cursor:pointer}
+  .cfburger svg{width:20px;height:20px}
+  .cfburger:hover{color:var(--ink)}
+  .cfscrim{display:none;position:fixed;inset:0;z-index:49;background:rgba(6,8,12,.55);backdrop-filter:blur(2px)}
+  .cfscrim.on{display:block}
+  @media(max-width:1079.98px){
+    .cftop{display:flex}
+    .pubnav{display:none}                     /* replaced by the drawer */
+    .cfside{display:flex;position:fixed;left:0;top:0;bottom:0;width:284px;max-width:86vw;z-index:51;
+      flex-direction:column;gap:18px;padding:22px 18px;background:var(--bg2);
+      border-right:1px solid var(--line);overflow-y:auto;
+      transform:translateX(-100%);visibility:hidden;transition:transform .25s ease,visibility 0s linear .25s}
+    .cfside.open{transform:none;visibility:visible;transition:transform .25s ease,visibility 0s}
+  }
+  @media print{.cftop,.cfscrim,.cfside{display:none!important}}
+</style>
+<script>(function(){try{var t=localStorage.getItem('cf-theme');if(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches)t='light';if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+<div class="cftop">
+  <a class="cfb" href="../index.html"><img src="../assets/img/portrait-2026.png" alt=""><span class="nm">Christopher Farmer</span></a>
+  <button class="cfburger" id="cfburger" aria-label="Menu" aria-expanded="false" aria-controls="cfsidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+</div>
+<div class="cfscrim" id="cfscrim" hidden></div>
+  <aside class="cfside" aria-label="Site navigation">
+    <div class="cfbrand">
+      <img src="../assets/img/portrait-2026.png" alt="Christopher Farmer">
+      <div><div class="nm">Christopher Farmer</div><div class="rl">Legal, Risk &amp; Technology Transformation</div></div>
+    </div>
+    <nav>
+      <a href="../index.html#overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg><span>Overview</span></a>
+      <a href="../index.html#projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Projects</span></a>
+      <a href="../case-studies/index.html" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 5h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h7z"/></svg><span>Case studies</span></a>
+      <a href="../index.html#experience"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Experience</span></a>
+      <a href="../index.html#warroom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>War Room</span></a>
+      <a href="../index.html#expertise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.1L12 17l-5.5 3.3 1-6.1L3 8.9 9 8z"/></svg><span>Expertise</span></a>
+      <a href="../index.html#credentials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg><span>Credentials</span></a>
+      <a href="../publications/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg><span>Publications</span></a>
+      <a href="../publications/research-lab.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3h6"/><path d="M10 3v7L5 20h14l-5-10V3"/><path d="M8 15h8"/></svg><span>Research Lab</span></a>
+      <a href="../index.html#contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M4 7l8 6 8-6"/></svg><span>Contact</span></a>
+    </nav>
+    <div class="cffoot">
+      <div class="cfavail"><span class="cfdot"></span> Open to legal, risk &amp; transformation roles &mdash; Geneva</div>
+      <div class="cfbtns">
+        <a class="cfcv" href="../docs/CV-Christopher-Farmer-2026-08.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg> CV</a>
+        <button class="cftheme" onclick="document.getElementById('theme')?document.getElementById('theme').click():(function(){var h=document.documentElement,n=h.getAttribute('data-theme')==='light'?'dark':'light';h.setAttribute('data-theme',n);try{localStorage.setItem('cf-theme',n)}catch(e){}})()" title="Toggle theme" aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="top">
+    <a class="brand" href="../index.html" aria-label="Back to Christopher Farmer portfolio">
+      <div class="crest">CF</div>
+      <div><div class="nm">Christopher Farmer</div><div class="rl">Case studies</div></div>
+    </a>
+    <div class="topacts">
+      <a class="btn" href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="lbl">All case studies</span></a>
+      <a class="btn" href="../index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M15 18l-6-6 6-6"/></svg><span class="lbl">&#8592; Back to portfolio</span></a>
+      <button class="btn icon" id="theme" title="Toggle light / dark" aria-label="Toggle light or dark theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <main class="wrap">
+    <article class="case">
+      <div class="eyebrow">Case study 08 &middot; Verification &amp; economic security</div>
+      <h1>Ground Truth &mdash; three instruments that check a claim against the register, offline</h1>
+      <p class="pos">Where is an economy&rsquo;s supply concentrated and could anyone replace it; does a cited authority exist and is it what the citation says; who consolidates whom. Three questions, four open registers, and no network call at any point.</p>
+      <div class="chips"><span class="chip">323,929 trade cells</span><span class="chip">479,762 control relationships</span><span class="chip">65,357 retractions</span><span class="chip">71 in-page assertions</span><span class="chip">Vanilla JS &middot; air-gapped</span></div>
+      <div class="cta">
+        <a class="plink" href="../projects/ground-truth/index.html" target="_blank" rel="noopener">Open the suite <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg></a>
+        <a class="plink ghost" href="../projects/ground-truth/Chokepoint.html" target="_blank" rel="noopener">Chokepoint</a>
+        <a class="plink ghost" href="../projects/ground-truth/Veritas.html" target="_blank" rel="noopener">Veritas</a>
+      </div>
+
+      <figure>
+        <img src="img/ground-truth.png" alt="Chokepoint ranking the United States&rsquo; most concentrated production inputs, with supplier shares, world grip and exposure scores" loading="lazy" style="width:100%;height:auto;display:block;border-radius:12px;border:1px solid var(--line)">
+        <figcaption>Chokepoint, drawn from the tool&rsquo;s own output on BACI 202601. The framing lumber, rail wagon and LED lines are real 2024 dependencies, not illustrations.</figcaption>
+      </figure>
+
+      <h2>The problem</h2>
+      <p>Three professions have the same defect in common. A compliance officer is asked whether a counterparty is exposed to a supplier who could switch the tap off, and answers from a supply-chain deck written by the counterparty. A litigator is handed a skeleton argument citing eleven authorities and reads none of them. A credit committee sees a corporate group chart drawn by the group. In each case the answer is available in a public register, and in each case nobody checks, because checking is slow, and because the tool that would check it wants to be online.</p>
+      <p>That last constraint is not incidental. The moment a verification tool calls an API it has told somebody what you are checking, which for a counterparty screen, a pre-action citation check or a takeover target is the most sensitive fact in the transaction. It also stops working in exactly the conditions where verification matters most: a network that is down, restricted, or not trusted.</p>
+
+      <h2>What was built</h2>
+      <p><b>Chokepoint</b> scores exposure to economic coercion in a single traded good. It reduces 11,250,411 bilateral flows from the CEPII BACI database &mdash; $22.94 trillion of 2024 trade &mdash; into 323,929 importer-product cells, and for each one measures the share held by the largest supplier, the concentration of the whole supplier set, the leading supplier&rsquo;s grip on <i>world</i> exports, and whether the rest of the world exported enough of that good, anywhere, to cover the loss.</p>
+      <p>Exposure is the product of a concentration term and a difficulty-of-substitution term, not a weighted average of several measures. That is a deliberate choice: a weighted average lets a comfortable reading on one measure buy off a dangerous reading on another, which is what makes most composite indices useless for decision. The difficulty term takes the <i>worst</i> of global grip, insufficient residual capacity, and concentration of the alternatives, because those are not compensating conditions. A buyer facing any one of them is stuck.</p>
+      <p>It also computes the mirror. Coercion is a two-sided game, and a vulnerability assessment that ignores the retaliation set is half an assessment. The leverage view lists the lines in which a chosen economy is the largest supplier to importers who are themselves exposed &mdash; what it could withhold, not what it would.</p>
+      <p><b>Veritas</b> answers whether a cited authority exists. It holds a citation index built from Find Case Law &mdash; neutral citation, case name, court and date, metadata only, harvested under a computational-analysis permission granted by the National Archives &mdash; and the Retraction Watch corpus of 65,357 human-verified retractions distributed by Crossref. Paste a bibliography, a table of authorities or a whole filing; it extracts every neutral citation and DOI and returns one of four verdicts.</p>
+      <p><b>Lineage</b> walks corporate control from the register regulators actually rely on. The Legal Entity Identifier is the identifier a bank must quote when it reports a derivative trade, and the accompanying Level 2 file records who consolidates whom, which makes it the only global machine-readable record of corporate control maintained because somebody is obliged to maintain it rather than because somebody chose to publish it. 479,762 active relationships across 350,169 entities.</p>
+
+      <h2>The decisions that mattered</h2>
+      <p><b>Concentration is not consequence.</b> The first working version of Chokepoint ranked Germany&rsquo;s most exposed imports as pistachios, cut flowers and Swiss watches. All three are genuinely single-sourced; none of them is coercion risk. What makes a dependency coercible is that it enters a production function &mdash; an input somebody&rsquo;s factory stops without. The default view is therefore restricted to intermediate and capital goods using the UN Broad Economic Categories, and the tool says so rather than pretending a composite score can distinguish importance from volume.</p>
+      <p><b>The buyer&rsquo;s own volume tells you nothing about substitution.</b> An earlier scoring rule gave the United States&rsquo; 73 per cent dependence on Chinese rare-earth compounds a score of 0.10, on the reasoning that the rest of the world exports twelve times what the United States buys. That reasoning is wrong, because most of those exports originate in the same place. Residual capacity measured against one importer&rsquo;s volume exceeds unity for almost every buyer of almost every good, so it discriminates between nothing. The score now turns on the leading supplier&rsquo;s share of world exports.</p>
+      <p><b>A verifier that cries wolf is worse than no verifier.</b> Find Case Law is not the whole of English law: it runs from 2001 for most courts and does not cover Scotland, Northern Ireland or most earlier authority. So Veritas distinguishes four verdicts, and the distinction between two of them is the entire product. A citation absent from the corpus <i>within the years the corpus covers for that court</i> is flagged. A citation outside that envelope is reported as unconfirmed, never as false. Ask it about <i>Donoghue v Stevenson</i> [1932] AC 562 and it says the corpus does not reach 1932 &mdash; because a tool that calls that judgment fabricated teaches its user to ignore every warning it ever gives.</p>
+      <p><b>The dangerous fabrication is not the invented citation.</b> It is the real citation carried by the wrong case name, which survives a glance at a citator. Veritas compares the name it was given against the name the register holds and reports the mismatch separately.</p>
+      <p><b>Registry data contains cycles.</b> Two entities each filing that the other consolidates them is not rare, and a naive parent walk hangs the page. Lineage guards every step and reports the cycle rather than following it, because the fact that the filings contradict each other is itself the finding.</p>
+
+      <h2>What they refuse to assert</h2>
+      <p>Chokepoint cannot see below HS 6-digit resolution. Where the decisive dependency sits inside a heading &mdash; extreme-ultraviolet lithography inside the semiconductor-machinery line, or a single qualified grade inside a chemical line &mdash; it under-reads, and says so rather than guessing. It reads customs origin, so material refined in one state and shipped from another appears as coming from the second. Alternative capacity counts only what a state actually exported in the reference year: not idle capacity, not capacity that could be built, because coercion operates on the first timescale and not the second.</p>
+      <p>Veritas makes exactly one claim about a DOI &mdash; whether it appears in the retraction corpus. It holds no index of extant publications and does not confirm that an unretracted work exists. Lineage records accounting consolidation, fund management and branch relationships. It does not record beneficial ownership, shareholding percentages, or control exercised by contract, and an entity absent from a chain is not thereby independent; it may simply have no reporting obligation.</p>
+      <p>Each of those limits is stated in the tool, carried inside the data pack, and reproduced on every export, so a figure cannot be separated from its own caveat by being copied into a slide.</p>
+
+      <h2>How it is built</h2>
+      <p>A Python pipeline reduces the four corpora into deterministic data packs; three single-file browser tools read those packs and never touch the network again. The build is reproducible: the same input files produce byte-identical packs, and every pack carries the SHA-256 of the file it was derived from, which is reproduced on every export and in every generated record. The builders abort rather than emit a short pack.</p>
+      <p>71 assertions run inside the pages themselves, on the real data, and can be run by anyone who opens them. They test the things that would be wrong quietly: that the same neutral citation written five different ways produces one key; that exposure can never exceed concentration; that a cycle terminates the walk; that every exported CSV row carries the header&rsquo;s column count; that a filter which returns nothing does so because nothing matched and not because a control failed to parse.</p>
+      <p><b>Stack:</b> Python 3 with numpy and pandas at build time, vanilla JavaScript at run time. No framework, no CDN, no runtime dependency, no telemetry.</p>
+
+      <nav class="pager">
+        <a href="sanctions-suite.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg><span><small>Previous &middot; 07</small>Sanctions Suite</span></a>
+      </nav>
+    </article>
+
+    <footer>
+      <div class="row">
+        <span>© <span id="yr">2026</span> Christopher I. V. Farmer</span>
+        <span>·</span>
+        <a href="../index.html">Portfolio</a>
+        <span>·</span>
+        <a href="index.html">Case studies</a>
+        <span>·</span>
+        <a href="../docs/CV-Christopher-Farmer-2026-08.pdf" target="_blank" rel="noopener">CV</a>
+        <span>·</span>
+        <span class="mono" style="color:var(--muted)">BACI (Etalab 2.0) · GLEIF (CC0) · Find Case Law (Open Justice Licence, computational analysis permitted) · Retraction Watch via Crossref (CC0) · point-in-time · not legal advice</span>
+      </div>
+    </footer>
+  </main>
+
+<script>
+  (function(){
+    var root=document.documentElement, KEY='cf-theme';
+    try{ var s=localStorage.getItem(KEY); if(s){ root.setAttribute('data-theme', s); } }catch(e){}
+    var btn=document.getElementById('theme');
+    if(btn){ btn.addEventListener('click', function(){
+      var next=root.getAttribute('data-theme')==='dark'?'light':'dark';
+      root.setAttribute('data-theme', next);
+      try{ localStorage.setItem(KEY, next); }catch(e){}
+    }); }
+    var yr=document.getElementById('yr'); if(yr){ yr.textContent=String(new Date().getFullYear()); }
+  })();
+</script>
+<script>
+/* mobile drawer — same behaviour as the home page: hamburger opens, scrim or Esc closes,
+   any nav link closes it, and it is force-closed if the viewport grows past the breakpoint */
+(function(){
+  var side=document.querySelector('.cfside'), b=document.getElementById('cfburger'), sc=document.getElementById('cfscrim');
+  if(!side||!b||!sc)return;
+  side.id=side.id||'cfsidebar';
+  function set(o){side.classList.toggle('open',o);sc.classList.toggle('on',o);sc.hidden=!o;
+    b.setAttribute('aria-expanded',o?'true':'false');document.body.style.overflow=o?'hidden':'';}
+  b.addEventListener('click',function(){set(!side.classList.contains('open'));});
+  sc.addEventListener('click',function(){set(false);});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')set(false);});
+  side.addEventListener('click',function(e){if(e.target.closest('a'))set(false);});
+  addEventListener('resize',function(){if(innerWidth>=1080)set(false);});
+})();
+</script>
+</body>
+</html>

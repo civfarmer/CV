@@ -208,15 +208,15 @@
       <div class="eyebrow">Case study 07 · Sanctions screening &amp; exposure</div>
       <h1>Sanctions Suite — four offline screening tools on one dated snapshot</h1>
       <p class="pos">A screening desk, an ownership-exposure graph, a vessel screener and a portfolio console — all built on one checksummed OpenSanctions snapshot, all running with the network cable unplugged.</p>
-      <div class="chips"><span class="chip">308,597 designated entities</span><span class="chip">12,113 relationship records</span><span class="chip">2,347 vessels &amp; aircraft</span><span class="chip">Attestation output</span><span class="chip">Vanilla JS · offline</span></div>
+      <div class="chips"><span class="chip">308,597 sanctions &amp; crime entities</span><span class="chip">12,113 relationship records</span><span class="chip">2,347 vessels &amp; aircraft</span><span class="chip">Attestation output</span><span class="chip">Vanilla JS · offline</span></div>
       <div class="cta">
         <a class="plink" href="../projects/sanctions-suite/index.html" target="_blank" rel="noopener">Open the suite <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg></a>
         <a class="plink ghost" href="../projects/sanctions-suite/Sentinel-Screen.html" target="_blank" rel="noopener">Screening desk</a>
       </div>
 
       <figure class="shot" data-shot="sanctions-suite">
-        <img src="img/sanctions-suite.png" alt="Sentinel Screen showing a Rosneft query returning designated entities with scores, list labels and sanctions programmes" loading="lazy" style="width:100%;height:auto;display:block;border-radius:12px;border:1px solid var(--line)">
-        <figcaption>Sentinel Screen — a real query against the deposited snapshot, returning designated Rosneft entities with their programmes and source lists. Rendered from live engine output; runs offline.</figcaption>
+        <img src="img/sanctions-suite.png" alt="Sentinel Screen showing a Rosneft query returning eight sanctioned entities with scores, list labels, countries and sanctions programmes" loading="lazy" style="width:100%;height:auto;display:block;border-radius:12px;border:1px solid var(--line)">
+        <figcaption>Sentinel Screen — a real query against the deposited snapshot, returning designated Rosneft entities with their programmes and source lists. Drawn from the tool&rsquo;s own output on snapshot 20260802074701-juq: the records, scores, list labels, countries and programmes are exactly what it returns. Programme lists are abridged to the first three for width.</figcaption>
       </figure>
 
       <section class="sec">
@@ -226,11 +226,11 @@
 
       <section class="sec">
         <h2><span class="secno">02</span>What I built</h2>
-        <p>Four tools sharing one pipeline. A Python builder streams a dated OpenSanctions snapshot — 292,861 entities drawn from 93 sources — into deterministic data packs; four single-file browser tools read those packs and never touch the network again.</p>
+        <p>Four tools sharing one pipeline. A Python builder streams two dated OpenSanctions collections — sanctions (292,861 entities) and crime (522,965) — into deterministic data packs holding 308,597 distinct targets drawn from 147 source datasets; four single-file browser tools read those packs and never touch the network again.</p>
         <ul>
           <li><b>Sentinel Screen</b> — name, identifier or pasted-list screening against 308,597 distinct sanctions and crime entities, with a PEP overlay of 771,755 records loaded on demand in the local build (the overlay is 141 MB and is not published with the web demo). Produces a dated <b>attestation</b> carrying the SHA-256 of every source file, the snapshot version of each collection, and the method applied.</li>
           <li><b>Exposure Graph</b> — 12,113 ownership, directorship, family, association and representation records, searched breadth-first for the shortest routes from a counterparty to a designated party, every hop showing the source that records it.</li>
-          <li><b>Vessel &amp; Trade Screener</b> — 2,347 designated vessels and aircraft by IMO, MMSI, call sign or pasted manifest, with ownership chains and sanctioned owners marked.</li>
+          <li><b>Vessel &amp; Trade Screener</b> — 2,347 vessels and aircraft (2,003 ships, 344 aircraft) from the designated lists, searched by IMO, MMSI, call sign or pasted manifest &mdash; ship-type prefixes and all. Each row is marked LISTED or RELATED, with ownership chains and sanctioned owners shown.</li>
           <li><b>Meridian Sanctions Console</b> — a 1,317-company register pre-screened against the snapshot, producing a review queue filterable by score band.</li>
         </ul>
       </section>
@@ -247,12 +247,12 @@
 
       <div class="status">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9L2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
-        <div><span class="k">Status &amp; data</span><b>Runs here in the portfolio, entirely in the browser and entirely offline — nothing typed into it leaves the page.</b> The web build carries a <b>12,544-record demo subset</b> of the 308,597-entity production corpus so it loads quickly; vessels, the relationship graph and the company screening are complete, and every tool states which corpus it is using. Data is <b>OpenSanctions</b>, licensed <b>CC BY-NC 4.0</b> — non-commercial use with attribution; business use requires a licence from OpenSanctions. Output is <b>point-in-time</b>, produces <b>candidates for human adjudication</b>, and is <b>not legal advice</b>.</div>
+        <div><span class="k">Status &amp; data</span><b>Runs here in the portfolio, entirely in the browser and entirely offline — nothing typed into it leaves the page.</b> The published build carries the <b>complete 308,597-entity corpus</b>, not a sample: repeated fields are interned into dictionaries and rehydrated in the browser, which is what makes a corpus of that size shippable at all. Sentinel Screen pulls 55&nbsp;MB for the core pack, with 23&nbsp;MB of listing detail following in the background; the other three tools carry their own smaller packs, 87&nbsp;MB for the suite. Once a tool’s page and its pack have loaded, the machine can be taken off the network and that tool keeps answering. That is the point of building it this way &mdash; screening work is often done where connectivity is unavailable, untrusted, or where the query itself is the sensitive part, and a tool that needs an API call is no tool at all in those conditions. The one component held back is the 771,755-record PEP overlay, a 141&nbsp;MB pack past GitHub's file limit; it runs in the local build and every tool says so rather than hiding it. Data is <b>OpenSanctions</b>, licensed <b>CC BY-NC 4.0</b> — non-commercial use with attribution; business use requires a licence from OpenSanctions. Output is <b>point-in-time</b>, produces <b>candidates for human adjudication</b>, and is <b>not legal advice</b>.</div>
       </div>
 
       <nav class="pager" aria-label="Case study navigation">
         <a href="sentinel.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg><span><small>Previous · 06</small>Sentinel</span></a>
-        <a href="index.html"><span style="text-align:right"><small>Back to</small>All case studies</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></a>
+        <a href="ground-truth.html"><span style="text-align:right"><small>Next &middot; 08</small>Ground Truth</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></a>
       </nav>
     </article>
 

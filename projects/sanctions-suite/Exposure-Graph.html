@@ -9,7 +9,7 @@
     --line:#233145;--accent:#43b3a6;--accent-ink:#84d6ca;--bad:#e0574a;--warn:#e0a13a;--good:#43c59e;
     --mono:ui-monospace,'Cascadia Code',Consolas,monospace;--sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
   html[data-theme="light"]{--bg:#f4f1ec;--surface:#fff;--surface2:#faf7f2;--ink:#221e18;--ink2:#4c473e;
-    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f}
+    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f--good:#0f7a5a;--warn:#8a5a10;--bad:#a32a1e;}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55}
   header{border-bottom:1px solid var(--line);padding:14px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--surface)}
@@ -41,13 +41,20 @@
   svg{width:100%;height:auto;background:var(--surface2);border-radius:8px;border:1px solid var(--line)}
   @media print{.noprint{display:none!important}body{background:#fff;color:#000}}
 </style>
+<script>
+/* The theme has to be applied before anything heavy loads. The data packs below
+   are blocking scripts — 55 MB in Sentinel's case — and a theme read placed after
+   them leaves a light-mode visitor staring at a dark page for the whole download. */
+(function(){try{var q=new URLSearchParams(location.search).get("theme");
+if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q);}catch(e){}})();
+</script>
 </head>
 <body>
 <header>
   <h1>Exposure Graph</h1>
   <span class="tag" id="verTag">loading…</span><span class="tag">offline</span>
   <span class="spacer"></span>
-  <a class="tag" href="index.html" style="text-decoration:none">← Suite</a>
+  <a class="tag" href="index.html" data-keep-theme style="text-decoration:none">← Suite</a>
   <button class="ghost noprint" id="themeBtn">Theme</button>
   <button class="ghost noprint" id="selfTestBtn">Self-test</button>
 </header>
@@ -376,7 +383,10 @@
     L.push("");
     L.push("Dataset: OpenSanctions snapshot "+m.snapshot_version+" (built from "+(m.built_from_snapshot||m.snapshot_version)+")");
     L.push("Generated: "+new Date().toISOString()+" — offline");
-    if(m.demo_subset) L.push("CORPUS: "+(m.demo_note||"demo subset"));
+    // The exported dossier stated its corpus only on a reduced build, so the
+    // full build shipped an export that said nothing about its own scope.
+    if(m.coverage_note) L.push("CORPUS: "+m.coverage_note);
+    else if(m.demo_subset) L.push("CORPUS: "+(m.demo_note||"demo subset"));
     L.push("");
     if(!currentPaths || !currentPaths.length){
       L.push("No route to a sanctioned entity within the searched depth.");
@@ -415,7 +425,8 @@
     if(!P){ el.innerHTML='<strong style="color:var(--bad)">Data pack not found.</strong> Run 01-build\\BUILD-ALL.cmd, then reopen.'; return; }
     document.getElementById("verTag").textContent=P.meta.snapshot_version||"unknown";
     var pre = P.meta.demo_subset
-      ? '<div style="color:var(--warn);margin-bottom:6px"><strong>Coverage.</strong> '+esc(P.meta.coverage_note||P.meta.demo_note||"")+'</div>' : '';
+      ? '<div style="color:var(--warn);margin-bottom:6px"><strong>Coverage.</strong> '+esc(P.meta.coverage_note||P.meta.demo_note||"")+'</div>'
+      : (P.meta.coverage_note ? '<div class="muted" style="margin-bottom:6px"><strong>Coverage.</strong> '+esc(P.meta.coverage_note)+'</div>' : '');
     el.innerHTML=pre+'<strong>Dataset:</strong> OpenSanctions snapshot <span class="mono">'+esc(P.meta.snapshot_version)+'</span> · '+
       Object.keys(NODES).length.toLocaleString()+' entities with relationships · '+EDGES.length.toLocaleString()+
       ' recorded links (ownership, directorship, family, association, representation).<br>'+
@@ -517,6 +528,20 @@
       document.documentElement.setAttribute("data-theme", ev.data.theme);
   });
 })();
+</script>
+<script>
+/* Carry the viewer's theme across every internal hop, so a light-mode visitor
+   who opens a tool from the suite index does not land on a dark page. */
+(function(){try{
+  var q=new URLSearchParams(location.search).get("theme");
+  if(q!=="light"&&q!=="dark") return;
+  var sel='a.tool, a[data-keep-theme], a[href$=".html"]:not([target="_blank"])';
+  Array.prototype.forEach.call(document.querySelectorAll(sel), function(a){
+    var h=a.getAttribute("href")||"";
+    if(!h || /^(https?:|#|mailto:)/.test(h) || h.indexOf("theme=")>=0) return;
+    a.setAttribute("href", h+(h.indexOf("?")>=0?"&":"?")+"theme="+q);
+  });
+}catch(e){}})();
 </script>
 </body>
 </html>
