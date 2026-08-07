@@ -6,7 +6,6 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f17'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='27' font-weight='700' fill='%23d4b24c' text-anchor='middle'%3ECF%3C/text%3E%3C/svg%3E">
 <title>Case studies — Christopher I. V. Farmer</title>
 <meta name="description" content="Eight working platforms read as case studies in regulatory judgement — FRIS, the Sanctions Suite, Ground Truth, Meridian, Vantage, Helm, Frontier and Sentinel. Each names a compliance failure mode, the control designed for it, and the legal reasoning behind the build. Synthetic, frozen or published-designation data; decision-support, not legal advice.">
-<meta name="robots" content="noindex">
 <style>
   /* Offline-first: font families name Zilla Slab / Inter / IBM Plex Mono but fall back to
      system fonts. No network requests, no CDN — matches the rest of the site. */
@@ -16,7 +15,7 @@
     --accent:#43b3a6; --accent-ink:#84d6ca; --gold:#d4b24c; --gold-soft:#e6cf8f;
     --good:#43c59e; --shadow:0 18px 50px -20px rgba(0,0,0,.7);
     --radius:16px; --maxw:1080px;
-    --font-display:'Zilla Slab',Georgia,'Times New Roman',serif;
+    --font-display:'Source Serif 4',Georgia,'Times New Roman',serif;
     --font-body:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
     --font-mono:'IBM Plex Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
   }
@@ -175,8 +174,39 @@
     .cfside.open{transform:none;visibility:visible;transition:transform .25s ease,visibility 0s}
   }
   @media print{.cftop,.cfscrim,.cfside{display:none!important}}
+
+  /* Print — force black-on-white. The site defaults to the dark theme and browsers
+     drop background colours when printing, so without this the page prints pale
+     grey text on white. These pages are printed to be taken into meetings. */
+  @media print{
+    :root,html[data-theme="dark"],html[data-theme="light"]{--bg:#fff;--bg2:#fff;--surface:#fff;--surface2:#fff;--card:#fff;--line:#bbb;--line2:#bbb;--ink:#000;--ink2:#1e1e1e;--mut:#3a3a3a;--muted:#3a3a3a;--accent:#0b5a52;--gold:#6f5714}
+    body{background:#fff!important;color:#000!important}
+    .side,.topbar,.scrim,.skip,.skyline-canvas,.cf-field,.viewer,.sheet,.cfmodal,.cftop,.cfscrim,.cfside,.menutgl,nav.main{display:none!important}
+    a{color:#000;text-decoration:underline}
+    .card,.paper,figure{border-color:#bbb!important;background:#fff!important;break-inside:avoid}
+    h1,h2,h3{color:#000!important;break-after:avoid}
+    .chip,.venue{border-color:#999!important;color:#222!important}
+    svg text{fill:#000!important} svg rect{fill:#fff!important;stroke:#666!important}
+    .edge{stroke:#666!important}
+  }
+
+  /* Loading state for the demo modals. These pull 600KB-1.5MB payloads and were
+     showing a blank panel for seconds. The mark is the Jet d'Eau reduced to a
+     rising column, so it belongs to the same hand as the skyline on the home page. */
+  .cfload{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:var(--bg);z-index:3}
+  .cfload.on{display:flex}
+  .cfload svg{width:34px;height:44px;overflow:visible}
+  .cfload .lake{stroke:var(--gold);stroke-opacity:.30;stroke-width:1.2;fill:none}
+  .cfload .jet{stroke:var(--gold);stroke-opacity:.85;stroke-width:1.6;stroke-linecap:round;fill:none;
+    stroke-dasharray:26;stroke-dashoffset:26;animation:cfjet 1.6s cubic-bezier(.4,0,.5,1) infinite}
+  .cfload .drop{fill:var(--gold);fill-opacity:.9;animation:cfdrop 1.6s cubic-bezier(.4,0,.5,1) infinite}
+  @keyframes cfjet{0%{stroke-dashoffset:26}45%{stroke-dashoffset:0}70%{stroke-dashoffset:0;stroke-opacity:.85}100%{stroke-dashoffset:0;stroke-opacity:0}}
+  @keyframes cfdrop{0%{transform:translateY(0);opacity:0}45%{transform:translateY(-26px);opacity:.9}100%{transform:translateY(-32px);opacity:0}}
+  .cfload p{margin:0;color:var(--mut,#8b97ab);font-size:13px}
+  @media (prefers-reduced-motion: reduce){ .cfload .jet{animation:none;stroke-dashoffset:0} .cfload .drop{animation:none;transform:translateY(-26px);opacity:.9} }
 </style>
 <script>(function(){try{var t=localStorage.getItem('cf-theme');if(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches)t='light';if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+  <link rel="stylesheet" href="../assets/fonts.css">
 </head>
 <body>
 <div class="cftop">
@@ -194,7 +224,7 @@
       <a href="../index.html#projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Projects</span></a>
       <a href="../case-studies/index.html" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 5h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h7z"/></svg><span>Case studies</span></a>
       <a href="../index.html#experience"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Experience</span></a>
-      <a href="../index.html#warroom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>War Room</span></a>
+      <a href="../index.html#warroom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>Crisis case studies</span></a>
       <a href="../index.html#expertise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.1L12 17l-5.5 3.3 1-6.1L3 8.9 9 8z"/></svg><span>Expertise</span></a>
       <a href="../index.html#credentials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg><span>Credentials</span></a>
       <a href="../publications/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg><span>Publications</span></a>
@@ -369,7 +399,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
         </button>
       </div>
-      <div class="cfmodal__body">
+      <div class="cfmodal__body"><div class="cfload" id="cfload" role="status" aria-live="polite"><svg viewBox="0 0 34 44" aria-hidden="true"><path class="lake" d="M4 38 q13 5 26 0"/><path class="jet" d="M17 38 V12"/><circle class="drop" cx="17" cy="38" r="1.7"/></svg><p>Loading&hellip;</p></div>
         <iframe class="cfmodal__frame" id="cfmodal-frame" title="Interactive tool" src="about:blank" allow="fullscreen" referrerpolicy="no-referrer"></iframe>
       </div>
     </div>
@@ -404,7 +434,7 @@
     var closers = modal.querySelectorAll('[data-cfclose]');
     var lastFocus = null, savedY = 0, isOpen = false;
 
-    function openModal(src, label){
+    function openModal(src, label){ if(window.cfLoadStart)cfLoadStart();
       if(!src || src === '#') return;
       savedY = window.pageYOffset || root.scrollTop || 0;
       lastFocus = document.activeElement;
@@ -419,7 +449,7 @@
       if(x){ try{ x.focus({preventScroll:true}); }catch(e){ x.focus(); } }
     }
 
-    function closeModal(){
+    function closeModal(){ if(window.cfLoadStop)cfLoadStop();
       if(!isOpen) return;
       modal.hidden = true;
       frame.setAttribute('src','about:blank');
@@ -461,6 +491,18 @@
   side.addEventListener('click',function(e){if(e.target.closest('a'))set(false);});
   addEventListener('resize',function(){if(innerWidth>=1080)set(false);});
 })();
+</script>
+<script>
+  /* 220ms before it shows, 400ms minimum once shown: it never flashes on a cached
+     load and never appears at all if the frame is instant. */
+  (function(){
+    var el=document.getElementById('cfload'); if(!el) return;
+    var showAt=0,timer=null;
+    window.cfLoadStart=function(){ clearTimeout(timer); timer=setTimeout(function(){ el.classList.add('on'); showAt=Date.now(); },220); };
+    window.cfLoadStop=function(){ clearTimeout(timer);
+      var held=Date.now()-showAt, wait=(showAt&&held<400)?400-held:0;
+      setTimeout(function(){ el.classList.remove('on'); showAt=0; },wait); };
+  })();
 </script>
 </body>
 </html>

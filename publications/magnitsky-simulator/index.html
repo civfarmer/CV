@@ -6,7 +6,6 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f17'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='27' font-weight='700' fill='%23d4b24c' text-anchor='middle'%3ECF%3C/text%3E%3C/svg%3E">
 <title>The Magnitsky Model for AI — Policy Simulator · Christopher I. V. Farmer</title>
 <meta name="description" content="An illustrative, offline policy simulator for the Magnitsky Model for AI: pick an AI-driven circumvention scenario, watch the double veil defeat attribution, enact targeted designations across jurisdictions, tune the cascade, and read a verdict. Not a prediction, not legal advice.">
-<meta name="robots" content="noindex">
 <style>
   /* Offline-first: names Zilla Slab / Inter / IBM Plex Mono, falls back to system fonts.
      No network, no CDN, no external assets. */
@@ -16,7 +15,7 @@
     --accent:#43b3a6; --accent-ink:#84d6ca; --gold:#d4b24c; --gold-soft:#e6cf8f;
     --good:#43c59e; --warn:#e0a13a; --bad:#e0685f; --shadow:0 18px 50px -20px rgba(0,0,0,.7);
     --radius:16px; --maxw:1180px;
-    --font-display:'Zilla Slab',Georgia,'Times New Roman',serif;
+    --font-display:'Source Serif 4',Georgia,'Times New Roman',serif;
     --font-body:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
     --font-mono:'IBM Plex Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
   }
@@ -276,6 +275,13 @@
   }
   @media print{.cftop,.cfscrim,.cfside{display:none!important}}
 </style>
+  <link rel="stylesheet" href="../../assets/fonts.css">
+<script>/* Respect the operating system's choice before first paint. Without this a deep
+   link from a submission email always lands on dark navy whatever the reader prefers,
+   and a returning visitor sees a dark-to-light flash. */
+(function(){try{var s=localStorage.getItem('cf-theme');
+if(!s)s=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';
+document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
 </head>
 <body>
 <div class="cftop">
@@ -293,7 +299,7 @@
       <a href="../../index.html#projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Projects</span></a>
       <a href="../../case-studies/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 5h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h7z"/></svg><span>Case studies</span></a>
       <a href="../../index.html#experience"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Experience</span></a>
-      <a href="../../index.html#warroom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>War Room</span></a>
+      <a href="../../index.html#warroom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>Crisis case studies</span></a>
       <a href="../../index.html#expertise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.1L12 17l-5.5 3.3 1-6.1L3 8.9 9 8z"/></svg><span>Expertise</span></a>
       <a href="../../index.html#credentials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg><span>Credentials</span></a>
       <a href="../../publications/index.html" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg><span>Publications</span></a>
@@ -301,7 +307,6 @@
       <a href="../../index.html#contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M4 7l8 6 8-6"/></svg><span>Contact</span></a>
     </nav>
     <div class="cffoot">
-      <div class="cfavail"><span class="cfdot"></span> Open to legal, risk &amp; transformation roles &mdash; Geneva</div>
       <div class="cfbtns">
         <a class="cfcv" href="../../docs/CV-Christopher-Farmer-2026-08.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg> CV</a>
         <button class="cftheme" onclick="document.getElementById('theme')?document.getElementById('theme').click():(function(){var h=document.documentElement,n=h.getAttribute('data-theme')==='light'?'dark':'light';h.setAttribute('data-theme',n);try{localStorage.setItem('cf-theme',n)}catch(e){}})()" title="Toggle theme" aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
@@ -333,7 +338,7 @@
   <a href="../../index.html#projects">Projects</a>
   <a href="../../case-studies/index.html">Case studies</a>
   <a href="../../index.html#experience">Experience</a>
-  <a href="../../index.html#warroom">War Room</a>
+  <a href="../../index.html#warroom">Crisis case studies</a>
   <a href="../../index.html#expertise">Expertise</a>
   <a href="../../index.html#credentials">Credentials</a>
   <a href="../index.html" aria-current="page">Publications</a>

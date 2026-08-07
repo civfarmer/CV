@@ -1,0 +1,58 @@
+Publish the corpus; rebuild the publications index; self-host the typefaces
+
+The publication PDFs had never been deployed. This adds all sixteen of them —
+the nine-paper economic warfare series, the seven manuscripts including the
+Swiss submission — together with the relationship map, which existed locally
+and had never been pushed.
+
+Publications index rebuilt as a list rather than a scroll of cards. Measured in
+Chromium at 390px: 20,573px down to 5,287px, 24.4 phone screens to 6.3, while
+gaining three works. The height was never the item count — a card cost a median
+630px and abstracts alone were 44% of the page. Each work is now a title, one
+metadata line, subject tags, and the abstract inside a <details> so it stays in
+the source for a crawler and costs nothing in height until wanted.
+
+No domain tabs. Two independent reviews rejected them: the counts do not support
+a three-way split, 64% of the corpus is genuinely cross-domain, and Google
+Scholar's guidelines exclude pages that require a click to reach an abstract.
+Domain is carried as non-exclusive tags instead.
+
+The jump navigation listed four sections and omitted two holding 16 of the 25
+documents, including the entire economic warfare series. It now lists all six.
+Sections are named by subject rather than by production phase.
+
+Three public-international-law papers on orbital conduct moved out of the
+Research Lab, where they sat between a railgun tradespace explorer and a
+launcher capstone, into a Space law and orbital conduct section.
+
+Typefaces are now actually present. There was no @font-face rule and no font
+file anywhere in the repository, so Zilla Slab, Inter and IBM Plex Mono had been
+declared for two years and never shipped — every visitor saw Georgia over Segoe
+UI. Eight woff2 files, latin subset, 176KB, self-hosted so the offline-first
+constraint holds. Zilla Slab replaced by Source Serif 4, which was drawn for
+extended screen reading and has real italics. Reading pages set in it at 18px on
+1.62 leading: 60 characters per line rather than 77.
+
+The map was display:none below 760px, so every phone visitor got a heading and
+one sentence. It now scrolls sideways at a legible width.
+
+Register: the availability pill and its green dot removed from the 18
+publications pages — a journal editor had "Open to legal, risk & transformation
+roles" pinned beside 14,000 words on orbital kinetic systems. "War Room" renamed
+to "Crisis case studies" across 29 files. Theme now respects the operating
+system before first paint, so a deep link from a submission email no longer
+lands on dark navy regardless of preference.
+
+Fixes found by rendering rather than reading: projects/meridian/demo.mp4 was
+referenced by the home page and did not exist; the master was unused in
+_build/video-masters. The Research Lab's descriptions, twelve of which exceed
+320 characters and one of which reaches 1,321, now clamp to four lines with a
+control to open them, applied by script so no-JS readers keep the full text.
+
+Papers republished after audit: Paper 5 (97 of 104 cross-references pointed at
+the wrong footnote; a citation belonging to an unrelated case), Paper 6, Papers
+0, 3 and 3B (four fabricated citations in 3B and all fourteen of its
+cross-references wrong), and Regulating Robots by Owning Them.
+
+Not published: working sources under publications/_source, the unredacted
+reference letters, local dev servers, and unlinked CV variants.
