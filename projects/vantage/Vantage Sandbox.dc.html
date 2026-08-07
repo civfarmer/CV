@@ -7,6 +7,7 @@
 <script src="./vantage-bundle.js"></script>
 <script src="./dc-nosri.js"></script>
 <script src="./support.js"></script>
+  <link rel="stylesheet" href="../../assets/fonts.css">
 </head>
 <body>
 <x-dc>
@@ -27,7 +28,7 @@
     <a href="Vantage.dc.html" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
       <img src="vantage-crest.png" style="height: 38px; width: auto;">
       <div>
-        <div style="font: 700 16px/1 'Zilla Slab', serif; color: var(--topbarText);">Vantage · Sandbox</div>
+        <div style="font: 700 16px/1 'Source Serif 4', serif; color: var(--topbarText);">Vantage · Sandbox</div>
         <div style="font: 500 9.5px/1 'IBM Plex Mono', monospace; color: var(--topbarSubtext); letter-spacing: 0.06em; margin-top: 3px;">BRING YOUR OWN DATA</div>
       </div>
     </a>
@@ -39,7 +40,7 @@
 
   <div style="max-width: 1000px; margin: 0 auto; padding: 30px 28px 80px;">
     <div style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sectionLabel);">Forecasting Sandbox</div>
-    <h1 style="font: 700 27px/1.15 'Zilla Slab', serif; color: var(--textStrong); margin: 8px 0 8px;">Upload a file or paste your figures. Pick your business. Get the right model.</h1>
+    <h1 style="font: 700 27px/1.15 'Source Serif 4', serif; color: var(--textStrong); margin: 8px 0 8px;">Upload a file or paste your figures. Pick your business. Get the right model.</h1>
     <p style="font: 500 14px/1.6 'IBM Plex Sans', sans-serif; color: var(--textMuted); margin: 0 0 22px; max-width: 730px;">Your business type sets the <em>model policy</em> and the <em>seasonality assumption</em> — so a SaaS series and a brewery series are forecast with genuinely different maths. Vantage back-tests every eligible model on your own numbers and returns the champion, with an ensemble option when no single model clearly wins.</p>
 
     <!-- step 1: business type -->
@@ -204,13 +205,13 @@ class Component extends DCLogic {
     const cardS = { background: 'var(--card)', border: '1px solid var(--cardBorder)', borderRadius: '12px', padding: '18px 20px', boxShadow: 'var(--cardShadow)' };
 
     const champCard = R('div', { key: 'ch', style: { ...cardS, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: '4px solid var(--accent)' } }, [
-      R('div', { key: 'a' }, [ R('div', { key: '1', style: { font: "600 10px/1 'IBM Plex Mono',monospace", letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--accent)' } }, 'Champion model — chosen by back-test'), R('div', { key: '2', style: { font: "700 22px/1.1 'Zilla Slab',serif", color: 'var(--textStrong)', marginTop: '6px' } }, short(champ)) ]),
+      R('div', { key: 'a' }, [ R('div', { key: '1', style: { font: "600 10px/1 'IBM Plex Mono',monospace", letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--accent)' } }, 'Champion model — chosen by back-test'), R('div', { key: '2', style: { font: "700 22px/1.1 'Source Serif 4',serif", color: 'var(--textStrong)', marginTop: '6px' } }, short(champ)) ]),
       R('div', { key: 'b', style: { textAlign: 'right' } }, [ R('div', { key: '1', style: { font: "600 10px/1 'IBM Plex Mono',monospace", color: 'var(--textSubtle)' } }, 'BACK-TESTED WAPE'), R('div', { key: '2', style: { font: "700 24px/1 'IBM Plex Mono',monospace", color: 'var(--accent)', marginTop: '4px' } }, sel.champion && sel.champion.metrics.wape != null ? sel.champion.metrics.wape.toFixed(1) + '%' : '—') ]),
     ]);
 
     const nextV = shownPath[0];
     const forecastCard = R('div', { key: 'fc', style: cardS }, [
-      R('div', { key: 't', style: { font: "700 15px/1 'Zilla Slab',serif", color: 'var(--textStrong)', marginBottom: '4px' } }, blendMode ? 'Forecast · ensemble (mean of top 3)' : 'Forecast · champion'),
+      R('div', { key: 't', style: { font: "700 15px/1 'Source Serif 4',serif", color: 'var(--textStrong)', marginBottom: '4px' } }, blendMode ? 'Forecast · ensemble (mean of top 3)' : 'Forecast · champion'),
       R('div', { key: 's', style: { font: "500 12px/1.4 'IBM Plex Sans',sans-serif", color: 'var(--textMuted)', marginBottom: '12px' } }, `Next period ≈ ${this.fmt(nextV)} (95% interval ${this.fmt(fc.pi95[0].lo)}–${this.fmt(fc.pi95[0].hi)}, from champion residuals). 12-period path below; the faint line is the ${altLabel}.`),
       R('div', { key: 'c', style: { height: '260px' } }, this.chart(hist, shownPath, fc.pi95, altPath, altLabel, chartT)),
     ]);
@@ -229,7 +230,7 @@ class Component extends DCLogic {
       R('div', { key: 3, style: { textAlign: 'right', font: "500 11.5px/1 'IBM Plex Mono',monospace", color: 'var(--textMuted)' } }, this.fmt(r.metrics.rmse)),
       R('div', { key: 4, style: { textAlign: 'center' } }, R('span', { style: { display: 'inline-block', padding: '3px 8px', borderRadius: '20px', font: "600 10px/1 'IBM Plex Sans',sans-serif", background: r.name === champ ? 'var(--accentBg)' : 'var(--border)', color: r.name === champ ? 'var(--accent)' : 'var(--textSubtle)' } }, r.name === champ ? 'Champion' : 'Challenger')),
     ]));
-    const rankCard = R('div', { key: 'rk', style: cardS }, [ R('div', { key: 't', style: { font: "700 15px/1 'Zilla Slab',serif", color: 'var(--textStrong)', marginBottom: '4px' } }, 'Model arena — back-tested on your data'), R('div', { key: 'sub', style: { font: "500 11.5px/1.4 'IBM Plex Sans',sans-serif", color: 'var(--textMuted)', marginBottom: '12px' } }, `Only models in the ${pol.label} policy compete; ${seasonNote}.`), rankHead, ...rankRows, R('div', { key: 'why', style: { font: "500 12px/1.55 'IBM Plex Sans',sans-serif", color: 'var(--textMuted)', marginTop: '12px' } }, sel.reason || '') ]);
+    const rankCard = R('div', { key: 'rk', style: cardS }, [ R('div', { key: 't', style: { font: "700 15px/1 'Source Serif 4',serif", color: 'var(--textStrong)', marginBottom: '4px' } }, 'Model arena — back-tested on your data'), R('div', { key: 'sub', style: { font: "500 11.5px/1.4 'IBM Plex Sans',sans-serif", color: 'var(--textMuted)', marginBottom: '12px' } }, `Only models in the ${pol.label} policy compete; ${seasonNote}.`), rankHead, ...rankRows, R('div', { key: 'why', style: { font: "500 12px/1.55 'IBM Plex Sans',sans-serif", color: 'var(--textMuted)', marginTop: '12px' } }, sel.reason || '') ]);
 
     return { ...base, blendPills, recoNote, nCount: String(y.length), statusNote: `champion: ${short(champ)} · ${blendMode ? 'showing ensemble' : 'showing champion'}`, results: el([champCard, forecastCard, recoCard, rankCard]) };
   }

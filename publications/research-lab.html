@@ -6,7 +6,6 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f17'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='27' font-weight='700' fill='%23d4b24c' text-anchor='middle'%3ECF%3C/text%3E%3C/svg%3E">
 <title>Research Lab — Christopher Farmer</title>
 <meta name="description" content="Research Lab — independent research by Christopher I. V. Farmer on space systems, robotics and space law: orbital solar power and storage, geomagnetic attitude control of very large flexible structures, a software-first spatial-intelligence layer for contact-capable robots, orbital denial and the limits of the Outer Space Treaty, eight working drafts, and six interactive tools that run the papers' own screening code in the browser. Preprints — submitted; pending peer review.">
-<meta name="robots" content="noindex">
 <style>
   /* Offline-first: font families name Zilla Slab / Inter / IBM Plex Mono but fall back to
      system fonts. No network requests, no CDN. */
@@ -16,7 +15,7 @@
     --accent:#43b3a6; --accent-ink:#84d6ca; --gold:#d4b24c; --gold-soft:#e6cf8f;
     --good:#43c59e; --warn:#e0a13a; --shadow:0 18px 50px -20px rgba(0,0,0,.7);
     --radius:16px; --maxw:1080px;
-    --font-display:'Zilla Slab',Georgia,'Times New Roman',serif;
+    --font-display:'Source Serif 4',Georgia,'Times New Roman',serif;
     --font-body:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
     --font-mono:'IBM Plex Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
   }
@@ -265,7 +264,62 @@
     .cfside.open{transform:none;visibility:visible;transition:transform .25s ease,visibility 0s}
   }
   @media print{.cftop,.cfscrim,.cfside{display:none!important}}
+
+  /* Print — force black-on-white. The site defaults to the dark theme and browsers
+     drop background colours when printing, so without this the page prints pale
+     grey text on white. These pages are printed to be taken into meetings. */
+  @media print{
+    :root,html[data-theme="dark"],html[data-theme="light"]{--bg:#fff;--bg2:#fff;--surface:#fff;--surface2:#fff;--card:#fff;--line:#bbb;--line2:#bbb;--ink:#000;--ink2:#1e1e1e;--mut:#3a3a3a;--muted:#3a3a3a;--accent:#0b5a52;--gold:#6f5714}
+    body{background:#fff!important;color:#000!important}
+    .side,.topbar,.scrim,.skip,.skyline-canvas,.cf-field,.viewer,.sheet,.cfmodal,.cftop,.cfscrim,.cfside,.menutgl,nav.main{display:none!important}
+    a{color:#000;text-decoration:underline}
+    .card,.paper,figure{border-color:#bbb!important;background:#fff!important;break-inside:avoid}
+    h1,h2,h3{color:#000!important;break-after:avoid}
+    .chip,.venue{border-color:#999!important;color:#222!important}
+    svg text{fill:#000!important} svg rect{fill:#fff!important;stroke:#666!important}
+    .edge{stroke:#666!important}
+  }
+
+  /* Loading state for the demo modals. These pull 600KB-1.5MB payloads and were
+     showing a blank panel for seconds. The mark is the Jet d'Eau reduced to a
+     rising column, so it belongs to the same hand as the skyline on the home page. */
+  .cfload{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:var(--bg);z-index:3}
+  .cfload.on{display:flex}
+  .cfload svg{width:34px;height:44px;overflow:visible}
+  .cfload .lake{stroke:var(--gold);stroke-opacity:.30;stroke-width:1.2;fill:none}
+  .cfload .jet{stroke:var(--gold);stroke-opacity:.85;stroke-width:1.6;stroke-linecap:round;fill:none;
+    stroke-dasharray:26;stroke-dashoffset:26;animation:cfjet 1.6s cubic-bezier(.4,0,.5,1) infinite}
+  .cfload .drop{fill:var(--gold);fill-opacity:.9;animation:cfdrop 1.6s cubic-bezier(.4,0,.5,1) infinite}
+  @keyframes cfjet{0%{stroke-dashoffset:26}45%{stroke-dashoffset:0}70%{stroke-dashoffset:0;stroke-opacity:.85}100%{stroke-dashoffset:0;stroke-opacity:0}}
+  @keyframes cfdrop{0%{transform:translateY(0);opacity:0}45%{transform:translateY(-26px);opacity:.9}100%{transform:translateY(-32px);opacity:0}}
+  .cfload p{margin:0;color:var(--mut,#8b97ab);font-size:13px}
+  @media (prefers-reduced-motion: reduce){ .cfload .jet{animation:none;stroke-dashoffset:0} .cfload .drop{animation:none;transform:translateY(-26px);opacity:.9} }
+
+  .movednote{font-size:13.5px;color:var(--muted,#7d8ba3);max-width:66ch;margin:6px 0 18px;line-height:1.6}
+  .movednote a{color:var(--gold,#d4b24c)}
+
+  /* ---- expandable descriptions ------------------------------------------
+     Twelve of the sixteen descriptions on this page run past 320 characters and
+     one reaches 1,321, which is a wall of text under every image. The clamp is
+     applied by script rather than in the stylesheet, so a reader without
+     JavaScript keeps the whole thing and loses nothing. */
+  .ab.clamped{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;
+    overflow:hidden;position:relative}
+  .abmore{display:none;margin:6px 0 0;padding:0;background:none;border:0;cursor:pointer;
+    font:inherit;font-size:12px;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--muted,#7d8ba3);border-bottom:1px dotted var(--line,#233145)}
+  .abmore:hover,.abmore:focus-visible{color:var(--gold,#d4b24c)}
+  .js .abmore{display:inline-block}
+  @media print{.ab.clamped{display:block;-webkit-line-clamp:none;overflow:visible}
+    .abmore{display:none!important}}
 </style>
+  <link rel="stylesheet" href="../assets/fonts.css">
+<script>/* Respect the operating system's choice before first paint. Without this a deep
+   link from a submission email always lands on dark navy whatever the reader prefers,
+   and a returning visitor sees a dark-to-light flash. */
+(function(){try{var s=localStorage.getItem('cf-theme');
+if(!s)s=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';
+document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
 </head>
 <body>
 <div class="cftop">
@@ -283,7 +337,7 @@
       <a href="../index.html#projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Projects</span></a>
       <a href="../case-studies/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 5h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h7z"/></svg><span>Case studies</span></a>
       <a href="../index.html#experience"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Experience</span></a>
-      <a href="../index.html#warroom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>War Room</span></a>
+      <a href="../index.html#warroom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>Crisis case studies</span></a>
       <a href="../index.html#expertise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.1L12 17l-5.5 3.3 1-6.1L3 8.9 9 8z"/></svg><span>Expertise</span></a>
       <a href="../index.html#credentials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg><span>Credentials</span></a>
       <a href="../publications/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg><span>Publications</span></a>
@@ -291,7 +345,6 @@
       <a href="../index.html#contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M4 7l8 6 8-6"/></svg><span>Contact</span></a>
     </nav>
     <div class="cffoot">
-      <div class="cfavail"><span class="cfdot"></span> Open to legal, risk &amp; transformation roles &mdash; Geneva</div>
       <div class="cfbtns">
         <a class="cfcv" href="../docs/CV-Christopher-Farmer-2026-08.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg> CV</a>
         <button class="cftheme" onclick="document.getElementById('theme')?document.getElementById('theme').click():(function(){var h=document.documentElement,n=h.getAttribute('data-theme')==='light'?'dark':'light';h.setAttribute('data-theme',n);try{localStorage.setItem('cf-theme',n)}catch(e){}})()" title="Toggle theme" aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
@@ -319,7 +372,7 @@
   <a href="../index.html#projects">Projects</a>
   <a href="../case-studies/index.html">Case studies</a>
   <a href="../index.html#experience">Experience</a>
-  <a href="../index.html#warroom">War Room</a>
+  <a href="../index.html#warroom">Crisis case studies</a>
   <a href="../index.html#expertise">Expertise</a>
   <a href="../index.html#credentials">Credentials</a>
   <a href="index.html">Publications</a>
@@ -331,6 +384,7 @@
     <section class="hero">
       <div class="eyebrow">Independent research &middot; space systems, robotics &amp; space law</div>
       <h1>Research Lab</h1>
+<p class="movednote">The public-international-law papers on orbital conduct and planetary defence now sit under <a href="index.html#space-law">Space law and orbital conduct</a> on the publications index. What follows is the models, the working drafts and the demonstrations that run them.</p>
       <p class="lead">Independent research, kept deliberately separate from the applied regulatory and compliance work. This is where the engineering, robotics and space-law strand lives &mdash; orbital power and attitude control, a software-first spatial-intelligence layer for contact-capable robots, and the legal status of conduct in orbit. The six interactive tools are not illustrations of the papers: they run the papers' own screening code in your browser.</p>
 
       <div class="note" role="note">
@@ -494,19 +548,7 @@
           </div>
         </article>
 
-        <article class="card">
-          <div class="meta"><span class="chip">Phase II · Theory</span><span class="chip venue">Submitted; pending peer review · law &amp; policy</span></div>
-          <h3>Orbital Denial and the Limits of the Outer Space Treaty: The Contested Legal Status of Kinetic and Conventional Space Systems</h3>
-          <div class="code">Public international law &amp; policy — no engineering detail</div>
-          <p class="ab">Argues that Article IV of the 1967 Outer Space Treaty is an artefact of a Cold-War bargain that prohibits weapons of mass destruction in orbit but says nothing about conventional, kinetic or dual-use systems, leaving “orbital denial” legally contested rather than clearly prohibited. Through an interpretive analysis of the text and <em>travaux</em>, a mapping of where kinetic and ASAT systems fall in law, and a survey of the PAROS/PPWT deadlock and the turn toward “responsible behaviours,” it contends the gap cannot be closed by a new multilateral treaty. It closes by extending the author's Magnitsky model: targeted, nationally-anchored measures that harden emergent responsible-behaviour norms by attaching domestic consequences that cascade through the commercial space economy. It contains no engineering or capability detail — the categories used are terms of legal art.</p>
-          <div class="foot">
-            <a class="read" href="phase2-theory/space-law-orbital-kinetic-systems.html">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg>
-              Read paper
-            </a>
-            <span class="fmt">.html · Web page</span>
-          </div>
-        </article>
+        
 
         <article class="card">
           <div class="meta"><span class="chip">Phase II · Theory</span><span class="chip venue">Submitted; pending peer review</span></div>
@@ -548,26 +590,8 @@
           </div>
         </article>
 
-        <article class="card">
-          <div class="meta"><span class="chip">Working draft · v1.1.0</span><span class="chip venue">Not yet submitted · revision in progress</span></div>
-          <h3>Conventional Counterspace Conduct and the Outer Space Treaty</h3>
-          <div class="code">Article VI supervision, responsible behaviour and nationally anchored market conditionality</div>
-          <p class="ab">Article IV of the 1967 Outer Space Treaty does not comprehensively prohibit conventional weapons, anti-satellite capabilities or all military activity in outer space — but that proposition does not create a legal vacuum. This draft develops Article VI supervision, responsible-behaviour norms and nationally anchored market conditionality as the operative framework for conduct the treaty does not specifically prohibit. Companion to the published &ldquo;Orbital Denial&rdquo; paper.</p>
-          <div class="foot">
-            <a class="read" href="drafts/Counterspace_Conduct_and_Outer_Space_Treaty_v1.1.0.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg> Read the draft (PDF)</a>
-            <span class="fmt">.pdf · 16 pages</span>
-          </div>
-        </article>
-        <article class="card">
-          <div class="meta"><span class="chip">Working draft · v0.2.0</span><span class="chip venue">Circulated for comment · not yet submitted</span></div>
-          <h3>Authorising Planetary Defence</h3>
-          <div class="code">Article IV characterisation, Article VI supervision and independent oversight for high-energy civil planetary-defence research systems</div>
-          <p class="ab">The companion legal paper that ARGUS-PD/POD-7K Paper&nbsp;II defers to. Characterises the hypothetical system under Article&nbsp;IV of the Outer Space Treaty (conventional-kinetic research outside the Article&nbsp;IV(1) WMD prohibition; Article&nbsp;IV(2) celestial-body limits regardless of civil labelling), analyses registration and liability for objects launched from an orbiting platform, engages Koplow's counter-position on debris-creating destructive testing, and proposes an independent-oversight model in which authorisation advances only through the technical series' own evidence gates &mdash; offered as policy consistent with existing law, not as existing law.</p>
-          <div class="foot">
-            <a class="read" href="drafts/Authorising_Planetary_Defence_v0.2.0.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg> Read the draft (PDF)</a>
-            <span class="fmt">.pdf · 21 pages</span>
-          </div>
-        </article>
+        
+        
         <article class="card">
           <div class="meta"><span class="chip">Working draft · v1.1.0</span><span class="chip venue">Not yet submitted · revision in progress</span></div>
           <h3>Feasibility Bounds for Geomagnetic Attitude Control of Very Large Flexible Space Structures</h3>
@@ -664,7 +688,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
         </button>
       </div>
-      <div class="cfmodal__body">
+      <div class="cfmodal__body"><div class="cfload" id="cfload" role="status" aria-live="polite"><svg viewBox="0 0 34 44" aria-hidden="true"><path class="lake" d="M4 38 q13 5 26 0"/><path class="jet" d="M17 38 V12"/><circle class="drop" cx="17" cy="38" r="1.7"/></svg><p>Loading&hellip;</p></div>
         <iframe class="cfmodal__frame" id="cfmodal-frame" title="Interactive tool" src="about:blank" allow="fullscreen" referrerpolicy="no-referrer"></iframe>
       </div>
     </div>
@@ -700,7 +724,7 @@
     var closers = modal.querySelectorAll('[data-cfclose]');
     var lastFocus = null, savedY = 0, isOpen = false;
 
-    function openModal(src, label){
+    function openModal(src, label){ if(window.cfLoadStart)cfLoadStart();
       if(!src || src === '#') return;
       savedY = window.pageYOffset || root.scrollTop || 0;      // remember scroll position
       lastFocus = document.activeElement;
@@ -717,7 +741,7 @@
       if(x){ try{ x.focus({preventScroll:true}); }catch(e){ x.focus(); } }
     }
 
-    function closeModal(){
+    function closeModal(){ if(window.cfLoadStop)cfLoadStop();
       if(!isOpen) return;
       modal.hidden = true;
       frame.setAttribute('src','about:blank');                 // unload tool (release WebGL/audio)
@@ -761,6 +785,45 @@
   document.addEventListener('keydown',function(e){if(e.key==='Escape')set(false);});
   side.addEventListener('click',function(e){if(e.target.closest('a'))set(false);});
   addEventListener('resize',function(){if(innerWidth>=1080)set(false);});
+})();
+</script>
+<script>
+  /* 220ms before it shows, 400ms minimum once shown: it never flashes on a cached
+     load and never appears at all if the frame is instant. */
+  (function(){
+    var el=document.getElementById('cfload'); if(!el) return;
+    var showAt=0,timer=null;
+    window.cfLoadStart=function(){ clearTimeout(timer); timer=setTimeout(function(){ el.classList.add('on'); showAt=Date.now(); },220); };
+    window.cfLoadStop=function(){ clearTimeout(timer);
+      var held=Date.now()-showAt, wait=(showAt&&held<400)?400-held:0;
+      setTimeout(function(){ el.classList.remove('on'); showAt=0; },wait); };
+  })();
+</script>
+
+<script>
+/* Clamp the long descriptions to four lines with a control to open them.
+   Done in script so that without JavaScript the text is simply all there:
+   nothing is hidden behind an interaction that might never be available. */
+(function(){
+  document.documentElement.classList.add('js');
+  var LIMIT = 320;
+  document.querySelectorAll('p.ab').forEach(function(p, i){
+    if ((p.textContent || '').trim().length <= LIMIT) return;
+    p.classList.add('clamped');
+    var id = p.id || ('ab-' + i); p.id = id;
+    var btn = document.createElement('button');
+    btn.className = 'abmore';
+    btn.type = 'button';
+    btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('aria-controls', id);
+    btn.textContent = 'Read more';
+    btn.addEventListener('click', function(){
+      var open = p.classList.toggle('clamped') === false;
+      btn.setAttribute('aria-expanded', String(open));
+      btn.textContent = open ? 'Show less' : 'Read more';
+    });
+    p.insertAdjacentElement('afterend', btn);
+  });
 })();
 </script>
 </body>

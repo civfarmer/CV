@@ -6,7 +6,6 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f17'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='27' font-weight='700' fill='%23d4b24c' text-anchor='middle'%3ECF%3C/text%3E%3C/svg%3E">
 <title>Publications — Christopher I. V. Farmer</title>
 <meta name="description" content="Preprints and working papers by Christopher I. V. Farmer — Phase I applied systems and engineering (FRIS, Meridian, Vantage, orbital solar power) and Phase II theory (Magnitsky Model for AI, autonomous-systems feasibility, spatial-intelligence robotics, space law, geomagnetic attitude control). Preprints — submitted; pending peer review.">
-<meta name="robots" content="noindex">
 <style>
   /* Offline-first: font families name Zilla Slab / Inter / IBM Plex Mono but fall back to
      system fonts. No network requests, no CDN. */
@@ -16,7 +15,7 @@
     --accent:#43b3a6; --accent-ink:#84d6ca; --gold:#d4b24c; --gold-soft:#e6cf8f;
     --good:#43c59e; --warn:#e0a13a; --shadow:0 18px 50px -20px rgba(0,0,0,.7);
     --radius:16px; --maxw:1080px;
-    --font-display:'Zilla Slab',Georgia,'Times New Roman',serif;
+    --font-display:'Source Serif 4',Georgia,'Times New Roman',serif;
     --font-body:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
     --font-mono:'IBM Plex Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
   }
@@ -265,7 +264,109 @@
     .cfside.open{transform:none;visibility:visible;transition:transform .25s ease,visibility 0s}
   }
   @media print{.cftop,.cfscrim,.cfside{display:none!important}}
+
+  /* Print — force black-on-white. The site defaults to the dark theme and browsers
+     drop background colours when printing, so without this the page prints pale
+     grey text on white. These pages are printed to be taken into meetings. */
+  @media print{
+    :root,html[data-theme="dark"],html[data-theme="light"]{--bg:#fff;--bg2:#fff;--surface:#fff;--surface2:#fff;--card:#fff;--line:#bbb;--line2:#bbb;--ink:#000;--ink2:#1e1e1e;--mut:#3a3a3a;--muted:#3a3a3a;--accent:#0b5a52;--gold:#6f5714}
+    body{background:#fff!important;color:#000!important}
+    .side,.topbar,.scrim,.skip,.skyline-canvas,.cf-field,.viewer,.sheet,.cfmodal,.cftop,.cfscrim,.cfside,.menutgl,nav.main{display:none!important}
+    a{color:#000;text-decoration:underline}
+    .card,.paper,figure{border-color:#bbb!important;background:#fff!important;break-inside:avoid}
+    h1,h2,h3{color:#000!important;break-after:avoid}
+    .chip,.venue{border-color:#999!important;color:#222!important}
+    svg text{fill:#000!important} svg rect{fill:#fff!important;stroke:#666!important}
+    .edge{stroke:#666!important}
+  }
+
+  /* Loading state for the demo modals. These pull 600KB-1.5MB payloads and were
+     showing a blank panel for seconds. The mark is the Jet d'Eau reduced to a
+     rising column, so it belongs to the same hand as the skyline on the home page. */
+  .cfload{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:var(--bg);z-index:3}
+  .cfload.on{display:flex}
+  .cfload svg{width:34px;height:44px;overflow:visible}
+  .cfload .lake{stroke:var(--gold);stroke-opacity:.30;stroke-width:1.2;fill:none}
+  .cfload .jet{stroke:var(--gold);stroke-opacity:.85;stroke-width:1.6;stroke-linecap:round;fill:none;
+    stroke-dasharray:26;stroke-dashoffset:26;animation:cfjet 1.6s cubic-bezier(.4,0,.5,1) infinite}
+  .cfload .drop{fill:var(--gold);fill-opacity:.9;animation:cfdrop 1.6s cubic-bezier(.4,0,.5,1) infinite}
+  @keyframes cfjet{0%{stroke-dashoffset:26}45%{stroke-dashoffset:0}70%{stroke-dashoffset:0;stroke-opacity:.85}100%{stroke-dashoffset:0;stroke-opacity:0}}
+  @keyframes cfdrop{0%{transform:translateY(0);opacity:0}45%{transform:translateY(-26px);opacity:.9}100%{transform:translateY(-32px);opacity:0}}
+  .cfload p{margin:0;color:var(--mut,#8b97ab);font-size:13px}
+  @media (prefers-reduced-motion: reduce){ .cfload .jet{animation:none;stroke-dashoffset:0} .cfload .drop{animation:none;transform:translateY(-26px);opacity:.9} }
+
+  /* ---- compact publication rows -------------------------------------------
+     Replaces the card grid. A card cost a median 630px of phone height, of
+     which the abstract was most; a row costs about 90px and keeps the abstract
+     in the source inside a <details>. */
+  .lede h1{font-size:clamp(28px,4vw,40px);margin:0 0 6px;letter-spacing:-.01em}
+  .lede .count{font-size:12.5px;color:var(--muted);margin:0 0 14px;letter-spacing:.04em;text-transform:uppercase}
+  .lede .note{font-size:13.5px;color:var(--ink2);max-width:62ch;margin:0 0 14px}
+  nav.jump{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px;padding:0 0 14px;border-bottom:1px solid var(--line)}
+  nav.jump a{font-size:12.5px;padding:5px 10px;border:1px solid var(--line);border-radius:999px;
+    color:var(--ink2);text-decoration:none;white-space:nowrap;transition:border-color .15s,color .15s}
+  nav.jump a:hover,nav.jump a:focus-visible{border-color:var(--gold);color:var(--ink)}
+  nav.jump .n{color:var(--muted);font-size:11px;margin-left:3px}
+  ul.starthere{list-style:none;padding:0;margin:0;display:grid;gap:7px}
+  ul.starthere li{display:grid;grid-template-columns:15em auto 1fr;gap:10px;align-items:baseline;font-size:14px}
+  ul.starthere .when{color:var(--muted);font-size:12.5px}
+  ul.starthere a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--gold)}
+  ul.starthere a:hover{color:var(--gold)}
+  ul.starthere .why{color:var(--muted);font-size:12.5px}
+  section h2{font-size:clamp(19px,2.4vw,24px);margin:34px 0 4px;letter-spacing:-.005em}
+  section h2 .secn{font-size:12px;color:var(--muted);font-weight:400;vertical-align:middle;margin-left:6px}
+  .seclede{font-size:13.5px;color:var(--muted);margin:0 0 14px;max-width:64ch}
+  ul.rows{list-style:none;padding:0;margin:0}
+  li.row{padding:11px 0;border-top:1px solid var(--line)}
+  li.row:last-child{border-bottom:1px solid var(--line)}
+  .rtitle{font-family:var(--font-display);font-size:17px;line-height:1.34;color:var(--ink);
+    text-decoration:none;font-weight:600}
+  .rtitle:hover,.rtitle:focus-visible{color:var(--gold)}
+  .rsub{font-size:13.5px;color:var(--muted);margin-left:7px}
+  .rmeta{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-top:4px;font-size:12px}
+  .rmeta .mono{color:var(--muted);letter-spacing:.01em}
+  .t{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:3px;
+    border:1px solid var(--line);color:var(--muted)}
+  .t-law{border-color:rgba(212,178,76,.42);color:var(--gold)}
+  .t-econ{border-color:rgba(159,201,194,.40);color:#9fc9c2}
+  .t-eng{border-color:rgba(190,190,205,.35)}
+  a.alt{font-size:12px;color:var(--ink2);text-decoration:none;border-bottom:1px dotted var(--line)}
+  a.alt:hover{color:var(--gold)}
+  details.rab{margin-top:6px}
+  details.rab summary{font-size:12px;color:var(--muted);cursor:pointer;list-style:none;
+    display:inline-block;border-bottom:1px dotted var(--line)}
+  details.rab summary::-webkit-details-marker{display:none}
+  details.rab summary:hover{color:var(--gold)}
+  details.rab p{font-size:14px;line-height:1.62;color:var(--ink2);margin:8px 0 2px;max-width:66ch}
+  /* The abstract is in the source either way; open it for print and for anyone
+     who has asked the browser not to animate. */
+  @media print{details.rab{display:block}details.rab p{display:block!important}
+    details.rab summary{display:none}nav.jump{display:none}}
+  @media (max-width:640px){
+    .lede .note{font-size:12.5px;margin-bottom:11px;line-height:1.5}
+    .lede .count{margin-bottom:9px}
+    nav.jump{gap:5px;margin-bottom:16px;padding-bottom:14px}
+    nav.jump a{font-size:11.5px;padding:4px 8px}
+    ul.starthere{gap:5px}
+    ul.starthere li{display:block;font-size:13.5px}
+    ul.starthere .when{display:block;min-width:0;margin-bottom:1px}
+    ul.starthere .why{display:none}
+    li.row{padding:9px 0}
+    .rtitle{font-size:16px}
+    .rsub{display:block;margin-left:0;font-size:12.5px}
+    .rmeta{gap:5px;margin-top:3px}
+    .rmeta .mono{font-size:11.5px}
+    section h2{margin-top:26px}
+    .seclede{font-size:12.5px;margin-bottom:10px}
+  }
 </style>
+  <link rel="stylesheet" href="../assets/fonts.css">
+<script>/* Respect the operating system's choice before first paint. Without this a deep
+   link from a submission email always lands on dark navy whatever the reader prefers,
+   and a returning visitor sees a dark-to-light flash. */
+(function(){try{var s=localStorage.getItem('cf-theme');
+if(!s)s=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';
+document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
 </head>
 <body>
 <div class="cftop">
@@ -283,7 +384,7 @@
       <a href="../index.html#projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Projects</span></a>
       <a href="../case-studies/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 5h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h7z"/></svg><span>Case studies</span></a>
       <a href="../index.html#experience"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Experience</span></a>
-      <a href="../index.html#warroom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>War Room</span></a>
+      <a href="../index.html#warroom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>Crisis case studies</span></a>
       <a href="../index.html#expertise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.1L12 17l-5.5 3.3 1-6.1L3 8.9 9 8z"/></svg><span>Expertise</span></a>
       <a href="../index.html#credentials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg><span>Credentials</span></a>
       <a href="../publications/index.html" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg><span>Publications</span></a>
@@ -291,7 +392,6 @@
       <a href="../index.html#contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M4 7l8 6 8-6"/></svg><span>Contact</span></a>
     </nav>
     <div class="cffoot">
-      <div class="cfavail"><span class="cfdot"></span> Open to legal, risk &amp; transformation roles &mdash; Geneva</div>
       <div class="cfbtns">
         <a class="cfcv" href="../docs/CV-Christopher-Farmer-2026-08.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg> CV</a>
         <button class="cftheme" onclick="document.getElementById('theme')?document.getElementById('theme').click():(function(){var h=document.documentElement,n=h.getAttribute('data-theme')==='light'?'dark':'light';h.setAttribute('data-theme',n);try{localStorage.setItem('cf-theme',n)}catch(e){}})()" title="Toggle theme" aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
@@ -319,7 +419,7 @@
   <a href="../index.html#projects">Projects</a>
   <a href="../case-studies/index.html">Case studies</a>
   <a href="../index.html#experience">Experience</a>
-  <a href="../index.html#warroom">War Room</a>
+  <a href="../index.html#warroom">Crisis case studies</a>
   <a href="../index.html#expertise">Expertise</a>
   <a href="../index.html#credentials">Credentials</a>
   <a href="index.html" aria-current="page">Publications</a>
@@ -328,262 +428,200 @@
 </nav>
 
   <main class="wrap">
-    <section class="hero">
-      <div class="eyebrow">Preprints &amp; working papers</div>
-      <h1>Publications</h1>
-      <p class="lead">The applied regulatory, financial-crime and decision-science work, made available for discussion. Each entry gives the title, its status, a short abstract, and a link to read the full draft. The space-systems, robotics and space-law research sits separately, in the <a href="research-lab.html">Research Lab</a>.</p>
-      <p class="lead" style="margin-top:12px">Research is one specialism among several &mdash; <a href="../docs/CV-Christopher-Farmer-2026-08.pdf" target="_blank" rel="noopener">the CV</a> shows where it sits in the wider career; this page is where that strand goes deep.</p>
+    <section class="lede" id="start">
+  <h1>Publications</h1>
+  <p class="count mono">28 works · 2024–2026 · international law, economics, engineering</p>
+  <p class="note">Preprints and manuscripts. Several are submitted and pending peer review;
+  the reports are deposited grey literature. Nothing here is legal advice.</p>
+  <nav class="jump" aria-label="Sections"><a href="#economic-warfare">Economic warfare <span class="n">9</span></a><a href="#autonomous-systems">Autonomous systems <span class="n">5</span></a><a href="#space-law">Space law <span class="n">3</span></a><a href="#verification">Verification &amp; compliance <span class="n">5</span></a><a href="#applied-systems">Applied systems <span class="n">3</span></a><a href="#reports">Reports <span class="n">3</span></a></nav>
+  <ul class="starthere">
+    <li><span class="when">If you have five minutes</span><a href="economic-warfare/05-uk-economic-warfare-prevention-and-response-act.pdf">The UK Economic Warfare Prevention and Response Act</a><span class="why">an emergency-powers model with the instrument drafted in full</span></li>
+    <li><span class="when">If you want the argument from the beginning</span><a href="economic-warfare/00-economic-warfare-the-unregulated-war-2026.pdf">Economic Warfare: The Unregulated War (2026 edition)</a><span class="why">the dissertation the series grew out of, revised</span></li>
+    <li><span class="when">If you want to see how the work connects</span><a href="map.html">The relationship map</a><span class="why">sixteen works, what each supplies to the others</span></li>
+  </ul>
+</section>
 
-      <div class="note" role="note">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9L2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
-        <div><b>These are preprints.</b> They have been <b>submitted and are pending peer review</b>; they are circulated here for scholarly and professional discussion. Empirical figures in the applied papers are computed on synthetic or clearly-labelled illustrative data, so nothing on this page should be read as a measured result, a prediction, or legal advice.</div>
-      </div>
+<section id="economic-warfare">
+  <h2>Economic warfare and the privatisation of hostile power <span class="secn mono">9</span></h2>
+  <p class="seclede">A nine-paper sequence, written to be read in order. It begins with the dissertation the argument grew out of and ends with a drafted Act and the evidential standard that Act depends on.</p>
+  <ul class="rows">
+      <li class="row">
+        <a class="rtitle" href="economic-warfare/00-economic-warfare-the-unregulated-war-2024-dissertation.pdf">Economic Warfare: The Unregulated War</a><span class="rsub">Thesis of record</span>
+        <div class="rmeta"><span class="mono">2024 · LL.M dissertation · awarded 100%</span><span class="t t-law">Law</span></div>
+<details class="rab"><summary>Abstract</summary><p>The submitted LL.M dissertation. It defines economic warfare against the law of armed conflict, works case studies in the Democratic Republic of Congo, Nigeria and Yemen, treats private military and security companies and cyber-economic aggression, examines SAMLA and the Magnitsky legislation, and proposes a United Kingdom response. Retained here as the thesis of record, unaltered.</p></details>
+      </li>
+      <li class="row">
+        <a class="rtitle" href="economic-warfare/00-economic-warfare-the-unregulated-war-2026.pdf">Economic Warfare: The Unregulated War</a><span class="rsub">Publication edition</span>
+        <div class="rmeta"><span class="mono">2026 · revised · 19,700 words</span><span class="t t-law">Law</span></div>
+<details class="rab"><summary>Abstract</summary><p>The same thesis, chapter sequence and voice, with corrections where the original contained an actual error, a full authority apparatus, and post-submission material expressly identified as such — including the March 2024 attribution concerning APT31, presented as later confirmation rather than written back into the original chronology. Papers 1 to 6 develop every major branch this one opens.</p></details>
+      </li>
+      <li class="row">
+        <a class="rtitle" href="economic-warfare/01-economic-warfare-after-the-embargo.pdf">Economic Warfare after the Embargo</a><span class="rsub">Paper 1</span>
+        <div class="rmeta"><span class="mono">2026 · manuscript · 18,400 words · 137 sources</span><span class="t t-law">Law</span><span class="t t-econ">Economics</span></div>
+<details class="rab"><summary>Abstract</summary><p>Replaces the embargo-centred conception of economic warfare with a functional account of privately controlled communications, capital, imagery, targeting and infrastructure. Starlink is treated chronologically, including assistance rendered before the formal contract; the absence of a mutual-defence treaty is distinguished from the law of collective self-defence; and cyber operations are classified by function and effect rather than by the presence of a keyboard.</p></details>
+      </li>
+      <li class="row">
+        <a class="rtitle" href="economic-warfare/02-the-algorithmic-auxiliary.pdf">The Algorithmic Auxiliary</a><span class="rsub">Paper 2</span>
+        <div class="rmeta"><span class="mono">2026 · manuscript · 18,200 words · 131 sources</span><span class="t t-law">Law</span><span class="t t-ai">AI</span></div>
+<details class="rab"><summary>Abstract</summary><p>Treats autonomy as an allocation of decision authority rather than a property of a model. Six build architectures and six end-to-end workflows — State–PMSC commissioning, subcontracted and time-zone-separated coding, modular development with no single informed programmer, open-weight deployment, jurisdiction-selected compute, and autonomous continuation after political withdrawal — joined to State responsibility, due diligence, criminal and humanitarian law.</p></details>
+      </li>
+      <li class="row">
+        <a class="rtitle" href="economic-warfare/03-sovereignty-in-fragments.pdf">Sovereignty in Fragments</a><span class="rsub">Paper 3</span>
+        <div class="rmeta"><span class="mono">2026 · manuscript · 17,900 words · 130 sources</span><span class="t t-law">Law</span><span class="t t-cyber">Cyber</span></div>
+<details class="rab"><summary>Abstract</summary><p>Distinguishes the victim&#x27;s assembled campaign from each territorial State&#x27;s partial view. Refuses strict liability for mere territorial transit; develops notice, knowledge, capacity and feasible protection; shows how sharding may be used deliberately to manufacture ignorance; and places the correlation burden on the controller that retains the operational map.</p></details>
+      </li>
+      <li class="row">
+        <a class="rtitle" href="economic-warfare/03b-the-mosaic-protocol.pdf">The MOSAIC Protocol</a><span class="rsub">Paper 3B</span>
+        <div class="rmeta"><span class="mono">2026 · manuscript · 18,000 words · 144 sources</span><span class="t t-law">Law</span><span class="t t-eng">Engineering</span><span class="t t-cyber">Cyber</span></div>
+<details class="rab"><summary>Abstract</summary><p>Answers the operational question Paper 3 leaves open, as a specified service rather than a slogan: architecture, data and evidential models, chain of custody, contrary hypotheses, manifests, correction, preservation, hostile-node testing, United Kingdom legal integration, a twelve-month pilot, a three-year core programme, procurement structure and staged acceptance gates.</p></details>
+      </li>
+      <li class="row">
+        <a class="rtitle" href="economic-warfare/04-private-sovereigns-at-war.pdf">Private Sovereigns at War</a><span class="rsub">Paper 4</span>
+        <div class="rmeta"><span class="mono">2026 · manuscript · 20,000 words · 204 sources</span><span class="t t-law">Law</span><span class="t t-econ">Economics</span></div>
+<details class="rab"><summary>Abstract</summary><p>A taxonomy of infrastructure, intelligence, PMSC, platform, intrusion and autonomous-capability sovereigns. Treats reciprocal risk, consumer and shareholder exposure, the two distinct Lebanese campaigns, beneficial ownership, subcontract chains, maximum reasonably credible harm and the economics of cheap war, and proposes a Strategic Private Capacity Act built on speed, control maps and the smallest effective dependency.</p></details>
+      </li>
+      <li class="row">
+        <a class="rtitle" href="economic-warfare/05-uk-economic-warfare-prevention-and-response-act.pdf">The UK Economic Warfare Prevention and Response Act</a><span class="rsub">Paper 5</span>
+        <div class="rmeta"><span class="mono">2026 · manuscript · 31,500 words · 176 sources</span><span class="t t-law">Law</span></div>
+<details class="rab"><summary>Abstract</summary><p>Converts the analysis into a consolidated statutory scheme. Preserves speed as a constitutional requirement; integrates reporting, an incident register and MOSAIC; regulates strategic private capacity and PMSCs; distinguishes payer, operator, contractor, territorial host and State; and constrains the power by parliamentary notification, rapid review, live-target verification, expiry, correction, remedy and compensation without making immediate action impossible.</p></details>
+      </li>
+      <li class="row">
+        <a class="rtitle" href="economic-warfare/06-the-attribution-threshold.pdf">The Attribution Threshold</a><span class="rsub">Paper 6</span>
+        <div class="rmeta"><span class="mono">2026 · manuscript · 18,900 words · 182 sources</span><span class="t t-law">Law</span><span class="t t-cyber">Cyber</span></div>
+<details class="rab"><summary>Abstract</summary><p>The law of decision, which the series otherwise lacked. Separates technical, legal and decisional attribution; builds a traceable claim graph and correction lifecycle; prescribes different thresholds for preservation, confidential engagement, public attribution, sanctions, civil restraint, criminal process, countermeasures and force; and closes with operational tests, a threshold matrix and an Attribution Decision Certificate.</p></details>
+      </li>
+  </ul>
+</section>
 
-      <a class="jumpbanner" href="research-lab.html" aria-label="Open the Research Lab">
-        <img src="assets/previews/argus-3d.jpg" alt="The ARGUS-PD launch architecture rendered in 3D above Earth" loading="lazy">
-        <span class="jb-txt">
-          <span class="jb-t">Research Lab — space systems, robotics &amp; space law</span>
-          <span class="jb-s">The separate research strand: 4 papers, 8 working drafts plus the reproducibility annex — including the new launcher-science study and programme capstone — and 6 live interactive tools that run the papers' own screening code in your browser.</span>
-        </span>
-        <span class="jb-go">open the Research Lab →</span>
-      </a>
+<section id="autonomous-systems">
+  <h2>Autonomous systems and the law of the machine <span class="secn mono">5</span></h2>
+  <p class="seclede">Five works on what the law can reach in a machine that acts after the person who deployed it has stopped deciding.</p>
+  <ul class="rows">
+      <li class="row">
+        <a class="rtitle" href="manuscripts/regulating-robots-by-owning-them.pdf">Regulating Robots by Owning Them</a>
+        <div class="rmeta"><span class="mono">2026 · manuscript · 24,200 words</span><span class="t t-law">Law</span><span class="t t-econ">Economics</span><span class="t t-rob">Robotics</span></div>
+<details class="rab"><summary>Abstract</summary><p>Labour displacement is answered fiscally and dangerous modification is answered by market-entry rules, and neither instrument can do the other&#x27;s work: a tax cannot deliver a quantity and confers no right of access, while a market-entry rule is discharged before the risk it manages has arisen. The paper proposes that the state retain title and pass possession under a lease. The quantity is graduated — possession as of right up to a household entitlement, a presumptively granted application band above it, a binding cap only at industrial scale — and the middle band generates the deployment data from which the binding band is calibrated, which no fiscal instrument can do. Stating the defence limb plainly exposes the paper&#x27;s most serious finding: “purpose” in the definition of a military objective means intended future use, so a standing statutory reservation over every unit of a class arguably confers a military purpose on all of them — and raises a question about the dwellings holding them — before any emergency. Civil-reserve arrangements escape this by accident of location; aircraft sit at airports and ships in ports. A reserve held in housing does not. 24,182 words.</p></details>
+      </li>
+      <li class="row">
+        <a class="rtitle" href="manuscripts/swiss-submission-retained-interest.pdf">Holding a Civil Reserve by Owning It Rather Than by Requiring It</a><span class="rsub">Submission to the Swiss Confederation</span>
+        <div class="rmeta"><span class="mono">filed 6 August 2026 · submitted to government</span><span class="t t-law">Law</span><span class="t t-rob">Robotics</span></div>
+<details class="rab"><summary>Abstract</summary><p>Switzerland already holds a civil reserve in private hands, and holds it the harder way: compulsory stockpiling imposes a contractual obligation on some 280 undertakings and the Confederation guarantees their bank financing. The retained-interest model obtains the same reserve by inverting the property relation instead — no obligation to impose, no financing to guarantee, and capability in continuous use rather than commodities held idle. The submission works the comparison against art. 102 and art. 26 of the Federal Constitution, the Landesversorgungsgesetz, cantonal labour-market differentiation, and the Mutual Recognition Agreement.</p></details>
+      </li>
+      <li class="row">
+        <a class="rtitle" href="manuscripts/a-robot-left-in-a-field.pdf">A Robot Left in a Field Is a Mine the Law Cannot See</a>
+        <div class="rmeta"><span class="mono">2026 · under submission · 11,300 words</span><span class="t t-law">Law</span><span class="t t-rob">Robotics</span></div>
+<details class="rab"><summary>Abstract</summary><p>Amended Protocol II imposes five obligations on emplaced devices — recording, marking, self-destruction, detectability and clearance after hostilities. An armed robotic platform emplaced for thirty days escapes all five, because the definition turns on a fuze: a mine is exploded by presence, while a robotic system observes presence and decides. Four of the five obligations are wholly indifferent to whether the device can classify what triggers it. The regime asks less of these systems than they can deliver, because it asks nothing of them at all. 11,281 words, 65 authorities.</p></details>
+      </li>
+      <li class="row">
+        <a class="rtitle" href="manuscripts/the-interval-not-the-autonomy.pdf">The Interval, Not the Autonomy</a>
+        <div class="rmeta"><span class="mono">2026 · under submission</span><span class="t t-law">Law</span><span class="t t-ai">AI</span></div>
+<details class="rab"><summary>Abstract</summary><p>Ten years of multilateral effort to define autonomy in weapons has produced no instrument, and the paper argues the failure is a property of the mandate rather than of the disagreement beneath it. It proposes regulating the interval between the last human decision and the effect, together with what was knowable across it, and shows that the rate at which the facts underlying an authorisation decay is what should set the lawful interval. Article 36&#x27;s temporal reach is broad across procurement and zero across operational life — the breadth runs along the wrong axis. 16,658 words, 88 authorities.</p></details>
+      </li>
+      <li class="row">
+        <a class="rtitle" href="manuscripts/holding-ground-with-machines-that-do-not-move.pdf">Holding Ground with Machines That Do Not Move</a>
+        <div class="rmeta"><span class="mono">2026 · manuscript</span><span class="t t-eng">Engineering</span><span class="t t-law">Law</span></div>
+<details class="rab"><summary>Abstract</summary><p>Published endurance figures for unmanned ground vehicles are drive-hours figures, and holding ground is not a drive-hours problem: locomotion dominates a moving platform&#x27;s budget and is nearly absent from a static one. The paper proposes the quantity the mission actually needs — watt-hours per emplaced-day at a stated readiness level — and a formation-level measure permitting robotic and infantry terrain denial to be compared on one axis. Read as a price list, the budget puts identification and release judgement at 91 per cent, recallability at 1.3 per cent and the weapon at 0.5 per cent: what the energy buys is discrimination, and a mine is the zero-energy limit of the same design. 28,723 words.</p></details>
+      </li>
+  </ul>
+</section>
 
-      <nav class="pubclasses" aria-label="Publication categories">
-        <span class="pcl-lab">Jump to</span>
-        <a href="#p1">Preprints</a>
-        <a href="#p2">Theory</a>
-        <a href="#notes">Methods notes</a>
-        <a href="#reports">Reports</a>
-        <a href="research-lab.html">Research Lab</a>
-      </nav>
-    </section>
+<section id="space-law">
+  <h2>Space law and orbital conduct <span class="secn mono">3</span></h2>
+  <p class="seclede">Three papers on what the Outer Space Treaty permits, and what it was never drafted to reach.</p>
+  <ul class="rows">
+      <li class="row">
+        <a class="rtitle" href="phase2-theory/space-law-orbital-kinetic-systems.html">Orbital Denial and the Limits of the Outer Space Treaty</a><span class="rsub">The conduct problem</span>
+        <div class="rmeta"><span class="mono">2026 · manuscript</span><span class="t t-law">Law</span><span class="t t-space">Space</span></div>
+<details class="rab"><summary>Abstract</summary><p>Argues that Article IV of the 1967 Outer Space Treaty is an artefact of a Cold-War bargain that prohibits weapons of mass destruction in orbit but says nothing about conventional, kinetic or dual-use systems, leaving “orbital denial” legally contested rather than clearly prohibited. Through an inter</p></details>
+      </li>
+      <li class="row">
+        <a class="rtitle" href="drafts/Counterspace_Conduct_and_Outer_Space_Treaty_v1.1.0.pdf">Conventional Counterspace Conduct and the Outer Space Treaty</a>
+        <div class="rmeta"><span class="mono">2026 · working draft v1.1.0</span><span class="t t-law">Law</span><span class="t t-space">Space</span></div>
+<details class="rab"><summary>Abstract</summary><p>Article IV of the 1967 Outer Space Treaty does not comprehensively prohibit conventional weapons, anti-satellite capabilities or all military activity in outer space — but that proposition does not create a legal vacuum. This draft develops Article VI supervision, responsible-behaviour norms and nat</p></details>
+      </li>
+      <li class="row">
+        <a class="rtitle" href="drafts/Authorising_Planetary_Defence_v0.2.0.pdf">Authorising Planetary Defence</a>
+        <div class="rmeta"><span class="mono">2026 · working draft v0.2.0</span><span class="t t-law">Law</span><span class="t t-space">Space</span></div>
+<details class="rab"><summary>Abstract</summary><p>The companion legal paper that ARGUS-PD/POD-7K Paper II defers to. Characterises the hypothetical system under Article IV of the Outer Space Treaty (conventional-kinetic research outside the Article IV(1) WMD prohibition; Article IV(2) celestial-body limits regardless of civil labelling), analyses r</p></details>
+      </li>
+  </ul>
+</section>
 
-    <!-- FEATURED: LL.M. DISSERTATION -->
-    <div class="feature dissert">
-      <div class="fin">
-        <div>
-          <span class="tag"><span class="dot"></span> LL.M. Dissertation · University of Worcester · awarded 100%</span>
-          <h2>Economic Warfare: The Unregulated War</h2>
-          <p>The intellectual root of everything on this page. Cyber-economic aggression, market manipulation and proxy financial tactics sit outside effective regulation — regimes reach the principal but not the proxy. The dissertation proposes a dedicated UK legislative framework (<b style="color:var(--ink)">UK-EWPRA</b>) and led to an invitation to pursue doctoral research; FRIS, Meridian and the Magnitsky Model for AI are its operational and theoretical descendants.</p>
-          <div class="facts">
-            <span><span class="dot"></span> Awarded 100% — highest mark available</span>
-            <span><span class="dot"></span> Foundation of the financial-crime &amp; AI-governance work</span>
-          </div>
-        </div>
-        <div class="cta">
-          <a class="plink gold" href="../The%20Unregulated%20War.pdf" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg>
-            Read the dissertation (PDF)
-          </a>
-        </div>
-      </div>
-    </div>
+<section id="verification">
+  <h2>Verification, compliance and regulatory systems <span class="secn mono">5</span></h2>
+  <p class="seclede">What it costs to check a claim, who bears that cost, and how a rule reaches across a border.</p>
+  <ul class="rows">
+      <li class="row">
+        <a class="rtitle" href="phase2-theory/magnitsky-model-for-ai.html">The Magnitsky Model for AI</a><span class="rsub">Localized legislative cascades</span>
+        <div class="rmeta"><span class="mono">2026 · submitted · law &amp; policy</span><span class="t t-law">Law</span><span class="t t-econ">Economics</span><span class="t t-ai">AI</span><a class="alt" href="magnitsky-simulator/index.html">Open the policy simulator</a></div>
+<details class="rab"><summary>Abstract</summary><p>Argues that AI has become the “perfected proxy” — a deniable, jurisdictionally slippery, self-executing intermediary through which actors circumvent international-legal norms while remaining formally unaccountable — and that the answer is not a new global treaty but its opposite: localised, targeted national legislation on the Magnitsky model. It theorises AI as an accountability-diffusing “double veil” (the corporate veil plus the algorithmic responsibility gap), explains why targeted designations cascade through market access, dollar-clearing, correspondent banking, compliance de-risking and legislative emulation, and proposes an original doctrinal mechanism of AI-conduct-triggered designation keyed to responsible control rather than to a completed, attributable wrong. It is tested against three worked scenarios and against the strongest objections — sovereignty, over-reach, fragmentation and due process.</p></details>
+      </li>
+      <li class="row">
+        <a class="rtitle" href="manuscripts/who-pays-to-check-the-machine.pdf">Who Pays to Check the Machine</a>
+        <div class="rmeta"><span class="mono">2026 · under submission</span><span class="t t-econ">Economics</span><span class="t t-law">Law</span></div>
+<details class="rab"><summary>Abstract</summary><p>Generative systems act on the cost of generating a claim and leave the cost of checking it untouched. Where a claim is cheap to make and dear to verify, its cost has been relocated to the checker rather than reduced — and where verification cost exceeds what a checker can bear, the checker stops verifying and adopts a proxy uncorrelated with truth. The paper defines a verification ratio, derives “verification drag” as a mechanism by which a real productivity improvement registers as a measured slowdown, and predicts a movement of the firm boundary: functions whose output is an unverifiable assertion should be internalised, not outsourced. 23,131 words, 158 authorities.</p></details>
+      </li>
+      <li class="row">
+        <a class="rtitle" href="manuscripts/coercion-without-an-author.pdf">Coercion Without an Author</a>
+        <div class="rmeta"><span class="mono">2026 · under submission</span><span class="t t-econ">Economics</span><span class="t t-law">Law</span></div>
+<details class="rab"><summary>Abstract</summary><p>A state that controls a chokepoint in a production network can obtain compliance without issuing an instruction, because the parties downstream adjust to the risk of its use rather than to its use. The paper separates the two channels through which that operates, shows why attribution rules built around a documentary trace cannot see the second, and tests the account against a cell-level empirical study of production inputs. 26,618 words, 137 authorities.</p></details>
+      </li>
+      <li class="row">
+        <a class="rtitle" href="phase2-theory/large-scale-autonomous-systems-feasibility.html">Strategic Procurement and Feasibility Modeling for Large-Scale Autonomous Systems</a>
+        <div class="rmeta"><span class="mono">2026 · submitted · methodology</span><span class="t t-eng">Engineering</span><span class="t t-econ">Economics</span></div>
+<details class="rab"><summary>Abstract</summary><p>A domain-general methodology for estimating cost, schedule and risk on very large, capital-intensive autonomous and infrastructure programmes before commitment. It integrates a work-breakdown-structure CapEx estimate with explicit uncertainty and learning-curve effects, critical-path scheduling under deep uncertainty via an event-sourced Monte-Carlo engine (Helm), explicit go/no-go feasibility gates, a procurement layer (make-versus-buy, long-lead management), and an integrated feasibility index triangulated against reference-class benchmarks. A fully de-identified worked illustration on a generic autonomous-freight network demonstrates the method end to end; all numbers are notional and clearly labelled.</p></details>
+      </li>
+      <li class="row">
+        <a class="rtitle" href="sentinel-positioning-note.html">Sentinel</a><span class="rsub">A methods and positioning note</span>
+        <div class="rmeta"><span class="mono">2026 · positioning note</span><span class="t t-law">Law</span><span class="t t-sanc">Sanctions</span><a class="alt" href="../projects/sentinel/index.html">Open Sentinel</a></div>
+<details class="rab"><summary>Abstract</summary><p>Why a regulated AI programme has to answer two legal questions at once — is it lawful to build and use (EU AI Act risk-tiering) and is it lawful to move (EU Dual-Use Regulation 2021/821 and Wassenaar export screening) — and how Sentinel answers both in one deterministic, fully-offline pass. The note sets out the rules-engine method, in which every line is tagged legal fact, reasoned assessment or verify and dated to the 2025–26 Digital Omnibus; the “regulated-by-design” thesis (human authority, auditability and export screening built into the control layer); and explicit scope limits — decision-support, not legal advice, and not an official control classification.</p></details>
+      </li>
+  </ul>
+</section>
 
-    <!-- FEATURED: SIMULATOR -->
-    <div class="feature">
-      <div class="fin">
-        <div>
-          <span class="tag"><span class="dot"></span> Interactive · illustrative model</span>
-          <h2>The Magnitsky Model for AI — Policy Simulator</h2>
-          <p>Pick an AI-driven circumvention scenario, watch the “double veil” defeat attribution, then enact targeted designations across jurisdictions and tune the cascade. The simulator scores the four channels of the paper — market access, dollar-clearing &amp; correspondent banking, compliance de-risking, and legislative emulation — and returns a verdict: <b style="color:var(--ink)">Contained</b>, <b style="color:var(--ink)">Circumvented</b>, or <b style="color:var(--ink)">Cascaded-to-compliance</b>.</p>
-          <div class="facts">
-            <span><span class="dot"></span> Runs fully offline in your browser</span>
-            <span><span class="dot"></span> Companion to the Phase II theory paper</span>
-          </div>
-        </div>
-        <div class="cta">
-          <img class="demo-shot" style="width:250px;margin:0 0 10px" src="assets/previews/magnitsky.jpg" alt="The Magnitsky policy simulator: a designation scenario with the four cascade channels scored" loading="lazy">
-          <a class="plink gold" href="magnitsky-simulator/index.html">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l14 9-14 9V3z"/></svg>
-            Open the simulator
-          </a>
-          <a class="plink ghost" href="phase2-theory/magnitsky-model-for-ai.html">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/></svg>
-            Read the paper
-          </a>
-        </div>
-      </div>
-    </div>
+<section id="applied-systems">
+  <h2>Applied systems and forecasting <span class="secn mono">3</span></h2>
+  <p class="seclede">Three preprints on systems built and measured rather than proposed.</p>
+  <ul class="rows">
+      <li class="row">
+        <a class="rtitle" href="phase1-preprints/fris-deterministic-peel-chains.html">Deterministic Peel Chains for Regulatory Compliance in Autonomous Systems</a>
+        <div class="rmeta"><span class="mono">2026 · submitted · TechRxiv</span><span class="t t-eng">Engineering</span><span class="t t-cyber">Cyber</span></div>
+<details class="rab"><summary>Abstract</summary><p>A working reference architecture for financial-crime and regulatory analysis built on three commitments: an offline, dependency-free client where no subject data leaves the analyst&#x27;s machine; a deterministic “peel-chain” method that traces layered value transfers as exact integers under a checked value-conservation invariant, byte-for-byte reproducible from its inputs; and a provenance-first data model that labels every value by source and surfaces gaps rather than imputing them. It specifies the peel-chain algorithm and a 23-module engine framework sharing common deterministic primitives across beneficial-ownership tracing, sanctions and adverse-media screening, an insolvency-recovery waterfall, and a compliance knowledge base. No performance benchmarks are claimed; every numeric example is labelled illustrative.</p></details>
+      </li>
+      <li class="row">
+        <a class="rtitle" href="phase1-preprints/meridian-regulatory-impact-mapping.html">Mapping Real-Time Regulatory Impacts to Asset Vulnerability</a>
+        <div class="rmeta"><span class="mono">2026 · submitted · arXiv cs.CY</span><span class="t t-eng">Engineering</span><span class="t t-econ">Economics</span></div>
+<details class="rab"><summary>Abstract</summary><p>The methodology of Meridian, a provenance-first research system that maps real-time regulatory instruments and changes onto a universe of roughly 1,300 issuers and infers potential — not measured — impact. Every value carries its own source key, timestamps, hashed raw artifact and explicit verification class; missing values are shown as missing, and an instrument is linked to a company only through a disclosed, quotable business fact. It also sets out an operating discipline for strict API budgets — a daily-cap governor, need-driven rotation, and an “outage is not absence” rule — and reports no empirical findings, only illustrative mechanism.</p></details>
+      </li>
+      <li class="row">
+        <a class="rtitle" href="phase1-preprints/vantage-forecasting-backtesting.html">Comparative Efficacy of Holt-Winters, ETS and Croston Methods</a>
+        <div class="rmeta"><span class="mono">2026 · submitted · forecasting</span><span class="t t-econ">Economics</span><span class="t t-eng">Engineering</span></div>
+<details class="rab"><summary>Abstract</summary><p>A dependency-free forecasting engine implementing the classical exponential-smoothing family (SES, Holt, additive Holt-Winters), OLS regression with seasonal dummies, and Croston&#x27;s method, with seasonal-naive and moving-average baselines. Rather than committing to one model, it performs per-series rolling-origin (walk-forward) backtesting and selects a champion by lowest held-out WAPE across five commercial domains with different cadences. The consistent finding is that model choice should be let to each series — notably, seasonal-naive beats Croston on every intermittent line because the intermittency is scheduled, not memoryless — using semi-synthetic, clearly-labelled benchmark data.</p></details>
+      </li>
+  </ul>
+</section>
 
-    <!-- PHASE 1 -->
-    <section class="papers" aria-labelledby="p1">
-      <div class="sechead">
-        <span class="ph">Phase I</span>
-        <h2 id="p1">Preprints — applied systems &amp; engineering</h2>
-        <span class="cnt">3 papers · submitted; pending peer review</span>
-      </div>
-      <div class="grid">
-
-        <article class="card">
-          <div class="meta"><span class="chip">Phase I · Preprint</span><span class="chip venue">Submitted; pending peer review · TechRxiv</span></div>
-          <h3>Deterministic Peel Chains for Regulatory Compliance in Autonomous, Offline Environments</h3>
-          <div class="code">FRIS — Forensic &amp; Regulatory Intelligence Suite</div>
-          <p class="ab">A working reference architecture for financial-crime and regulatory analysis built on three commitments: an offline, dependency-free client where no subject data leaves the analyst's machine; a deterministic “peel-chain” method that traces layered value transfers as exact integers under a checked value-conservation invariant, byte-for-byte reproducible from its inputs; and a provenance-first data model that labels every value by source and surfaces gaps rather than imputing them. It specifies the peel-chain algorithm and a 23-module engine framework sharing common deterministic primitives across beneficial-ownership tracing, sanctions and adverse-media screening, an insolvency-recovery waterfall, and a compliance knowledge base. No performance benchmarks are claimed; every numeric example is labelled illustrative.</p>
-          <div class="foot">
-            <a class="read" href="phase1-preprints/fris-deterministic-peel-chains.html">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg>
-              Read paper
-            </a>
-            <span class="fmt">.html · Web page</span>
-          </div>
-        </article>
-
-        <article class="card">
-          <div class="meta"><span class="chip">Phase I · Preprint</span><span class="chip venue">Submitted; pending peer review · arXiv cs.CY</span></div>
-          <h3>Mapping Real-Time Regulatory Impacts to Asset Vulnerability Under Strict API Budgets</h3>
-          <div class="code">Meridian — regulatory impact mapping</div>
-          <p class="ab">The methodology of Meridian, a provenance-first research system that maps real-time regulatory instruments and changes onto a universe of roughly 1,300 issuers and infers <em>potential</em> — not measured — impact. Every value carries its own source key, timestamps, hashed raw artifact and explicit verification class; missing values are shown as missing, and an instrument is linked to a company only through a disclosed, quotable business fact. It also sets out an operating discipline for strict API budgets — a daily-cap governor, need-driven rotation, and an “outage is not absence” rule — and reports no empirical findings, only illustrative mechanism.</p>
-          <div class="foot">
-            <a class="read" href="phase1-preprints/meridian-regulatory-impact-mapping.html">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg>
-              Read paper
-            </a>
-            <span class="fmt">.html · Web page</span>
-          </div>
-        </article>
-
-        <article class="card">
-          <div class="meta"><span class="chip">Phase I · Preprint</span><span class="chip venue">Submitted; pending peer review · forecasting &amp; operations</span></div>
-          <h3>Comparative Efficacy of Holt-Winters, ETS and Croston Methods in Multi-Industry Rolling-Origin Backtesting</h3>
-          <div class="code">Vantage — forecasting &amp; backtesting</div>
-          <p class="ab">A dependency-free forecasting engine implementing the classical exponential-smoothing family (SES, Holt, additive Holt-Winters), OLS regression with seasonal dummies, and Croston's method, with seasonal-naive and moving-average baselines. Rather than committing to one model, it performs per-series rolling-origin (walk-forward) backtesting and selects a champion by lowest held-out WAPE across five commercial domains with different cadences. The consistent finding is that model choice should be let to each series — notably, seasonal-naive beats Croston on every intermittent line because the intermittency is scheduled, not memoryless — using semi-synthetic, clearly-labelled benchmark data.</p>
-          <div class="foot">
-            <a class="read" href="phase1-preprints/vantage-forecasting-backtesting.html">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg>
-              Read paper
-            </a>
-            <span class="fmt">.html · Web page</span>
-          </div>
-        </article>
-
-      </div>
-    </section>
-
-    <!-- PHASE 2 -->
-    <section class="papers" aria-labelledby="p2">
-      <div class="sechead">
-        <span class="ph">Phase II</span>
-        <h2 id="p2">Theory &amp; methodology</h2>
-        <span class="cnt">2 papers · submitted; pending peer review</span>
-      </div>
-      <div class="grid">
-
-        <article class="card">
-          <div class="meta"><span class="chip">Phase II · Theory</span><span class="chip venue">Submitted; pending peer review · law &amp; policy</span></div>
-          <h3>The Magnitsky Model for AI: Localized Legislative Cascades as a Response to AI-Driven Circumvention of International Law</h3>
-          <div class="code">Companion interactive simulator available above</div>
-          <p class="ab">Argues that AI has become the “perfected proxy” — a deniable, jurisdictionally slippery, self-executing intermediary through which actors circumvent international-legal norms while remaining formally unaccountable — and that the answer is not a new global treaty but its opposite: localised, targeted national legislation on the Magnitsky model. It theorises AI as an accountability-diffusing “double veil” (the corporate veil plus the algorithmic responsibility gap), explains why targeted designations cascade through market access, dollar-clearing, correspondent banking, compliance de-risking and legislative emulation, and proposes an original doctrinal mechanism of AI-conduct-triggered designation keyed to responsible control rather than to a completed, attributable wrong. It is tested against three worked scenarios and against the strongest objections — sovereignty, over-reach, fragmentation and due process.</p>
-          <div class="foot">
-            <a class="read" href="phase2-theory/magnitsky-model-for-ai.html">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg>
-              Read paper
-            </a>
-            <a class="read alt" href="magnitsky-simulator/index.html">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l14 9-14 9V3z"/></svg>
-              Open simulator
-            </a>
-            <span class="fmt">.html · Web page</span>
-          </div>
-        </article>
-
-        <article class="card">
-          <div class="meta"><span class="chip">Phase II · Methodology</span><span class="chip venue">Submitted; pending peer review</span></div>
-          <h3>Strategic Procurement and Feasibility Modeling for Large-Scale Autonomous Systems</h3>
-          <div class="code">Domain-general systems-engineering methodology</div>
-          <p class="ab">A domain-general methodology for estimating cost, schedule and risk on very large, capital-intensive autonomous and infrastructure programmes before commitment. It integrates a work-breakdown-structure CapEx estimate with explicit uncertainty and learning-curve effects, critical-path scheduling under deep uncertainty via an event-sourced Monte-Carlo engine (Helm), explicit go/no-go feasibility gates, a procurement layer (make-versus-buy, long-lead management), and an integrated feasibility index triangulated against reference-class benchmarks. A fully de-identified worked illustration on a generic autonomous-freight network demonstrates the method end to end; all numbers are notional and clearly labelled.</p>
-          <div class="foot">
-            <a class="read" href="phase2-theory/large-scale-autonomous-systems-feasibility.html">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg>
-              Read paper
-            </a>
-            <span class="fmt">.html · Web page</span>
-          </div>
-        </article>
-
-      </div>
-    </section>
-
-    <!-- METHODS / POSITIONING NOTES -->
-    <section class="papers" aria-labelledby="notes">
-      <div class="sechead">
-        <span class="ph">Notes</span>
-        <h2 id="notes">Methods &amp; positioning notes</h2>
-        <span class="cnt">1 note</span>
-      </div>
-      <div class="grid">
-
-        <article class="card">
-          <div class="meta"><span class="chip">Positioning note</span><span class="chip venue">Companion to a portfolio project</span></div>
-          <h3>Sentinel — A Methods &amp; Positioning Note</h3>
-          <div class="code">Sentinel — AI-governance &amp; export-control readiness assessor</div>
-          <p class="ab">Why a regulated AI programme has to answer two legal questions at once — <b style="color:var(--ink)">is it lawful to build and use</b> (EU AI Act risk-tiering) and <b style="color:var(--ink)">is it lawful to move</b> (EU Dual-Use Regulation 2021/821 and Wassenaar export screening) — and how Sentinel answers both in one deterministic, fully-offline pass. The note sets out the rules-engine method, in which every line is tagged <em>legal fact</em>, <em>reasoned assessment</em> or <em>verify</em> and dated to the 2025&ndash;26 Digital Omnibus; the &ldquo;regulated-by-design&rdquo; thesis (human authority, auditability and export screening built into the control layer); and explicit scope limits — decision-support, <em>not</em> legal advice, and <em>not</em> an official control classification.</p>
-          <div class="foot">
-            <a class="read" href="sentinel-positioning-note.html">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg>
-              Read the note
-            </a>
-            <a class="read alt" href="../projects/sentinel/index.html">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l8 4v5c0 5-3.5 8-8 10-4.5-2-8-5-8-10V7z"/><path d="M9 12l2 2 4-4"/></svg>
-              Open Sentinel
-            </a>
-            <span class="fmt">.html · Web page</span>
-          </div>
-        </article>
-
-      </div>
-    </section>
-
-    <!-- REPORTS (independent grey literature) -->
-    <section class="papers" aria-labelledby="reports">
-      <div class="sechead">
-        <span class="ph">Reports</span>
-        <h2 id="reports">Reports (independent grey literature)</h2>
-        <span class="cnt">3 reports &middot; deposited on Zenodo</span>
-      </div>
-      <div class="grid">
-
-        <article class="card">
-          <div class="meta"><span class="chip">Report · grey literature</span><span class="chip venue">Deposited &middot; Zenodo</span></div>
-          <h3>Insolvency Avoidance &amp; Executive Crisis Intervention Model — A Simulated Charity Governance Case Study</h3>
-          <div class="code">Independent advisory / technical report</div>
-          <p class="ab">A simulated charity-governance case study modelling how the board of a mid-sized UK charity should respond to a projected structural deficit compounded by the sudden loss of its COO and Director of Finance. It sets out a crisis-governance playbook — an emergency board cadence, absolute cash controls, forensic ring-fencing of restricted grant funds, and proactive regulator communication — each intervention mapped to UK statutory frameworks (Companies Act 2006 directors' duties; Insolvency Act 1986; TUPE 2006; Charity Commission guidance and Serious Incident Reporting; Charities SORP / FRS 102; and CIGA 2020 moratorium options). The entity is fictional and every figure is illustrative; the document is an explicit portfolio demonstration.</p>
-          <div class="foot">
-            <a class="read" href="zenodo-reports/hvoss-coverpage.html">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg>
-              Read cover page
-            </a>
-            <span class="fmt">.html · Web page</span>
-          </div>
-        </article>
-
-        <article class="card">
-          <div class="meta"><span class="chip">Report · grey literature</span><span class="chip venue">Deposited &middot; Zenodo</span></div>
-          <h3>Compliance-Led Operational Architecture — A Legal &amp; Compliance Operating Model for Publicly-Funded Education Delivery</h3>
-          <div class="code">Independent advisory / technical report</div>
-          <p class="ab">A redacted, illustrative case study of a compliance-led operating model for a multi-site, publicly-funded education provider (a community interest company), 2018&ndash;2024, written from the seat of a Director / Head of Legal &amp; Compliance. It migrates a paper-based baseline for sensitive learner data to evidence-led, audit-ready digital delivery while managing public-funding clawback risk — with controls mapped across UK GDPR / DPA 2018, safeguarding (KCSIE, Working Together), the Prevent duty, ESFA/ILR funding assurance and health &amp; safety. Its centrepiece is an automated legal-compliance pipeline: a Python change-detection runner over GOV.UK / HSE / ESFA, a rules-based urgency classifier, a documented legal-decision hub, and controlled policy/training rollout with comprehension checks. Illustrative outcomes: &gt;95% training completion within 72 hours of a policy change, funding-error rates cut from 12% to under 1%, sub-15-minute audit retrieval, and zero reportable breaches. A redacted, illustrative account of the author&rsquo;s own operating experience; individuals and third parties are not identified, and nothing confidential, privileged, or NDA-protected is reproduced.</p>
-          <div class="foot">
-            <a class="read" href="zenodo-reports/rsl-coverpage.html">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg>
-              Read cover page
-            </a>
-            <span class="fmt">.html · Web page</span>
-          </div>
-        </article>
-
-        <article class="card">
-          <div class="meta"><span class="chip">Report · grey literature</span><span class="chip venue">Deposited &middot; Zenodo</span></div>
-          <h3>Project Finance &amp; Structuring Advisory: A Utility-Scale PV Project on a Philippine Island Province</h3>
-          <div class="code">Independent advisory / technical report</div>
-          <p class="ab">A project-finance and structuring case study, drawn from the author&rsquo;s own advisory work: a proposed utility-scale solar farm on a Philippine island province, raising USD 2M for a 2 MW first phase under a 25-year power-supply agreement with the provincial electric cooperative. It recalibrates an over-stated &ldquo;80% efficiency&rdquo; claim into standard metrics (performance ratio ~0.80, capacity factor ~18&ndash;21%, ~1,575 MWh/yr) and shows that the pivotal insight is capital-structural: a pure-equity raise would over-dilute the founders (&gt;60% control lost), whereas senior debt through an SPV preserves control. It analyses the Philippine reforms that opened the sector &mdash; 100% foreign ownership of solar SPVs (DOJ Opinion 21 / DC2022-11-0034), 99-year leases (RA 12252) and the DOE Certificate-of-Authority permitting path &mdash; and flags politically-exposed-person (PEP) and FCPA governance exposure as a gating risk. The jurisdiction and regulatory analysis are real; the project, counterparties and location are anonymised, and no individual is identified.</p>
-          <div class="foot">
-            <a class="read" href="../keystonesolar.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg> Read the report (PDF)</a>
-            <a class="cf-newtab" href="zenodo-reports/keystonesolar-coverpage.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/></svg> <span>Cover page</span></a>
-            <span class="fmt">.pdf &middot; 5 pages</span>
-          </div>
-        </article>
-
-      </div>
-    </section>
+<section id="reports">
+  <h2>Reports and advisory case studies <span class="secn mono">3</span></h2>
+  <p class="seclede">Independent grey literature, deposited rather than submitted.</p>
+  <ul class="rows">
+      <li class="row">
+        <a class="rtitle" href="zenodo-reports/hvoss-coverpage.html">Insolvency Avoidance and Executive Crisis Intervention Model</a><span class="rsub">HVOSS</span>
+        <div class="rmeta"><span class="mono">deposited · Zenodo</span><span class="t t-econ">Economics</span><span class="t t-law">Law</span></div>
+<details class="rab"><summary>Abstract</summary><p>A simulated charity-governance case study modelling how the board of a mid-sized UK charity should respond to a projected structural deficit compounded by the sudden loss of its COO and Director of Finance. It sets out a crisis-governance playbook — an emergency board cadence, absolute cash controls, forensic ring-fencing of restricted grant funds, and proactive regulator communication — each intervention mapped to UK statutory frameworks (Companies Act 2006 directors&#x27; duties; Insolvency Act 1986; TUPE 2006; Charity Commission guidance and Serious Incident Reporting; Charities SORP / FRS 102; and CIGA 2020 moratorium options). The entity is fictional and every figure is illustrative; the document is an explicit portfolio demonstration.</p></details>
+      </li>
+      <li class="row">
+        <a class="rtitle" href="zenodo-reports/rsl-coverpage.html">Compliance-Led Operational Architecture</a><span class="rsub">A legal and compliance review</span>
+        <div class="rmeta"><span class="mono">deposited · Zenodo</span><span class="t t-law">Law</span><span class="t t-econ">Economics</span></div>
+<details class="rab"><summary>Abstract</summary><p>A redacted, illustrative case study of a compliance-led operating model for a multi-site, publicly-funded education provider (a community interest company), 2018–2024, written from the seat of a Director / Head of Legal &amp; Compliance. It migrates a paper-based baseline for sensitive learner data to evidence-led, audit-ready digital delivery while managing public-funding clawback risk — with controls mapped across UK GDPR / DPA 2018, safeguarding (KCSIE, Working Together), the Prevent duty, ESFA/ILR funding assurance and health &amp; safety. Its centrepiece is an automated legal-compliance pipeline: a Python change-detection runner over GOV.UK / HSE / ESFA, a rules-based urgency classifier, a documented legal-decision hub, and controlled policy/training rollout with comprehension checks. Illustrative outcomes: &gt;95% training completion within 72 hours of a policy change, funding-error rates cut from 12% to under 1%, sub-15-minute audit retrieval, and zero reportable breaches. A redacted, illustrative account of the author’s own operating experience; individuals and third parties are not identified, and nothing confidential, privileged, or NDA-protected is reproduced.</p></details>
+      </li>
+      <li class="row">
+        <a class="rtitle" href="../keystonesolar.pdf">Project Finance and Structuring Advisory</a><span class="rsub">A utility-scale PV project</span>
+        <div class="rmeta"><span class="mono">deposited · Zenodo</span><span class="t t-econ">Economics</span><a class="alt" href="zenodo-reports/keystonesolar-coverpage.html">Cover page</a></div>
+<details class="rab"><summary>Abstract</summary><p>A project-finance and structuring case study, drawn from the author’s own advisory work: a proposed utility-scale solar farm on a Philippine island province, raising USD 2M for a 2 MW first phase under a 25-year power-supply agreement with the provincial electric cooperative. It recalibrates an over-stated “80% efficiency” claim into standard metrics (performance ratio ~0.80, capacity factor ~18–21%, ~1,575 MWh/yr) and shows that the pivotal insight is capital-structural: a pure-equity raise would over-dilute the founders (&gt;60% control lost), whereas senior debt through an SPV preserves control. It analyses the Philippine reforms that opened the sector — 100% foreign ownership of solar SPVs (DOJ Opinion 21 / DC2022-11-0034), 99-year leases (RA 12252) and the DOE Certificate-of-Authority permitting path — and flags politically-exposed-person (PEP) and FCPA governance exposure as a gating risk. The jurisdiction and regulatory analysis are real; the project, counterparties and location are anonymised, and no individual is identified.</p></details>
+      </li>
+  </ul>
+</section>
 
     <footer>
       <div class="row">
@@ -616,7 +654,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
         </button>
       </div>
-      <div class="cfmodal__body">
+      <div class="cfmodal__body"><div class="cfload" id="cfload" role="status" aria-live="polite"><svg viewBox="0 0 34 44" aria-hidden="true"><path class="lake" d="M4 38 q13 5 26 0"/><path class="jet" d="M17 38 V12"/><circle class="drop" cx="17" cy="38" r="1.7"/></svg><p>Loading&hellip;</p></div>
         <iframe class="cfmodal__frame" id="cfmodal-frame" title="Interactive tool" src="about:blank" allow="fullscreen" referrerpolicy="no-referrer"></iframe>
       </div>
     </div>
@@ -652,7 +690,7 @@
     var closers = modal.querySelectorAll('[data-cfclose]');
     var lastFocus = null, savedY = 0, isOpen = false;
 
-    function openModal(src, label){
+    function openModal(src, label){ if(window.cfLoadStart)cfLoadStart();
       if(!src || src === '#') return;
       savedY = window.pageYOffset || root.scrollTop || 0;      // remember scroll position
       lastFocus = document.activeElement;
@@ -669,7 +707,7 @@
       if(x){ try{ x.focus({preventScroll:true}); }catch(e){ x.focus(); } }
     }
 
-    function closeModal(){
+    function closeModal(){ if(window.cfLoadStop)cfLoadStop();
       if(!isOpen) return;
       modal.hidden = true;
       frame.setAttribute('src','about:blank');                 // unload tool (release WebGL/audio)
@@ -714,6 +752,18 @@
   side.addEventListener('click',function(e){if(e.target.closest('a'))set(false);});
   addEventListener('resize',function(){if(innerWidth>=1080)set(false);});
 })();
+</script>
+<script>
+  /* 220ms before it shows, 400ms minimum once shown: it never flashes on a cached
+     load and never appears at all if the frame is instant. */
+  (function(){
+    var el=document.getElementById('cfload'); if(!el) return;
+    var showAt=0,timer=null;
+    window.cfLoadStart=function(){ clearTimeout(timer); timer=setTimeout(function(){ el.classList.add('on'); showAt=Date.now(); },220); };
+    window.cfLoadStop=function(){ clearTimeout(timer);
+      var held=Date.now()-showAt, wait=(showAt&&held<400)?400-held:0;
+      setTimeout(function(){ el.classList.remove('on'); showAt=0; },wait); };
+  })();
 </script>
 </body>
 </html>

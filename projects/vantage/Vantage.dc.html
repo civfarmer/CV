@@ -7,6 +7,7 @@
 <script src="./vantage-bundle.js"></script>
 <script src="./dc-nosri.js"></script>
 <script src="./support.js"></script>
+  <link rel="stylesheet" href="../../assets/fonts.css">
 </head>
 <body>
 <x-dc>
@@ -32,7 +33,7 @@
     <div style="display: flex; align-items: center; gap: 12px;">
       <img src="vantage-crest.png" style="height: 42px; width: auto; display: block;">
       <div>
-        <div style="font: 700 16px/1 'Zilla Slab', serif; color: var(--topbarText); letter-spacing: 0.02em;">Vantage</div>
+        <div style="font: 700 16px/1 'Source Serif 4', serif; color: var(--topbarText); letter-spacing: 0.02em;">Vantage</div>
         <div style="font: 500 9.5px/1 'IBM Plex Mono', monospace; color: var(--topbarSubtext); letter-spacing: 0.06em; margin-top: 3px;">FORECASTING &amp; PREDICTIVE ANALYTICS</div>
       </div>
     </div>
@@ -43,7 +44,7 @@
 
     <div style="text-align: center; margin-bottom: 48px;">
       <img src="vantage-crest.png" style="height: 132px; width: auto; margin: 0 auto 16px; display: block;">
-      <h1 style="font: 700 40px/1.1 'Zilla Slab', serif; color: var(--textStrong); margin: 0 0 10px; letter-spacing: -0.01em;">Vantage</h1>
+      <h1 style="font: 700 40px/1.1 'Source Serif 4', serif; color: var(--textStrong); margin: 0 0 10px; letter-spacing: -0.01em;">Vantage</h1>
       <div style="font: 600 12px/1 'IBM Plex Mono', monospace; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 20px;">Foresight · Precision · Insight</div>
       <p style="font: 500 16px/1.65 'IBM Plex Sans', sans-serif; color: var(--textMuted); max-width: 640px; margin: 0 auto;">A multi-industry forecasting sandbox that demonstrates how a single prediction engine adapts to five different commercial use cases — with real models, honest data labelling, and plain-English explanations.</p>
     </div>
@@ -52,27 +53,27 @@
 
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 48px;">
       <div style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 10px; padding: 16px; box-shadow: var(--cardShadow);">
-        <div style="font: 700 13px/1.2 'Zilla Slab', serif; color: var(--textStrong); margin-bottom: 8px;">Model Selection</div>
+        <div style="font: 700 13px/1.2 'Source Serif 4', serif; color: var(--textStrong); margin-bottom: 8px;">Model Selection</div>
         <div style="font: 500 12.5px/1.55 'IBM Plex Sans', sans-serif; color: var(--textMuted);">Runs Holt-Winters, exponential smoothing, regression, Croston (intermittent demand), seasonal-naive and moving-average baselines. The champion is the model with the lowest back-tested error — not the fanciest name.</div>
       </div>
       <div style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 10px; padding: 16px; box-shadow: var(--cardShadow);">
-        <div style="font: 700 13px/1.2 'Zilla Slab', serif; color: var(--textStrong); margin-bottom: 8px;">Rolling-Origin Backtesting</div>
+        <div style="font: 700 13px/1.2 'Source Serif 4', serif; color: var(--textStrong); margin-bottom: 8px;">Rolling-Origin Backtesting</div>
         <div style="font: 500 12.5px/1.55 'IBM Plex Sans', sans-serif; color: var(--textMuted);">Every model is tested by hiding real history and forecasting forward, repeatedly. Performance is measured with MAE, RMSE, MAPE, sMAPE, WAPE and bias — not on training data, on held-out actuals.</div>
       </div>
       <div style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 10px; padding: 16px; box-shadow: var(--cardShadow);">
-        <div style="font: 700 13px/1.2 'Zilla Slab', serif; color: var(--textStrong); margin-bottom: 8px;">Live Recalibration</div>
+        <div style="font: 700 13px/1.2 'Source Serif 4', serif; color: var(--textStrong); margin-bottom: 8px;">Live Recalibration</div>
         <div style="font: 500 12.5px/1.55 'IBM Plex Sans', sans-serif; color: var(--textMuted);">Enter a new actual and the forecast updates immediately. The engine classifies the reading (normal / anomalous / structural), re-estimates the level, and explains in plain English what changed and why.</div>
       </div>
       <div style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 10px; padding: 16px; box-shadow: var(--cardShadow);">
-        <div style="font: 700 13px/1.2 'Zilla Slab', serif; color: var(--textStrong); margin-bottom: 8px;">Scenario Comparison</div>
+        <div style="font: 700 13px/1.2 'Source Serif 4', serif; color: var(--textStrong); margin-bottom: 8px;">Scenario Comparison</div>
         <div style="font: 500 12.5px/1.55 'IBM Plex Sans', sans-serif; color: var(--textMuted);">Base, optimistic and conservative cases compared side by side — with stockout risk, revenue and margin computed per scenario. Custom scenarios for contracts, campaigns and constraints.</div>
       </div>
       <div style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 10px; padding: 16px; box-shadow: var(--cardShadow);">
-        <div style="font: 700 13px/1.2 'Zilla Slab', serif; color: var(--textStrong); margin-bottom: 8px;">Data Confidence</div>
+        <div style="font: 700 13px/1.2 'Source Serif 4', serif; color: var(--textStrong); margin-bottom: 8px;">Data Confidence</div>
         <div style="font: 500 12.5px/1.55 'IBM Plex Sans', sans-serif; color: var(--textMuted);">Every data source is labelled: real historical, simulated, user-entered, contracted, pipeline or public. The system never silently mixes real and synthetic data and always tells you what would improve the forecast.</div>
       </div>
       <div style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 10px; padding: 16px; box-shadow: var(--cardShadow);">
-        <div style="font: 700 13px/1.2 'Zilla Slab', serif; color: var(--textStrong); margin-bottom: 8px;">Industry-Aware</div>
+        <div style="font: 700 13px/1.2 'Source Serif 4', serif; color: var(--textStrong); margin-bottom: 8px;">Industry-Aware</div>
         <div style="font: 500 12.5px/1.55 'IBM Plex Sans', sans-serif; color: var(--textMuted);">Each industry gets its own metrics, assumptions, language, constraints and model families. The maths is the product — the skin flexes to match the client. A brewery is not a SaaS startup with hops.</div>
       </div>
     </div>
@@ -83,35 +84,35 @@
 
       <a href="Vantage%20Brewery.dc.html" style="text-decoration: none; display: block; background: var(--card); border: 1px solid var(--cardBorder); border-radius: 12px; padding: 20px 16px; box-shadow: var(--cardShadow); border-top: 3px solid var(--watneys); transition: transform .15s, box-shadow .15s;" style-hover="transform: translateY(-3px); box-shadow: 0 8px 28px -8px rgba(0,0,0,0.2);">
         <div style="font: 700 32px/1 serif; margin-bottom: 10px; color: var(--watneys);">🍺</div>
-        <div style="font: 700 14px/1.2 'Zilla Slab', serif; color: var(--textStrong); margin-bottom: 6px;">Brewery</div>
+        <div style="font: 700 14px/1.2 'Source Serif 4', serif; color: var(--textStrong); margin-bottom: 6px;">Brewery</div>
         <div style="font: 500 11.5px/1.5 'IBM Plex Sans', sans-serif; color: var(--textMuted);">Demand, stock, production, delivery. Seasonal forecasting with weather and event drivers.</div>
         <div style="font: 600 11px/1 'IBM Plex Mono', monospace; color: var(--accent); margin-top: 10px;">Live demo →</div>
       </a>
 
       <a href="Vantage%20DTC.dc.html" style="text-decoration: none; display: block; background: var(--card); border: 1px solid var(--cardBorder); border-radius: 12px; padding: 20px 16px; box-shadow: var(--cardShadow); border-top: 3px solid var(--accent);" style-hover="transform: translateY(-3px);">
         <div style="font: 700 32px/1 serif; margin-bottom: 10px; color: var(--accent);">🛒</div>
-        <div style="font: 700 14px/1.2 'Zilla Slab', serif; color: var(--textStrong); margin-bottom: 6px;">DTC Retail</div>
+        <div style="font: 700 14px/1.2 'Source Serif 4', serif; color: var(--textStrong); margin-bottom: 6px;">DTC Retail</div>
         <div style="font: 500 11.5px/1.5 'IBM Plex Sans', sans-serif; color: var(--textMuted);">SKU demand, campaigns, inventory, fulfilment. Marketing-driven with return-rate modelling.</div>
         <div style="font: 600 11px/1 'IBM Plex Mono', monospace; color: var(--accent); margin-top: 10px;">Live demo →</div>
       </a>
 
       <a href="Vantage%20SaaS.dc.html" style="text-decoration: none; display: block; background: var(--card); border: 1px solid var(--cardBorder); border-radius: 12px; padding: 20px 16px; box-shadow: var(--cardShadow); border-top: 3px solid var(--green);" style-hover="transform: translateY(-3px);">
         <div style="font: 700 32px/1 serif; margin-bottom: 10px; color: var(--green);">📊</div>
-        <div style="font: 700 14px/1.2 'Zilla Slab', serif; color: var(--textStrong); margin-bottom: 6px;">SaaS Startup</div>
+        <div style="font: 700 14px/1.2 'Source Serif 4', serif; color: var(--textStrong); margin-bottom: 6px;">SaaS Startup</div>
         <div style="font: 500 11.5px/1.5 'IBM Plex Sans', sans-serif; color: var(--textMuted);">MRR, churn, expansion, pipeline. Cohort-based with cash runway and capacity planning.</div>
         <div style="font: 600 11px/1 'IBM Plex Mono', monospace; color: var(--accent); margin-top: 10px;">Live demo →</div>
       </a>
 
       <a href="Vantage%20Education.dc.html" style="text-decoration: none; display: block; background: var(--card); border: 1px solid var(--cardBorder); border-radius: 12px; padding: 20px 16px; box-shadow: var(--cardShadow); border-top: 3px solid var(--blue);" style-hover="transform: translateY(-3px);">
         <div style="font: 700 32px/1 serif; margin-bottom: 10px; color: var(--blue);">🎓</div>
-        <div style="font: 700 14px/1.2 'Zilla Slab', serif; color: var(--textStrong); margin-bottom: 6px;">Education</div>
+        <div style="font: 700 14px/1.2 'Source Serif 4', serif; color: var(--textStrong); margin-bottom: 6px;">Education</div>
         <div style="font: 500 11.5px/1.5 'IBM Plex Sans', sans-serif; color: var(--textMuted);">Enrolment, course demand, tutor capacity. Cohort retention with dropout-risk modelling.</div>
         <div style="font: 600 11px/1 'IBM Plex Mono', monospace; color: var(--accent); margin-top: 10px;">Live demo →</div>
       </a>
 
       <a href="Vantage%20Manufacturing.dc.html" style="text-decoration: none; display: block; background: var(--card); border: 1px solid var(--cardBorder); border-radius: 12px; padding: 20px 16px; box-shadow: var(--cardShadow); border-top: 3px solid var(--textSubtle);" style-hover="transform: translateY(-3px);">
         <div style="font: 700 32px/1 serif; margin-bottom: 10px; color: var(--textSubtle);">⚙️</div>
-        <div style="font: 700 14px/1.2 'Zilla Slab', serif; color: var(--textStrong); margin-bottom: 6px;">Manufacturing</div>
+        <div style="font: 700 14px/1.2 'Source Serif 4', serif; color: var(--textStrong); margin-bottom: 6px;">Manufacturing</div>
         <div style="font: 500 11.5px/1.5 'IBM Plex Sans', sans-serif; color: var(--textMuted);">Production, BOM, supplier delays, defect rates. Constraint-led with capacity utilisation.</div>
         <div style="font: 600 11px/1 'IBM Plex Mono', monospace; color: var(--accent); margin-top: 10px;">Live demo →</div>
       </a>
@@ -122,7 +123,7 @@
       <div style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sectionLabel); margin-bottom: 14px;">Try It With Your Own Data</div>
       <a href="Vantage%20Sandbox.dc.html" style="text-decoration: none; display: flex; justify-content: space-between; align-items: center; gap: 20px; background: var(--card); border: 1px solid var(--cardBorder); border-radius: 14px; padding: 22px 26px; box-shadow: var(--cardShadow); border-left: 4px solid var(--accent);" style-hover="border-left-width: 8px;">
         <div>
-          <div style="font: 700 18px/1.2 'Zilla Slab', serif; color: var(--textStrong);">Open the forecasting sandbox →</div>
+          <div style="font: 700 18px/1.2 'Source Serif 4', serif; color: var(--textStrong);">Open the forecasting sandbox →</div>
           <div style="font: 500 13px/1.55 'IBM Plex Sans', sans-serif; color: var(--textMuted); margin-top: 6px; max-width: 640px;">Paste your own figures (monthly or weekly) and pick your business type — Vantage automatically applies the right model family (Holt-Winters, regression, Croston or a baseline), back-tests them on your data, and shows the champion forecast with confidence intervals. No setup, no spreadsheet formulas.</div>
         </div>
         <div style="font: 700 13px/1 'IBM Plex Mono', monospace; color: var(--accent); white-space: nowrap;">Sandbox</div>
