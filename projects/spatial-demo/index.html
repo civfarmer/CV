@@ -64,6 +64,28 @@
   .foot{margin-top:18px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:12px;font-family:var(--fm)}
   .keys{display:flex;gap:15px;flex-wrap:wrap;margin-top:14px;font-family:var(--fm);font-size:11.5px;color:var(--ink2)}
   .keys i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:7px;vertical-align:-1px}
+
+  /* ---- phone: get to the demo -------------------------------------------
+     At 390px these pages ran to four or five screens, of which the canvas was
+     one: the rest was the lede and the caveat notes, which a reader has to
+     scroll past before touching anything. The prose is not removed - the
+     caveats matter and several are the reason the page is honest - but on a
+     small screen it collapses so the demo is what you land on. */
+  @media (max-width:640px){
+    .lede{font-size:14px;line-height:1.55}
+    .lede.clamped{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+    details.mnote{margin:10px 0;border-left:3px solid var(--line,#233145);padding-left:10px}
+    details.mnote > summary{font-size:12px;letter-spacing:.04em;text-transform:uppercase;
+      color:var(--muted,#7d8ba3);cursor:pointer;list-style:none;padding:2px 0}
+    details.mnote > summary::-webkit-details-marker{display:none}
+    details.mnote > summary::after{content:' ▸';font-size:10px}
+    details.mnote[open] > summary::after{content:' ▾'}
+    details.mnote .note{border:0;padding:0;margin:6px 0 0;font-size:12.5px;line-height:1.55}
+    .ledemore{display:inline-block;margin-top:4px;background:none;border:0;padding:0;font:inherit;
+      font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted,#7d8ba3);
+      border-bottom:1px dotted var(--line,#233145);cursor:pointer}
+  }
+  @media print{.lede.clamped{display:block;-webkit-line-clamp:none}details.mnote{display:block}}
 </style>
   <link rel="stylesheet" href="../../assets/fonts.css">
 </head>
@@ -1368,6 +1390,55 @@ window.__demo={
 if(window.THREE&&window.THREE.GLTFLoader&&window.ROBOT_GLB_B64){
   try{init();}catch(e){cv.outerHTML='<div class="note" style="margin:20px">WebGL unavailable — this demo needs a 3D-capable browser.</div>';console.error(e);}
 }else{PHASE.textContent='Assets missing: three.js, GLTFLoader or the bundled robot model did not load.';}
+</script>
+
+<script>
+/* Phone only, and applied by script so nothing is hidden from a reader without
+   JavaScript: clamp the lede to four lines with a control, and fold each caveat
+   note into a labelled disclosure. Desktop is untouched. */
+(function(){
+  if(!window.matchMedia || !matchMedia('(max-width:640px)').matches) return;
+  var lede=document.querySelector('.lede');
+  if(lede && (lede.textContent||'').trim().length>260){
+    lede.classList.add('clamped');
+    var b=document.createElement('button');
+    b.className='ledemore'; b.type='button'; b.setAttribute('aria-expanded','false');
+    b.textContent='Read more';
+    b.addEventListener('click',function(){
+      var open=lede.classList.toggle('clamped')===false;
+      b.setAttribute('aria-expanded',String(open));
+      b.textContent=open?'Show less':'Read more';
+    });
+    lede.insertAdjacentElement('afterend',b);
+  }
+  document.querySelectorAll('.note').forEach(function(n,i){
+    if(n.closest('details')) return;
+    var d=document.createElement('details'); d.className='mnote';
+    var s=document.createElement('summary');
+    var strong=n.querySelector('b');
+    s.textContent=(strong?strong.textContent:'Note').replace(/[.—-]\s*$/,'').slice(0,64);
+    d.appendChild(s);
+    n.parentNode.insertBefore(d,n);
+    d.appendChild(n);
+  });
+
+  /* On a phone the interactive panel comes first: the point of the page is the thing
+     you can touch, and it was sitting behind a controls column. */
+  document.querySelectorAll('.grid').forEach(function(grid){
+    var panels=[].slice.call(grid.children);
+    if(panels.length<2) return;
+    var best=null,bestArea=0;
+    panels.forEach(function(pl){
+      var v=pl.querySelector('canvas,svg');
+      if(!v) return;
+      var r=v.getBoundingClientRect(), a=r.width*r.height;
+      if(a>bestArea){bestArea=a;best=pl;}
+    });
+    if(best && bestArea>12000 && best!==grid.firstElementChild){
+      grid.insertBefore(best, grid.firstElementChild);
+    }
+  });
+})();
 </script>
 </body>
 </html>
