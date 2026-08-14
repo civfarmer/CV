@@ -1,51 +1,24 @@
-One Geneva everywhere; the billboard built into the hero; the camera finally holds the impact
+Phone HUD fold on the 3D demos: the scene owns the screen until you ask for the instruments
 
-Five independent design reviews were run on the proposed landing-page split
-(a billboard front door with the CV demoted to an About page). Four returned
-"modified", one "against", none endorsed the split: the root URL is literally
-/CV/, the page's search presence lives on its text, and a gateway screen costs
-a click before any evidence. What survived of the idea is built here instead -
-the billboard is now IN the hero: eight wayfinding tiles with one-line
-descriptions and counts (Projects 8, Crisis studies 3, Publications 28,
-Research Lab 16), contact on the first screen, and a two-button audience fork
-- "Hiring?" and "Here from a citation?" - above the tailoring chips. Under the
-research lens the sidebar now sells the work, not the job hunt: the
-availability pill and CV button give way to "Publications - 28 works".
+On a phone the robots demo buried its storeroom under nine overlapping
+pills - scenario chips, an engagement log printed over them, two sensor
+spec panels, a status line behind the Run button - and the launcher demo
+covered its bottom half with the full control rack. Both viewports now
+open clean on a small screen: the scene, a Run/Launch button, Reset, and
+one pill - "Info".
 
-The Geneva skyline is now one shared implementation on every first-party page.
-It had been painted per-column on the home page only, which is why the art
-slammed into the sidebar edge and the CV button hung below the horizon - the
-reported jank. The procedural scene (Saleve and Jura, St-Pierre, the shore
-city, Lac Leman, the Jet d'Eau with its spray) moved to assets/chrome.js and
-draws once per page as a fixed full-viewport layer behind a now-translucent
-sidebar, animated on the home page, drawn once everywhere else, faded at its
-top edge so it never fights the text. 26 subpages carry it now - publications,
-papers, case studies, coverpages, the map. Every page has a light/dark toggle:
-pages without their own get a floating one. In-character product demos (FRIS,
-Morris Anderson, the consoles) are deliberately excluded - a Geneva sidebar
-inside a product fiction would break the product.
+Opening it restores everything. On the robots demo the log, the scenario
+status and the controls flow BELOW the scene when open, because stacking
+them back over the chips is what caused the original collision; the
+scenario selector and sensor specs overlay the top, where there is sky to
+spare. Closing folds it all away again. Desktop is untouched - the toggle
+does not exist above 700px.
 
-The ARGUS 3D camera bug is actually fixed this time, and the cause was worth
-finding: the target closes at 70 u/s while the camera holds a 26-72 u
-standoff, and a plain world-space lerp lags a mover of that speed by up to
-~30 u - so the asteroid physically overran the camera during every impact
-hold, at any speed. The camera now rides the body: the focus's own
-frame-to-frame displacement is applied 1:1 and the lerp smooths only the
-cinematic offsets. The impact view also derives its directions from each
-shot's approach axis (they were fixed world constants, so half the shots
-watched the wrong face), and the hold tracks the live scar rather than the
-frozen prediction. Measured across the hold: the camera never crosses the
-target plane and settles to 0.3 degrees off the body.
+The other 3D pages were checked and left alone: the geomagnetic orbit
+screen already keeps its legend below the canvas, and the slew and
+explorer pages put three small chips on a sub-200px chart, which is not
+the problem being solved.
 
-The Jet d'Eau loading mark now shows when apps open from the portfolio page -
-it was on three hub pages but not the one page where every platform actually
-launches. Same art, same clear-on-load wiring.
-
-Wording: "~20,000 lines of JavaScript, authored by me" read as protesting.
-It is now "a single-author codebase of ~20,000 lines of JavaScript" - the
-same fact, stated as a property of the code.
-
-Verified: 27 pages rendered at 390 and 1440 in a real browser - canvas
-present, toggle present, no horizontal overflow, zero page errors, 54/54
-clean - plus visual inspection of the home page (both sizes), the tiles, the
-publications hub, a paper page, and the research-lens sidebar swap.
+Verified in a real browser at 390px: closed, open, closed again - state
+and button label correct both ways, zero page errors - and at 1440px:
+toggle absent, full HUD visible as before.

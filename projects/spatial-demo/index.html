@@ -86,6 +86,15 @@
       border-bottom:1px dotted var(--line,#233145);cursor:pointer}
   }
   @media print{.lede.clamped{display:block;-webkit-line-clamp:none}details.mnote{display:block}}
+
+  /* ---- phone HUD fold: the scene owns the screen; ☰ opens the instruments ---- */
+  #hudTgl{display:none;position:absolute;top:8px;right:8px;z-index:30;font:600 12px/1 var(--font-mono,ui-monospace,monospace);padding:8px 12px;border-radius:999px;border:1px solid var(--line,#26304a);background:color-mix(in oklab,var(--bg2,#0f1522) 82%,transparent);color:var(--ink,#e8edf6);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);cursor:pointer}
+  @media (max-width:700px){
+    #hudTgl{display:inline-flex;align-items:center;gap:6px}
+    .viewbox:not(.hud-on) .scen,.viewbox:not(.hud-on) .lat,.viewbox:not(.hud-on) .tally,.viewbox:not(.hud-on) .phase{display:none!important}
+    /* when open, the log, status and controls flow BELOW the scene rather than printing over each other */
+    .viewbox.hud-on .tally,.viewbox.hud-on .phase,.viewbox.hud-on .ctl{position:static;margin:8px 10px}
+  }
 </style>
   <link rel="stylesheet" href="../../assets/fonts.css">
 </head>
@@ -106,6 +115,7 @@
     <div class="note"><b>Illustrative animation, not a benchmark.</b> Cadences and latencies are engineering targets or vendor-published capabilities per §3.3; no measured performance is claimed. Collisions resolve with real separation and momentum exchange. Robot model: “RobotExpressive” by Tomás Laulhé (Quaternius), CC0 1.0, modifications by Don McCurdy. Surface textures: ambientCG.com (CC0 1.0).</div>
     <div class="viewbox">
       <canvas id="scene"></canvas>
+      <button id="hudTgl" aria-expanded="false" aria-label="Show or hide the instrument panels">☰ Info</button>
       <div class="scen" id="scen">
         <button data-s="package" class="on">▤ Fragile package protection</button>
         <button data-s="arena">◧ Arena · machine vs machine</button>
@@ -1440,5 +1450,7 @@ if(window.THREE&&window.THREE.GLTFLoader&&window.ROBOT_GLB_B64){
   });
 })();
 </script>
+<script>(function(){var vb=document.querySelector('.viewbox'),b=document.getElementById('hudTgl');if(!vb||!b)return;
+b.addEventListener('click',function(){var on=vb.classList.toggle('hud-on');b.innerHTML=on?'\u2715 Close':'\u2630 Info';b.setAttribute('aria-expanded',on?'true':'false');});})();</script>
 </body>
 </html>
