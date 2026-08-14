@@ -285,15 +285,31 @@
      rising column, so it belongs to the same hand as the skyline on the home page. */
   .cfload{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:var(--bg);z-index:3}
   .cfload.on{display:flex}
-  .cfload svg{width:34px;height:44px;overflow:visible}
-  .cfload .lake{stroke:var(--gold);stroke-opacity:.30;stroke-width:1.2;fill:none}
-  .cfload .jet{stroke:var(--gold);stroke-opacity:.85;stroke-width:1.6;stroke-linecap:round;fill:none;
-    stroke-dasharray:26;stroke-dashoffset:26;animation:cfjet 1.6s cubic-bezier(.4,0,.5,1) infinite}
-  .cfload .drop{fill:var(--gold);fill-opacity:.9;animation:cfdrop 1.6s cubic-bezier(.4,0,.5,1) infinite}
-  @keyframes cfjet{0%{stroke-dashoffset:26}45%{stroke-dashoffset:0}70%{stroke-dashoffset:0;stroke-opacity:.85}100%{stroke-dashoffset:0;stroke-opacity:0}}
+  .cfload svg{width:96px;height:64px;overflow:visible}
+  /* The Jet d'Eau, drawn rather than implied: the arc of the Rade with the old town
+     and St-Pierre behind it, and a fountain that is actually water-coloured. The jet
+     climbs, the plume feathers open behind it, and the spray falls. */
+  .cfload .city rect,.cfload .city path{fill:var(--ink2,#9fb0c9);fill-opacity:.26}
+  .cfload .quay{stroke:var(--ink2,#9fb0c9);stroke-opacity:.32;stroke-width:1;fill:none}
+  .cfload .jet{stroke:#5aa9d6;stroke-opacity:.95;stroke-width:2.3;stroke-linecap:round;fill:none;
+    stroke-dasharray:38;stroke-dashoffset:38;animation:cfjet 2s cubic-bezier(.3,0,.4,1) infinite}
+  .cfload .plume{stroke:#8fcdea;stroke-opacity:0;stroke-width:1.1;stroke-linecap:round;fill:none;
+    animation:cfplume 2s cubic-bezier(.3,0,.4,1) infinite}
+  .cfload .drop{fill:#bfe3f5;fill-opacity:0;animation:cfdrop 2s cubic-bezier(.4,0,.6,1) infinite}
+  .cfload .d2{animation-delay:.1s}
+  .cfload .d3{animation-delay:.2s}
+  .cfload .d4{animation-delay:.3s}
+  @keyframes cfjet{0%{stroke-dashoffset:38}44%{stroke-dashoffset:0}
+    84%{stroke-dashoffset:0;stroke-opacity:.95}100%{stroke-dashoffset:0;stroke-opacity:0}}
+  @keyframes cfplume{0%,32%{stroke-opacity:0;transform:scaleY(.45);transform-origin:48px 10px}
+    58%{stroke-opacity:.7;transform:scaleY(1);transform-origin:48px 10px}
+    86%{stroke-opacity:.42}100%{stroke-opacity:0}}
+  @keyframes cfdrop{0%,40%{fill-opacity:0;transform:translateY(0)}
+    54%{fill-opacity:.8}100%{fill-opacity:0;transform:translateY(17px)}}  .cfload .drop{fill:var(--gold);fill-opacity:.9;animation:cfdrop 1.6s cubic-bezier(.4,0,.5,1) infinite}
   @keyframes cfdrop{0%{transform:translateY(0);opacity:0}45%{transform:translateY(-26px);opacity:.9}100%{transform:translateY(-32px);opacity:0}}
   .cfload p{margin:0;color:var(--mut,#8b97ab);font-size:13px}
-  @media (prefers-reduced-motion: reduce){ .cfload .jet{animation:none;stroke-dashoffset:0} .cfload .drop{animation:none;transform:translateY(-26px);opacity:.9} }
+  @media (prefers-reduced-motion: reduce){ .cfload .jet{animation:none;stroke-dashoffset:0;stroke-opacity:.92}
+    .cfload .plume{animation:none;stroke-opacity:.7} .cfload .drop{animation:none;fill-opacity:.8} }
 
   /* ---- compact publication rows -------------------------------------------
      Replaces the card grid. A card cost a median 630px of phone height, of
@@ -654,7 +670,7 @@ document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
         </button>
       </div>
-      <div class="cfmodal__body"><div class="cfload" id="cfload" role="status" aria-live="polite"><svg viewBox="0 0 34 44" aria-hidden="true"><path class="lake" d="M4 38 q13 5 26 0"/><path class="jet" d="M17 38 V12"/><circle class="drop" cx="17" cy="38" r="1.7"/></svg><p>Loading&hellip;</p></div>
+      <div class="cfmodal__body"><div class="cfload" id="cfload" role="status" aria-live="polite"><svg viewBox="0 0 96 64" aria-hidden="true"><g class="city"><rect x="6" y="29.1" width="5" height="8.0"/><rect x="12" y="27.5" width="4" height="12.0"/><rect x="17" y="34.6" width="6" height="7.0"/><rect x="24" y="29.3" width="4" height="14.0"/><rect x="29" y="35.3" width="3" height="9.0"/><rect x="34" y="33.5" width="9" height="12.0"/><rect x="34" y="27.5" width="3" height="7"/><rect x="40" y="27.5" width="3" height="7"/><path d="M36.3 27.5 L38.5 18.5 L40.7 27.5 Z"/><rect x="45" y="38.0" width="4" height="8.0"/><rect x="50" y="33.9" width="5" height="12.0"/><rect x="56" y="38.5" width="4" height="7.0"/><rect x="61" y="31.5" width="7" height="13.0"/><rect x="69" y="35.1" width="4" height="8.0"/><rect x="74" y="30.3" width="6" height="11.0"/><rect x="81" y="31.9" width="5" height="7.0"/><rect x="87" y="26.4" width="4" height="10.0"/></g><path class="quay" d="M4.0 34.8 L7.7 36.7 L11.3 38.4 L15.0 39.9 L18.7 41.2 L22.3 42.3 L26.0 43.3 L29.7 44.2 L33.3 44.8 L37.0 45.3 L40.7 45.7 L44.3 45.9 L48.0 46.0 L51.7 45.9 L55.3 45.7 L59.0 45.3 L62.7 44.8 L66.3 44.2 L70.0 43.3 L73.7 42.3 L77.3 41.2 L81.0 39.9 L84.7 38.4 L88.3 36.7 L92.0 34.8"/><g class="water"><path class="jet" d="M48 46.0 V8"/><path class="plume" d="M48 10 q-9 6 -12 17 M48 10 q9 6 12 17 M48 9 q-5 8 -6 19 M48 9 q5 8 6 19 M48 8 q-1.5 9 -1.5 20 M48 8 q1.5 9 1.5 20"/><circle class="drop d1" cx="37" cy="28" r="1.2"/><circle class="drop d2" cx="59" cy="28" r="1.2"/><circle class="drop d3" cx="43" cy="23" r="1"/><circle class="drop d4" cx="53" cy="23" r="1"/></g></svg><p>Loading&hellip;</p></div>
         <iframe class="cfmodal__frame" id="cfmodal-frame" title="Interactive tool" src="about:blank" allow="fullscreen" referrerpolicy="no-referrer"></iframe>
       </div>
     </div>
@@ -690,8 +706,28 @@ document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
     var closers = modal.querySelectorAll('[data-cfclose]');
     var lastFocus = null, savedY = 0, isOpen = false;
 
-    function openModal(src, label){ if(window.cfLoadStart)cfLoadStart();
+    // The frame's load event is what actually clears the loader. A tool that never
+    // fires load - a WebGL page that stalls, a file:// quirk - would otherwise leave
+    // the spinner up for ever, which is exactly what happened. The timeout is the
+    // backstop: after 8 seconds the tool is shown regardless, because a visible tool
+    // that is still warming up is better than an animation that never ends.
+    var loadTimer = null;
+    function armLoadStop(){
+      clearTimeout(loadTimer);
+      var done = false;
+      function finish(){
+        if(done) return; done = true;
+        clearTimeout(loadTimer);
+        frame.removeEventListener('load', finish);
+        if(window.cfLoadStop) cfLoadStop();
+      }
+      frame.addEventListener('load', finish);
+      loadTimer = setTimeout(finish, 8000);
+    }
+
+    function openModal(src, label){
       if(!src || src === '#') return;
+      if(window.cfLoadStart)cfLoadStart();
       savedY = window.pageYOffset || root.scrollTop || 0;      // remember scroll position
       lastFocus = document.activeElement;
       titleEl.textContent = label || 'Interactive tool';
@@ -699,6 +735,7 @@ document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
       var theme = document.documentElement.getAttribute('data-theme') || 'dark';
       var srcT = src + (src.indexOf('?')>=0 ? '&' : '?') + 'theme=' + theme;   // match tool theme to page
       frame.setAttribute('src', srcT);                         // document load — file:// safe
+      armLoadStop();                                           // clear the loader when the frame is ready
       modal.hidden = false;
       root.classList.add('cf-lock');                           // freeze background scroll
       document.body.classList.add('cfmodal-open');

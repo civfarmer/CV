@@ -235,6 +235,28 @@
   html[data-theme="light"] .shotpanel .sp-n{color:#e9eef7}
   html[data-theme="light"] .shotpanel .sp-dv{color:#aab7cc}
   html[data-theme="light"] .shotpanel .sp-note{color:#93a2ba}
+
+  /* ---- phone: get to the demo -------------------------------------------
+     At 390px these pages ran to four or five screens, of which the canvas was
+     one: the rest was the lede and the caveat notes, which a reader has to
+     scroll past before touching anything. The prose is not removed - the
+     caveats matter and several are the reason the page is honest - but on a
+     small screen it collapses so the demo is what you land on. */
+  @media (max-width:640px){
+    .lede{font-size:14px;line-height:1.55}
+    .lede.clamped{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+    details.mnote{margin:10px 0;border-left:3px solid var(--line,#233145);padding-left:10px}
+    details.mnote > summary{font-size:12px;letter-spacing:.04em;text-transform:uppercase;
+      color:var(--muted,#7d8ba3);cursor:pointer;list-style:none;padding:2px 0}
+    details.mnote > summary::-webkit-details-marker{display:none}
+    details.mnote > summary::after{content:' ▸';font-size:10px}
+    details.mnote[open] > summary::after{content:' ▾'}
+    details.mnote .note{border:0;padding:0;margin:6px 0 0;font-size:12.5px;line-height:1.55}
+    .ledemore{display:inline-block;margin-top:4px;background:none;border:0;padding:0;font:inherit;
+      font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted,#7d8ba3);
+      border-bottom:1px dotted var(--line,#233145);cursor:pointer}
+  }
+  @media print{.lede.clamped{display:block;-webkit-line-clamp:none}details.mnote{display:block}}
 </style>
   <link rel="stylesheet" href="../../assets/fonts.css">
 </head>
@@ -251,7 +273,7 @@
     <div style="margin-top:28px">
       <div class="eyebrow">Interactive 3D · conceptual system architecture</div>
       <h1 class="title">The launch architecture in orbit</h1>
-      <p class="lede">A conceptual 3D view of the ARGUS-PD/POD-7K research architecture as an integrated orbital demonstrator: the seven-kilometre driver — <b>1,000 × 7 m cells at 150 MJ each</b> — energised as a travelling wave, its solar generation and pulse-energy buffer, converters, radiators, magnetic vector control, and the modular projectile whose deposited mass budget the papers screen. Pick a family member, drag to orbit, click any subsystem to label it, and run the launch to watch the cell wave sweep the projectile down the bore and coast to a demonstration target. Every subsystem traces to Paper II, the projectile budget to Paper I, and the attitude loop to the geomagnetic companion paper.</p>
+      <p class="lede">The ARGUS-PD/POD-7K architecture drawn as one orbital demonstrator, so the parts the papers screen separately can be seen together: a seven-kilometre driver of <b>1,000 × 7 m cells at 150 MJ each</b> energised as a travelling wave, the solar generation and pulse-energy buffer that feed it, the converters and radiators that survive it, the magnetic vector control that points it, and the modular projectile whose deposited mass budget is the actual subject of Paper I. Pick a family member, drag to orbit, click any subsystem to label it, then fire. The camera rides the projectile down the bore and stays with it — the Moon at roughly a third of the way out and Mars at two-thirds swell and fall behind on their own, because every body sits at its true relative size on a log-compressed range — and holds on the body at intercept so the impact is the thing you watch. Every subsystem traces to Paper II, the projectile budget to Paper I, and the attitude loop to the geomagnetic companion paper.</p>
       <div class="note"><b>Illustrative &amp; conceptual — not to scale, not a buildable design.</b> A hypothetical planetary-defence research demonstrator in orbit (the series declares no operational altitude; geometry and placement are schematic). Only the projectile <i>mass allocations</i> (deposited budget, total 0.300&nbsp;kg reference) and the 1,000-cell / 32-face / 0.505&nbsp;m-collar figures are quantitative. No operational targeting, fire-control, pulsed-power, coil, capacitor or rail engineering is shown or implied — the on-screen auto-aim and lead-corrected shots are game-style illustration of the papers&#8217; pointing hierarchy, not a firing solution.</div>
       <div class="note" style="border-left-color:#cf8a44"><b>The engagement scenario is this visualiser&#8217;s invention, not a finding of the papers.</b> An inbound body on an Earth-crossing track, a multi-shot campaign, cumulative deflection and a closing sequence of intercepts are all staged here to make the geometry legible. The papers claim none of them: Paper&nbsp;I&nbsp;§8 places <i>&#8220;all Earth-intersecting states outside the intended research envelope&#8221;</i> and states that delivered kinetic energy is calculable while useful deflection is not; Paper&nbsp;III&nbsp;§7.2 makes <i>no E3 or E4 claim</i>; and no salvo, warning window or intercept range appears anywhere in the series. <b>0.5&nbsp;AU is a screening quotient</b> — the normalising range <i>R/v</i> used to compare family members (Paper&nbsp;I&nbsp;§6.2) — <b>not a stated intercept distance</b>; it is drawn here as a marked gate for exactly that reason. Ranges are log-compressed (Moon 384,400&nbsp;km → Mars ~54.6e6&nbsp;km → target 0.5–1.5&nbsp;AU) so all of it fits one frame; body diameters are true relative to each other.</div>
     </div>
@@ -517,7 +539,7 @@ const CONE_DEG=1.5;              // vector-control EXIT-STEERING authority: ± d
 const CAM_CHASE_DIR=new THREE.Vector3(-0.26,0.34,0.9);   // chase offset while tracking the flying projectile
 const CAM_IMPACT_DIR=new THREE.Vector3(-0.62,0.34,0.72); // 3/4 view of the impact face for the surface hit
 const CAM_REVEAL_DIR=new THREE.Vector3(-0.4,0.46,0.86);  // pulled-back aftermath view
-const Z_CHASE=42, Z_IMPACT=30, Z_REVEAL=108;             // follow distances (projectile visible en route; impact fills a sensible fraction)
+const Z_CHASE=42, Z_IMPACT=26, Z_REVEAL=72;             // follow distances: close on the impact, and the aftermath still frames the body rather than retreating to a dot
 let cineDir=new THREE.Vector3(-0.26,0.34,0.9);           // per-phase camera offset direction (set by stepFire)
 let coneGroup=null,coneSurface=null,coneRing=null,coneEdges=[]; // ±1.5° reachable-cone visual (Show forces)
 function smoothstep(a,b,x){x=Math.max(0,Math.min(1,(x-a)/(b-a)));return x*x*(3-2*x);}
@@ -956,11 +978,11 @@ function flybyTarget(){
     if(!o||!o.visible)return;
     const d=camera.position.distanceTo(o.position);
     const ang=2*Math.atan(r/d)*180/Math.PI;               // apparent size, degrees
-    if(ang<4)return;                                       // too small to be worth turning for
+    if(ang<11)return;                                      // only a body genuinely filling the frame is worth any turn at all
     const ahead=axisRange(o.position)-camR;                // + = still ahead of us
     if(ahead<-r*3.2)return;                                // well behind — let it go
     // strongest just before and at closest approach, easing out behind
-    const w=Math.min(0.90,(ang-4)/14)*(ahead<0?Math.max(0,1+ahead/(r*3.2)):1);
+    const w=Math.min(0.18,(ang-11)/60)*(ahead<0?Math.max(0,1+ahead/(r*3.2)):1);
     if(w>0.02&&(!best||w>best.w))best={p:o.position.clone(),w:w,ang:ang};
   });
   return best;
@@ -998,10 +1020,10 @@ function loop(){raf=requestAnimationFrame(loop);
         ).multiplyScalar(cineZoom*freeZoom))
       : cineFocus.clone().add(cineDir.clone().normalize().multiplyScalar(cineZoom));
     tPos=homePos.clone().lerp(cinePos,cine); tLook=homeLook.clone().lerp(cineFocus,cine);
-    // ---- FLY-PAST PAN. A body sitting off the flight line is at its biggest exactly when it is
-    //      abeam — i.e. 90° off the view axis and completely out of frame. So as the shot closes
-    //      on the Moon and then Mars, the camera turns to watch it go by and then returns to the
-    //      flight. Position still rides the projectile; only the look direction is blended. ----
+    // ---- FLY-PAST ACKNOWLEDGEMENT. The camera's job is the projectile, and it used to break off
+    //      to watch the Moon and then Mars go past, which reads as losing the shot. It now gives a
+    //      body at most an 18% lean of the look direction, and only once it genuinely fills the
+    //      frame. Position always rides the projectile; only the look direction leans. ----
     const fb=flybyTarget();
     if(fb&&!freeLook)tLook.lerp(fb.p,fb.w*cine);
   }
@@ -1518,7 +1540,7 @@ function stepFire(){
     document.getElementById('vel').textContent=Math.round(FAMILY[famIdx].v/1000).toLocaleString('en-GB')+' km/s';
     // ---- camera: TRACK the flying projectile across; on a hit ease onto the impact point, on a miss frame
     //      the TARGET so the fly-past is visible ----
-    const kk=smoothstep(0.72,1.0,cf);
+    const kk=smoothstep(0.52,1.0,cf); // settle on the target well before arrival
     const focusPt=P.willHit?P.impactPt:(P.target?P.target.obj.position:end);
     cineFocus.copy(wp).lerp(focusPt,kk);
     cineZoom=Z_CHASE+((P.willHit?Z_IMPACT:Z_REVEAL*0.9)-Z_CHASE)*kk; // hit: close in · miss: pull wide to frame the fly-past
@@ -1551,7 +1573,7 @@ function stepFire(){
       cineFocus.copy(tgtPos);cineZoom=Z_REVEAL*0.9;cineDir.copy(CAM_REVEAL_DIR);
     }else{
       // hold CLOSE on the surface reaction (flash / shock / ejecta), then ease back to reveal the outcome
-      const back=smoothstep(0.32,1.0,hf);
+      const back=smoothstep(0.66,1.0,hf); // stay on the impact, then ease out
       cineFocus.copy(impactPt).lerp(tgtPos,back);
       cineZoom=Z_IMPACT+(Z_REVEAL-Z_IMPACT)*back;
       cineDir.copy(CAM_IMPACT_DIR).lerp(CAM_REVEAL_DIR,back);
@@ -2291,6 +2313,55 @@ try{var _q=new URLSearchParams(location.search).get('theme');if(_q){document.doc
 
 if(THREE_OK){ try{ initThree(); buildFamSel(); buildTargetSel(); updateMatch(); buildList(); updateAimBtn(); }catch(e){ cv.outerHTML='<div class="note" style="margin:20px">This device could not start WebGL, so the 3D view is unavailable. The subsystem list and projectile budget are in the panel and the provenance line below.</div>'; buildList(); console.error(e); } }
 else{ cv.outerHTML='<div class="note" style="margin:20px">3D library unavailable offline. Subsystems are listed in the panel.</div>'; buildList(); }
+</script>
+
+<script>
+/* Phone only, and applied by script so nothing is hidden from a reader without
+   JavaScript: clamp the lede to four lines with a control, and fold each caveat
+   note into a labelled disclosure. Desktop is untouched. */
+(function(){
+  if(!window.matchMedia || !matchMedia('(max-width:640px)').matches) return;
+  var lede=document.querySelector('.lede');
+  if(lede && (lede.textContent||'').trim().length>260){
+    lede.classList.add('clamped');
+    var b=document.createElement('button');
+    b.className='ledemore'; b.type='button'; b.setAttribute('aria-expanded','false');
+    b.textContent='Read more';
+    b.addEventListener('click',function(){
+      var open=lede.classList.toggle('clamped')===false;
+      b.setAttribute('aria-expanded',String(open));
+      b.textContent=open?'Show less':'Read more';
+    });
+    lede.insertAdjacentElement('afterend',b);
+  }
+  document.querySelectorAll('.note').forEach(function(n,i){
+    if(n.closest('details')) return;
+    var d=document.createElement('details'); d.className='mnote';
+    var s=document.createElement('summary');
+    var strong=n.querySelector('b');
+    s.textContent=(strong?strong.textContent:'Note').replace(/[.—-]\s*$/,'').slice(0,64);
+    d.appendChild(s);
+    n.parentNode.insertBefore(d,n);
+    d.appendChild(n);
+  });
+
+  /* On a phone the interactive panel comes first: the point of the page is the thing
+     you can touch, and it was sitting behind a controls column. */
+  document.querySelectorAll('.grid').forEach(function(grid){
+    var panels=[].slice.call(grid.children);
+    if(panels.length<2) return;
+    var best=null,bestArea=0;
+    panels.forEach(function(pl){
+      var v=pl.querySelector('canvas,svg');
+      if(!v) return;
+      var r=v.getBoundingClientRect(), a=r.width*r.height;
+      if(a>bestArea){bestArea=a;best=pl;}
+    });
+    if(best && bestArea>12000 && best!==grid.firstElementChild){
+      grid.insertBefore(best, grid.firstElementChild);
+    }
+  });
+})();
 </script>
 </body>
 </html>
