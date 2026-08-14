@@ -257,6 +257,14 @@
       border-bottom:1px dotted var(--line,#233145);cursor:pointer}
   }
   @media print{.lede.clamped{display:block;-webkit-line-clamp:none}details.mnote{display:block}}
+
+  /* ---- phone HUD fold: the scene owns the screen; ☰ opens the instruments ---- */
+  #hudTgl{display:none;position:absolute;top:8px;right:8px;z-index:30;font:600 12px/1 var(--font-mono,ui-monospace,monospace);padding:8px 12px;border-radius:999px;border:1px solid var(--line,#26304a);background:color-mix(in oklab,var(--bg2,#0f1522) 82%,transparent);color:var(--ink,#e8edf6);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);cursor:pointer}
+  @media (max-width:700px){
+    #hudTgl{display:inline-flex;align-items:center;gap:6px}
+    .viewbox:not(.hud-on) .modes,.viewbox:not(.hud-on) .hud,.viewbox:not(.hud-on) .scaleinset{display:none!important}
+    .viewbox:not(.hud-on) .controls>*:not(#fireBtn):not(#resetBtn){display:none!important}
+  }
 </style>
   <link rel="stylesheet" href="../../assets/fonts.css">
 </head>
@@ -281,6 +289,7 @@
     <div class="stage">
       <div class="viewbox">
         <canvas id="scene"></canvas>
+      <button id="hudTgl" aria-expanded="false" aria-label="Show or hide the instrument panels">☰ Info</button>
         <div class="modes">
           <button data-mode="system" class="on">Full system</button>
           <button data-mode="projectile">Projectile (exploded)</button>
@@ -2397,5 +2406,7 @@ else{ cv.outerHTML='<div class="note" style="margin:20px">3D library unavailable
   });
 })();
 </script>
+<script>(function(){var vb=document.querySelector('.viewbox'),b=document.getElementById('hudTgl');if(!vb||!b)return;
+b.addEventListener('click',function(){var on=vb.classList.toggle('hud-on');b.innerHTML=on?'\u2715 Close':'\u2630 Info';b.setAttribute('aria-expanded',on?'true':'false');});})();</script>
 </body>
 </html>
