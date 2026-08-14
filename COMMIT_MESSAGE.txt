@@ -1,41 +1,51 @@
-Remove the AI-assistance statements from the portfolio page
+One Geneva everywhere; the billboard built into the hero; the camera finally holds the impact
 
-Two lines on the home page volunteered that the work was AI-assisted. The
-site is the landing point for submissions to Geneva missions, DG GROW and
-the Swiss federal process, and a reader who arrives from a letter citing a
-DOI should meet the argument, not a note about how it was typed.
+Five independent design reviews were run on the proposed landing-page split
+(a billboard front door with the CV demoted to an About page). Four returned
+"modified", one "against", none endorsed the split: the root URL is literally
+/CV/, the page's search presence lives on its text, and a gateway screen costs
+a click before any evidence. What survived of the idea is built here instead -
+the billboard is now IN the hero: eight wayfinding tiles with one-line
+descriptions and counts (Projects 8, Crisis studies 3, Publications 28,
+Research Lab 16), contact on the first screen, and a two-button audience fork
+- "Hiring?" and "Here from a citation?" - above the tailoring chips. Under the
+research lens the sidebar now sells the work, not the job hunt: the
+availability pill and CV button give way to "Publications - 28 works".
 
-  "Architected and built by me - AI-assisted, never AI-designed; the
-   analysis engines, data models and interfaces are mine."
-      -> "Architected and built by me: the analysis engines, data models
-          and interfaces are mine."
+The Geneva skyline is now one shared implementation on every first-party page.
+It had been painted per-column on the home page only, which is why the art
+slammed into the sidebar edge and the CV button hung below the horizon - the
+reported jank. The procedural scene (Saleve and Jura, St-Pierre, the shore
+city, Lac Leman, the Jet d'Eau with its spray) moved to assets/chrome.js and
+draws once per page as a fixed full-viewport layer behind a now-translucent
+sidebar, animated on the home page, drawn once everywhere else, faded at its
+top edge so it never fights the text. 26 subpages carry it now - publications,
+papers, case studies, coverpages, the map. Every page has a light/dark toggle:
+pages without their own get a floating one. In-character product demos (FRIS,
+Morris Anderson, the consoles) are deliberately excluded - a Geneva sidebar
+inside a product fiction would break the product.
 
-  "~20,000 lines of JavaScript, authored by me (AI-assisted with Claude
-   Code)."  (inside the FRIS "How it's built" panel)
-      -> "~20,000 lines of JavaScript, authored by me."
+The ARGUS 3D camera bug is actually fixed this time, and the cause was worth
+finding: the target closes at 70 u/s while the camera holds a 26-72 u
+standoff, and a plain world-space lerp lags a mover of that speed by up to
+~30 u - so the asteroid physically overran the camera during every impact
+hold, at any speed. The camera now rides the body: the focus's own
+frame-to-frame displacement is applied 1:1 and the lerp smooths only the
+cinematic offsets. The impact view also derives its directions from each
+shot's approach axis (they were fixed world constants, so half the shots
+watched the wrong face), and the hold tracks the live scar rather than the
+frozen prediction. Measured across the hold: the camera never crosses the
+target plane and settles to 0.3 degrees off the body.
 
-The ownership claim is unchanged in both. Only the qualifier is gone.
+The Jet d'Eau loading mark now shows when apps open from the portfolio page -
+it was on three hub pages but not the one page where every platform actually
+launches. Same art, same clear-on-load wiring.
 
-Two skills chips were removed for the same reason: "Claude Code", which
-names a code-authoring tool and sat directly above a portfolio of code,
-and "Compliance-audit prompting", which reads as the audit being prompted
-rather than performed.
+Wording: "~20,000 lines of JavaScript, authored by me" read as protesting.
+It is now "a single-author codebase of ~20,000 lines of JavaScript" - the
+same fact, stated as a property of the code.
 
-Two were deliberately kept. "Agentic-LLM workflows (HITL)" and "GenAI
-control mapping" are governance capabilities - they describe overseeing
-these systems, which is the opposite claim to being written by one, and
-it is the subject of several of the papers. Removing them would cost a
-real qualification to solve a problem they do not create.
-
-Nothing was changed in the papers themselves. Anthropic, OpenAI, the AI
-Security Institute and the legal-hallucination literature appear in
-Papers 2, 3 and 4 and in "Who Pays to Check the Machine" as cited
-sources on AI in cyber operations. Those are bibliography, not
-provenance, and they stay.
-
-Checked at the same time, no change needed: every disclosure on the site
-already defaults to collapsed and toggles both ways - 32 <details>
-elements across the demo pages and the publications index open on click
-and close on a second click, and the "Read more" clamps on the Lab and
-the demo ledes return to "Read more" when clicked again. No <details
-open> exists anywhere in the deployed tree.
+Verified: 27 pages rendered at 390 and 1440 in a real browser - canvas
+present, toggle present, no horizontal overflow, zero page errors, 54/54
+clean - plus visual inspection of the home page (both sizes), the tiles, the
+publications hub, a paper page, and the research-lens sidebar swap.

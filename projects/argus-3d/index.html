@@ -484,6 +484,7 @@ function fmtRange(u){const km=rangeKm(u);
 let screenRing=null;
 let interceptLog=[],lastInterceptU=0;   // down-range distance at which each shot met the body
 let asteroidHome=null,cineFocus=new THREE.Vector3(120,18,-160),cineZoom=110;
+let cinePrevFocus=new THREE.Vector3(),cinePrevFocusOk=false; // drift-ride state: last frame's focus, so the camera can move WITH the body
 let asteroidVel=new THREE.Vector3(),asteroidTravel=0;const DRIFT_UPS=70; // inbound closing speed in units/SIM-second — sized so a 4-shot salvo walks the intercept from beyond the 0.5 AU mark down to inside Mars — NEVER pauses (real bodies don't stop for a launch); shots correct with exact linear lead
 let forceGroup=null,boreForceGroup=null,showForces=false,accelArrow=null,vecArrow=null,coilArrows=[];
 // ---- geomagnetic attitude control (companion "Geomagnetic Attitude Control" paper): a commanded magnetic
@@ -536,9 +537,25 @@ const BORE_LOCAL=new THREE.Vector3(1,0,0), MUZZLE_LOCAL=new THREE.Vector3(LEN/2+
 const IMPACT_PT_DIR=new THREE.Vector3(-1,0.06,0.06).normalize(); // muzzle-facing surface impact point (matches triggerImpact)
 const CONE_DEG=1.5;              // vector-control EXIT-STEERING authority: ± degrees off the bore/aim axis
 // cinematic follow tunables (retuned for the far, off-axis target)
-const CAM_CHASE_DIR=new THREE.Vector3(-0.26,0.34,0.9);   // chase offset while tracking the flying projectile
-const CAM_IMPACT_DIR=new THREE.Vector3(-0.62,0.34,0.72); // 3/4 view of the impact face for the surface hit
-const CAM_REVEAL_DIR=new THREE.Vector3(-0.4,0.46,0.86);  // pulled-back aftermath view
+const CAM_CHASE_DIR=new THREE.Vector3(-0.26,0.34,0.9);   // FALLBACK ONLY (pre-plan accel phase). Real dirs are derived per shot.
+const CAM_IMPACT_DIR=new THREE.Vector3(-0.62,0.34,0.72); // fallback: 3/4 view of the impact face
+const CAM_REVEAL_DIR=new THREE.Vector3(-0.4,0.46,0.86);  // fallback: pulled-back aftermath view
+/* ---- PER-SHOT CAMERA BASIS. These used to be fixed world-space constants, which is why the camera
+   kept "overshooting" the asteroid: the bore slews to a drifting target, and whenever the approach
+   axis happened to align with the constant, the offset landed the camera DOWNRANGE of the body,
+   looking at the face the projectile never touches. Every direction is now built from the frozen
+   plan's approach axis with a NEGATIVE along-track component, so the camera is always on the muzzle
+   side — the struck face is always toward the lens: chase sits behind the projectile looking down
+   the flight path, impact is a 3/4 view of the arrival face, reveal pulls back and up on that same
+   side and never crosses the target plane. ---- */
+function mkCamBasis(P){
+  const up=new THREE.Vector3(0,1,0);
+  const side=new THREE.Vector3().crossVectors(P.aim,up);
+  if(side.lengthSq()<1e-4)side.set(1,0,0); side.normalize();
+  P.camChase =new THREE.Vector3().addScaledVector(P.aim,-0.85).addScaledVector(side,0.30).addScaledVector(up,0.34).normalize();
+  P.camImpact=new THREE.Vector3().addScaledVector(P.aim,-0.62).addScaledVector(side,0.55).addScaledVector(up,0.34).normalize();
+  P.camReveal=new THREE.Vector3().addScaledVector(P.aim,-0.50).addScaledVector(side,0.62).addScaledVector(up,0.46).normalize();
+}
 const Z_CHASE=42, Z_IMPACT=26, Z_REVEAL=72;             // follow distances: close on the impact, and the aftermath still frames the body rather than retreating to a dot
 let cineDir=new THREE.Vector3(-0.26,0.34,0.9);           // per-phase camera offset direction (set by stepFire)
 let coneGroup=null,coneSurface=null,coneRing=null,coneEdges=[]; // ±1.5° reachable-cone visual (Show forces)
@@ -1027,8 +1044,20 @@ function loop(){raf=requestAnimationFrame(loop);
     const fb=flybyTarget();
     if(fb&&!freeLook)tLook.lerp(fb.p,fb.w*cine);
   }
-  if(cine>0.01){ camera.position.lerp(tPos,0.10); camLook.lerp(tLook,0.10); }
-  else { camera.position.copy(homePos); camLook.copy(homeLook); }
+  if(cine>0.01){
+    // ---- RIDE THE BODY. The target closes at 70 u/s while the camera holds a 26-72 u standoff; a
+    //      plain world-space lerp lags a mover of that speed by up to ~30 u, so the asteroid
+    //      physically overran the camera during every impact hold — the "camera overshoots the
+    //      asteroid" report. The focus's own frame-to-frame displacement is now applied 1:1
+    //      (the camera travels WITH the body); the 0.10 lerp smooths only the cinematic offset
+    //      changes. Large focus jumps (retargets at phase edges, salvo shot starts) are NOT
+    //      ridden — those are cuts, and the lerp absorbs them as before. ----
+    if(cinePrevFocusOk){const _d=cineFocus.clone().sub(cinePrevFocus);
+      if(_d.lengthSq()<400){camera.position.add(_d);camLook.add(_d);}}
+    cinePrevFocus.copy(cineFocus);cinePrevFocusOk=true;
+    camera.position.lerp(tPos,0.10); camLook.lerp(tLook,0.10);
+  }
+  else { cinePrevFocusOk=false; camera.position.copy(homePos); camLook.copy(homeLook); }
   // ---- EARTH-CLIP GUARD: the station floats only ~28u above the 280u Earth sphere, so user orbit (pitch
   //      down) or cinematic lerps could put the camera INSIDE the planet, visually swallowing the vessel.
   //      Hard clamp: keep the camera radially outside the atmosphere shell every frame. ----
@@ -1520,6 +1549,7 @@ function stepFire(){
   } else if(fireT<=T_ACCEL+coastT){
     if(!shotPlan||!shotPlan.locked)shotPlan=mkShotPlan(true); // freeze ONCE at muzzle exit, lead-corrected for the drifting target
     const P=shotPlan;if(!P){resetFire();return;}
+    if(!P.camImpact)mkCamBasis(P); // derive the camera basis once, from THIS shot's approach axis
     phase='coast';
     if(!impacted)document.getElementById('phase').textContent=P.willHit
       ?'coast · shot flies straight down the aimed bore · vector-control trims ≤1.5°'
@@ -1544,9 +1574,10 @@ function stepFire(){
     const focusPt=P.willHit?P.impactPt:(P.target?P.target.obj.position:end);
     cineFocus.copy(wp).lerp(focusPt,kk);
     cineZoom=Z_CHASE+((P.willHit?Z_IMPACT:Z_REVEAL*0.9)-Z_CHASE)*kk; // hit: close in · miss: pull wide to frame the fly-past
-    cineDir.copy(CAM_CHASE_DIR).lerp(CAM_IMPACT_DIR,kk);
+    cineDir.copy(P.camChase||CAM_CHASE_DIR).lerp(P.camImpact||CAM_IMPACT_DIR,kk);
     if(cf>=0.985&&!impacted){
-      if(P.willHit){triggerImpact();impacted=true;if(tracer)tracer.visible=false;}
+      if(P.willHit){triggerImpact();impacted=true;if(tracer)tracer.visible=false;
+        P.ipOff=P.impactPt.clone().sub(P.target?P.target.obj.position:asteroid.position);} // scar offset from body centre, captured at the hit
       else{impacted=true; // no impact FX — the shot sails past
         document.getElementById('phase').textContent='MISS — bore '+P.offDeg.toFixed(1)+'° off target (> ±1.5° authority) · passes ~'+Math.round(P.missDist)+'u from the body · no energy delivered';}
     }
@@ -1559,7 +1590,8 @@ function stepFire(){
     // it here the first time we enter the impact phase, whatever the timestep did.
     if(!impacted){
       const Q=shotPlan;
-      if(Q&&Q.willHit){triggerImpact();if(tracer)tracer.visible=false;}
+      if(Q&&Q.willHit){triggerImpact();if(tracer)tracer.visible=false;
+        Q.ipOff=Q.impactPt.clone().sub(Q.target?Q.target.obj.position:asteroid.position);}
       else if(Q)document.getElementById('phase').textContent='MISS — bore '+Q.offDeg.toFixed(1)+'° off target (> ±1.5° authority) · passes ~'+Math.round(Q.missDist)+'u from the body · no energy delivered';
       impacted=true;
     }
@@ -1570,13 +1602,15 @@ function stepFire(){
       // MISS aftermath: hold on the untouched body; let the tracer recede down the bore line
       const past=P.muzzle.clone().addScaledVector(P.aim,P.range*(1.3+0.5*hf));
       if(tracer){tracer.position.copy(past);tracer.material.opacity=Math.max(0,0.7-hf*0.8);tracer.visible=true;}
-      cineFocus.copy(tgtPos);cineZoom=Z_REVEAL*0.9;cineDir.copy(CAM_REVEAL_DIR);
+      cineFocus.copy(tgtPos);cineZoom=Z_REVEAL*0.9;cineDir.copy((P&&P.camReveal)||CAM_REVEAL_DIR);
     }else{
       // hold CLOSE on the surface reaction (flash / shock / ejecta), then ease back to reveal the outcome
       const back=smoothstep(0.66,1.0,hf); // stay on the impact, then ease out
-      cineFocus.copy(impactPt).lerp(tgtPos,back);
+      // the scar RIDES the drifting body — look at where it is NOW, not the frozen prediction
+      const liveIp=(P&&P.ipOff)?tgtPos.clone().add(P.ipOff):impactPt;
+      cineFocus.copy(liveIp).lerp(tgtPos,back);
       cineZoom=Z_IMPACT+(Z_REVEAL-Z_IMPACT)*back;
-      cineDir.copy(CAM_IMPACT_DIR).lerp(CAM_REVEAL_DIR,back);
+      cineDir.copy((P&&P.camImpact)||CAM_IMPACT_DIR).lerp((P&&P.camReveal)||CAM_REVEAL_DIR,back);
     }
   } else { if(salvoActive)endShotInSalvo(); else softStop(); } // single shot: SOFT stop — outcome stays on screen; ↺ Reset restores
 }

@@ -43,7 +43,7 @@
 
   /* Shell / nav */
   .app{display:grid;grid-template-columns:264px 1fr;min-height:100vh}
-  .side{position:sticky;top:0;height:100vh;border-right:1px solid var(--line);background:linear-gradient(180deg,var(--bg2),var(--bg));
+  .side{position:sticky;top:0;height:100vh;border-right:1px solid var(--line);background:linear-gradient(180deg,color-mix(in oklab,var(--bg2) 86%,transparent),color-mix(in oklab,var(--bg) 86%,transparent));backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
     display:flex;flex-direction:column;padding:24px 20px;gap:18px;z-index:40}
   .brand{display:flex;align-items:center;gap:12px}
   .crest{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;flex:0 0 auto;
@@ -92,11 +92,8 @@
   .hero h1{font-size:clamp(28px,4.1vw,44px);letter-spacing:-.015em;line-height:1.13;margin-top:22px;max-width:19em}
   .hero .htag{display:block;font-size:clamp(14.5px,1.5vw,17.5px);color:var(--gold);font-family:var(--font-display);font-weight:600;margin-top:12px}
   .wrap.hero{position:relative;overflow:hidden}
-  .skyline-canvas{position:absolute;left:0;bottom:0;width:100%;height:clamp(250px,40vh,420px);opacity:.32;z-index:0;pointer-events:none}
-  html[data-theme="light"] .skyline-canvas{opacity:.55}
   /* Skyline as a backdrop on inner pages */
   #v-warroom .wrap,#v-contact .wrap{position:relative;padding-bottom:clamp(150px,24vh,280px)}
-  #v-warroom .wrap>*:not(.skyline-canvas),#v-contact .wrap>*:not(.skyline-canvas){position:relative;z-index:1}
   .herowrap{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:clamp(22px,4vw,46px);align-items:start}
   .heromain{min-width:0}
   .heroaside{display:none;flex:0 0 auto}
@@ -114,6 +111,23 @@
   .lenses button{font-size:12.5px;font-weight:600;color:var(--ink2);background:var(--surface);border:1px solid var(--line2);border-radius:999px;padding:6px 12px;cursor:pointer;transition:.14s}
   .lenses button:hover{border-color:var(--accent);color:var(--ink)}
   .lenses button.on{background:linear-gradient(145deg,var(--accent),var(--accent-ink));border-color:transparent;color:#fff}
+  /* audience fork + wayfinding strip (the billboard, without the gate) */
+  .fork{display:flex;gap:8px;margin:16px 0 2px;flex-wrap:wrap}
+  .fork button{font-size:12.5px;font-weight:650;padding:7px 14px;border-radius:999px;cursor:pointer;border:1px solid var(--line2);background:var(--surface);color:var(--ink2);transition:.14s}
+  .fork button:hover{border-color:var(--accent);color:var(--ink)}
+  .wayfind{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:18px 0 0}
+  .wayfind a{position:relative;display:block;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:color-mix(in oklab,var(--surface) 72%,transparent);text-decoration:none;color:var(--ink2);transition:.14s;cursor:pointer}
+  .wayfind a:hover{border-color:var(--accent);color:var(--ink)}
+  .wayfind b{display:block;font-size:12.8px;color:var(--ink);margin-bottom:2px;padding-right:22px}
+  .wayfind span{display:block;font-size:11.3px;line-height:1.35;color:var(--muted)}
+  .wayfind i{position:absolute;top:7px;right:9px;font-style:normal;font-family:var(--font-mono);font-size:10.5px;color:var(--gold)}
+  .wf-contact{margin:10px 0 0;font-size:12.5px;color:var(--muted)}
+  .wf-contact a{color:var(--ink2)}
+  @media (max-width:960px){.wayfind{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  html[data-lens="research"] .foot .avail{display:none}
+  html[data-lens="research"] .foot .btn.primary{display:none}
+  .foot .cite-btn{display:none}
+  html[data-lens="research"] .foot .cite-btn{display:inline-flex;flex:1;justify-content:center;text-decoration:none}
   .hero .focus{font-size:13.5px;color:var(--ink2);margin-top:14px}
   .hero .focus b{color:var(--ink)} .hero .focus a{cursor:pointer;font-weight:600;border-bottom:1px solid color-mix(in oklab,var(--accent) 45%,transparent)}
   .hero .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
@@ -296,7 +310,7 @@
     .app{grid-template-columns:1fr}
     .topbar{display:flex}
     .menutgl{display:inline-flex}
-    .side{position:fixed;left:0;top:0;width:280px;transform:translateX(-100%);visibility:hidden;transition:transform .25s ease,visibility 0s linear .25s;box-shadow:var(--shadow)}
+    .side{position:fixed;left:0;top:0;width:280px;background:var(--bg2);backdrop-filter:none;transform:translateX(-100%);visibility:hidden;transition:transform .25s ease,visibility 0s linear .25s;box-shadow:var(--shadow)}
     .side.open{transform:none;visibility:visible;transition:transform .25s ease,visibility 0s;z-index:51}
     .scrim.on{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:39}
     .pgrid,.grid2,.contact,.wgrid{grid-template-columns:1fr}
@@ -344,6 +358,36 @@
 </script>
 <script>(function(){try{var t=localStorage.getItem('cf-theme');if(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches)t='light';if(t)document.documentElement.setAttribute('data-theme',t);var m=document.getElementById('themeColor');if(m)m.content=((t||'dark')==='light'?'#f4f1ec':'#0b0f17');}catch(e){}})();</script>
   <link rel="stylesheet" href="assets/fonts.css">
+  <link rel="stylesheet" href="assets/chrome.css">
+  <script defer src="assets/chrome.js" data-sky="live"></script>
+<style id="cfloadcss">
+#avload svg{width:96px;height:64px;overflow:visible}
+#avload svg{width:96px;height:64px;overflow:visible}
+  /* The Jet d'Eau, drawn rather than implied: the arc of the Rade with the old town
+     and St-Pierre behind it, and a fountain that is actually water-coloured. The jet
+     climbs, the plume feathers open behind it, and the spray falls. */
+  #avload .city rect,#avload .city path{fill:var(--ink2,#9fb0c9);fill-opacity:.26}
+  #avload .quay{stroke:var(--ink2,#9fb0c9);stroke-opacity:.32;stroke-width:1;fill:none}
+  #avload .jet{stroke:#5aa9d6;stroke-opacity:.95;stroke-width:2.3;stroke-linecap:round;fill:none;
+    stroke-dasharray:38;stroke-dashoffset:38;animation:cfjet 2s cubic-bezier(.3,0,.4,1) infinite}
+  #avload .plume{stroke:#8fcdea;stroke-opacity:0;stroke-width:1.1;stroke-linecap:round;fill:none;
+    animation:cfplume 2s cubic-bezier(.3,0,.4,1) infinite}
+  #avload .drop{fill:#bfe3f5;fill-opacity:0;animation:cfdrop 2s cubic-bezier(.4,0,.6,1) infinite}
+  #avload .d2{animation-delay:.1s}
+  #avload .d3{animation-delay:.2s}
+  #avload .d4{animation-delay:.3s}
+  @keyframes cfjet{0%{stroke-dashoffset:38}44%{stroke-dashoffset:0}
+    84%{stroke-dashoffset:0;stroke-opacity:.95}100%{stroke-dashoffset:0;stroke-opacity:0}}
+  @keyframes cfplume{0%,32%{stroke-opacity:0;transform:scaleY(.45);transform-origin:48px 10px}
+    58%{stroke-opacity:.7;transform:scaleY(1);transform-origin:48px 10px}
+    86%{stroke-opacity:.42}100%{stroke-opacity:0}}
+  @keyframes cfdrop{0%,40%{fill-opacity:0;transform:translateY(0)}
+    54%{fill-opacity:.8}100%{fill-opacity:0;transform:translateY(17px)}}  #avload .drop{fill:var(--gold);fill-opacity:.9;animation:cfdrop 1.6s cubic-bezier(.4,0,.5,1) infinite}
+  @keyframes cfdrop{0%{transform:translateY(0);opacity:0}45%{transform:translateY(-26px);opacity:.9}100%{transform:translateY(-32px);opacity:0}}
+  #avload p{margin:0;color:var(--mut,#8b97ab);font-size:13px}
+  @media (prefers-reduced-motion: reduce){ #avload .jet{animation:none;stroke-dashoffset:0;stroke-opacity:.92}
+    #avload .plume{animation:none;stroke-opacity:.7} #avload .drop{animation:none;fill-opacity:.8} }
+</style>
 </head>
 <body>
 <a class="skip" href="#maincontent">Skip to main content</a>
@@ -371,6 +415,7 @@
     <div class="foot">
       <div class="avail"><span class="dot"></span> Open to legal, risk &amp; transformation roles — Geneva</div>
       <div class="sidebtns">
+        <a class="btn cite-btn" href="publications/index.html">Publications — 28 works</a>
         <button class="btn primary" style="flex:1" onclick="openDoc('docs/CV-Christopher-Farmer-2026-08.pdf','Christopher Farmer — CV')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg> CV</button>
         <button class="btn icon" id="theme" title="Toggle theme" aria-label="Toggle theme">
@@ -390,11 +435,14 @@
     <!-- OVERVIEW -->
     <section class="view on" id="v-overview">
       <div class="wrap hero">
-        <canvas class="skyline-canvas" aria-hidden="true"></canvas>
         <div class="herowrap">
           <div class="heromain">
             <div class="eyebrow">Geneva · Swiss B permit — work-authorised, no sponsorship needed · available now</div>
         <h1>I take ownership of the problems that cross law, risk, operations and technology — and build the systems that resolve them.</h1>
+        <div class="fork" role="group" aria-label="Quick route">
+          <button type="button" onclick="try{document.querySelector('.lenses button[data-lens=&quot;operator&quot;]').click()}catch(e){}">Hiring? — the operator view</button>
+          <button type="button" onclick="try{document.querySelector('.lenses button[data-lens=&quot;research&quot;]').click()}catch(e){}">Here from a citation? — the research view</button>
+        </div>
         <div class="lenses" id="lenses" role="group" aria-label="Tailor this page for your audience" style="margin:14px 0 6px">
           <span class="lb">Tailor this page:</span>
           <button data-lens="operator" class="on">Strategic Operator</button>
@@ -419,6 +467,17 @@
           <a class="btn" href="https://www.linkedin.com/in/civfarmer" target="_blank" rel="noopener">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5A2.5 2.5 0 1 1 5 8.5a2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05 4 0 4.75 2.64 4.75 6.06V21H21v-5.6c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94V21H13z"/></svg> LinkedIn</a>
         </div>
+        <nav class="wayfind" aria-label="Everything on this site">
+          <a href="#projects" onclick="show('projects');return false"><b>Projects</b><span>Eight platforms, live in this page — forensics, screening, forecasting</span><i>8</i></a>
+          <a href="case-studies/index.html"><b>Case studies</b><span>How each platform is built — and the documents under pressure&nbsp;&#8599;</span></a>
+          <a href="#experience" onclick="show('experience');return false"><b>Experience</b><span>Board-level legal, compliance &amp; operations — the roles behind the build</span></a>
+          <a href="#warroom" onclick="show('warroom');return false"><b>Crisis case studies</b><span>Deficit recovery, continuity and crisis governance, documented</span><i>3</i></a>
+          <a href="#expertise" onclick="show('expertise');return false"><b>Expertise</b><span>Where the law meets the build — stack, controls, jurisdictions</span></a>
+          <a href="#credentials" onclick="show('credentials');return false"><b>Credentials</b><span>LL.M. (dissertation 100%), solicitor route Jan 2027, languages</span></a>
+          <a href="publications/index.html"><b>Publications</b><span>The research corpus — economic warfare law, autonomous systems, space&nbsp;&#8599;</span><i>28</i></a>
+          <a href="publications/research-lab.html"><b>Research Lab</b><span>Interactive models, 3D demonstrations and technical notes&nbsp;&#8599;</span><i>16</i></a>
+        </nav>
+        <p class="wf-contact"><a href="mailto:civfarmer@gmail.com">civfarmer@gmail.com</a> · <a href="https://www.linkedin.com/in/civfarmer" target="_blank" rel="noopener">linkedin.com/in/civfarmer</a> · Geneva · Swiss B permit — work-authorised</p>
           </div>
           <aside class="heroaside"><img class="herophoto" alt="Christopher Farmer"></aside>
         </div>
@@ -454,7 +513,7 @@
             </div>
             <div class="pbody">
               <h3>FRIS <span class="sub">Forensic &amp; Regulatory Intelligence Suite</span></h3>
-              <p>A forensic workbench for financial-crime investigations — <b>23 analysis engines</b> spanning beneficial-ownership tracing, sanctions &amp; adverse-media screening, crypto peel-chain tracing and an insolvency-recovery waterfall. ~20,000 lines of JavaScript, authored by me.</p>
+              <p>A forensic workbench for financial-crime investigations — <b>23 analysis engines</b> spanning beneficial-ownership tracing, sanctions &amp; adverse-media screening, crypto peel-chain tracing and an insolvency-recovery waterfall. A single-author codebase of ~20,000 lines of JavaScript.</p>
               <div class="tags"><span class="tag">23 engines · ~20k LOC</span><span class="tag">Vanilla JS</span><span class="tag">Graph engine</span><span class="tag">Offline</span></div>
               <div class="pactions">
                 <button class="plink" data-open>Launch <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button>
@@ -667,7 +726,6 @@
     <!-- WAR ROOM -->
     <section class="view" id="v-warroom">
       <div class="wrap pad">
-        <canvas class="skyline-canvas" aria-hidden="true"></canvas>
         <div class="eyebrow">War Room — governance, finance &amp; crisis operations</div>
         <h2 class="h-sec">The documents I produce under pressure</h2>
         <p class="lead" style="margin-top:12px">Deep-dive case analyses — governance-led operational pivots, deficit recovery, and regulator- and audit-ready crisis response.</p>
@@ -798,7 +856,6 @@
     <!-- CONTACT -->
     <section class="view" id="v-contact">
       <div class="wrap pad">
-        <canvas class="skyline-canvas" aria-hidden="true"></canvas>
         <div class="eyebrow">Get in touch</div>
         <h2 class="h-sec">Contact</h2>
         <div class="contact">
@@ -845,7 +902,7 @@
     <span><b id="avtitle">App</b> — running inside Christopher Farmer’s portfolio. <span class="hint">Use Close (top-right) to return to the site.</span></span>
   </div>
   <div style="position:relative;flex:1;display:flex">
-    <div class="avload" id="avload" role="status" aria-live="polite"><div class="spin"></div>Loading app…</div>
+    <div class="avload" id="avload" role="status" aria-live="polite"><svg viewBox="0 0 96 64" aria-hidden="true"><g class="city"><rect x="6" y="29.1" width="5" height="8.0"/><rect x="12" y="27.5" width="4" height="12.0"/><rect x="17" y="34.6" width="6" height="7.0"/><rect x="24" y="29.3" width="4" height="14.0"/><rect x="29" y="35.3" width="3" height="9.0"/><rect x="34" y="33.5" width="9" height="12.0"/><rect x="34" y="27.5" width="3" height="7"/><rect x="40" y="27.5" width="3" height="7"/><path d="M36.3 27.5 L38.5 18.5 L40.7 27.5 Z"/><rect x="45" y="38.0" width="4" height="8.0"/><rect x="50" y="33.9" width="5" height="12.0"/><rect x="56" y="38.5" width="4" height="7.0"/><rect x="61" y="31.5" width="7" height="13.0"/><rect x="69" y="35.1" width="4" height="8.0"/><rect x="74" y="30.3" width="6" height="11.0"/><rect x="81" y="31.9" width="5" height="7.0"/><rect x="87" y="26.4" width="4" height="10.0"/></g><path class="quay" d="M4.0 34.8 L7.7 36.7 L11.3 38.4 L15.0 39.9 L18.7 41.2 L22.3 42.3 L26.0 43.3 L29.7 44.2 L33.3 44.8 L37.0 45.3 L40.7 45.7 L44.3 45.9 L48.0 46.0 L51.7 45.9 L55.3 45.7 L59.0 45.3 L62.7 44.8 L66.3 44.2 L70.0 43.3 L73.7 42.3 L77.3 41.2 L81.0 39.9 L84.7 38.4 L88.3 36.7 L92.0 34.8"/><g class="water"><path class="jet" d="M48 46.0 V8"/><path class="plume" d="M48 10 q-9 6 -12 17 M48 10 q9 6 12 17 M48 9 q-5 8 -6 19 M48 9 q5 8 6 19 M48 8 q-1.5 9 -1.5 20 M48 8 q1.5 9 1.5 20"/><circle class="drop d1" cx="37" cy="28" r="1.2"/><circle class="drop d2" cx="59" cy="28" r="1.2"/><circle class="drop d3" cx="43" cy="23" r="1"/><circle class="drop d4" cx="53" cy="23" r="1"/></g></svg><p style="margin:0">Loading app…</p></div>
     <iframe id="avframe" title="Embedded application" allow="clipboard-read; clipboard-write"></iframe>
   </div>
 </div>
@@ -946,7 +1003,7 @@
   var avtimer=null;
   function openApp(href,title,slug){
     avtitle.innerHTML=title||'App'; avnew.href=href; avpath.textContent='/'+(slug||'app');
-    avload.innerHTML='<div class="spin"></div>Loading app…'; avload.style.pointerEvents='none'; avload.style.display='flex';
+    if(!window.__cfmark)window.__cfmark=avload.innerHTML; avload.innerHTML=window.__cfmark; avload.style.pointerEvents='none'; avload.style.display='flex';
     appv.classList.add('on'); _lastFocus=document.activeElement;document.body.style.overflow='hidden';_bgInert(true);appv.focus();
     if(avtimer) clearTimeout(avtimer);
     avframe.onload=function(){ if(avtimer) clearTimeout(avtimer); avload.style.display='none'; };
@@ -970,7 +1027,7 @@
       '<li><b>Money handled as BigInt</b> — values reconcile exactly (initial = residual + peeled + fees); no floating-point drift.</li>'+
       '<li>A fetch-shim runs the identical UI against a Node server <i>or</i> a fully in-memory dataset.</li>'+
       '<li>A headless self-verification harness checks every view and workflow before release.</li>'+
-      '<li>~20,000 lines of JavaScript, authored by me.</li></ul>' },
+      '<li>A single-author codebase — ~20,000 lines of JavaScript.</li></ul>' },
     meridian:{ title:"Meridian — how it’s built", icon:'assets/img/meridian-crest.png', html:
       '<span class="mine">Built by me · Python + SQLite</span>'+
       '<p>A truthfulness-first regulatory &amp; market-intelligence platform.</p>'+
@@ -1071,7 +1128,7 @@
       lead:'A sanctions and financial-crime specialist who <b>codes his own screening, tracing and export-control tooling</b>. I built <b>FRIS</b> — 23 engines spanning beneficial-ownership tracing, sanctions &amp; adverse-media screening and crypto peel-chain analysis — and <b>Sentinel</b>, a dual-use export-control screen (EU Reg. 2021/821, Wassenaar). My LL.M. dissertation on economic warfare (awarded 100%) is directly on-theme for commodity-trade sanctions. Swiss B permit — work-authorised, no sponsorship needed.',
       focus:'Start with <a data-go="projects">Projects</a> (FRIS &amp; Sentinel), then <a data-go="experience">Experience</a> and the <a data-go="warroom">Crisis case studies</a> — the software is the proof, not the pitch.'},
     tech:{tag:'A builder who understands the legal implications — not just the code.',
-      lead:'I design and build working software — a <b>23-engine forensic-intelligence suite</b>, a provenance-first market-intelligence platform, a dependency-free forecasting engine, a self-scheduling PM platform, a <b>cross-border data-transfer &amp; TIA assessor</b> and an <b>AI-governance &amp; export-control readiness assessor</b> — and I own the legal and regulatory reasoning behind every control. ~20,000 lines of code in FRIS alone, authored by me — and every automated workflow keeps a human in the loop.',
+      lead:'I design and build working software — a <b>23-engine forensic-intelligence suite</b>, a provenance-first market-intelligence platform, a dependency-free forecasting engine, a self-scheduling PM platform, a <b>cross-border data-transfer &amp; TIA assessor</b> and an <b>AI-governance &amp; export-control readiness assessor</b> — and I own the legal and regulatory reasoning behind every control. ~20,000 lines of code in FRIS alone, a single-author codebase — and every automated workflow keeps a human in the loop.',
       focus:'Start with <a data-go="projects">Projects</a> (open &ldquo;How it&rsquo;s built&rdquo; on any card) and <a data-go="expertise">Expertise</a>.'},
     governance:{tag:'Board-level leadership that also builds the systems behind the decisions.',
       lead:'Board-level owner of an eight-site operating model — funders, regulators, restructuring and crisis — who also <b>builds the systems behind the decisions</b>. 100% inspection pass; £200k secured; £500k+ in bids authored; orderly, compliant wind-down; an independent charity trusteeship alongside the executive roles. My governance style is practical rather than ceremonial: I translate board intent, funding conditions and legal obligations into clear decision rights, accountable ownership and systems people can actually use. I work across executives, specialists and delivery teams&mdash;identifying the decisive constraint, aligning the right expertise and carrying change through from diagnosis to operation.',
@@ -1179,77 +1236,6 @@
   _booted=true; /* boot complete — from here on, show() moves focus to the main landmark */
 })();
 </script>
-<script>
-/* Animated procedural Geneva skyline — Saleve/Jura, St-Pierre, Lac Leman, Jet d'Eau.
-   Rendered on every .skyline-canvas (Overview, War Room & Contact); each instance is self-contained.
-   Composition: one low rolling ridge, sparse city on a thin shore band, generous open sky. */
-(function(){
-  function initSkyline(cvs){
-    var ctx=cvs.getContext('2d'); if(!ctx) return;
-    var w=0,h=0, particles=[], clouds=[];
-    function resize(){ w=cvs.width=cvs.clientWidth; h=cvs.height=cvs.clientHeight; if(reduce&&w&&h) draw(); }
-    window.addEventListener('resize',resize);
-    if(window.ResizeObserver){ try{ new ResizeObserver(resize).observe(cvs); }catch(e){} }
-    resize();
-    function P(){ this.reset(); }
-    P.prototype.reset=function(){ this.x=w*0.74+(Math.random()*8-4); this.y=h-18; this.vx=(Math.random()-0.5)*0.4; this.vy=-(Math.random()*3+4); this.life=Math.random()*0.6+0.4; this.age=0; this.size=Math.random()*1.5+0.5; };
-    P.prototype.update=function(){ this.x+=this.vx; this.y+=this.vy; this.vy+=0.08; this.vx+=(Math.random()-0.5)*0.1; this.age+=0.01; };
-    P.prototype.draw=function(color){ ctx.globalAlpha=Math.max(0,1-(this.age/this.life)); ctx.fillStyle=color; ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=1; };
-    for(var i=0;i<150;i++) particles.push(new P());
-    clouds=[{x:0.1,y:58,s:0.05,sc:1},{x:0.5,y:94,s:0.08,sc:0.8},{x:0.8,y:38,s:0.03,sc:1.2},{x:0.33,y:30,s:0.06,sc:0.65}];
-    function cloud(x,y,sc,color){ ctx.fillStyle=color; ctx.beginPath(); ctx.arc(x,y,20*sc,Math.PI*0.5,Math.PI*1.5); ctx.arc(x+20*sc,y-10*sc,20*sc,Math.PI,Math.PI*2); ctx.arc(x+45*sc,y,20*sc,Math.PI*1.5,Math.PI*0.5); ctx.fill(); }
-    /* Respect prefers-reduced-motion: freeze the drift + jet spray to a static scene (canvas rAF isn't covered by the CSS reduced-motion rule). Loop is killed after the first painted frame. */
-    var reduce=window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    
-  /* Off-screen canvases were rendering at full rate permanently: the loop guarded
-     on document.hidden only. Gate each canvas on visibility so scrolled-past
-     animations stop, which is where the real cost was. */
-  function _cfGate(cv,onVis){
-    if(!('IntersectionObserver' in window)){onVis(true);return;}
-    new IntersectionObserver(function(es){onVis(es[0].isIntersecting);},{threshold:0}).observe(cv);
-  }
-var _tokCache=null;function _tokInvalidate(){_tokCache=null;}new MutationObserver(_tokInvalidate).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});try{matchMedia('(prefers-color-scheme: light)').addEventListener('change',_tokInvalidate);}catch(e){}function tokens(){if(_tokCache)return _tokCache;_tokCache=_tokensRead();return _tokCache;}function _tokensRead(){ var cs=getComputedStyle(document.documentElement); function v(n,f){ var x=cs.getPropertyValue(n).trim(); return x||f; }
-      return { line:v('--line','#26304a'), ink:v('--muted','#7c87a3'), accent:v('--accent','#43b3a6'), light:document.documentElement.getAttribute('data-theme')==='light' }; }
-    /* Ridge profile: the gentle low roll (two long waves, small amplitude, no noise) */
-    function ry(x,y0,a1,a2,ph){ return y0 - a1*Math.sin(x/150+ph) - a2*Math.cos(x/80+ph); }
-    function ridge(y0,a1,a2,ph){ ctx.beginPath(); ctx.moveTo(0,h);
-      for(var x=0;x<=w;x+=8){ ctx.lineTo(x, ry(x,y0,a1,a2,ph)); }
-      ctx.lineTo(w, ry(w,y0,a1,a2,ph)); ctx.lineTo(w,h); ctx.closePath(); ctx.fill(); }
-    /* Sparse rectangular blocks on the shore band — original placement, a little height/width variety */
-    var BX=[0.10,0.15,0.25,0.40,0.45,0.55,0.65,0.85,0.90],
-        BH=[24,40,20,56,28,46,22,50,30],
-        BW=[28,38,24,34,30,40,26,36,30];
-    function city(color){ var base=h-33; ctx.fillStyle=color;
-      ctx.fillRect(0,base,w,33); /* thin ground/shore band the city sits on */
-      for(var i=0;i<BX.length;i++){ ctx.fillRect(w*BX[i], base-BH[i], BW[i], BH[i]); }
-      ctx.fillRect(w*0.55+18, base-53, 2, 7); /* slim rooftop antenna on the mid block */
-      /* St-Pierre: nave, twin square towers, tapering central spire + finial */
-      var cx=w*0.30;
-      ctx.fillRect(cx,h-73,40,40);
-      ctx.fillRect(cx-10,h-98,15,65); ctx.fillRect(cx+35,h-98,15,65);
-      ctx.beginPath(); ctx.moveTo(cx+10,h-73); ctx.lineTo(cx+20,h-118); ctx.lineTo(cx+30,h-73); ctx.closePath(); ctx.fill();
-      ctx.fillRect(cx+19,h-124,2,6); }
-    function draw(){ if(!w||!h) return; var T=tokens();
-      ctx.clearRect(0,0,w,h);
-      /* Dark theme keeps its ink tones; light theme uses the stone-sage palette */
-      ctx.globalAlpha=T.light?0.32:0.10; ctx.fillStyle=T.light?'#b8bcae':T.ink; ridge(h-118,16,0,2.6); /* Jura, a whisper behind */
-      ctx.globalAlpha=T.light?0.75:0.24; ctx.fillStyle=T.light?'#a3a896':T.ink; ridge(h-92,30,20,0);   /* Saleve, the one real ridge */
-      ctx.globalAlpha=T.light?0.10:0.14;
-      for(var c=0;c<clouds.length;c++){ var cl=clouds[c]; if(!reduce){ cl.x+=cl.s/1000; if(cl.x>1.15) cl.x=-0.2; } cloud(cl.x*w, cl.y, cl.sc, T.ink); }
-      ctx.globalAlpha=T.light?0.85:0.36; city(T.light?'#8b8f7f':T.ink);
-      ctx.globalAlpha=0.18; ctx.fillStyle=T.accent; ctx.fillRect(0,h-18,w,18); /* thin Lac Leman band */
-      var jx=w*0.74; ctx.globalAlpha=0.4; ctx.strokeStyle=T.accent; ctx.lineWidth=1.6;
-      ctx.beginPath(); ctx.moveTo(jx,h-16); ctx.quadraticCurveTo(jx+2,h-72,jx+5,h-120); ctx.stroke(); /* Jet d'Eau column */
-      ctx.globalAlpha=0.14; ctx.beginPath(); ctx.moveTo(jx,h-14); ctx.lineTo(jx,h-4); ctx.stroke(); /* its faint reflection */
-      ctx.globalAlpha=1;
-      for(var i=0;i<particles.length;i++){ var p=particles[i]; if(!reduce){ p.update(); if(p.age>=p.life||p.y>h-14) p.reset(); } p.draw(T.accent); }
-      ctx.globalAlpha=1; }
-    function loop(){ if(!document.hidden) draw(); requestAnimationFrame(loop); }
-    if(reduce){ for(var s=0;s<40;s++){ for(var i2=0;i2<particles.length;i2++){ var q=particles[i2]; q.update(); if(q.age>=q.life||q.y>h-14) q.reset(); } } draw(); }
-    else requestAnimationFrame(loop);
-  }
-  document.querySelectorAll('.skyline-canvas').forEach(initSkyline);
-})();
-</script>
+
 </body>
 </html>
