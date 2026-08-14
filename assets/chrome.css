@@ -1,0 +1,37 @@
+/* ============================================================================
+   Shared site chrome — one Geneva, everywhere.
+   The procedural skyline (Salève/Jura, St-Pierre, Lac Léman, Jet d'Eau) used to
+   be painted per-column on the home page only, which put a hard vertical seam
+   at the sidebar edge. It is now a single fixed full-viewport layer behind the
+   content of every first-party page, animated on the home page and drawn once
+   elsewhere. chrome.js injects the canvas and, where a page has no theme
+   control of its own, a floating light/dark toggle.
+   ========================================================================== */
+
+html{background:var(--bg,#0b0f17)}
+body{background:transparent !important}
+
+.skyline-canvas.cf-fixed{
+  position:fixed;left:0;right:0;bottom:0;width:100vw;
+  height:clamp(250px,38vh,420px);
+  z-index:-1;pointer-events:none;opacity:.24;
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 52%);
+  mask-image:linear-gradient(180deg,transparent,#000 52%);
+}
+html[data-theme="light"] .skyline-canvas.cf-fixed{opacity:.38}
+
+/* Floating theme toggle — only injected on pages without their own control */
+.cf-toggle{
+  position:fixed;top:12px;right:12px;z-index:90;
+  width:38px;height:38px;border-radius:10px;
+  border:1px solid var(--line,#26304a);
+  background:color-mix(in oklab,var(--bg2,#0f1522) 78%,transparent);
+  color:var(--ink2,#9fb0c9);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+  transition:border-color .14s;
+}
+.cf-toggle:hover{border-color:var(--accent,#43b3a6)}
+.cf-toggle svg{width:18px;height:18px}
+
+@media print{.skyline-canvas.cf-fixed,.cf-toggle{display:none !important}}
