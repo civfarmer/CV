@@ -1,24 +1,39 @@
-Phone HUD fold on the 3D demos: the scene owns the screen until you ask for the instruments
+The two GGE papers, revised to the state of play their audience is living in
 
-On a phone the robots demo buried its storeroom under nine overlapping
-pills - scenario chips, an engagement log printed over them, two sensor
-spec panels, a status line behind the Run button - and the launcher demo
-covered its bottom half with the full control rack. Both viewports now
-open clean on a small screen: the scene, a Run/Launch button, Reset, and
-one pill - "Info".
+Both papers were dated 6 August and cited the rolling text as revised on
+8 November 2024. The delegations they are written for sat through a first
+reading of the 18 December 2025 status in March and return to it on
+31 August. Revised 14 August 2026:
 
-Opening it restores everything. On the robots demo the log, the scenario
-status and the controls flow BELOW the scene when open, because stacking
-them back over the chips is what caused the original collision; the
-scenario selector and sensor specs overlay the top, where there is sky to
-spare. Closing folds it all away again. Desktop is untouched - the toggle
-does not exist above 700px.
+The Interval, Not the Autonomy (34pp): now reads the December 2025 text
+part by part - the central formula's migration from prohibition to stated
+need between revisions, the scale-of-operation measure that absorbed the
+four parameters, the new understanding requirement in part IV that answers
+the critics' gap in form and leaves it open in substance. The March session
+is in the chronology: first reading, revised boxes I-III, support past
+seventy states, and the United States proposing "good faith human judgement
+and care" - a live demonstration that the negotiation is a dispute over
+which unmeasured words to prefer. The ICRC's October 2025 position paper is
+engaged where it comes closest: its "invalidate legal determinations"
+passage is the decay of a targeting judgement stated qualitatively, and the
+paper now says precisely what it adds - the rate, the record, the
+assessment.
 
-The other 3D pages were checked and left alone: the geomagnetic orbit
-screen already keeps its legend below the canvas, and the slew and
-explorer pages put three small chips on a sub-200px chart, which is not
-the problem being solved.
+A Robot Left in a Field Is a Mine the Law Cannot See (25pp): the novelty
+section now names its nearest neighbours honestly (Lewis's Yale LJ model
+argument; the ICRC's "indicative baselines") and distinguishes
+precedent-as-model from characterisation-plus-amendment. A new subsection
+records the corroboration neither drafter intended: the rolling text and
+the ICRC both now prescribe the Technical Annex's two-layer deactivation
+and perimeter discipline for mobile systems, while the instrument they are
+copying reaches the emplaced case on one amended definition. And the
+consensus objection is met on the record: the anti-vehicle-mines protocol
+died post-stockpile in 2006, Protocol IV succeeded pre-deployment in 1995,
+and emplaced systems are still in the second window - with CCW art 8, the
+AP II Annual Conference, and the rolling text's own exclusion clause as the
+standing routes.
 
-Verified in a real browser at 390px: closed, open, closed again - state
-and button label correct both ways, zero page errors - and at 1440px:
-toggle absent, full HUD visible as before.
+Both rebuilt with their own pipelines at the shipped renderer settings
+(Latin Modern 10pt; page counts unchanged at 34/25), apparatus renumbered
+by the build, structural and citation checks clean, every new source
+verified against the primary record this session.
