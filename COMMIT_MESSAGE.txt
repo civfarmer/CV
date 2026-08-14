@@ -1,45 +1,41 @@
-Fix the loader that never finished; draw the Jet d'Eau properly; make the demos usable on a phone
+Remove the AI-assistance statements from the portfolio page
 
-The loading animation never stopped. cfLoadStop was only called when the modal was
-closed, so nothing cleared the spinner when the iframe finished — every interactive
-tool sat behind a permanent animation and could only be reached by opening it in a
-new tab. The frame's load event now clears it, with an eight-second backstop so a
-tool that stalls shows itself anyway rather than trapping the loader again. Fixed on
-all three pages that carry the modal.
+Two lines on the home page volunteered that the work was AI-assisted. The
+site is the landing point for submissions to Geneva missions, DG GROW and
+the Swiss federal process, and a reader who arrives from a letter citing a
+DOI should meet the argument, not a note about how it was typed.
 
-The loading mark is now actually the Jet d'Eau. It was a gold vertical line with no
-city and no water. It is now the Rade: building silhouettes seated on the arc of the
-bay rather than on a flat line, which is the difference between a skyline and a bar
-chart, with St-Pierre's twin towers and spire above the old town, and a fountain in
-water blue — a jet that climbs, a plume that feathers open behind it, and spray that
-falls back. The reduced-motion path shows it formed rather than frozen mid-climb.
+  "Architected and built by me - AI-assisted, never AI-designed; the
+   analysis engines, data models and interfaces are mine."
+      -> "Architected and built by me: the analysis engines, data models
+          and interfaces are mine."
 
-ARGUS 3D camera. It broke off to watch the Moon and then Mars go past, which reads
-as losing the shot, and it pulled back to a wide reveal from a third of the way
-through the impact hold, so the impact was already receding as it happened. The
-fly-past pan is now capped at an 18% lean of the look direction and only fires when a
-body genuinely fills the frame; the camera settles onto the target from 52% of the
-coast rather than 72%; the impact hold stays close until 66% before easing out; and
-the aftermath framing no longer retreats far enough to make the body a dot. The
-demo's description was rewritten to say what the camera now does.
+  "~20,000 lines of JavaScript, authored by me (AI-assisted with Claude
+   Code)."  (inside the FRIS "How it's built" panel)
+      -> "~20,000 lines of JavaScript, authored by me."
 
-Phones. The six demo pages ran to two to five screens of which the canvas was one —
-the rest was the lede and the caveat notes you scroll past before touching anything.
-The prose is not removed, because several of those notes are the reason the page is
-honest, but on a small screen the lede clamps to four lines and each note folds into
-a labelled disclosure, and the panel holding the visual is promoted to the top of the
-grid. Applied by script, so nothing is hidden from a reader without JavaScript, and
-desktop is untouched.
+The ownership claim is unchanged in both. Only the qualifier is gone.
 
-  argus-3d        3,906px → 2,920px      spatial-demo    2,054px → 1,402px
-  argus-explorer  2,266px → 1,966px      slew-tradeoff   2,261px → 1,842px
-  geomag-orbit    2,303px → 2,026px      evidence-gates  4,406px → 4,060px
+Two skills chips were removed for the same reason: "Claude Code", which
+names a code-authoring tool and sat directly above a portfolio of code,
+and "Compliance-audit prompting", which reads as the audit being prompted
+rather than performed.
 
-The explorer's chart was 1,452px down the page and is now 870px.
+Two were deliberately kept. "Agentic-LLM workflows (HITL)" and "GenAI
+control mapping" are governance capabilities - they describe overseeing
+these systems, which is the opposite claim to being written by one, and
+it is the subject of several of the papers. Removing them would cost a
+real qualification to solve a problem they do not create.
 
-Research Lab: 19.8 phone screens when this work started, 10.7 now. Descriptions
-clamp to three lines on a phone with a control to open them — twelve of the sixteen
-exceed 320 characters and one reaches 1,321 — and the card chrome no longer uses
-desktop proportions on a small screen. Card median 494px → 388px. Desktop unchanged.
+Nothing was changed in the papers themselves. Anthropic, OpenAI, the AI
+Security Institute and the legal-hallucination literature appear in
+Papers 2, 3 and 4 and in "Who Pays to Check the Machine" as cited
+sources on AI in cyber operations. Those are bibliography, not
+provenance, and they stay.
 
-push-log.txt added to .gitignore; it is regenerated each run.
+Checked at the same time, no change needed: every disclosure on the site
+already defaults to collapsed and toggles both ways - 32 <details>
+elements across the demo pages and the publications index open on click
+and close on a second click, and the "Read more" clamps on the Lab and
+the demo ledes return to "Read more" when clicked again. No <details
+open> exists anywhere in the deployed tree.
