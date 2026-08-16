@@ -1,26 +1,13 @@
-Line-by-line pass on the two GGE papers; the skip-path declared
+Restore the title pages the last rebuild dropped; The Interval carries its DOI
 
-Both papers were read line by line, in full, after yesterday's revision. The
-read found what a fast revision leaves: the abstract and the closing remarks
-still called the rolling text's core a prohibition two sections after the body
-established it no longer is one; the migration point was argued twice in the
-same words; the March session example sat in the middle of a three-limb
-argument instead of after it; one internal footnote label leaked into print
-as "n 703"; one Box citation survived; and the paper's own build caught the
-repair and forced it into proper OSCOLA shape - full citation at first
-mention, back-reference after. MINE lost a duplicated qualifier, an
-unverifiable stockpile figure, and an overstatement of the ICRC's position
-("exactly that pattern... the effective one" is now "among the most
-effective", which is what the source says).
+The papers' rebuild pipeline had lost the step that merges the title page -
+the citation block, status, keywords, licence and date that a law reader
+cites from. The last push served both GGE papers without it. Restored
+(pandoc --include-before-body, with pandoc's own thin title block turned
+off, which is how the originals were built), and both papers now open on
+the proper page, dated 17 August 2026.
 
-A reviewing agent assessed the structural worry - readers lost in technical
-detail - and found the skip-architecture already present but undeclared: the
-abstracts are the argument in brief, the headings narrate, every technical
-stretch ends in a stated result. What was added is four sentences, not
-summaries: each paper's roadmap now names the pressed reader's path (Part I,
-the central section, the drafted text, the conclusions), and each Part III
-tells the expert what they may pass over and where to rejoin. The drafted
-texts, the falsification sections and the conclusions were left untouched.
-
-Rebuilt through both pipelines: structural problems 0, citation checks 0,
-apparatus renumbered, page counts unchanged at 34 and 25.
+The Interval, Not the Autonomy additionally carries its DOI on the title
+page and in the suggested citation: 10.5281/zenodo.21970778, reserved
+today on Zenodo ahead of deposit. A Robot Left in a Field follows when
+its DOI is reserved.
