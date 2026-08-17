@@ -1,20 +1,11 @@
-The apparatus the law reader looks for, and a conclusion that says what to do
+Both papers now carry their DOIs
 
-Both GGE papers now close with proper end-matter: a Table of Instruments
-and Official Documents and a Bibliography (The Interval), and a Table of
-Cases, Table of Instruments and Bibliography (A Robot Left in a Field).
-Only works actually cited are listed, and a two-way audit enforced it:
-every bibliography entry traces to a footnote, every footnote source
-appears in the apparatus. The one mismatch it caught was fixed the OSCOLA
-way - the emplaced paper's first reference to its companion now carries
-the full citation and the sibling's DOI.
+A Robot Left in a Field Is a Mine the Law Cannot See has been assigned
+DOI 10.5281/zenodo.21971256, and its title page now carries it alongside
+the suggested citation, matching The Interval, Not the Autonomy
+(10.5281/zenodo.21970778) from the same batch.
 
-The Interval's summative remarks now end by saying what a reader should
-do: a delegation can table the element as a working paper; a ministry can
-put the four-line record into targeting doctrine without waiting; and the
-question to carry away is the one the framework makes askable - how long
-did the authorisation have to hold, how fast did the facts decay, and
-could the system be reached when they did.
-
-37pp and 27pp; the structure checker was taught that end-matter is
-apparatus, not argument; all checks clean.
+The manuscript on the site is the same 27-page build distributed to the
+publication batch - verified byte-identical before this push. Each paper
+also cites the other by DOI, so a reader landing on either can reach
+both.
