@@ -1,11 +1,6 @@
-Both papers now carry their DOIs
+Front matter tidied in the emplaced-systems paper
 
-A Robot Left in a Field Is a Mine the Law Cannot See has been assigned
-DOI 10.5281/zenodo.21971256, and its title page now carries it alongside
-the suggested citation, matching The Interval, Not the Autonomy
-(10.5281/zenodo.21970778) from the same batch.
-
-The manuscript on the site is the same 27-page build distributed to the
-publication batch - verified byte-identical before this push. Each paper
-also cites the other by DOI, so a reader landing on either can reach
-both.
+The Contents no longer lists the paper's own title, subtitle, abstract
+and method note as entries, and the article proper now begins on a
+fresh page after the Contents instead of running on mid-page under the
+Bibliography line. No text changed; 28 pages.
