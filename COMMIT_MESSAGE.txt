@@ -1,13 +1,20 @@
-Restore the title pages the last rebuild dropped; The Interval carries its DOI
+The apparatus the law reader looks for, and a conclusion that says what to do
 
-The papers' rebuild pipeline had lost the step that merges the title page -
-the citation block, status, keywords, licence and date that a law reader
-cites from. The last push served both GGE papers without it. Restored
-(pandoc --include-before-body, with pandoc's own thin title block turned
-off, which is how the originals were built), and both papers now open on
-the proper page, dated 17 August 2026.
+Both GGE papers now close with proper end-matter: a Table of Instruments
+and Official Documents and a Bibliography (The Interval), and a Table of
+Cases, Table of Instruments and Bibliography (A Robot Left in a Field).
+Only works actually cited are listed, and a two-way audit enforced it:
+every bibliography entry traces to a footnote, every footnote source
+appears in the apparatus. The one mismatch it caught was fixed the OSCOLA
+way - the emplaced paper's first reference to its companion now carries
+the full citation and the sibling's DOI.
 
-The Interval, Not the Autonomy additionally carries its DOI on the title
-page and in the suggested citation: 10.5281/zenodo.21970778, reserved
-today on Zenodo ahead of deposit. A Robot Left in a Field follows when
-its DOI is reserved.
+The Interval's summative remarks now end by saying what a reader should
+do: a delegation can table the element as a working paper; a ministry can
+put the four-line record into targeting doctrine without waiting; and the
+question to carry away is the one the framework makes askable - how long
+did the authorisation have to hold, how fast did the facts decay, and
+could the system be reached when they did.
+
+37pp and 27pp; the structure checker was taught that end-matter is
+apparatus, not argument; all checks clean.
