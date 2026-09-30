@@ -27,7 +27,10 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   button:disabled{opacity:.5;cursor:not-allowed}
   main{padding:20px;max-width:1280px;margin:0 auto}
   .grid{display:grid;grid-template-columns:340px 1fr;gap:20px}
+  .grid>*{min-width:0}
+  #out{overflow-x:auto}
   @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  @media(max-width:600px){#out table{min-width:600px}}
   .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:16px}
   label{display:block;font-size:.72rem;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.06em}
   input,select{width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--ink);
@@ -38,8 +41,10 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   .pill{display:inline-block;font-size:.66rem;padding:1px 7px;border-radius:99px;border:1px solid var(--line);margin:1px 3px 1px 0;white-space:nowrap;color:var(--muted)}
   .p-direct{border-color:var(--accent);color:var(--accent-ink)}
   .p-ultimate{border-color:var(--gold);color:var(--gold)}
-  .p-branch,.p-feeder{border-color:var(--line);color:var(--muted)}
+  .p-branch,.p-feeder,.p-subfund,.p-fund-manager{border-color:var(--line);color:var(--muted)}
   .p-alert{border-color:var(--bad);color:var(--bad)}
+  a.lei{color:var(--accent-ink);text-decoration:none}
+  a.lei:hover{text-decoration:underline}
   .muted{color:var(--muted);font-size:.8rem}
   .mono{font-family:var(--mono);font-size:.78rem}
   .banner{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:.78rem;color:var(--ink2);margin-bottom:16px}
@@ -66,11 +71,11 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   <span class="spacer"></span>
   <a class="tag" href="index.html" data-keep-theme style="text-decoration:none">← Suite</a>
   <button class="ghost noprint" id="themeBtn">Theme</button>
-  <button class="ghost noprint" id="selfTestBtn">Self-test</button>
+  <button class="ghost noprint" id="selfTestBtn" disabled>Self-test</button>
 </header>
 <main>
   <div id="warn"></div>
-  <div class="banner" id="provenance">Loading data packs…</div>
+  <div class="banner" id="provenance">Loading the data packs &mdash; about 18 MB compressed, usually 20 to 40 seconds. The buttons enable once the packs have parsed.</div>
   <div class="grid">
     <div>
       <div class="card">
@@ -79,7 +84,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
         <label for="q">Name or LEI</label>
         <input id="q" placeholder="e.g. Barclays, or 213800LBQA1Y9L22JB70" autocomplete="off">
         <div style="margin-top:12px;display:flex;gap:8px">
-          <button id="runBtn">Resolve</button>
+          <button id="runBtn" disabled>Resolve</button>
           <button class="ghost" id="csvBtn" disabled>Export CSV</button>
         </div>
         <div id="hits" class="muted" style="margin-top:10px"></div>
@@ -127,13 +132,35 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
       (childrenOf[r.p] || (childrenOf[r.p] = [])).push(r);
     }
   }
+  // Names are folded for matching — lower case, accents removed — so that
+  // "Nestle" finds NESTLÉ S.A. and "Turkiye" finds Türkiye. The fold is applied
+  // to the query as well, and only names that carry non-ASCII characters pay
+  // for the normalisation.
+  function fold(s){
+    s = String(s||"").toLowerCase();
+    if(/[^\x00-\x7f]/.test(s) && s.normalize) s = s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return s;
+  }
   var nameIdx = null;
   function buildNameIdx(){
     if(nameIdx) return nameIdx;
     nameIdx = [];
-    for(var lei in E){ nameIdx.push([E[lei].n.toLowerCase(), lei]); }
-    nameIdx.sort(function(a,b){ return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0; });
+    for(var lei in E){ nameIdx.push([fold(E[lei].n), lei]); }
     return nameIdx;
+  }
+  // How well a folded name matches a folded query: 0 exact, 1 the query is the
+  // whole opening word(s), 2 a whole word inside the name, 3 the opening of a
+  // longer word ("BP" in "BPCE"), 4 a fragment inside a word ("UBS" in
+  // "Substanz"). Anything above 4 does not match.
+  function tier(name, q){
+    if(name === q) return 0;
+    var i = name.indexOf(q);
+    if(i < 0) return 9;
+    var after = name.charAt(i + q.length), before = i > 0 ? name.charAt(i - 1) : "";
+    var wordEnd = !after || /[^a-z0-9]/.test(after);
+    if(i === 0) return wordEnd ? 1 : 3;
+    var wordStart = /[^a-z0-9]/.test(before);
+    return wordStart && wordEnd ? 2 : 4;
   }
   function search(q){
     q = String(q||"").trim();
@@ -142,21 +169,30 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
       var k = q.toUpperCase();
       return E[k] ? [k] : [];
     }
-    var ql = q.toLowerCase(), out = [], idx = buildNameIdx();
-    for(var i=0;i<idx.length && out.length < 60;i++){
-      if(idx[i][0].indexOf(ql) >= 0) out.push(idx[i][1]);
+    var ql = fold(q), idx = buildNameIdx(), cand = [];
+    // Every name is scanned. An earlier version stopped at the first sixty
+    // substring hits in alphabetical order, which for "Barclays" filled the list
+    // with funds before BARCLAYS PLC was ever reached.
+    for(var i=0;i<idx.length;i++){
+      var t = tier(idx[i][0], ql);
+      if(t < 9){
+        var lei = idx[i][1], kids = childrenOf[lei] || [], ult = 0;
+        for(var j=0;j<kids.length;j++){ if(kids[j].t === "ultimate") ult++; }
+        cand.push({lei: lei, n: idx[i][0], t: t, ult: ult, kids: kids.length});
+      }
     }
-    // Exact and prefix matches first: a search for "Barclays" should not open
-    // with a fund whose name merely contains the word.
-    out.sort(function(a,b){
-      var x = E[a].n.toLowerCase(), y = E[b].n.toLowerCase();
-      var ax = x === ql ? 0 : x.indexOf(ql) === 0 ? 1 : 2;
-      var ay = y === ql ? 0 : y.indexOf(ql) === 0 ? 1 : 2;
-      if(ax !== ay) return ax - ay;
-      if(x.length !== y.length) return x.length - y.length;
-      return x < y ? -1 : x > y ? 1 : 0;
+    // Within a tier, the entity that most other entities name as their ultimate
+    // parent comes first: a search for a group's name is almost always a search
+    // for the group. Then the entity with the most filed children, then the
+    // shorter name.
+    cand.sort(function(a,b){
+      if(a.t !== b.t) return a.t - b.t;
+      if(a.ult !== b.ult) return b.ult - a.ult;
+      if(a.kids !== b.kids) return b.kids - a.kids;
+      if(a.n.length !== b.n.length) return a.n.length - b.n.length;
+      return a.n < b.n ? -1 : a.n > b.n ? 1 : a.lei < b.lei ? -1 : 1;
     });
-    return out;
+    return cand.slice(0, 60).map(function(c){ return c.lei; });
   }
 
   // ---- chain resolution ----------------------------------------------------
@@ -194,12 +230,30 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     var up = walkUp(lei);
     var ult = declaredUltimate(lei);
     var nodes = [lei].concat(up.chain.map(function(r){ return r.p; }));
-    var juris = {}, order = [];
-    nodes.forEach(function(n){ var j = jur(n); if(j && !juris[j]){ juris[j] = 1; order.push(j); } });
-    var kids = (childrenOf[lei] || []);
+    var juris = {}, order = [], ctry = {}, countries = [];
+    nodes.forEach(function(n){
+      var j = jur(n); if(!j) return;
+      if(!juris[j]){ juris[j] = 1; order.push(j); }
+      // GLEIF writes sub-national jurisdictions as "US-DE". A chain that runs
+      // US-DE → US has not crossed a border, so crossings are counted on the
+      // country part alone, and the entity searched is the starting point, not
+      // a crossing.
+      var c = j.split("-")[0]; if(!ctry[c]){ ctry[c] = 1; countries.push(c); }
+    });
+    // Children are grouped by entity: the registry files a direct and an
+    // ultimate relationship separately, so a subsidiary would otherwise be
+    // listed twice and counted twice.
+    var rows = childrenOf[lei] || [], byLei = {}, kids = [], kinds = {};
+    rows.forEach(function(r){
+      var k = byLei[r.c];
+      if(!k){ k = byLei[r.c] = {lei: r.c, rels: []}; kids.push(k); }
+      if(k.rels.indexOf(r.t) < 0){ k.rels.push(r.t); kinds[r.t] = (kinds[r.t] || 0) + 1; }
+    });
+    kids.forEach(function(k){ k.rels.sort(); });
     var exc = (REL && REL.exceptions) ? (REL.exceptions[up.terminal] || null) : null;
     return {lei: lei, up: up, ultimate: ult, nodes: nodes, jurisdictions: order,
-            children: kids, exception: exc};
+            countries: countries, crossings: Math.max(0, countries.length - 1),
+            children: kids, childKinds: kinds, childRows: rows, exception: exc};
   }
 
   // ---- rendering -----------------------------------------------------------
@@ -214,13 +268,27 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     return h;
   }
 
+  // A name that can be followed: every parent and child in a result is a link
+  // that resolves that entity, so a chain can be walked without copying LEIs.
+  function link(lei){
+    return E[lei] ? '<a href="#" class="lei" data-lei="' + esc(lei) + '">' + esc(nm(lei)) + '</a>'
+                  : '<strong>' + esc(nm(lei)) + '</strong>';
+  }
+  var LEGEND = 'Relationship kinds as GLEIF files them: <strong>direct</strong> — the parent that ' +
+    'consolidates this entity\'s accounts; <strong>ultimate</strong> — the top of that consolidation chain; ' +
+    '<strong>branch</strong> — the head office of an international branch; <strong>fund-manager</strong> — ' +
+    'the entity that manages a fund; <strong>subfund</strong> — the umbrella fund a sub-fund sits in; ' +
+    '<strong>feeder</strong> — the master fund a feeder invests in. <strong>LAPSED</strong> means the ' +
+    'LEI\'s annual renewal is overdue: the record stands but has not been re-attested.';
+
   function render(res){
     var h = "";
-    var crossings = res.jurisdictions.length;
+    var direct = res.childKinds.direct || 0, ultimate = res.childKinds.ultimate || 0;
     h += '<div class="kpis">' +
       kpi("Steps to the top", res.up.chain.length, false) +
-      kpi("Jurisdictions crossed", crossings, crossings >= 4) +
-      kpi("Direct subsidiaries recorded", res.children.length, false) +
+      kpi("Jurisdictions crossed", res.crossings, res.crossings >= 3) +
+      kpi("Direct subsidiaries", direct, false) +
+      kpi("Ultimate subsidiaries", ultimate, false) +
       kpi("Declared ultimate parent", res.ultimate ? "yes" : "none filed", !res.ultimate) +
       '</div>';
 
@@ -233,7 +301,8 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
       h += '<div class="notebar">No <strong>ultimate consolidating parent</strong> has been filed for this ' +
         'entity. Under the GLEIF regime an entity must either name one or record why it has not, so the ' +
         'absence is itself a filing position rather than an absence of information.' +
-        (res.exception ? ' The recorded reason is set out below.' : '') + '</div>';
+        ((res.exception && res.exception.length) ? ' The recorded reason is set out below.'
+          : ' No reason is recorded in this pack; the reporting exception, if one was filed, is on the GLEIF record.') + '</div>';
     }
     if(res.exception && res.exception.length){
       h += '<div class="notebar"><strong>Reporting exception at the top of the chain.</strong> ' +
@@ -246,7 +315,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
          '<div>' + statusPills(res.lei) + '</div><div class="muted">the entity searched</div></li>';
     res.up.chain.forEach(function(r, i){
       var top = (i === res.up.chain.length - 1);
-      h += '<li' + (top ? ' class="top"' : '') + '><strong>' + esc(nm(r.p)) + '</strong> ' +
+      h += '<li' + (top ? ' class="top"' : '') + '><strong>' + link(r.p) + '</strong> ' +
         '<span class="mono muted">' + esc(r.p) + '</span>' +
         ' <span class="pill p-' + esc(r.t) + '">' + esc(r.t) + '</span>' +
         '<div>' + statusPills(r.p) + '</div></li>';
@@ -259,29 +328,37 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
 
     if(res.ultimate && res.ultimate !== (res.up.chain.length ? res.up.chain[res.up.chain.length-1].p : null)){
       h += '<div class="notebar"><strong>The declared ultimate parent is not where the direct chain ends.</strong> ' +
-        'Filed ultimate parent: <strong>' + esc(nm(res.ultimate)) + '</strong> <span class="mono">' +
+        'Filed ultimate parent: <strong>' + link(res.ultimate) + '</strong> <span class="mono">' +
         esc(res.ultimate) + '</span>. Walking the direct-consolidation filings instead terminates at <strong>' +
-        esc(nm(res.up.terminal)) + '</strong>. Both are as filed; the discrepancy is the finding.</div>';
+        link(res.up.terminal) + '</strong>. Both are as filed; the discrepancy is the finding.</div>';
     }
 
     if(res.jurisdictions.length){
       h += '<h2 style="font-size:1rem">Jurisdictions in the chain</h2><div>' +
         res.jurisdictions.map(function(j){ return '<span class="pill">' + esc(j) + '</span>'; }).join("") +
-        '</div>';
+        '</div><div class="muted">' + res.countries.length + ' countr' + (res.countries.length === 1 ? 'y' : 'ies') +
+        ' along the chain, so ' + res.crossings + ' border' + (res.crossings === 1 ? '' : 's') +
+        ' crossed; a sub-national code such as US-DE counts with its country.</div>';
     }
 
     if(res.children.length){
-      h += '<h2 style="font-size:1rem">Recorded directly beneath it (' + res.children.length + ')</h2>';
+      var kindsNote = Object.keys(res.childKinds).sort().map(function(k){
+        return res.childKinds[k] + ' ' + k; }).join(', ');
+      h += '<h2 style="font-size:1rem">Recorded beneath it (' + res.children.length + ' entit' +
+        (res.children.length === 1 ? 'y' : 'ies') + ')</h2>' +
+        '<div class="muted">' + res.childRows.length + ' filed relationship' + (res.childRows.length === 1 ? '' : 's') +
+        ': ' + esc(kindsNote) + '. An entity that files both a direct and an ultimate relationship to this one is listed once.</div>';
       h += '<table><thead><tr><th>Entity</th><th>LEI</th><th>Relationship</th><th>Jurisdiction</th></tr></thead><tbody>';
-      res.children.slice(0,300).forEach(function(r){
-        h += '<tr><td>' + esc(nm(r.c)) + '</td><td class="mono">' + esc(r.c) + '</td>' +
-          '<td><span class="pill p-' + esc(r.t) + '">' + esc(r.t) + '</span></td>' +
-          '<td>' + esc(jur(r.c)) + '</td></tr>';
+      res.children.slice(0,300).forEach(function(k){
+        h += '<tr><td>' + link(k.lei) + '</td><td class="mono">' + esc(k.lei) + '</td>' +
+          '<td>' + k.rels.map(function(t){ return '<span class="pill p-' + esc(t) + '">' + esc(t) + '</span>'; }).join("") + '</td>' +
+          '<td>' + esc(jur(k.lei)) + '</td></tr>';
       });
       h += '</tbody></table>';
       if(res.children.length > 300) h += '<div class="muted">Showing 300 of ' + res.children.length +
         '. The CSV export carries all of them.</div>';
     }
+    h += '<div class="muted" style="margin-top:14px">' + LEGEND + '</div>';
     return h;
   }
   function kpi(l,v,alert){ return '<div class="kpi"><div class="v"' + (alert?' style="color:var(--bad)"':'') +
@@ -292,27 +369,44 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     var hits = search(q);
     var el = document.getElementById("hits");
     if(!hits.length){
-      el.innerHTML = '<span class="muted">No entity in the chain corpus matches. Only entities that ' +
-        'appear in at least one control relationship are carried.</span>';
+      var msg = q ? 'No entity in the chain corpus matches “' + esc(q) + '”. Only entities that ' +
+        'appear in at least one control relationship are carried.' : 'Enter a legal name or a 20-character LEI.';
+      el.innerHTML = '<span class="muted">' + msg + '</span>';
+      // A failed search must not leave the previous entity's chain on screen
+      // as though it were the answer.
+      lastRun = null;
+      document.getElementById("out").innerHTML = '<div class="notebar">' + msg + '</div>';
+      ["csvBtn","attBtn","printBtn"].forEach(function(id){ document.getElementById(id).disabled = true; });
       return;
     }
     if(hits.length > 1){
+      // Kind, LEI and country are shown so that two entities filed under the
+      // same name (BARCLAYS BANK PLC, the bank and a branch) can be told apart.
       el.innerHTML = hits.slice(0,12).map(function(l){
-        return '<div style="margin:3px 0"><a href="#" data-lei="' + esc(l) + '" style="color:var(--accent-ink)">' +
-          esc(E[l].n) + '</a> <span class="muted">' + esc(jur(l)) + '</span></div>'; }).join("") +
-        (hits.length > 12 ? '<div class="muted">…and ' + (hits.length-12) + ' more</div>' : "");
-      Array.prototype.forEach.call(el.querySelectorAll("a[data-lei]"), function(a){
-        a.onclick = function(ev){ ev.preventDefault(); show(a.getAttribute("data-lei")); };
-      });
+        var e = E[l];
+        return '<div style="margin:4px 0"><a href="#" class="lei" data-lei="' + esc(l) + '">' + esc(e.n) + '</a> ' +
+          '<span class="pill">' + esc(jur(l)) + '</span>' + (e.k ? '<span class="pill">' + esc(e.k) + '</span>' : '') +
+          (e.s && e.s !== "ACTIVE" ? '<span class="pill p-alert">' + esc(e.s) + '</span>' : '') +
+          (e.r && e.r !== "ISSUED" ? '<span class="pill p-alert">' + esc(e.r) + '</span>' : '') +
+          '<div class="mono muted">' + esc(l) + '</div></div>'; }).join("") +
+        (hits.length > 12 ? '<div class="muted">…and ' + (hits.length-12) + ' more. Add a word to narrow the search.</div>' : "");
+      wireLinks(el);
     } else {
       el.innerHTML = "";
     }
     show(hits[0]);
   }
+  function wireLinks(root){
+    Array.prototype.forEach.call(root.querySelectorAll("a[data-lei]"), function(a){
+      a.onclick = function(ev){ ev.preventDefault(); show(a.getAttribute("data-lei")); };
+    });
+  }
   function show(lei){
     var res = resolve(lei);
     lastRun = {res: res, when: new Date().toISOString()};
-    document.getElementById("out").innerHTML = render(res);
+    var out = document.getElementById("out");
+    out.innerHTML = render(res);
+    wireLinks(out);
     ["csvBtn","attBtn","printBtn"].forEach(function(id){ document.getElementById(id).disabled = false; });
   }
 
@@ -331,7 +425,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     push("subject", 0, res.lei, "");
     res.up.chain.forEach(function(r, i){ push("parent", i+1, r.p, r.t); });
     if(res.ultimate) push("declared-ultimate", "", res.ultimate, "ultimate");
-    res.children.forEach(function(r){ push("child", "", r.c, r.t); });
+    res.children.forEach(function(k){ push("child", "", k.lei, k.rels.join("|")); });
     return rows;
   }
   function exportCsv(){
@@ -381,6 +475,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
       return;
     }
     document.getElementById("verTag").textContent = (META.entities||0).toLocaleString() + " entities";
+    ["runBtn","selfTestBtn"].forEach(function(id){ document.getElementById(id).disabled = false; });
     el.innerHTML = '<strong>Data:</strong> ' + esc(META.source||"") + ' — ' +
       (META.relationships||0).toLocaleString() + ' active control relationships over ' +
       (META.entities||0).toLocaleString() + ' entities.<br>' +
@@ -445,7 +540,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
       if(n.length < 4) return true;
       var hits = search(n);
       return hits.length > 0 && hits.every(function(l){
-        return E[l].n.toLowerCase().indexOf(n.toLowerCase()) >= 0; }); })());
+        return fold(E[l].n).indexOf(fold(n)) >= 0; }); })());
     ok("an exact name outranks a merely containing name", (function(){
       var target = null;
       for(var i=0;i<leis.length && i<20000;i++){
@@ -458,7 +553,40 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     ok("jurisdiction crossings never exceed the chain length", (function(){
       if(!withParent) return true;
       var r = resolve(withParent);
-      return r.jurisdictions.length <= r.nodes.length; })());
+      return r.jurisdictions.length <= r.nodes.length && r.crossings <= r.nodes.length - 1; })());
+    ok("crossings count countries, so US-DE to US is not a crossing and the start is not one either", (function(){
+      var ids = ["CCCC0000000000000001","CCCC0000000000000002","CCCC0000000000000003"];
+      E[ids[0]] = {n:"a", j:"US-DE"}; E[ids[1]] = {n:"b", j:"US"}; E[ids[2]] = {n:"c", j:"GB"};
+      parentsOf[ids[0]] = [{c:ids[0], p:ids[1], t:"direct"}];
+      parentsOf[ids[1]] = [{c:ids[1], p:ids[2], t:"direct"}];
+      var r = resolve(ids[0]);
+      ids.forEach(function(id){ delete E[id]; delete parentsOf[id]; });
+      return r.jurisdictions.join(",") === "US-DE,US,GB" && r.countries.join(",") === "US,GB" && r.crossings === 1; })());
+    ok("an all-domestic chain crosses nothing", (function(){
+      var ids = ["DDDD0000000000000001","DDDD0000000000000002"];
+      E[ids[0]] = {n:"a", j:"GB"}; E[ids[1]] = {n:"b", j:"GB"};
+      parentsOf[ids[0]] = [{c:ids[0], p:ids[1], t:"direct"}];
+      var r = resolve(ids[0]);
+      ids.forEach(function(id){ delete E[id]; delete parentsOf[id]; });
+      return r.crossings === 0; })());
+    ok("a child filed under both a direct and an ultimate relationship is listed once", (function(){
+      var p = "EEEE0000000000000001", c = "EEEE0000000000000002";
+      childrenOf[p] = [{c:c, p:p, t:"direct"}, {c:c, p:p, t:"ultimate"}];
+      var r = resolve(p);
+      delete childrenOf[p];
+      return r.children.length === 1 && r.children[0].rels.join(",") === "direct,ultimate" &&
+             r.childKinds.direct === 1 && r.childKinds.ultimate === 1; })());
+    ok("name matching folds accents", fold("NESTLÉ S.A.") === "nestle s.a." && fold("Türkiye") === "turkiye");
+    ok("a whole-word match outranks a fragment", (function(){
+      return tier("ubs ag", "ubs ag") === 0 && tier("ubs ag", "ubs") === 1 && tier("dew-ubs-fonds", "ubs") === 2 &&
+             tier("bpce", "bp") === 3 && tier("frs substanz", "ubs") === 4 && tier("nothing here", "ubs") === 9; })());
+    ok("the whole name index is scanned, not the first sixty hits", (function(){
+      // Take a word that many names contain, and check that the best-tier
+      // match returned is at least as good as any match in the index.
+      var hits = search("Bank"); if(!hits.length) return true;
+      var best = tier(fold(E[hits[0]].n), "bank"), idx = buildNameIdx();
+      for(var i=0;i<idx.length;i++){ if(tier(idx[i][0], "bank") < best) return false; }
+      return true; })());
 
     ok("CSV rows all carry the header's column count", (function(){
       lastRun = {res: resolve(withParent || leis[0]), when: "t"};
@@ -478,6 +606,9 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   }
 
   document.getElementById("runBtn").onclick = run;
+  document.getElementById("q").addEventListener("keydown", function(ev){
+    if(ev.key === "Enter" && !document.getElementById("runBtn").disabled){ ev.preventDefault(); run(); }
+  });
   document.getElementById("csvBtn").onclick = exportCsv;
   document.getElementById("attBtn").onclick = record;
   document.getElementById("printBtn").onclick = function(){ window.print(); };

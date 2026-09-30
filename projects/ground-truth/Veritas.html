@@ -27,7 +27,10 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   button:disabled{opacity:.5;cursor:not-allowed}
   main{padding:20px;max-width:1280px;margin:0 auto}
   .grid{display:grid;grid-template-columns:360px 1fr;gap:20px}
+  .grid>*{min-width:0}
+  #out{overflow-x:auto}
   @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  @media(max-width:600px){#out table{min-width:600px}}
   .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:16px}
   label{display:block;font-size:.72rem;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.06em}
   input,select,textarea{width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--ink);
@@ -40,6 +43,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   .v-ok{border-color:var(--good);color:var(--good)}
   .v-check{border-color:var(--warn);color:var(--warn)}
   .v-bad{border-color:var(--bad);color:var(--bad)}
+  .v-info{border-color:var(--accent);color:var(--accent-ink)}
   .v-out{border-color:var(--line);color:var(--muted)}
   .muted{color:var(--muted);font-size:.8rem}
   .mono{font-family:var(--mono);font-size:.78rem}
@@ -62,11 +66,11 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   <span class="spacer"></span>
   <a class="tag" href="index.html" data-keep-theme style="text-decoration:none">← Suite</a>
   <button class="ghost noprint" id="themeBtn">Theme</button>
-  <button class="ghost noprint" id="selfTestBtn">Self-test</button>
+  <button class="ghost noprint" id="selfTestBtn" disabled>Self-test</button>
 </header>
 <main>
   <div id="warn"></div>
-  <div class="banner" id="provenance">Loading data packs…</div>
+  <div class="banner" id="provenance">Loading the data packs &mdash; about 7 MB compressed, usually 10 to 30 seconds. The buttons enable once the packs have parsed.</div>
   <div class="grid">
     <div>
       <div class="card">
@@ -76,7 +80,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
         <label for="src">Input</label>
         <textarea id="src" placeholder="Ayinde v London Borough of Haringey [2025] EWHC 1383 (Admin)&#10;Harber v HMRC [2023] UKFTT 1007 (TC)&#10;Smith v Jones [2021] EWHC 9999 (KB)&#10;10.1257/aer.20180338"></textarea>
         <div style="margin-top:12px;display:flex;gap:8px">
-          <button id="runBtn">Check</button>
+          <button id="runBtn" disabled>Check</button>
           <button class="ghost" id="clearBtn">Clear</button>
           <button class="ghost" id="csvBtn" disabled>Export CSV</button>
         </div>
@@ -145,12 +149,98 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
 
   var byKey = {};
   if(CASES){ for(var i=0;i<CASES.cases.length;i++){ byKey[CASES.cases[i].k] = CASES.cases[i]; } }
+  // One DOI can carry several Retraction Watch records (a correction, then an
+  // expression of concern, then the retraction). All of them are kept: the
+  // verdict is decided from the whole history, not from whichever record the
+  // pack happened to list last.
   var byDoi = {};
-  if(RETR){ for(var j=0;j<RETR.retractions.length;j++){ byDoi[RETR.retractions[j].d] = RETR.retractions[j]; } }
+  if(RETR){ for(var j=0;j<RETR.retractions.length;j++){
+    var rr = RETR.retractions[j];
+    (byDoi[rr.d] || (byDoi[rr.d] = [])).push(rr);
+  } }
+
+  // ---- coverage ------------------------------------------------------------
+  // The corpus is incomplete inside its own year envelope: it may hold 962 of
+  // roughly 1,018 Supreme Court judgments, or one Court of Appeal judgment for
+  // 2001. "Not in corpus" is only evidence of anything where the corpus holds
+  // nearly every judgment of that court and year, so coverage is measured per
+  // court-year at load: judgments held against the highest citation number
+  // seen. Courts whose divisions number their judgments separately (EWCA Civ
+  // and Crim) are measured per division; that is read from the data, not
+  // assumed. A handful of mis-numbered records (a 2025 EWHC judgment numbered
+  // 33314, costs judgments in the 90000s) would otherwise set the ceiling, so
+  // the ceiling is the highest number that sits within a quarter of the 98th
+  // percentile; the true maximum is kept separately for the wording.
+  var COV = {}, SPLIT = {};
+  (function(){
+    if(!CASES) return;
+    var seen = {}, coll = {}, perCourt = {};
+    for(var i=0;i<CASES.cases.length;i++){
+      var p = CASES.cases[i].k.split(" ");
+      var court = p[1], yn = p[0] + " " + p[2], div = p.slice(3).join(" ");
+      perCourt[court] = (perCourt[court]||0) + 1;
+      var k = court + "|" + yn;
+      if(seen[k] === undefined) seen[k] = div;
+      else if(seen[k] !== div) coll[court] = (coll[court]||0) + 1;
+    }
+    for(var c in perCourt){ if((coll[c]||0) > perCourt[c] * 0.02) SPLIT[c] = true; }
+    var nums = {};
+    for(var j=0;j<CASES.cases.length;j++){
+      var q = CASES.cases[j].k.split(" ");
+      var s = seriesOf(q);
+      (nums[s] || (nums[s] = [])).push(parseInt(q[2],10));
+    }
+    for(var sk in nums){
+      var a = nums[sk].sort(function(x,y){ return x - y; });
+      var n = a.length, max = a[n-1];
+      var p98 = a[Math.floor((n-1) * 0.98)];
+      var top = max;
+      if(n >= 20){ for(var t=n-1;t>=0;t--){ if(a[t] <= p98 * 1.25){ top = a[t]; break; } } }
+      COV[sk] = {n: n, top: top, max: max, cov: top > 0 ? Math.min(1, n / top) : 0};
+    }
+  })();
+  // The series a canonical key belongs to: "EWCA CIV 2012" where the court
+  // numbers by division, "EWHC 2021" where it does not.
+  function seriesOf(parts){
+    var court = parts[1] || "", year = parts[0] || "";
+    var div = SPLIT[court] ? parts.slice(3).join(" ") : "";
+    return court + (div ? " " + div : "") + " " + year;
+  }
+  // "EWCA CIV 2012" reads as "EWCA Civ 2012": the court stays upper case, the
+  // division as practitioners write it.
+  function seriesLabel(sk){
+    var t = sk.split(" ");
+    return t.map(function(w, i){
+      return (i === 0 || i === t.length - 1) ? w : w.charAt(0) + w.slice(1).toLowerCase(); }).join(" ");
+  }
 
   // ---- extraction ----------------------------------------------------------
-  var NCN_RE = /(?:\[\s*((?:19|20)\d{2})\s*\]|\(\s*((?:19|20)\d{2})\s*\))\s*([A-Z][A-Za-z]{1,9})\s*(?:\(([A-Za-z ]{1,24})\)\s*)?(\d{1,5})(?:\s*\(([A-Za-z ]{1,24})\))?/g;
-  var DOI_RE = /\b10\.\d{4,9}\/[^\s"'<>,;)\]]+/g;
+  // The division can sit either side of the number, in parentheses or bare:
+  // "[2025] EWHC 1383 (Admin)", "[2025] EWHC (Admin) 1383", "[2012] EWCA Civ
+  // 525". The bare form is limited to the divisions the index actually uses,
+  // so that "[2020] UKSC and 12 others" in prose is not read as a citation.
+  var DIVS = ["Civ","Crim","Admin","Ch","Comm","Fam","Pat","QB","KB","TCC","IPEC","SCCO","Costs",
+              "Admlty","Mercantile","GRC","TC","HESC","PC","LC","AAC","IAC","B"];
+  var DIV_ALT = DIVS.slice().sort(function(a,b){ return b.length - a.length; }).map(function(d){
+    return d.split("").map(function(ch){ return "[" + ch.toUpperCase() + ch.toLowerCase() + "]"; }).join(""); }).join("|");
+  var NCN_RE = new RegExp("(?:\\[\\s*((?:19|20)\\d{2})\\s*\\]|\\(\\s*((?:19|20)\\d{2})\\s*\\))\\s*([A-Z][A-Za-z]{1,9})" +
+    "(?:\\s+(" + DIV_ALT + "))?\\s*(?:\\(([A-Za-z ]{1,24})\\)\\s*)?(\\d{1,5})(?:\\s*\\(([A-Za-z ]{1,24})\\))?", "g");
+  // A DOI may contain parentheses ("10.1016/S0140-6736(97)11096-0") and, in
+  // the old SICI form, semicolons. Closing punctuation that belongs to the
+  // sentence rather than the DOI is trimmed afterwards.
+  var DOI_RE = /\b10\.\d{4,9}\/[^\s"'<>,\]]+/g;
+  function trimDoi(d){
+    for(;;){
+      var last = d.charAt(d.length - 1);
+      if(/[.,;:]/.test(last)){ d = d.slice(0, -1); continue; }
+      if(last === ")"){
+        var opens = (d.match(/\(/g)||[]).length, closes = (d.match(/\)/g)||[]).length;
+        if(closes > opens){ d = d.slice(0, -1); continue; }
+      }
+      break;
+    }
+    return d;
+  }
 
   // A case name is a party string: "A v B", "R (X) v Y", "Re Z", "In re Z".
   // Anything else preceding a citation is prose and is not a name.
@@ -187,7 +277,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
       }
       DOI_RE.lastIndex = 0;
       while((m = DOI_RE.exec(line))){
-        var d = m[0].replace(/[.,;]+$/,"").toLowerCase();
+        var d = trimDoi(m[0]).toLowerCase();
         var id2 = "doi:" + d;
         if(seen[id2]) continue; seen[id2] = 1;
         out.push({type:"doi", raw:d, key:d, line:li+1});
@@ -222,6 +312,10 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
       return {verdict:"malformed", note:"No recognisable court identifier in the citation."};
     }
     if(!env){
+      if(LAW_REPORTS[token]){
+        return {verdict:"lawreport", note:"Law-report citation — not a neutral citation; not checkable here. " +
+                "“" + token + "” is a report series. Find the case through the report or its neutral citation."};
+      }
       return {verdict:"outside", note:"The court identifier “" + token + "” does not appear " +
               "anywhere in this index. It may be a court this corpus does not carry, or it may not be " +
               "a court identifier at all. Check a law report."};
@@ -230,24 +324,99 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
       return {verdict:"outside", note:"This index holds " + token + " only for " + env.from + " to " +
               env.to + ". A citation from " + year + " falls outside the corpus and cannot be checked here."};
     }
-    return {verdict:"absent", note:"Within the years this index covers for " + token + " (" + env.from +
-            " to " + env.to + ", " + env.n.toLocaleString() + " judgments), no judgment carries this " +
-            "citation. Verify against a law report before relying on it."};
+    if(SPLIT[token] && parts.length < 4){
+      return {verdict:"malformed", note:token + " citations name a division (Civ or Crim); this one " +
+              "names neither, so it cannot be looked up. Check the citation."};
+    }
+    // Inside the envelope. Whether absence means anything depends on how much
+    // of that court-year the corpus actually holds.
+    var sk = seriesOf(parts), cv = COV[sk], label = seriesLabel(sk), num = parseInt(parts[2], 10);
+    if(!cv){
+      return {verdict:"unconfirmed", note:"Unconfirmed — the corpus holds no judgment filed as " + label +
+              ", so absence says nothing about this citation. Confirm on Find Case Law."};
+    }
+    var pct = Math.round(cv.cov * 100);
+    var high = (num > cv.max) ? " The cited number is higher than any this corpus holds for " + label +
+               " (highest held: " + cv.max.toLocaleString() + ")." : "";
+    if(cv.cov >= 0.95){
+      return {verdict:"absent", note:"The corpus holds " + cv.n.toLocaleString() + " of ~" +
+              cv.top.toLocaleString() + " judgments for " + label + " (" + pct + "%, near-complete) and " +
+              "none carries this citation." + high + " Verify against a law report before relying on it."};
+    }
+    return {verdict:"unconfirmed", note:"Unconfirmed — the corpus holds " + cv.n.toLocaleString() + " of ~" +
+            cv.top.toLocaleString() + " judgments for " + label + " (" + pct + "%), so absence is not " +
+            "evidence either way." + high + " Confirm on Find Case Law."};
   }
+  // Report series that are written like neutral citations but are not ones.
+  var LAW_REPORTS = {AC:1, QB:1, KB:1, CH:1, FAM:1, P:1, WLR:1, ICR:1, IRLR:1, FLR:1, FCR:1, EHRR:1, CMLR:1,
+    STC:1, BCLC:1, BCC:1, HLR:1, EGLR:1, RPC:1, FSR:1, BMLR:1, PIQR:1, RTR:1, TLR:1, LGR:1, EMLR:1, SLT:1, SC:1};
   function overlap(a,b){
     var A = a.split(" ").filter(Boolean), B = {}, n = 0;
     b.split(" ").forEach(function(t){ B[t] = 1; });
     A.forEach(function(t){ if(B[t]) n++; });
     return A.length ? n / A.length : 0;
   }
+  // Retraction Watch dates arrive as "M/D/YYYY" with a truncated time tail;
+  // reasons and titles are cut at a fixed length in the pack. Neither is
+  // rebuilt here: the date is read into ISO form and a cut string is shown
+  // with an ellipsis rather than as if it ended there.
+  function rwDate(r){
+    var m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(String(r||""));
+    if(!m) return "";
+    return m[3] + "-" + (m[1].length < 2 ? "0" : "") + m[1] + "-" + (m[2].length < 2 ? "0" : "") + m[2];
+  }
+  function rwText(s, cap){ s = String(s||""); return s.length >= cap ? s + "…" : s; }
+  function rwRecord(r){
+    var dt = rwDate(r.r);
+    return r.n + (dt ? " (" + dt + ")" : "") + (r.w ? ": " + rwText(r.w, 200) : "");
+  }
   function checkDoi(d){
-    var hit = byDoi[d.key];
-    if(hit) return {verdict:"retracted", found:hit,
-      note:"This work is recorded as " + (hit.n || "retracted") + (hit.r ? " on " + hit.r : "") +
-           (hit.w ? ". Reason: " + hit.w : ".")};
-    return {verdict:"unchecked",
-      note:"Not present in the retraction corpus, which is the only claim this instrument makes " +
-           "about a DOI. It does not confirm that the work exists or that the citation is accurate."};
+    var recs = byDoi[d.key];
+    if(!recs || !recs.length){
+      return {verdict:"unchecked",
+        note:"Not present in the retraction corpus, which is the only claim this instrument makes " +
+             "about a DOI. It does not confirm that the work exists or that the citation is accurate."};
+    }
+    // Newest record first. The most severe notice decides the verdict —
+    // a retraction is not downgraded by a correction filed years earlier —
+    // and a reinstatement lifts a retraction only if it came after it.
+    var sorted = recs.slice().sort(function(a,b){
+      var x = rwDate(a.r), y = rwDate(b.r); return x < y ? 1 : x > y ? -1 : 0; });
+    var retr = null, rein = null, eoc = null, corr = null;
+    sorted.forEach(function(r){
+      if(r.n === "Retraction"){ if(!retr) retr = r; }
+      else if(r.n === "Reinstatement"){ if(!rein) rein = r; }
+      else if(r.n === "Correction"){ if(!corr) corr = r; }
+      else if(!eoc) eoc = r;   // "Expression of concern", or any nature this page does not know
+    });
+    var verdict, summary, primary;
+    if(retr && rein && rwDate(rein.r) >= rwDate(retr.r)){
+      verdict = "reinstated"; primary = rein;
+      summary = "Recorded as retracted on " + rwDate(retr.r) + " and reinstated on " + rwDate(rein.r) +
+        ". Retraction Watch records a reinstatement where a retraction was later reversed; check the " +
+        "current status with the publisher.";
+    } else if(retr){
+      verdict = "retracted"; primary = retr;
+      summary = "Recorded as retracted" + (rwDate(retr.r) ? " on " + rwDate(retr.r) : "") + ".";
+    } else if(eoc){
+      verdict = "eoc"; primary = eoc;
+      summary = (eoc.n === "Expression of concern")
+        ? "An expression of concern is recorded" + (rwDate(eoc.r) ? " (" + rwDate(eoc.r) + ")" : "") +
+          ": the journal has flagged the work but has not retracted it."
+        : "Recorded as “" + eoc.n + "”" + (rwDate(eoc.r) ? " on " + rwDate(eoc.r) : "") + ".";
+    } else if(corr){
+      verdict = "corrected"; primary = corr;
+      summary = "A correction is recorded" + (rwDate(corr.r) ? " (" + rwDate(corr.r) + ")" : "") +
+        ". The work stands; the correction should be read with it.";
+    } else {
+      verdict = "reinstated"; primary = rein;
+      summary = "Recorded as reinstated" + (rwDate(rein.r) ? " on " + rwDate(rein.r) : "") +
+        ". Retraction Watch records a reinstatement where a retraction was later reversed; check the " +
+        "current status with the publisher.";
+    }
+    return {verdict: verdict, found: primary, records: sorted,
+      note: summary + " Retraction Watch record" + (sorted.length > 1 ? "s" : "") + ": " +
+            sorted.map(rwRecord).join(" · ")};
   }
 
   function run(){
@@ -265,26 +434,33 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   }
 
   var LABEL = {confirmed:["v-ok","confirmed"], mismatch:["v-bad","name mismatch"],
-    absent:["v-bad","not in corpus"], outside:["v-out","outside corpus"],
-    malformed:["v-check","malformed"], retracted:["v-bad","RETRACTED"],
-    unchecked:["v-out","no retraction recorded"]};
+    absent:["v-bad","not in corpus"], unconfirmed:["v-check","unconfirmed"],
+    outside:["v-out","outside corpus"], lawreport:["v-out","law report — not checkable"],
+    malformed:["v-check","malformed"], retracted:["v-bad","retracted"],
+    eoc:["v-check","expression of concern"], corrected:["v-info","corrected"],
+    reinstated:["v-ok","reinstated"], unchecked:["v-out","no record in corpus"]};
+  // Verdicts that call for the reader to do something before relying on the citation.
+  var NEEDS_CHECK = ["absent","unconfirmed","mismatch","malformed","eoc"];
+  var DID_NOT_VERIFY = ["absent","unconfirmed","mismatch","retracted","eoc"];
+  function countIn(rows, list){
+    return rows.filter(function(r){ return list.indexOf(r.result.verdict) >= 0; }).length; }
 
   function render(rows){
     if(!rows.length){
       return '<div class="notebar"><strong>No citation found in that text.</strong> Veritas reads ' +
-        'neutral citations in the usual forms and DOIs. It does not yet parse law report citations ' +
-        '(<span class="mono">[1932] AC 562</span>) or foreign neutral citations, and says so rather ' +
+        'neutral citations in the usual forms and DOIs. It does not check law report citations ' +
+        '(<span class="mono">[2003] 1 WLR 1</span>) or foreign neutral citations, and says so rather ' +
         'than passing them silently.</div>';
     }
     var n = function(v){ return rows.filter(function(r){ return r.result.verdict === v; }).length; };
     var h = '<div class="kpis">' +
       kpi("Citations found", rows.length, false) +
       kpi("Confirmed", n("confirmed"), false) +
-      kpi("Require checking", n("absent") + n("mismatch") + n("malformed"), (n("absent")+n("mismatch"))>0) +
+      kpi("Require checking", countIn(rows, NEEDS_CHECK), (n("absent")+n("mismatch"))>0) +
       kpi("Retracted", n("retracted"), n("retracted") > 0) +
       '</div>';
-    if(n("absent") + n("mismatch") + n("retracted") > 0){
-      h += '<div class="warnbar"><strong>' + (n("absent")+n("mismatch")+n("retracted")) +
+    if(countIn(rows, DID_NOT_VERIFY) > 0){
+      h += '<div class="warnbar"><strong>' + countIn(rows, DID_NOT_VERIFY) +
         ' citation(s) did not verify.</strong> Each is set out below with what the corpus does and ' +
         'does not cover. Absence from the corpus is not proof of fabrication; it is a direction to ' +
         'check the law report before the citation is relied on.</div>';
@@ -297,7 +473,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
         detail = '<strong>' + esc(r.result.found.t) + '</strong><div class="muted">' +
           esc(r.result.found.c) + (r.result.found.d ? ' &middot; ' + esc(r.result.found.d) : '') + '</div>';
       } else if(r.result.found){
-        detail = '<strong>' + esc(r.result.found.t) + '</strong><div class="muted">' +
+        detail = '<strong>' + esc(rwText(r.result.found.t, 160)) + '</strong><div class="muted">' +
           esc(r.result.found.j) + '</div>';
       }
       if(r.result.note) detail += '<div class="muted">' + esc(r.result.note) + '</div>';
@@ -319,9 +495,10 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     var rows = [["line","type","citation","given_name","verdict","resolved_name","court","date","note",
       "case_corpus","case_corpus_sha256","retraction_corpus","retraction_corpus_sha256","checked_utc"]];
     lastRun.rows.forEach(function(r){
+      var f = r.result.found;
       rows.push([r.item.line, r.item.type, r.item.raw, r.item.name||"", r.result.verdict,
-        (r.result.found && r.result.found.t) || "", (r.result.found && r.result.found.c) || "",
-        (r.result.found && (r.result.found.d || r.result.found.r)) || "", r.result.note||"",
+        (f && (r.item.type === "doi" ? rwText(f.t, 160) : f.t)) || "", (f && (f.c || f.j)) || "",
+        (f && (r.item.type === "doi" ? rwDate(f.r) : f.d)) || "", r.result.note||"",
         META.fcl_records||"", META.fcl_sha256||"", META.retraction_records||"",
         META.retraction_sha256||"", lastRun.when]);
     });
@@ -350,20 +527,37 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
       '<br>' + esc(META.retraction_source||"") + ' &mdash; ' + (META.retraction_records||0).toLocaleString() +
       ' records, SHA-256 <span class="mono">' + esc(String(META.retraction_sha256||"").slice(0,40)) +
       '&hellip;</span></div>';
+    var cases = rows.filter(function(r){ return r.item.type === "case"; }).length;
+    var dois = rows.length - cases;
+    var tally = [
+      [n("confirmed"), "confirmed against the case corpus"],
+      [n("mismatch"), "resolving to a differently named case"],
+      [n("absent"), "absent from a near-complete court-year"],
+      [n("unconfirmed"), "unconfirmed, the court-year being incomplete in the corpus"],
+      [n("outside"), "outside the corpus"],
+      [n("lawreport"), "law-report citations, not checkable here"],
+      [n("malformed"), "malformed"],
+      [n("retracted"), "DOIs recorded as retracted"],
+      [n("eoc"), "DOIs under an expression of concern"],
+      [n("corrected"), "DOIs with a correction recorded"],
+      [n("reinstated"), "DOIs recorded as reinstated"],
+      [n("unchecked"), "DOIs with no record in the retraction corpus"]
+    ].filter(function(t){ return t[0] > 0; }).map(function(t){ return t[0] + " " + t[1]; });
     h += '<h3 style="font-size:.9rem">Result</h3><div class="muted">' + rows.length +
-      ' citation(s) extracted from ' + lastRun.chars.toLocaleString() + ' characters. ' +
-      n("confirmed") + ' confirmed against the case corpus; ' + n("absent") + ' absent from it; ' +
-      n("mismatch") + ' resolving to a differently named case; ' + n("outside") +
-      ' falling outside its coverage; ' + n("retracted") + ' recorded as retracted.</div>';
-    var flagged = rows.filter(function(r){ return ["absent","mismatch","retracted","malformed"].indexOf(r.result.verdict) >= 0; });
-    if(flagged.length){
-      h += '<table style="margin-top:8px"><thead><tr><th>Citation</th><th>Verdict</th><th>Note</th></tr></thead><tbody>';
-      flagged.forEach(function(r){
-        h += '<tr><td class="mono">' + esc(r.item.raw) + '</td><td>' + esc((LABEL[r.result.verdict]||["",""])[1]) +
-          '</td><td class="muted">' + esc(r.result.note||"") + '</td></tr>';
-      });
-      h += '</tbody></table>';
-    }
+      ' citation(s) extracted from ' + lastRun.chars.toLocaleString() + ' characters: ' + cases +
+      ' neutral citation(s) and ' + dois + ' DOI(s). ' + tally.join("; ") + '.</div>';
+    // Every citation checked is listed, not only the ones that failed: a
+    // certificate that shows only the failures cannot be read for what passed.
+    h += '<table style="margin-top:8px"><thead><tr><th>Line</th><th>Citation</th><th>Verdict</th><th>What the corpus says</th></tr></thead><tbody>';
+    rows.forEach(function(r){
+      var f = r.result.found, what = "";
+      if(f && r.item.type === "case") what = esc(f.t) + (f.d ? ' (' + esc(f.d) + ')' : '') + '. ';
+      else if(f) what = esc(rwText(f.t, 160)) + (f.j ? ', ' + esc(f.j) : '') + '. ';
+      h += '<tr><td class="mono">' + r.item.line + '</td><td class="mono">' + esc(r.item.raw) +
+        (r.item.name ? '<div class="muted">' + esc(r.item.name.slice(0,90)) + '</div>' : '') + '</td><td>' +
+        esc((LABEL[r.result.verdict]||["",""])[1]) + '</td><td class="muted">' + what + esc(r.result.note||"") + '</td></tr>';
+    });
+    h += '</tbody></table>';
     h += '<h3 style="font-size:.9rem">Limits of this certificate</h3><div class="muted">' +
       esc(META.coverage_warning||"") + ' A DOI not present in the retraction corpus is not thereby ' +
       'confirmed to exist: this instrument holds no index of extant publications, and makes no claim ' +
@@ -385,6 +579,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     }
     document.getElementById("verTag").textContent =
       (META.fcl_records||0).toLocaleString() + " judgments";
+    ["runBtn","selfTestBtn"].forEach(function(id){ document.getElementById(id).disabled = false; });
     el.innerHTML = '<strong>Corpora:</strong> ' + esc(META.fcl_source||"") + ' &mdash; ' +
       (META.fcl_records||0).toLocaleString() + ' judgments, ' + esc(META.fcl_year_from||"") + '&ndash;' +
       esc(META.fcl_year_to||"") + '. ' + esc(META.retraction_source||"") + ' &mdash; ' +
@@ -401,7 +596,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     }
     ok("case pack loaded", !!CASES && CASES.cases.length > 100, CASES ? CASES.cases.length + " cases" : "none");
     ok("retraction pack loaded", !!RETR && RETR.retractions.length > 1000,
-       RETR ? RETR.retractions.length + " retractions" : "none");
+       RETR ? RETR.retractions.length + " records" : "none");
     ok("both packs describe the same build",
        !CASES || !RETR || CASES.meta.fcl_sha256 === RETR.meta.fcl_sha256);
 
@@ -419,6 +614,25 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     ok("extraction finds a citation with a case name", (function(){
       var e = extract("Ayinde v London Borough of Haringey [2025] EWHC 1383 (Admin)");
       return e.length === 1 && e[0].type === "case" && /haringey/i.test(e[0].name); })());
+    ok("a bare division between court and number is read", (function(){
+      var keys = ["[2012] EWCA Civ 525", "[2016] EWCA Crim 1", "[2025] EWCA Civ 973"].map(function(s){
+        var e = extract(s); return e.length === 1 ? e[0].key : "(none)"; });
+      return keys[0] === "2012 EWCA 525 CIV" && keys[1] === "2016 EWCA 1 CRIM" && keys[2] === "2025 EWCA 973 CIV"; })());
+    ok("bare and parenthesised divisions give the same key",
+       extract("[2012] EWCA Civ 525")[0].key === extract("[2012] EWCA (Civ) 525")[0].key);
+    ok("every division the index uses is one the extractor reads", (function(){
+      var known = {}; DIVS.forEach(function(d){ known[d.toUpperCase()] = 1; });
+      var miss = {};
+      CASES.cases.forEach(function(c){ c.k.split(" ").slice(3).forEach(function(t){ if(!known[t]) miss[t] = 1; }); });
+      return Object.keys(miss).length === 0; })(), "unknown divisions would silently fail the bare form");
+    ok("Chandler v Cape plc [2012] EWCA Civ 525 resolves against the corpus", (function(){
+      var e = extract("Chandler v Cape plc [2012] EWCA Civ 525");
+      return e.length === 1 && checkCase(e[0]).verdict === "confirmed"; })());
+    ok("[2016] EWCA Crim 1 resolves against the corpus",
+       checkCase(extract("[2016] EWCA Crim 1")[0]).verdict === "confirmed");
+    ok("[2025] EWCA Civ 973 is looked up, and not called absent from an incomplete year", (function(){
+      var v = checkCase(extract("[2025] EWCA Civ 973")[0]).verdict;
+      return v === "confirmed" || v === "unconfirmed"; })());
     ok("extraction finds a DOI", (function(){
       var e = extract("see 10.1257/aer.20180338 for the argument");
       return e.some(function(x){ return x.type === "doi" && x.key === "10.1257/aer.20180338"; }); })());
@@ -426,6 +640,12 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
       var e = extract("(10.1257/aer.20180338).");
       var d = e.filter(function(x){ return x.type === "doi"; })[0];
       return d && d.key === "10.1257/aer.20180338"; })());
+    ok("a DOI containing parentheses is read whole", (function(){
+      var e = extract("Wakefield et al, Lancet 1998, doi:10.1016/S0140-6736(97)11096-0.");
+      var d = e.filter(function(x){ return x.type === "doi"; })[0];
+      return d && d.key === "10.1016/s0140-6736(97)11096-0"; })());
+    ok("the Wakefield DOI resolves to its retraction",
+       checkDoi({key:"10.1016/s0140-6736(97)11096-0"}).verdict === "retracted");
     ok("the same citation twice is reported once",
        extract("[2025] EWHC 1383 (Admin) and again [2025] EWHC 1383 (Admin)").length === 1);
     ok("line numbers are reported", (function(){
@@ -439,20 +659,64 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     ok("a real citation carried by the wrong name is caught", (function(){
       var c = CASES.cases[Math.floor(CASES.cases.length/2)];
       return checkCase({key: c.k, name: "Entirely Fictitious Claimant v Nobody At All"}).verdict === "mismatch"; })());
-    ok("an invented citation inside the covered years is flagged absent", (function(){
-      var tok = Object.keys(CASES.envelope)[0];
-      var env = CASES.envelope[tok];
-      var key = normNcn("[" + env.to + "] " + tok + " 99999");
-      return checkCase({key: key, name: ""}).verdict === "absent"; })());
+    // A series-year the corpus holds nearly all of, and one it holds a fraction of.
+    var full = null, thin = null;
+    for(var sk in COV){
+      if(!full && COV[sk].cov >= 0.95 && COV[sk].n >= 20) full = sk;
+      if(!thin && COV[sk].cov < 0.5 && COV[sk].n >= 20) thin = sk;
+    }
+    function keyFor(sk, num){ var t = sk.split(" "); return t[t.length-1] + " " + t[0] + " " + num + (t.length > 2 ? " " + t.slice(1,-1).join(" ") : ""); }
+    ok("an invented citation in a near-complete court-year is flagged absent", (function(){
+      if(!full) return true;
+      return checkCase({key: keyFor(full, COV[full].max + 5000), name: ""}).verdict === "absent"; })(),
+      full ? "series " + full : "no near-complete series in this pack");
+    ok("an absent citation in an incomplete court-year is unconfirmed, not absent", (function(){
+      if(!thin) return true;
+      var r = checkCase({key: keyFor(thin, COV[thin].max + 5000), name: ""});
+      return r.verdict === "unconfirmed" && /Confirm on Find Case Law/.test(r.note); })(),
+      thin ? "series " + thin : "no incomplete series in this pack");
+    ok("coverage is a ratio of judgments held to the top citation number", (function(){
+      for(var sk in COV){ var c = COV[sk]; if(!(c.cov >= 0 && c.cov <= 1 && c.top <= c.max && c.n > 0)) return false; }
+      return true; })());
+    ok("R v Jogee [2016] UKSC 8 is never called absent", (function(){
+      var v = checkCase(extract("R v Jogee [2016] UKSC 8")[0]).verdict;
+      return v === "confirmed" || v === "unconfirmed"; })());
     ok("a citation outside the corpus is NOT called false", (function(){
       var r = checkCase({key: normNcn("[1932] AC 562"), name: "Donoghue v Stevenson"});
-      return r.verdict === "outside" || r.verdict === "malformed"; })());
+      return r.verdict === "outside" || r.verdict === "malformed" || r.verdict === "lawreport"; })());
+    ok("a law-report citation is named as one, not as an unknown court",
+       checkCase({key: normNcn("[1932] AC 562"), name: ""}).verdict === "lawreport");
     ok("an unknown court identifier is reported as outside, not absent",
        checkCase({key: normNcn("[2025] ZZZZ 1"), name: ""}).verdict === "outside");
     ok("a retracted DOI is caught", (function(){
       if(!RETR.retractions.length) return true;
-      var d = RETR.retractions[0].d;
-      return checkDoi({key: d}).verdict === "retracted"; })());
+      var d = null;
+      for(var i=0;i<RETR.retractions.length;i++){ if(RETR.retractions[i].n === "Retraction"){ d = RETR.retractions[i].d; break; } }
+      return !d || checkDoi({key: d}).verdict === "retracted"; })());
+    ok("the most severe notice decides the verdict, whatever order the pack lists them in", (function(){
+      var k = "10.9999/severity-test";
+      byDoi[k] = [{d:k, n:"Correction", r:"1/19/2017 0", t:"t", w:"w"}, {d:k, n:"Retraction", r:"6/30/2026 0", t:"t", w:"w"},
+                  {d:k, n:"Expression of concern", r:"10/3/2022 0", t:"t", w:"w"}];
+      var a = checkDoi({key:k}).verdict;
+      byDoi[k] = [{d:k, n:"Expression of concern", r:"6/29/2026 0", t:"t", w:"w"}];
+      var b = checkDoi({key:k}).verdict;
+      byDoi[k] = [{d:k, n:"Correction", r:"1/19/2017 0", t:"t", w:"w"}];
+      var c = checkDoi({key:k}).verdict;
+      delete byDoi[k];
+      return a === "retracted" && b === "eoc" && c === "corrected"; })());
+    ok("a later reinstatement lifts a retraction; an earlier one does not", (function(){
+      var k = "10.9999/reinstatement-test";
+      byDoi[k] = [{d:k, n:"Retraction", r:"8/1/2020 0:", t:"t", w:"w"}, {d:k, n:"Reinstatement", r:"9/1/2020 0:", t:"t", w:"w"}];
+      var a = checkDoi({key:k}).verdict;
+      byDoi[k] = [{d:k, n:"Reinstatement", r:"7/1/2020 0:", t:"t", w:"w"}, {d:k, n:"Retraction", r:"8/1/2020 0:", t:"t", w:"w"}];
+      var b = checkDoi({key:k}).verdict;
+      delete byDoi[k];
+      return a === "reinstated" && b === "retracted"; })());
+    ok("Retraction Watch dates are read into ISO form",
+       rwDate("3/9/2026 0:") === "2026-03-09" && rwDate("12/31/2024 ") === "2024-12-31" && rwDate("") === "");
+    ok("a reason cut by the pack ends with an ellipsis, a whole one does not", (function(){
+      var cut = new Array(201).join("x");
+      return /…$/.test(rwText(cut, 200)) && rwText("short", 200) === "short"; })());
     ok("an unretracted DOI is not asserted to exist", (function(){
       var r = checkDoi({key:"10.9999/definitely-not-a-real-doi"});
       return r.verdict === "unchecked" && /does not confirm/.test(r.note); })());
@@ -483,6 +747,10 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   document.getElementById("clearBtn").onclick = function(){
     document.getElementById("src").value = "";
     document.getElementById("out").innerHTML = '<div class="muted">Results appear here.</div>';
+    // A cleared run must not be exportable: the buttons would otherwise hand
+    // out the previous run's CSV and certificate under a blank input.
+    lastRun = null;
+    ["csvBtn","attBtn","printBtn"].forEach(function(id){ document.getElementById(id).disabled = true; });
   };
   document.getElementById("csvBtn").onclick = exportCsv;
   document.getElementById("attBtn").onclick = certificate;
