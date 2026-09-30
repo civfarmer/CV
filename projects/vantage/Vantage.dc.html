@@ -14,18 +14,24 @@
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; }
   body { margin: 0; }
   a { color: var(--accent); text-decoration: none; }
   a:hover { opacity: 0.85; }
+  @media (max-width: 720px) {
+    .v-main { padding: 36px 16px 60px !important; }
+    .v-wm img { width: 90vw !important; }
+    .v-cols3, .v-cols5 { grid-template-columns: 1fr !important; }
+    .v-wrap { flex-wrap: wrap !important; row-gap: 8px; }
+  }
 </style>
 </helmet>
 
 <div style="{{ wrapperStyle }}">
 
-  <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); pointer-events: none; z-index: 0; opacity: var(--watermarkOpacity); mix-blend-mode: var(--watermarkBlend);">
+  <div class="v-wm" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); pointer-events: none; z-index: 0; opacity: var(--watermarkOpacity); mix-blend-mode: var(--watermarkBlend);">
     <img src="vantage-crest.png" style="width: 600px; height: auto;">
   </div>
 
@@ -37,10 +43,13 @@
         <div style="font: 500 9.5px/1 'IBM Plex Mono', monospace; color: var(--topbarSubtext); letter-spacing: 0.06em; margin-top: 3px;">FORECASTING &amp; PREDICTIVE ANALYTICS</div>
       </div>
     </div>
-    <button onclick="{{ toggleMode }}" style="background: var(--pillBg); border: none; color: var(--pillText); font-size: 16px; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; display: grid; place-items: center;" title="{{ modeLabel }}">{{ modeIcon }}</button>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <a href="../../index.html" style="font: 600 11.5px/1 'IBM Plex Sans', sans-serif; color: var(--pillText); background: var(--pillBg); padding: 7px 12px; border-radius: 6px; white-space: nowrap;">← Portfolio</a>
+      <button onclick="{{ toggleMode }}" style="background: var(--pillBg); border: none; color: var(--pillText); font-size: 16px; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; display: grid; place-items: center;" title="{{ modeLabel }}">{{ modeIcon }}</button>
+    </div>
   </div>
 
-  <div style="max-width: 960px; margin: 0 auto; padding: 56px 28px 80px; position: relative; z-index: 1;">
+  <div class="v-main" style="max-width: 960px; margin: 0 auto; padding: 56px 28px 80px; position: relative; z-index: 1;">
 
     <div style="text-align: center; margin-bottom: 48px;">
       <img src="vantage-crest.png" style="height: 132px; width: auto; margin: 0 auto 16px; display: block;">
@@ -51,7 +60,7 @@
 
     <div style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sectionLabel); margin-bottom: 14px;">How the Engine Works</div>
 
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 48px;">
+    <div class="v-cols3" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 48px;">
       <div style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 10px; padding: 16px; box-shadow: var(--cardShadow);">
         <div style="font: 700 13px/1.2 'Source Serif 4', serif; color: var(--textStrong); margin-bottom: 8px;">Model Selection</div>
         <div style="font: 500 12.5px/1.55 'IBM Plex Sans', sans-serif; color: var(--textMuted);">Runs Holt-Winters, exponential smoothing, regression, Croston (intermittent demand), seasonal-naive and moving-average baselines. The champion is the model with the lowest back-tested error — not the fanciest name.</div>
@@ -80,7 +89,7 @@
 
     <div style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sectionLabel); margin-bottom: 14px;">Choose Your Industry</div>
 
-    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px;">
+    <div class="v-cols5" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px;">
 
       <a href="Vantage%20Brewery.dc.html" style="text-decoration: none; display: block; background: var(--card); border: 1px solid var(--cardBorder); border-radius: 12px; padding: 20px 16px; box-shadow: var(--cardShadow); border-top: 3px solid var(--watneys); transition: transform .15s, box-shadow .15s;" style-hover="transform: translateY(-3px); box-shadow: 0 8px 28px -8px rgba(0,0,0,0.2);">
         <div style="font: 700 32px/1 serif; margin-bottom: 10px; color: var(--watneys);">🍺</div>
@@ -121,7 +130,7 @@
 
     <div style="margin-top: 40px;">
       <div style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sectionLabel); margin-bottom: 14px;">Try It With Your Own Data</div>
-      <a href="Vantage%20Sandbox.dc.html" style="text-decoration: none; display: flex; justify-content: space-between; align-items: center; gap: 20px; background: var(--card); border: 1px solid var(--cardBorder); border-radius: 14px; padding: 22px 26px; box-shadow: var(--cardShadow); border-left: 4px solid var(--accent);" style-hover="border-left-width: 8px;">
+      <a class="v-wrap" href="Vantage%20Sandbox.dc.html" style="text-decoration: none; display: flex; justify-content: space-between; align-items: center; gap: 20px; background: var(--card); border: 1px solid var(--cardBorder); border-radius: 14px; padding: 22px 26px; box-shadow: var(--cardShadow); border-left: 4px solid var(--accent);" style-hover="border-left-width: 8px;">
         <div>
           <div style="font: 700 18px/1.2 'Source Serif 4', serif; color: var(--textStrong);">Open the forecasting sandbox →</div>
           <div style="font: 500 13px/1.55 'IBM Plex Sans', sans-serif; color: var(--textMuted); margin-top: 6px; max-width: 640px;">Paste your own figures (monthly or weekly) and pick your business type — Vantage automatically applies the right model family (Holt-Winters, regression, Croston or a baseline), back-tests them on your data, and shows the champion forecast with confidence intervals. No setup, no spreadsheet formulas.</div>
@@ -133,6 +142,7 @@
     <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); text-align: center;">
       <div style="font: 500 11px/1.5 'IBM Plex Sans', sans-serif; color: var(--textSubtle);">Vantage Forecasting · Foresight · Precision · Insight</div>
       <div style="font: 500 10px/1 'IBM Plex Mono', monospace; color: var(--textSubtle); margin-top: 4px;">Engine: Holt-Winters + ETS + Croston + OLS regression · Back-tested on rolling origins · Dependency-free</div>
+      <div style="font: 500 11px/1.5 'IBM Plex Sans', sans-serif; margin-top: 10px;"><a href="../../index.html">← Portfolio</a> · <a href="../../case-studies/vantage.html">Case study</a></div>
     </div>
   </div>
 </div>

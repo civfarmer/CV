@@ -37,6 +37,8 @@ function periodInfo(D) {
 
 export const fmtI = n => (n == null || isNaN(n)) ? '—' : Math.round(n).toLocaleString('en-GB');
 const short = m => (m || '').replace(/\s*\(.*\)/, '');
+// the champion's back-test score in the metric the engine actually ranked on (WAPE, or MAE when WAPE is undefined)
+const champMetricLine = (s) => `${s.champMetric || 'WAPE'} ${s.champMetricText || (s.champWape != null ? s.champWape.toFixed(1) + '%' : '—')}`;
 
 function money(cur, n, d) {
   if (n == null || isNaN(n)) return '—';
@@ -70,7 +72,7 @@ export function computeAnalysis(E, D, props, overrides = {}) {
     const cn = sel.champion ? sel.champion.name : 'Seasonal naive';
     const fc = E.buildForecast(y, cn, { season, horizon, exog, exogFuture: exogF });
     const base = { id: en.id, name: en.name, subtitle: en.subtitle || en.style || '', category: en.category || '', series: y, baseLen: en.series.length, appended: ap.length,
-      champ: cn, champWape: sel.champion ? sel.champion.metrics.wape : null, ranking: sel.ranking, fc, reason: sel.reason, nextForecast: fc.point[0], note: en.note || '', raw: en, ov };
+      champ: cn, champWape: sel.champion ? sel.champion.metrics.wape : null, champMetric: sel.metric || 'WAPE', champMetricText: sel.metricText || '—', ranking: sel.ranking, fc, reason: sel.reason, nextForecast: fc.point[0], note: en.note || '', raw: en, ov };
     return deriveEntity(mode, base, en, ov, E, D, horizon);
   });
 
@@ -91,6 +93,9 @@ function deriveEntity(mode, b, en, ov, E, D, horizon) {
     const ro = E.reorderQty({ onHand, onOrder, forecast: b.fc.point, leadTimeMonths: lm, reviewMonths: 1, sigma: b.fc.sigma });
     const nm = Math.max(...b.fc.point), dormant = b.fc.point[0] < Math.max(25, 0.18 * nm);
     let flag; if (dormant) flag = 'dormant'; else if (cover < lm + P.stockSlack) flag = 'stockout'; else if (cover < P.reorderT) flag = 'reorder'; else if (cover > P.overstockT) flag = 'overstock'; else flag = 'healthy';
+    // an overstocked or off-season line is held, not reordered — the formula's safety-stock top-up is
+    // suppressed so the status and the advice read one way
+    if (flag === 'overstock' || flag === 'dormant') ro.qty = 0;
     const pd = b.fc.point[0] / P.days, dc = pd > 0 ? av / pd : 99;
     const yl = P.seasonPerYear;
     const yoY = b.series.length > yl+1 && b.series[b.series.length-1-yl] > 0 ? (b.series[b.series.length-1]/b.series[b.series.length-1-yl]-1)*100 : null;
@@ -147,10 +152,10 @@ function deriveAlerts(mode, ents, totals, D) {
   const cur = D.META.currency || '£', out = [], P = periodInfo(D);
   if (mode === 'inventory') {
     const so = ents.filter(e=>e.flag==='stockout').sort((a,b)=>a.cover-b.cover)[0];
-    if (so) { const sh = Math.max(0, Math.round(so.leadTimeWeeks*7 - so.daysCover)); out.push({ tone:'red', head:`Stock-out risk — ${so.name}`, body:`Cover is ${so.cover.toFixed(1)} ${P.plural}. At the forecast (${fmtI(so.nextForecast)} ${unitOf(so,D)} next ${P.noun}), on-hand + on-order of ${fmtI(so.avail)} runs out ~${sh} days before the next delivery. Order ${fmtI(so.ro.qty)} now.` }); }
+    if (so) { const sh = Math.max(0, Math.round(so.leadTimeWeeks*7 - so.daysCover)); out.push({ tone:'red', head:`Stock-out risk — ${so.name}`, body:`Cover is ${so.cover.toFixed(1)} ${P.plural}. At the forecast (${fmtI(so.nextForecast)} ${unitOf(so,D)} next ${P.noun}), on-hand + on-order of ${fmtI(so.avail)} runs out ~${sh} days before the next delivery. ${so.ro.qty > 0 ? `Order ${fmtI(so.ro.qty)} now.` : 'Bring the next delivery forward.'}` }); }
     if (D.META.capacity && totals.capUtil > 0.98) out.push({ tone:'amber', head:`${D.META.capacity.label} exceeded`, body:`Next-${P.noun} load is ${fmtI(totals.load)} ${D.META.capacity.unit||'units'} against ${fmtI(D.META.capacity.value)} of capacity (${Math.round(totals.capUtil*100)}%). Prioritise the highest-margin lines; push slower ones back.` });
     const grow = ents.filter(e=>e.yoY!=null).sort((a,b)=>b.yoY-a.yoY)[0];
-    if (grow && grow.yoY > 15) out.push({ tone:'amber', head:`Fast growth — ${grow.name}`, body:`Demand up ${grow.yoY.toFixed(0)}% YoY. Reorder ${fmtI(grow.ro.qty)} and make sure supply keeps pace with the trend.` });
+    if (grow && grow.yoY > 15) out.push({ tone:'amber', head:`Fast growth — ${grow.name}`, body:`Demand up ${grow.yoY.toFixed(0)}% YoY. ${grow.ro.qty > 0 ? `Reorder ${fmtI(grow.ro.qty)} and make` : 'No extra order is needed this cycle — make'} sure supply keeps pace with the trend.` });
     const over = ents.filter(e=>e.flag==='overstock').sort((a,b)=>b.cover-a.cover)[0];
     if (over) out.push({ tone:'blue', head:`Overstock — ${over.name}`, body:`Cover is ${over.cover.toFixed(1)} ${P.plural} at the seasonal low — about ${money(cur, over.onHand*(over.price-over.unitMargin))} of cash tied up. Hold or promote; don't reorder yet.` });
     out.push({ tone:'green', head:'Model check', body:`Each line's champion is chosen by rolling-origin back-test from the ${D.META.industry} model policy — not one global model. Baselines run every time as an honesty check.` });
@@ -226,10 +231,9 @@ function scenarioChart(hist, base, opt, con, labels, t, fmtY) {
 
 // ============================ EXPLANATIONS ============================
 function defaultExpl(hero, entryMonth, mode, cur) {
-  const w = hero.champWape != null ? hero.champWape.toFixed(1) : '—';
   const noun = mode === 'subscription' ? 'MRR' : mode === 'capacity' ? 'enrolment' : 'demand';
   const val = mode === 'subscription' ? money(cur, hero.nextForecast) : fmtI(hero.nextForecast);
-  return { head: 'Base case forecast', tone: 'normal', body: `${hero.name} ${noun} is forecast at ${val} for ${entryMonth}, with a 95% band of ${mode==='subscription'?money(cur,hero.fc.pi95[0].lo)+'–'+money(cur,hero.fc.pi95[0].hi):fmtI(hero.fc.pi95[0].lo)+'–'+fmtI(hero.fc.pi95[0].hi)}. Champion is ${short(hero.champ)}, back-tested WAPE ${w}%. Enter an actual for ${entryMonth} above to watch the forecast recalibrate — and see exactly why it moved.` };
+  return { head: 'Base case forecast', tone: 'normal', body: `${hero.name} ${noun} is forecast at ${val} for ${entryMonth}, with a 95% band of ${mode==='subscription'?money(cur,hero.fc.pi95[0].lo)+'–'+money(cur,hero.fc.pi95[0].hi):fmtI(hero.fc.pi95[0].lo)+'–'+fmtI(hero.fc.pi95[0].hi)}. Champion is ${short(hero.champ)}, back-tested ${champMetricLine(hero)}. Enter an actual for ${entryMonth} above to watch the forecast recalibrate — and see exactly why it moved.` };
 }
 function explain(rc, V, hero, mode, cur) {
   const fmtv = mode === 'subscription' ? (x)=>money(cur,x) : fmtI;
@@ -279,7 +283,7 @@ function kpiDetail(key, A, D) {
     return { title:'Lines at stock-out risk', subtitle:'Why they are at risk', tagLabel:`${A.totals.atRisk} of ${A.ents.length}`, tagColor:A.totals.atRisk?'var(--red)':'var(--green)',
       lead:`A line is flagged when stock cover falls below its supplier lead time — it will run dry before the next delivery can land. ${money(cur,exposure)} of ${P.noun}ly gross margin is exposed across flagged lines.`,
       metrics:[{label:'At stock-out risk',value:String(A.totals.atRisk),sub:'below lead time'},{label:'Also low',value:String(risky.filter(e=>e.flag==='reorder').length),sub:'reorder soon'},{label:'Margin exposed',value:money(cur,exposure),sub:'per '+P.noun}],
-      stepsTitle:'Flagged lines — cover vs lead time', steps: risky.length? risky.map(e=>({label:`${e.name} · cover ${e.cover.toFixed(1)} ${P.unit} vs ${P.leadToPeriods(e.leadTimeWeeks).toFixed(1)} ${P.unit} lead`, value:`order ${fmtI(e.ro.qty)}`})) : [{label:'No lines below lead time',value:'all healthy'}],
+      stepsTitle:'Flagged lines — cover vs lead time', steps: risky.length? risky.map(e=>({label:`${e.name} · cover ${e.cover.toFixed(1)} ${P.unit} vs ${P.leadToPeriods(e.leadTimeWeeks).toFixed(1)} ${P.unit} lead`, value:e.ro.qty>0?`order ${fmtI(e.ro.qty)}`:'no order this cycle'})) : [{label:'No lines below lead time',value:'all healthy'}],
       notes: w? [`Worst: ${w.name} — stock covers ~${Math.round(w.daysCover)} days but the lead time is ${w.leadTimeWeeks*7} days, so it runs dry ~${Math.max(0,Math.round(w.leadTimeWeeks*7-w.daysCover))} days before a re-order lands.`, 'Click any line in the table below for its full reorder calculation.'] : ['Every line currently has cover above its lead time — nothing at risk.'] };
   }
 
@@ -336,7 +340,7 @@ function invDetail(s, A, D) {
   const FC={stockout:'var(--red)',reorder:'var(--amber)',overstock:'var(--blue)',healthy:'var(--green)',dormant:'var(--textSubtle)'};
   return { title:s.name, subtitle:`${s.subtitle} · ${s.category}`, tagLabel:FT[s.flag], tagColor:FC[s.flag], lead:'',
     metrics:[ {label:`Next-${P.noun} forecast`,value:fmtI(s.nextForecast),sub:`95%: ${fmtI(s.fc.pi95[0].lo)}–${fmtI(s.fc.pi95[0].hi)}`},{label:'Stock cover',value:s.flag==='dormant'?'—':s.cover.toFixed(1)+' '+P.unit,sub:`lead ${s.leadTimeWeeks}wk`},{label:'On-hand + on-order',value:fmtI(s.avail),sub:`${fmtI(s.onHand)} + ${fmtI(s.onOrder)}`},{label:s.flag==='overstock'?'Cash tied up':'Margin at risk',value:s.flag==='overstock'?money(cur,tied):money(cur,marginRisk),sub:s.flag==='overstock'?'working capital':'per '+P.noun} ],
-    stepsTitle:'How the reorder is calculated', steps:[ {label:'Champion model',value:short(s.champ)+(s.champWape!=null?` · WAPE ${s.champWape.toFixed(1)}%`:'')},{label:'Demand over lead + review',value:fmtI(s.ro.demand)+' '+u},{label:'Safety stock (z·σ·√h, 95%)',value:'+ '+fmtI(s.ro.safety)},{label:'Target stock level',value:fmtI(s.ro.demand+s.ro.safety)},{label:'Less on-hand + on-order',value:'− '+fmtI(s.avail)},{label:'Recommended order',value:fmtI(s.ro.qty)+' '+u} ],
+    stepsTitle:'How the reorder is calculated', steps:[ {label:'Champion model',value:short(s.champ)+' · '+champMetricLine(s)},{label:'Demand over lead + review',value:fmtI(s.ro.demand)+' '+u},{label:'Safety stock (z·σ·√h, 95%)',value:'+ '+fmtI(s.ro.safety)},{label:'Target stock level',value:fmtI(s.ro.demand+s.ro.safety)},{label:'Less on-hand + on-order',value:'− '+fmtI(s.avail)},{label:'Recommended order',value:s.flag==='overstock'?'None — hold (overstock)':s.flag==='dormant'?'None — off-season':s.ro.qty>0?fmtI(s.ro.qty)+' '+u:'None this cycle'} ],
     notes:[ s.flag==='stockout'?`Why it's at risk: at the forecast, stock covers ~${Math.round(s.daysCover)} days but the lead time is ${s.leadTimeWeeks*7} days — so it runs dry ~${Math.max(0,Math.round(s.leadTimeWeeks*7-s.daysCover))} days before a re-order lands. The ${money(cur,marginRisk)} at risk is one ${P.noun} of gross margin exposed.`:'', s.flag==='overstock'?`Why it's tied up: cover is ${s.cover.toFixed(1)} ${P.plural} at the seasonal low, so ${money(cur,tied)} of working capital sits in stock. Shelf life ${s.shelfLifeMonths} mo — it won't spoil, but the cash is locked up.`:'', s.reason?'Model choice: '+s.reason:'', s.note ].filter(Boolean) };
 }
 function subDetail(s, A, D) {
@@ -344,7 +348,7 @@ function subDetail(s, A, D) {
   const FT={growing:'Growing',watch:'Watch',declining:'At risk',flat:'Flat'}, FC={growing:'var(--green)',watch:'var(--amber)',declining:'var(--red)',flat:'var(--textSubtle)'};
   return { title:s.name, subtitle:`${s.subtitle} · segment`, tagLabel:FT[s.flag], tagColor:FC[s.flag], lead:'',
     metrics:[ {label:'Forecast MRR (next mo)',value:money(cur,s.nextMRR),sub:`95%: ${money(cur,s.fc.pi95[0].lo)}–${money(cur,s.fc.pi95[0].hi)}`},{label:'Implied ARR',value:money(cur,s.arr),sub:'×12'},{label:'Monthly churn',value:s.churn.toFixed(1)+'%',sub:'logo'},{label:'MoM growth',value:(s.mom>=0?'+':'')+s.mom.toFixed(1)+'%',sub:'last period'} ],
-    stepsTitle:'How the forecast is built', steps:[ {label:'Champion model',value:short(s.champ)+(s.champWape!=null?` · WAPE ${s.champWape.toFixed(1)}%`:'')},{label:'Latest MRR',value:money(cur,s.series[s.series.length-1])},{label:'Forecast next month',value:money(cur,s.nextMRR)},{label:'Churn drag',value:'−'+s.churn.toFixed(1)+'%/mo'} ],
+    stepsTitle:'How the forecast is built', steps:[ {label:'Champion model',value:short(s.champ)+' · '+champMetricLine(s)},{label:'Latest MRR',value:money(cur,s.series[s.series.length-1])},{label:'Forecast next month',value:money(cur,s.nextMRR)},{label:'Churn drag',value:'−'+s.churn.toFixed(1)+'%/mo'} ],
     notes:[ s.flag==='declining'?`At ${s.churn.toFixed(1)}% monthly churn this segment loses more than it adds — its MRR line is bending down. Fix activation/onboarding here first.`:`Growing ~${s.mom.toFixed(1)}%/mo. `, s.reason?'Model choice: '+s.reason:'', s.note ].filter(Boolean) };
 }
 function capDetail(s, A, D) {
@@ -352,7 +356,7 @@ function capDetail(s, A, D) {
   const FT={oversubscribed:'Oversubscribed',healthy:'Healthy',under:'Under-enrolled'}, FC={oversubscribed:'var(--amber)',healthy:'var(--green)',under:'var(--red)'};
   return { title:s.name, subtitle:`${s.subtitle} · course`, tagLabel:FT[s.flag], tagColor:FC[s.flag], lead:'',
     metrics:[ {label:'Forecast enrolment',value:fmtI(s.nextEnrol),sub:`95%: ${fmtI(s.fc.pi95[0].lo)}–${fmtI(s.fc.pi95[0].hi)}`},{label:'Seat utilisation',value:Math.round(s.util*100)+'%',sub:`${fmtI(s.capacity)} seats`},{label:'Tutors needed',value:String(s.tutors),sub:`1:${s.studentsPerTutor}`},{label:'Fee revenue',value:money(cur,s.nextEnrol*s.fee),sub:'this intake'} ],
-    stepsTitle:'How enrolment is forecast', steps:[ {label:'Champion model',value:short(s.champ)+(s.champWape!=null?` · WAPE ${s.champWape.toFixed(1)}%`:'')},{label:'Forecast enrolment',value:fmtI(s.nextEnrol)},{label:'Seat capacity',value:fmtI(s.capacity)},{label:'Tutors (1:'+s.studentsPerTutor+')',value:String(s.tutors)} ],
+    stepsTitle:'How enrolment is forecast', steps:[ {label:'Champion model',value:short(s.champ)+' · '+champMetricLine(s)},{label:'Forecast enrolment',value:fmtI(s.nextEnrol)},{label:'Seat capacity',value:fmtI(s.capacity)},{label:'Tutors (1:'+s.studentsPerTutor+')',value:String(s.tutors)} ],
     notes:[ s.flag==='oversubscribed'?`Demand exceeds seats — open a second cohort or add a tutor, or you'll turn students away.`:s.flag==='under'?`Below break-even utilisation — a marketing push or merging intakes protects course profitability.`:`Healthy utilisation.`, s.reason?'Model choice: '+s.reason:'', s.note ].filter(Boolean) };
 }
 
@@ -389,7 +393,9 @@ export function buildReport(state, A, D, props) {
   // recommendations = imperative actions
   const recs = [];
   if (mode === 'inventory') {
-    A.ents.filter(e=>e.flag==='stockout'||e.flag==='reorder').sort((a,b)=>a.cover-b.cover).forEach(e=>recs.push(`Increase ${e.name} orders by ${fmtI(e.ro.qty)} ${D.META.unit||'units'} to stay above the ${e.leadTimeWeeks}-week lead time (cover ${e.cover.toFixed(1)} ${P.unit}).`));
+    A.ents.filter(e=>e.flag==='stockout'||e.flag==='reorder').sort((a,b)=>a.cover-b.cover).forEach(e=>recs.push(e.ro.qty>0
+      ? `Increase ${e.name} orders by ${fmtI(e.ro.qty)} ${D.META.unit||'units'} to stay above the ${e.leadTimeWeeks}-week lead time (cover ${e.cover.toFixed(1)} ${P.unit}).`
+      : `No order needed for ${e.name} this cycle — cover ${e.cover.toFixed(1)} ${P.unit} is under the review line, but stock already covers the ${e.leadTimeWeeks}-week lead time plus safety stock; re-check next cycle.`));
     A.ents.filter(e=>e.flag==='overstock').forEach(e=>recs.push(`Hold or promote ${e.name} — ${money(cur,e.onHand*(e.price-e.unitMargin))} of cash is tied up; do not reorder this cycle.`));
     if (D.META.capacity && A.totals.capUtil>1) recs.push(`${D.META.capacity.label} is at ${Math.round(A.totals.capUtil*100)}% — prioritise the highest-margin lines and defer slower ones.`);
   } else if (mode === 'subscription') {
@@ -413,8 +419,7 @@ export function buildReport(state, A, D, props) {
   let worst = 0, worstI = -1, biasSum = 0, cnt = 0;
   act.forEach((a, i) => { if (!isNaN(fit[i]) && a) { const d = (fit[i] - a) / a; biasSum += d; cnt++; if (Math.abs(d) > Math.abs(worst)) { worst = d; worstI = i; } } });
   const bias = cnt ? biasSum / cnt * 100 : 0;
-  const w = hero.champWape != null ? hero.champWape.toFixed(1) : '—';
-  const reviewNote = `Back-tested on ${hero.name}, the champion (${short(hero.champ)}) tracked actuals to within WAPE ${w}% with a ${bias>=0?'slight over':'slight under'}-forecast bias of ${Math.abs(bias).toFixed(1)}%. ${worstI>=0?`Largest single-${P.noun} deviation was ${worst>=0?'+':''}${(worst*100).toFixed(0)}% in ${P.labelAt(hero.series.length-win+worstI)}.`:'Deviations stay within tolerance.'} Newer lines with short histories carry wider intervals and lower confidence.`;
+  const reviewNote = `Back-tested on ${hero.name}, the champion (${short(hero.champ)}) tracked actuals to within ${champMetricLine(hero)} with a ${bias>=0?'slight over':'slight under'}-forecast bias of ${Math.abs(bias).toFixed(1)}%. ${worstI>=0?`Largest single-${P.noun} deviation was ${worst>=0?'+':''}${(worst*100).toFixed(0)}% in ${P.labelAt(hero.series.length-win+worstI)}.`:'Deviations stay within tolerance.'} Newer lines with short histories carry wider intervals and lower confidence.`;
   return { periodLabel, periodKey: pk, generated: 'as of ' + P.labelAt(A.ents[0].series.length - 1), rows, recs, headline: reportHeadline(mode, A, cur), reviewChart, reviewNote, reviewName: hero.name };
 }
 function reportHeadline(mode, A, cur) {
@@ -442,7 +447,7 @@ export function buildRenderVals(state, props, E, D, handlers) {
     toggleMode: handlers.toggleMode, setBase: handlers.setBase, setOpt: handlers.setOpt, setCon: handlers.setCon, onActualInput: handlers.onActualInput, addActual: handlers.addActual, resetData: handlers.resetData, onHandInput: handlers.onHandInput, onOrderInput: handlers.onOrderInput, closeDetail: handlers.closeDetail, openReport: handlers.openReport, closeReport: handlers.closeReport, printReport: handlers.printReport,
     actual: state.actual, sBase: state.scenario==='base'?sOn:sOff, sOpt: state.scenario==='optimistic'?sOn:sOff, sCon: state.scenario==='conservative'?sOn:sOff };
 
-  if (!state.analysis) return { ...base, kpis:[], heroName:'—', horizonLabel:horizon+' '+periodInfo(D).unit, heroChart:null, scenDelta:'', explHead:'Loading…', explBody:'Back-testing model families…', explColor:'var(--green)', explBg:'var(--greenBg)', skuRows:[], alerts:[], champName:'—', champWape:'—', modelReason:'', modelRows:[], scenarioCards:[], scenChart:null, provenance:[], references:[], gaps:[], skuPills:[], entryMonth:'', onHandVal:'', onOrderVal:'', invLabel1:'', invLabel2:'', dataModified:false, addLabel:'Add', stockPlan:{}, planTitle:'', planQ:'', monthPills:[], actions:[], actionCount:0, policyHeadline:'', policyRationale:'', detail:null, detailOpen:false, report:null, reportOpen:false, reportPills:[] };
+  if (!state.analysis) return { ...base, kpis:[], heroName:'—', horizonLabel:horizon+' '+periodInfo(D).unit, heroChart:null, scenDelta:'', explHead:'Loading…', explBody:'Back-testing model families…', explColor:'var(--green)', explBg:'var(--greenBg)', skuRows:[], alerts:[], champName:'—', champWape:'—', champMetricLabel:'BACK-TESTED WAPE', modelReason:'', modelRows:[], scenarioCards:[], scenChart:null, provenance:[], references:[], gaps:[], skuPills:[], entryMonth:'', onHandVal:'', onOrderVal:'', invLabel1:'', invLabel2:'', dataModified:false, addLabel:'Add', stockPlan:{}, planTitle:'', planQ:'', monthPills:[], actions:[], actionCount:0, policyHeadline:'', policyRationale:'', detail:null, detailOpen:false, report:null, reportOpen:false, reportPills:[] };
 
   const A = state.analysis, selId = state.selectedSku || A.heroDefault, hero = A.ents.find(e=>e.id===selId) || A.ents[0];
   const P = A.P || periodInfo(D);
@@ -477,7 +482,7 @@ export function buildRenderVals(state, props, E, D, handlers) {
   const alertTones={red:'var(--red)',amber:'var(--amber)',blue:'var(--blue)',green:'var(--green)'};
   const alerts = A.alerts.map(al=>({head:al.head,body:al.body,toneColor:alertTones[al.tone]}));
 
-  const champName=short(hero.champ), champWape=hero.champWape!=null?hero.champWape.toFixed(1)+'%':'—';
+  const champName=short(hero.champ), champWape=hero.champMetricText||'—', champMetricLabel=hero.champMetric==='MAE'?'BACK-TESTED MAE (WAPE N/A)':'BACK-TESTED WAPE';
   const modelRows = hero.ranking.map(r=>{const isC=r.name===hero.champ;return {name:r.name,wape:r.metrics.wape!=null?r.metrics.wape.toFixed(1)+'%':'—',mae:fmtI(r.metrics.mae),rmse:fmtI(r.metrics.rmse),smape:r.metrics.smape.toFixed(1)+'%',bias:(r.metrics.bias>=0?'+':'')+fmtI(r.metrics.bias),biasColor:r.metrics.bias>0?'var(--amber)':r.metrics.bias<-10?'var(--blue)':'var(--textMuted)',statusLabel:isC?'Champion':'Challenger',statusBg:isC?'var(--accentBg)':'var(--border)',statusColor:isC?'var(--accent)':'var(--textSubtle)',rowBg:isC?'var(--accentBg)':'transparent'};});
 
   // scenario cards + overlay
@@ -496,7 +501,7 @@ export function buildRenderVals(state, props, E, D, handlers) {
   const rpBase='padding:5px 11px;border-radius:6px;font:600 11px/1 IBM Plex Sans,sans-serif;cursor:pointer;border:1px solid ';
   const reportPills = P.reportPeriods.map(([k,l])=>({label:l,style:rpBase+((state.reportPeriod||'quarter')===k?'var(--accent);background:var(--accentBg);color:var(--accent);':'var(--border);background:transparent;color:var(--textMuted);'),onClick:()=>handlers.setReportPeriod(k)}));
 
-  return { ...base, kpis, heroName:hero.name, horizonLabel:horizon+' '+P.unit, heroChart, scenDelta, explHead:ex.head, explBody:ex.body, explColor:toneMap[ex.tone], explBg:toneBg[ex.tone], skuRows, alerts, champName, champWape, modelReason:hero.reason||'', modelRows, scenarioCards, scenChart, provenance, references, gaps, skuPills, entryMonth, dataModified, addLabel:'Add to history', ...plan, actions: buildActions(mode,A,D,cur,handlers), actionCount: buildActions(mode,A,D,cur,handlers).length, policyHeadline: D.MODEL_POLICY.headline, policyRationale: D.MODEL_POLICY.rationale, detail: state.detail?buildDetail(state.detail,A,D):null, detailOpen:!!state.detail, report, reportOpen: state.reportOpen, reportPills, reviewChart: report ? report.reviewChart : null, reviewName: report ? report.reviewName : '', reviewNote: report ? report.reviewNote : '' };
+  return { ...base, kpis, heroName:hero.name, horizonLabel:horizon+' '+P.unit, heroChart, scenDelta, explHead:ex.head, explBody:ex.body, explColor:toneMap[ex.tone], explBg:toneBg[ex.tone], skuRows, alerts, champName, champWape, champMetricLabel, modelReason:hero.reason||'', modelRows, scenarioCards, scenChart, provenance, references, gaps, skuPills, entryMonth, dataModified, addLabel:'Add to history', ...plan, actions: buildActions(mode,A,D,cur,handlers), actionCount: buildActions(mode,A,D,cur,handlers).length, policyHeadline: D.MODEL_POLICY.headline, policyRationale: D.MODEL_POLICY.rationale, detail: state.detail?buildDetail(state.detail,A,D):null, detailOpen:!!state.detail, report, reportOpen: state.reportOpen, reportPills, reviewChart: report ? report.reviewChart : null, reviewName: report ? report.reviewName : '', reviewNote: report ? report.reviewNote : '' };
 }
 
 function buildKpis(mode, A, D, cur, h) {
@@ -532,7 +537,9 @@ function buildActions(mode, A, D, cur, h) {
     const P = A.P || periodInfo(D);
     A.ents.forEach(s=>{const u=D.META.unit||'units';
       if(s.flag==='stockout')out.push({prio:0,tone:'var(--red)',title:`Order ${fmtI(s.ro.qty)} ${u} · ${s.name}`,detail:`Cover ${s.cover.toFixed(1)} ${P.unit} — runs out ~${Math.round(s.daysCover)} days vs ${s.leadTimeWeeks}-wk lead.`,money:`${money(cur,s.nextForecast*s.unitMargin)} at risk`,moneyColor:'var(--red)',onClick:()=>h.openDetail('sku:'+s.id)});
-      else if(s.flag==='reorder')out.push({prio:1,tone:'var(--amber)',title:`Reorder ${fmtI(s.ro.qty)} ${u} · ${s.name}`,detail:`Cover ${s.cover.toFixed(1)} ${P.unit} — schedule this cycle.`,money:'',moneyColor:'var(--amber)',onClick:()=>h.openDetail('sku:'+s.id)});
+      else if(s.flag==='reorder')out.push(s.ro.qty>0
+        ? {prio:1,tone:'var(--amber)',title:`Reorder ${fmtI(s.ro.qty)} ${u} · ${s.name}`,detail:`Cover ${s.cover.toFixed(1)} ${P.unit} — schedule this cycle.`,money:'',moneyColor:'var(--amber)',onClick:()=>h.openDetail('sku:'+s.id)}
+        : {prio:1,tone:'var(--amber)',title:`No order needed this cycle · ${s.name}`,detail:`Cover ${s.cover.toFixed(1)} ${P.unit} is under the ${P.reorderT}-${P.unit} review line, but on-hand + on-order already covers the ${s.leadTimeWeeks}-wk lead time plus safety stock — re-check next cycle.`,money:'',moneyColor:'var(--amber)',onClick:()=>h.openDetail('sku:'+s.id)});
       else if(s.flag==='overstock')out.push({prio:3,tone:'var(--blue)',title:`Hold or promote · ${s.name}`,detail:`Cover ${s.cover.toFixed(1)} ${P.unit} at the low — don't reorder.`,money:`${money(cur,s.onHand*(s.price-s.unitMargin))} tied up`,moneyColor:'var(--blue)',onClick:()=>h.openDetail('sku:'+s.id)});});
     if(D.META.capacity&&A.totals.capUtil>1)out.push({prio:2,tone:'var(--red)',title:`Prioritise — ${D.META.capacity.label} exceeded`,detail:`Load ${fmtI(A.totals.load)} vs ${fmtI(D.META.capacity.value)} (${Math.round(A.totals.capUtil*100)}%). Highest-margin lines first.`,money:'',moneyColor:'var(--red)',onClick:()=>h.openDetail('capacity')});
   } else if (mode === 'subscription') {
@@ -564,25 +571,38 @@ function buildPlan(mode, state, hero, A, D, cur, h, nHist, horizon) {
     const idxs = P.wk ? hero.fc.point.map((_, i) => i).slice(0, tmi + 1) : [tmi];
     const through = idxs.reduce((a, i) => a + hero.fc.point[i], 0);
     const tLo = idxs.reduce((a, i) => a + hero.fc.pi95[i].lo, 0), tHi = idxs.reduce((a, i) => a + hero.fc.pi95[i].hi, 0);
-    const safety = 1.6449 * hero.fc.sigma * Math.sqrt(idxs.length), recHold = through + safety, gap = recHold - hero.avail, unit = D.META.unit || 'units';
-    const gapNote = P.wk
+    // no forecast demand through the selected period → nothing to protect, so no safety stock either
+    const safety = through > 0 ? 1.6449 * hero.fc.sigma * Math.sqrt(idxs.length) : 0, recHold = through + safety, gap = recHold - hero.avail, unit = D.META.unit || 'units';
+    const gapNote = through <= 0
+      ? `No demand is forecast ${P.wk ? 'through' : 'for'} ${planMonth} — nothing to hold; on-hand + on-order of ${fmtI(hero.avail)} ${unit} stays in stock (${hero.shelfLifeMonths}-mo shelf life).`
+      : P.wk
       ? (gap>5 ? `Cumulative demand through ${planMonth} is ${fmtI(through)} ${unit}; on-hand + on-order of ${fmtI(hero.avail)} falls short — order ${fmtI(gap)} to hold a 95% service level (${hero.leadTimeWeeks}-wk lead).`
         : gap<-5 ? `On-hand + on-order covers demand through ${planMonth} with ${fmtI(-gap)} ${unit} to spare (${hero.shelfLifeMonths}-mo shelf life).`
         : `On-hand + on-order covers demand through ${planMonth} at a 95% service level.`)
       : (gap>5 ? `${hero.leadTimeWeeks}-week lead time — order now to land before ${planMonth}.`
         : gap<-5 ? `More than ${planMonth} needs — hold (${hero.shelfLifeMonths}-mo shelf life) or promote.`
         : `Covers ${planMonth} at a 95% service level.`);
+    const sentence = through > 0
+      ? sentenceEl(['Forecast demand ', B(fmtI(through)), ` (95%: ${fmtI(tLo)}–${fmtI(tHi)}) plus `, B(fmtI(safety)), ' safety stock for a 95% service level. You currently hold ', B(fmtI(hero.onHand)), ' + ', B(fmtI(hero.onOrder)), ' on order.'])
+      : sentenceEl([`No demand is forecast ${P.wk ? 'through' : 'for'} ${planMonth} (95%: 0–${fmtI(tHi)}), so no safety stock is needed. You currently hold `, B(fmtI(hero.onHand)), ' + ', B(fmtI(hero.onOrder)), ' on order.']);
     return { planTitle:`Stock Plan · ${hero.name}`, planQ:P.wk?'How much to hold through':'How much should I hold for', invLabel1:'On-hand stock', invLabel2:'On-order', onHandVal:String(hero.onHand), onOrderVal:String(hero.onOrder), monthPills,
-      stockPlan:{ month:planMonth, unit, recHold:fmtI(recHold), demand:fmtI(through), range:`${fmtI(tLo)}–${fmtI(tHi)}`, safety:fmtI(safety), avail:fmtI(hero.avail), onHand:fmtI(hero.onHand), onOrder:fmtI(hero.onOrder), gapLabel:gap>5?`Order ${fmtI(gap)} more`:gap<-5?`Surplus of ${fmtI(-gap)}`:'On plan', gapColor:gap>5?'var(--red)':gap<-5?'var(--blue)':'var(--green)', gapNote, formula:short(hero.champ), wape:hero.champWape!=null?hero.champWape.toFixed(1)+'%':'—', conf, confColor } };
+      stockPlan:{ month:planMonth, unit, holdLabel:`Hold ${P.wk ? 'through' : 'for'} ${planMonth}`, unitLabel:`${unit} available`, recHold:fmtI(recHold), demand:fmtI(through), range:`${fmtI(tLo)}–${fmtI(tHi)}`, safety:fmtI(safety), avail:fmtI(hero.avail), onHand:fmtI(hero.onHand), onOrder:fmtI(hero.onOrder), sentence, gapLabel:gap>5?`Order ${fmtI(gap)} more`:gap<-5?`Surplus of ${fmtI(-gap)}`:'On plan', gapColor:gap>5?'var(--red)':gap<-5?'var(--blue)':'var(--green)', gapNote, formula:short(hero.champ), wape:hero.champWape!=null?hero.champWape.toFixed(1)+'%':'—', metric:champMetricLine(hero), conf, confColor } };
   }
   if (mode === 'subscription') {
+    const last = hero.series[hero.series.length-1];
+    const sentence = sentenceEl(['Forecast MRR ', B(money(cur,pDemand)), ` for ${planMonth} (95%: ${money(cur,pLo)}–${money(cur,pHi)}) — `, B(money(cur,pDemand*12)), ' implied ARR at that run-rate. Latest actual ', B(money(cur,last)), '; monthly logo churn ', B(hero.churn.toFixed(1)+'%'), '.']);
     return { planTitle:`MRR Plan · ${hero.name}`, planQ:'Forecast MRR for', invLabel1:'Monthly churn %', invLabel2:'', onHandVal:String(hero.churn), onOrderVal:'', monthPills,
-      stockPlan:{ month:planMonth, unit:'MRR', recHold:money(cur,pDemand), demand:money(cur,pDemand), range:`${money(cur,pLo)}–${money(cur,pHi)}`, safety:money(cur,hero.arr), avail:hero.churn.toFixed(1)+'%', onHand:money(cur,hero.series[hero.series.length-1]), onOrder:hero.churn.toFixed(1)+'%', gapLabel:hero.flag==='declining'?'Churn risk':'On trend', gapColor:hero.flag==='declining'?'var(--red)':'var(--green)', gapNote:hero.flag==='declining'?`Churn of ${hero.churn.toFixed(1)}%/mo is bending this segment down — fix retention before scaling spend.`:`Compounding ~${hero.mom.toFixed(1)}%/mo; ${money(cur,hero.arr)} implied ARR.`, formula:short(hero.champ), wape:hero.champWape!=null?hero.champWape.toFixed(1)+'%':'—', conf, confColor } };
+      stockPlan:{ month:planMonth, unit:'MRR', holdLabel:`Forecast MRR · ${planMonth}`, unitLabel:'monthly recurring revenue', recHold:money(cur,pDemand), demand:money(cur,pDemand), range:`${money(cur,pLo)}–${money(cur,pHi)}`, safety:money(cur,hero.arr), avail:hero.churn.toFixed(1)+'%', onHand:money(cur,last), onOrder:hero.churn.toFixed(1)+'%', sentence, gapLabel:hero.flag==='declining'?'Churn risk':'On trend', gapColor:hero.flag==='declining'?'var(--red)':'var(--green)', gapNote:hero.flag==='declining'?`Churn of ${hero.churn.toFixed(1)}%/mo is bending this segment down — fix retention before scaling spend.`:`Compounding ~${hero.mom.toFixed(1)}%/mo; ${money(cur,hero.arr)} implied ARR.`, formula:short(hero.champ), wape:hero.champWape!=null?hero.champWape.toFixed(1)+'%':'—', metric:champMetricLine(hero), conf, confColor } };
   }
   const tutors=Math.ceil(pDemand/(hero.studentsPerTutor||18));
+  const utilP = hero.capacity>0 ? Math.round(pDemand/hero.capacity*100) : 0;
+  const sentence = sentenceEl(['Forecast enrolment ', B(fmtI(pDemand)), ` for ${planMonth} (95%: ${fmtI(pLo)}–${fmtI(pHi)}), needing `, B(String(tutors)+' tutors'), ` at 1:${hero.studentsPerTutor}. Seat capacity `, B(fmtI(hero.capacity)), ` — ${utilP}% of seats filled at the forecast.`]);
   return { planTitle:`Enrolment Plan · ${hero.name}`, planQ:'Expected enrolment for', invLabel1:'Seat capacity', invLabel2:'', onHandVal:String(hero.capacity), onOrderVal:'', monthPills,
-    stockPlan:{ month:planMonth, unit:'students', recHold:fmtI(pDemand), demand:fmtI(pDemand), range:`${fmtI(pLo)}–${fmtI(pHi)}`, safety:String(tutors)+' tutors', avail:fmtI(hero.capacity)+' seats', onHand:fmtI(hero.capacity), onOrder:String(tutors), gapLabel:hero.util>1?'Oversubscribed':hero.util<0.55?'Under-enrolled':'On plan', gapColor:hero.util>1?'var(--amber)':hero.util<0.55?'var(--red)':'var(--green)', gapNote:hero.util>1?`Forecast exceeds ${fmtI(hero.capacity)} seats — open a cohort or add a tutor.`:hero.util<0.55?`Below break-even — marketing spend or merged intake needed.`:`Fills ${Math.round(hero.util*100)}% of seats; needs ${tutors} tutors.`, formula:short(hero.champ), wape:hero.champWape!=null?hero.champWape.toFixed(1)+'%':'—', conf, confColor } };
+    stockPlan:{ month:planMonth, unit:'students', holdLabel:`Expected enrolment · ${planMonth}`, unitLabel:'students', recHold:fmtI(pDemand), demand:fmtI(pDemand), range:`${fmtI(pLo)}–${fmtI(pHi)}`, safety:String(tutors)+' tutors', avail:fmtI(hero.capacity)+' seats', onHand:fmtI(hero.capacity), onOrder:String(tutors), sentence, gapLabel:hero.util>1?'Oversubscribed':hero.util<0.55?'Under-enrolled':'On plan', gapColor:hero.util>1?'var(--amber)':hero.util<0.55?'var(--red)':'var(--green)', gapNote:hero.util>1?`Forecast exceeds ${fmtI(hero.capacity)} seats — open a cohort or add a tutor.`:hero.util<0.55?`Below break-even — marketing spend or merged intake needed.`:`Fills ${Math.round(hero.util*100)}% of seats; needs ${tutors} tutors.`, formula:short(hero.champ), wape:hero.champWape!=null?hero.champWape.toFixed(1)+'%':'—', metric:champMetricLine(hero), conf, confColor } };
 }
+// plan sentence pieces — plain strings and <strong> values, rendered by the template as one sentence
+const B = (txt) => React.createElement('strong', { key: 'b' + txt }, txt);
+const sentenceEl = (parts) => React.createElement(React.Fragment, null, ...parts.map((p, i) => (typeof p === 'string' ? p : React.cloneElement(p, { key: i }))));
 
 function scenarioCard(mode, label, m, i, hero, A, cur, D) {
   const colors=['var(--accent)','var(--green)','var(--red)'], P = A.P || periodInfo(D);

@@ -302,23 +302,33 @@ export function autoSelect(train, { season = 12, exog = null, horizon = 3, folds
     const bt = backtest(train, c.factory, { H: horizon, folds });
     if (bt) ranking.push({ name: c.name, metrics: bt });
   }
-  // Rank by WAPE (falls back to sMAPE) — robust to scale + zeros.
-  ranking.sort((a, b) => (a.metrics.wape ?? a.metrics.smape) - (b.metrics.wape ?? b.metrics.smape));
+  // Rank by MAE with RMSE as the tie-break. Over one shared hold-out set this is the same
+  // order as WAPE (WAPE = ΣMAE / Σ|actual|), so WAPE is reported when it is defined; when the
+  // hold-out actuals are all zero (an intermittent line) WAPE is undefined and MAE is the
+  // metric actually used — the reason text says which.
+  ranking.sort((a, b) => (a.metrics.mae - b.metrics.mae) || (a.metrics.rmse - b.metrics.rmse));
+  const useWape = ranking.length > 0 && ranking.every((r) => r.metrics.wape != null);
+  const metric = useWape ? 'WAPE' : 'MAE';
+  const scoreOf = (r) => (useWape ? r.metrics.wape : r.metrics.mae);
+  const fmtScore = (v) => (useWape ? `${v.toFixed(1)}%` : `${round(v, 1)} units`);
+  for (const r of ranking) r.score = scoreOf(r);
   const champion = ranking[0];
   const runnerUp = ranking[1];
   let reason = '';
   if (champion) {
-    const cw = champion.metrics.wape ?? champion.metrics.smape;
-    reason = `Lowest back-tested error over ${champion.metrics.folds} rolling origins (WAPE ${cw.toFixed(1)}%).`;
+    const cw = scoreOf(champion);
+    reason = `Lowest back-tested error over ${champion.metrics.folds} rolling origins (${metric} ${fmtScore(cw)}).`;
+    if (!useWape) reason += ' WAPE has no value here because the hold-out actuals are all zero, so models are ranked on MAE (absolute error in units).';
     if (runnerUp) {
-      const rw = runnerUp.metrics.wape ?? runnerUp.metrics.smape;
-      const gap = rw - cw;
-      reason += gap < 1.2
-        ? ` Narrow lead over ${runnerUp.name} (+${gap.toFixed(1)} pts) — kept as challenger.`
-        : ` Clear of ${runnerUp.name} by ${gap.toFixed(1)} pts.`;
+      const gap = scoreOf(runnerUp) - cw;
+      const narrow = useWape ? gap < 1.2 : gap <= Math.max(0.5, 0.05 * cw);
+      const gapTxt = useWape ? `${gap.toFixed(1)} pts` : `${round(gap, 1)} units`;
+      reason += narrow
+        ? ` Narrow lead over ${runnerUp.name} (+${gapTxt}) — kept as challenger.`
+        : ` Clear of ${runnerUp.name} by ${gapTxt}.`;
     }
   }
-  return { champion, ranking, isIntermittent: isInt, reason };
+  return { champion, ranking, isIntermittent: isInt, reason, metric, metricText: champion ? fmtScore(scoreOf(champion)) : '—' };
 }
 
 // ============================================================================
@@ -394,7 +404,8 @@ export function reorderQty({ onHand, onOrder, forecast, leadTimeMonths, reviewMo
   const frac = horizon - whole;
   let demand = sum(forecast.slice(0, whole));
   if (frac > 0 && forecast[whole] != null) demand += frac * forecast[whole];
-  const safety = serviceZ * sigma * Math.sqrt(horizon);
+  // no forecast demand over the lead + review window → nothing to protect, so no safety stock
+  const safety = demand > 0 ? serviceZ * sigma * Math.sqrt(horizon) : 0;
   const target = demand + safety;
   return { qty: Math.max(0, Math.round(target - (onHand + onOrder))), safety: Math.round(safety), demand: Math.round(demand) };
 }

@@ -39,6 +39,7 @@ svg{display:block;max-width:100%;height:auto}
 :root[data-theme="light"]{--bg:#f4f1ec;--surface:#ffffff;--surface2:#faf7f2;--ink:#221e18;--ink2:#4c473e;--muted:#6b6459;--line:#ded7ca;--line2:#cfc7b8;--accent:#0d7a6e;--accent2:#0d5f57;--gold:#9a7b22;--good:#1a8f6b;--warn:#b3760f;--bad:#c8323f}
 :root[data-theme="light"] body{background:radial-gradient(1100px 600px at 80% -10%,rgba(13,122,110,.08),transparent 60%),var(--bg)}
 :root[data-theme="light"] .foot,:root[data-theme="light"] .note{color:var(--muted)}
+@media (max-width:720px){table{display:block;overflow-x:auto;white-space:nowrap}.mast{flex-wrap:wrap}.snap{margin-left:0}}
 </style>  <link rel="stylesheet" href="../../assets/fonts.css">
 </head><body>
 <script>(function(){try{var m=location.search.match(/[?&]theme=(light|dark)/);var t=m?m[1]:((window.matchMedia&&matchMedia('(prefers-color-scheme:light)').matches)?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}try{addEventListener('message',function(e){var d=e&&e.data;if(d&&d.type==='cf-theme'){document.documentElement.setAttribute('data-theme',d.theme==='light'?'light':'dark');}});}catch(e){}})();</script>

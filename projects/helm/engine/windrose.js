@@ -1,9 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Windrose — the primary 90-day showcase project (anonymised from the real brief)
-// Client "Windrose" · Streamline→Relay, Juro→Accord, OneTrust→Sentinel,
-// ServiceNow→CaseDesk, Close→Compass, Jira→Tracker, Airtable→GridWorks,
-// Catylex→ClauseLens. Resourcing: Christopher Farmer 1.0 FTE (€90/h) + Crystal Morris
-// (junior analyst) 0.6 FTE (€32/h) + external engineering / security / vendor lanes.
+// Windrose — the primary 90-day showcase project (anonymised from a client brief).
 // Snapshot "today" = Day 23 (Stage 2 · Design).
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -202,11 +198,9 @@ export const windrose = {
     { id: 'b1', label: 'Relay licences (year 1)', amount: 15000, when: 1, status: 'spent', guard: null, basis: 'Legal-request / matter-workflow SaaS for a small in-house team — European category benchmark ≈ €12k–€20k/yr.' },
     { id: 'b2', label: 'Accord licences (year 1)', amount: 21000, when: 1, status: 'spent', guard: null, basis: 'Mid-market CLM licence (contract lifecycle) — European category benchmark ≈ €14k–€45k/yr.' },
     { id: 'b3', label: 'Accord vendor configuration pack', amount: 10500, when: 34, status: 'committed', guard: 't212', guardNote: 'Not released until the design gate passes', basis: 'Vendor professional-services configuration — typically 30–70% of year-1 CLM licence (here ~50%).' },
-    // Implementation lead — Christopher Farmer · €90/h × 7.5h = €675/day · 1.0 FTE · ~64 working days = €43,200.
     { id: 'b4', label: 'Implementation lead — Christopher Farmer (€90/h · 1.0 FTE)', amount: 43200, when: 1, status: 'payroll', guard: null,
       pay: [{ day: 27, amount: 12825 }, { day: 55, amount: 13500 }, { day: 86, amount: 14850 }, { day: 90, amount: 2025 }],
       basis: '€90/h × 7.5h/day = €675/day, full-time across ~64 working days. Settled by monthly payroll in arrears (Days 27/55/86/90).' },
-    // Junior analyst — Crystal Morris · €32/h × 7.5h × 0.6 FTE = €144/day · ~64 working days = €9,216.
     { id: 'b5', label: 'Junior analyst — Crystal Morris (€32/h · 0.6 FTE)', amount: 9216, when: 1, status: 'payroll', guard: null,
       pay: [{ day: 27, amount: 2736 }, { day: 55, amount: 2880 }, { day: 86, amount: 3168 }, { day: 90, amount: 432 }],
       basis: 'Junior legal-ops analyst €32/h fully-loaded (EU market ≈ €30–€38/h) × 7.5h × 0.6 FTE = €144/day. Monthly payroll, same run dates.' },

@@ -14,7 +14,7 @@
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; }
   body { margin: 0; }
@@ -24,16 +24,30 @@
   input:focus { outline: none; box-shadow: 0 0 0 2px var(--accent); }
   @keyframes livepulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
   @media print { [data-noprint]{display:none!important} [data-report]{position:static!important} body{background:#fff!important} }
+  @media (max-width: 720px) {
+    .v-top { flex-wrap: wrap !important; height: auto !important; min-height: 56px; padding: 8px 14px !important; row-gap: 6px; }
+    .v-top-nav { order: 3; flex-basis: 100%; flex-wrap: wrap; padding-bottom: 2px; }
+    .v-top-right { margin-left: auto; }
+    .v-wm img { width: 90vw !important; }
+    .v-main { padding: 18px 16px 60px !important; }
+    .v-wrap { flex-wrap: wrap !important; row-gap: 8px; }
+    .v-kpis { grid-template-columns: 1fr 1fr !important; }
+    .v-cols2, .v-cols3 { grid-template-columns: 1fr !important; }
+    .v-table { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+    .v-table .v-row { min-width: 600px; }
+    .v-plan-right { text-align: left !important; }
+    .v-report-wrap { padding: 20px 16px 40px !important; }
+  }
 </style>
 </helmet>
 
 <div style="{{ wrapperStyle }}">
 
-  <div data-noprint style="position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); pointer-events: none; z-index: 0; opacity: var(--watermarkOpacity); mix-blend-mode: var(--watermarkBlend);">
+  <div data-noprint class="v-wm" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); pointer-events: none; z-index: 0; opacity: var(--watermarkOpacity); mix-blend-mode: var(--watermarkBlend);">
     <img src="vantage-crest.png" style="width: 520px; height: auto;">
   </div>
 
-  <div data-noprint style="position: sticky; top: 0; z-index: 100; background: var(--topbar); border-bottom: 2px solid var(--watneys); padding: 0 28px; display: flex; justify-content: space-between; align-items: center; height: 56px;">
+  <div data-noprint class="v-top" style="position: sticky; top: 0; z-index: 100; background: var(--topbar); border-bottom: 2px solid var(--watneys); padding: 0 28px; display: flex; justify-content: space-between; align-items: center; height: 56px;">
     <a href="Vantage.dc.html" style="display: flex; align-items: center; gap: 12px; text-decoration: none;" title="Back to Vantage home">
       <img src="vantage-crest.png" style="height: 42px; width: auto; display: block;">
       <div>
@@ -41,24 +55,24 @@
         <div style="font: 500 9.5px/1 'IBM Plex Mono', monospace; color: var(--topbarSubtext); letter-spacing: 0.06em; margin-top: 3px;">FORECASTING &amp; PREDICTIVE ANALYTICS</div>
       </div>
     </a>
-    <div style="display: flex; gap: 4px;">
+    <div class="v-top-nav" style="display: flex; gap: 4px;">
       <a href="#dashboard" style="padding: 6px 12px; border-radius: 5px; font: 600 11.5px/1 'IBM Plex Sans', sans-serif; color: var(--pillText); background: var(--pillBg); text-decoration: none;">Dashboard</a>
       <a href="#models" style="padding: 6px 12px; border-radius: 5px; font: 600 11.5px/1 'IBM Plex Sans', sans-serif; color: var(--pillText); background: var(--pillBg); text-decoration: none;">Models</a>
       <a href="#scenarios" style="padding: 6px 12px; border-radius: 5px; font: 600 11.5px/1 'IBM Plex Sans', sans-serif; color: var(--pillText); background: var(--pillBg); text-decoration: none;">Scenarios</a>
       <a href="#data" style="padding: 6px 12px; border-radius: 5px; font: 600 11.5px/1 'IBM Plex Sans', sans-serif; color: var(--pillText); background: var(--pillBg); text-decoration: none;">Data</a>
     </div>
-    <div style="display: flex; align-items: center; gap: 10px;">
+    <div class="v-top-right" style="display: flex; align-items: center; gap: 10px;">
       <span style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.08em; color: var(--watneys); background: var(--watneysLight); padding: 4px 8px; border-radius: 4px;">{{ industryTag }}</span>
       <button onclick="{{ openReport }}" style="background: var(--accent); border: none; color: var(--card); font: 600 11px/1 'IBM Plex Sans', sans-serif; padding: 0 12px; height: 32px; border-radius: 6px; cursor: pointer;">Report</button>
       <button onclick="{{ toggleMode }}" style="background: var(--pillBg); border: none; color: var(--pillText); font-size: 16px; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; display: grid; place-items: center;" title="{{ modeLabel }}">{{ modeIcon }}</button>
     </div>
   </div>
 
-  <div data-noprint style="max-width: 1100px; margin: 0 auto; padding: 28px 28px 80px; position: relative; z-index: 1;">
+  <div data-noprint class="v-main" style="max-width: 1100px; margin: 0 auto; padding: 28px 28px 80px; position: relative; z-index: 1;">
 
     <div id="dashboard" style="scroll-margin-top: 68px;">
       <div style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sectionLabel);">Dashboard Overview</div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+      <div class="v-wrap" style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
         <div style="display: flex; align-items: center; gap: 13px;">
           <img src="logo-dtc.png" style="height: 44px; width: auto; border-radius: 9px;">
           <h2 style="font: 700 24px/1.15 'Source Serif 4', serif; color: var(--textStrong); margin: 0;">{{ company }}</h2>
@@ -66,7 +80,7 @@
         <div style="font: 500 12px/1 'IBM Plex Sans', sans-serif; color: var(--textMuted);">{{ subtitle }}</div>
       </div>
 
-      <div style="display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-top: 18px;">
+      <div class="v-kpis" style="display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-top: 18px;">
         <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
           <div onclick="{{ k.onClick }}" style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 10px; padding: 14px 15px; box-shadow: var(--cardShadow); cursor: pointer;" style-hover="border-color: var(--accent);">
             <div style="font: 500 10.5px/1.3 'IBM Plex Sans', sans-serif; color: var(--textMuted); min-height: 26px;">{{ k.l }}</div>
@@ -100,7 +114,7 @@
             <button onclick="{{ p.onClick }}" style="{{ p.style }}">{{ p.name }}</button>
           </sc-for>
         </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div class="v-wrap" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <div>
             <div style="font: 700 16px/1 'Source Serif 4', serif; color: var(--textStrong);">{{ heroName }} — demand</div>
             <div style="font: 500 11.5px/1.3 'IBM Plex Sans', sans-serif; color: var(--textMuted); margin-top: 4px;">actual history · {{ horizonLabel }} forecast · 80/95% intervals</div>
@@ -115,7 +129,7 @@
         <div style="font: 500 11.5px/1.4 'IBM Plex Mono', monospace; color: var(--textSubtle); margin-top: 6px;">{{ scenDelta }}</div>
 
         <div style="margin-top: 16px; padding: 14px 15px; border: 1px solid var(--border); border-radius: 9px; background: var(--bg);">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <div class="v-wrap" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
             <div style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sectionLabel);">Manual Data Entry · {{ heroName }}</div>
             <button onclick="{{ resetData }}" style="font: 600 10.5px/1 'IBM Plex Sans', sans-serif; color: var(--textMuted); background: transparent; border: 1px solid var(--border); border-radius: 5px; padding: 5px 10px; cursor: pointer;">⟲ Reset all</button>
           </div>
@@ -155,15 +169,15 @@
           </div>
           <div style="display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-end;">
             <div>
-              <div style="font: 500 10.5px/1 'IBM Plex Sans', sans-serif; color: var(--textSubtle); margin-bottom: 6px;">Hold for {{ stockPlan.month }}</div>
+              <div style="font: 500 10.5px/1 'IBM Plex Sans', sans-serif; color: var(--textSubtle); margin-bottom: 6px;">{{ stockPlan.holdLabel }}</div>
               <div style="font: 700 36px/1 'IBM Plex Mono', monospace; color: var(--kpiValue); letter-spacing: -0.02em;">{{ stockPlan.recHold }}</div>
-              <div style="font: 500 11px/1 'IBM Plex Sans', sans-serif; color: var(--textSubtle); margin-top: 4px;">{{ stockPlan.unit }} available</div>
+              <div style="font: 500 11px/1 'IBM Plex Sans', sans-serif; color: var(--textSubtle); margin-top: 4px;">{{ stockPlan.unitLabel }}</div>
             </div>
             <div style="flex: 1; min-width: 250px;">
-              <div style="font: 500 12.5px/1.6 'IBM Plex Sans', sans-serif; color: var(--text);">Forecast demand <strong>{{ stockPlan.demand }}</strong> (95%: {{ stockPlan.range }}) plus <strong>{{ stockPlan.safety }}</strong> safety stock for a 95% service level. You currently hold <strong>{{ stockPlan.onHand }}</strong> + <strong>{{ stockPlan.onOrder }}</strong> on order.</div>
-              <div style="margin-top: 8px; font: 500 11.5px/1.55 'IBM Plex Sans', sans-serif; color: var(--textMuted);">Calculated with <strong style="color: var(--accent);">{{ stockPlan.formula }}</strong> — the best-performing model for this line (WAPE {{ stockPlan.wape }}). Forecast confidence: <strong style="color: {{ stockPlan.confColor }};">{{ stockPlan.conf }}</strong>.</div>
+              <div style="font: 500 12.5px/1.6 'IBM Plex Sans', sans-serif; color: var(--text);">{{ stockPlan.sentence }}</div>
+              <div style="margin-top: 8px; font: 500 11.5px/1.55 'IBM Plex Sans', sans-serif; color: var(--textMuted);">Calculated with <strong style="color: var(--accent);">{{ stockPlan.formula }}</strong> — the best-performing model for this line ({{ stockPlan.metric }}). Forecast confidence: <strong style="color: {{ stockPlan.confColor }};">{{ stockPlan.conf }}</strong>.</div>
             </div>
-            <div style="text-align: right;">
+            <div class="v-plan-right" style="text-align: right;">
               <div style="display: inline-block; padding: 9px 15px; border-radius: 9px; background: var(--bg); border: 1px solid var(--border);">
                 <div style="font: 700 16px/1 'IBM Plex Mono', monospace; color: {{ stockPlan.gapColor }};">{{ stockPlan.gapLabel }}</div>
               </div>
@@ -175,12 +189,12 @@
 
       <div style="margin-top: 20px;">
         <div style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.12em; text-transform: uppercase; color: var(--sectionLabel); margin-bottom: 10px;">{{ entityLabel }}</div>
-        <div style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 10px; overflow: hidden; box-shadow: var(--cardShadow);">
-          <div style="display: grid; grid-template-columns: 1.7fr 1.1fr 0.8fr 0.8fr 1fr 0.9fr; gap: 4px 10px; padding: 11px 16px; font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.04em; text-transform: uppercase; color: var(--textSubtle); background: var(--bg); border-bottom: 1px solid var(--cardBorder);">
+        <div class="v-table" style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 10px; overflow: hidden; box-shadow: var(--cardShadow);">
+          <div class="v-row" style="display: grid; grid-template-columns: 1.7fr 1.1fr 0.8fr 0.8fr 1fr 0.9fr; gap: 4px 10px; padding: 11px 16px; font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.04em; text-transform: uppercase; color: var(--textSubtle); background: var(--bg); border-bottom: 1px solid var(--cardBorder);">
             <div>Line</div><div>Model</div><div style="text-align: right;">{{ colNext }}</div><div style="text-align: right;">{{ col1 }}</div><div style="text-align: center;">Status</div><div style="text-align: right;">{{ col2 }}</div>
           </div>
           <sc-for list="{{ skuRows }}" as="row" hint-placeholder-count="5">
-            <div onclick="{{ row.onClick }}" style="display: grid; grid-template-columns: 1.7fr 1.1fr 0.8fr 0.8fr 1fr 0.9fr; gap: 4px 10px; padding: 11px 16px; align-items: center; border-bottom: 1px solid var(--border); cursor: pointer;" style-hover="background: var(--bg);">
+            <div class="v-row" onclick="{{ row.onClick }}" style="display: grid; grid-template-columns: 1.7fr 1.1fr 0.8fr 0.8fr 1fr 0.9fr; gap: 4px 10px; padding: 11px 16px; align-items: center; border-bottom: 1px solid var(--border); cursor: pointer;" style-hover="background: var(--bg);">
               <div><div style="font: 600 13px/1.2 'IBM Plex Sans', sans-serif; color: var(--textStrong);">{{ row.name }}</div><div style="font: 500 10.5px/1 'IBM Plex Sans', sans-serif; color: var(--textSubtle); margin-top: 2px;">{{ row.style }}</div></div>
               <div style="font: 500 11px/1 'IBM Plex Mono', monospace; color: var(--textMuted);">{{ row.champ }}</div>
               <div style="text-align: right; font: 600 13px/1 'IBM Plex Mono', monospace; color: var(--textStrong);">{{ row.next }}</div>
@@ -218,23 +232,23 @@
       <p style="font: 500 12.5px/1.55 'IBM Plex Sans', sans-serif; color: var(--textMuted); margin: 0 0 12px;">{{ policyRationale }}</p>
       <p style="font: 500 12.5px/1.5 'IBM Plex Sans', sans-serif; color: var(--textMuted); margin: 0 0 16px;"><strong style="color: var(--textStrong);">This line:</strong> {{ modelReason }}</p>
 
-      <div style="background: var(--accentBg); border: 1px solid var(--accent); border-radius: 10px; padding: 16px 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+      <div class="v-wrap" style="background: var(--accentBg); border: 1px solid var(--accent); border-radius: 10px; padding: 16px 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
         <div>
           <div style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent);">Current Champion</div>
           <div style="font: 700 20px/1 'Source Serif 4', serif; color: var(--textStrong); margin-top: 6px;">{{ champName }}</div>
         </div>
         <div style="text-align: right;">
-          <div style="font: 600 10px/1 'IBM Plex Mono', monospace; color: var(--textSubtle);">BACK-TESTED WAPE</div>
+          <div style="font: 600 10px/1 'IBM Plex Mono', monospace; color: var(--textSubtle);">{{ champMetricLabel }}</div>
           <div style="font: 700 24px/1 'IBM Plex Mono', monospace; color: var(--accent); margin-top: 4px;">{{ champWape }}</div>
         </div>
       </div>
 
-      <div style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 10px; overflow: hidden; box-shadow: var(--cardShadow);">
-        <div style="display: grid; grid-template-columns: 2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.9fr; gap: 4px 8px; padding: 11px 16px; font: 600 9.5px/1 'IBM Plex Mono', monospace; letter-spacing: 0.04em; text-transform: uppercase; color: var(--textSubtle); background: var(--bg); border-bottom: 1px solid var(--cardBorder);">
+      <div class="v-table" style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 10px; overflow: hidden; box-shadow: var(--cardShadow);">
+        <div class="v-row" style="display: grid; grid-template-columns: 2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.9fr; gap: 4px 8px; padding: 11px 16px; font: 600 9.5px/1 'IBM Plex Mono', monospace; letter-spacing: 0.04em; text-transform: uppercase; color: var(--textSubtle); background: var(--bg); border-bottom: 1px solid var(--cardBorder);">
           <div>Model</div><div style="text-align: right;">WAPE</div><div style="text-align: right;">MAE</div><div style="text-align: right;">RMSE</div><div style="text-align: right;">sMAPE</div><div style="text-align: right;">Bias</div><div style="text-align: center;">Status</div>
         </div>
         <sc-for list="{{ modelRows }}" as="mr" hint-placeholder-count="6">
-          <div style="display: grid; grid-template-columns: 2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.9fr; gap: 4px 8px; padding: 11px 16px; align-items: center; border-bottom: 1px solid var(--border); background: {{ mr.rowBg }};">
+          <div class="v-row" style="display: grid; grid-template-columns: 2fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.9fr; gap: 4px 8px; padding: 11px 16px; align-items: center; border-bottom: 1px solid var(--border); background: {{ mr.rowBg }};">
             <div style="font: 600 12.5px/1.2 'IBM Plex Sans', sans-serif; color: var(--textStrong);">{{ mr.name }}</div>
             <div style="text-align: right; font: 600 12.5px/1 'IBM Plex Mono', monospace; color: var(--textStrong);">{{ mr.wape }}</div>
             <div style="text-align: right; font: 500 12px/1 'IBM Plex Mono', monospace; color: var(--textMuted);">{{ mr.mae }}</div>
@@ -251,7 +265,7 @@
       <div style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sectionLabel);">Scenario Lab</div>
       <h2 style="font: 700 22px/1.15 'Source Serif 4', serif; color: var(--textStrong); margin: 6px 0 16px;">Compare Demand Scenarios</h2>
 
-      <div style="display: grid; grid-template-columns: repeat(3,1fr); gap: 14px;">
+      <div class="v-cols3" style="display: grid; grid-template-columns: repeat(3,1fr); gap: 14px;">
         <sc-for list="{{ scenarioCards }}" as="sc" hint-placeholder-count="3">
           <div style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 10px; padding: 16px 16px 14px; box-shadow: var(--cardShadow); border-top: 3px solid {{ sc.accentColor }};">
             <div style="font: 700 14px/1 'Source Serif 4', serif; color: var(--textStrong); margin-bottom: 14px;">{{ sc.label }}</div>
@@ -275,7 +289,7 @@
       <div style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sectionLabel);">Data Confidence</div>
       <h2 style="font: 700 22px/1.15 'Source Serif 4', serif; color: var(--textStrong); margin: 6px 0 16px;">Provenance &amp; Quality</h2>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+      <div class="v-cols2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
         <div style="background: var(--card); border: 1px solid var(--cardBorder); border-radius: 10px; padding: 16px 18px; box-shadow: var(--cardShadow);">
           <div style="font: 700 13px/1 'Source Serif 4', serif; color: var(--textStrong); margin-bottom: 12px;">Data Labels</div>
           <sc-for list="{{ provenance }}" as="p" hint-placeholder-count="6">
@@ -311,8 +325,8 @@
       </div>
     </div>
 
-    <div style="margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-      <div style="font: 500 11px/1.5 'IBM Plex Sans', sans-serif; color: var(--textSubtle);">Vantage Forecasting · Foresight · Precision · Insight</div>
+    <div class="v-wrap" style="margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+      <div style="font: 500 11px/1.5 'IBM Plex Sans', sans-serif; color: var(--textSubtle);">Vantage Forecasting · Foresight · Precision · Insight · <a href="../../index.html">← Portfolio</a> · <a href="../../case-studies/vantage.html">Case study</a></div>
       <div style="font: 500 10px/1 'IBM Plex Mono', monospace; color: var(--textSubtle);">Engine: HW + ETS + Croston + OLS · Back-tested on rolling origins</div>
     </div>
   </div>
@@ -357,23 +371,23 @@
 
   <sc-if value="{{ reportOpen }}" hint-placeholder-val="{{ false }}">
     <div data-report style="position: fixed; inset: 0; z-index: 300; background: var(--bg); overflow-y: auto;">
-      <div style="max-width: 900px; margin: 0 auto; padding: 38px 48px 60px; position: relative;">
+      <div class="v-report-wrap" style="max-width: 900px; margin: 0 auto; padding: 38px 48px 60px; position: relative;">
         <div style="position: absolute; top: 44%; left: 50%; transform: translate(-50%,-50%); opacity: 0.05; pointer-events: none; z-index: 0;"><img src="vantage-crest.png" style="width: 440px;"></div>
         <div style="position: relative; z-index: 1;">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--watneys); padding-bottom: 16px;">
+          <div class="v-wrap" style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--watneys); padding-bottom: 16px;">
             <div style="display: flex; gap: 12px; align-items: center;"><img src="vantage-crest.png" style="height: 46px;"><div><div style="font: 700 20px/1 'Source Serif 4', serif; color: var(--textStrong);">Vantage</div><div style="font: 500 9.5px/1 'IBM Plex Mono', monospace; color: var(--textMuted); letter-spacing: 0.06em; margin-top: 4px;">FORECASTING &amp; PREDICTIVE ANALYTICS</div></div></div>
             <div data-noprint style="display: flex; gap: 8px;"><button onclick="{{ printReport }}" style="background: var(--accent); border: none; color: var(--card); font: 600 11px/1 'IBM Plex Sans', sans-serif; padding: 0 13px; height: 32px; border-radius: 6px; cursor: pointer;">Print / Save PDF</button><button onclick="{{ closeReport }}" style="background: var(--bg); border: 1px solid var(--border); color: var(--textMuted); font: 600 11px/1 'IBM Plex Sans', sans-serif; padding: 0 13px; height: 32px; border-radius: 6px; cursor: pointer;">Close</button></div>
           </div>
           <div style="margin: 16px 0 10px;"><div style="font: 700 24px/1.15 'Source Serif 4', serif; color: var(--textStrong);">{{ company }} — Forecast Report</div><div style="font: 500 12px/1 'IBM Plex Sans', sans-serif; color: var(--textMuted); margin-top: 5px;">{{ report.periodLabel }} · generated {{ report.generated }}</div></div>
-          <div data-noprint style="display: flex; gap: 6px; align-items: center; margin-bottom: 18px;"><span style="font: 500 11px/1 'IBM Plex Sans', sans-serif; color: var(--textMuted); margin-right: 3px;">Period:</span><sc-for list="{{ reportPills }}" as="rp" hint-placeholder-count="4"><button onclick="{{ rp.onClick }}" style="{{ rp.style }}">{{ rp.label }}</button></sc-for></div>
+          <div data-noprint class="v-wrap" style="display: flex; gap: 6px; align-items: center; margin-bottom: 18px;"><span style="font: 500 11px/1 'IBM Plex Sans', sans-serif; color: var(--textMuted); margin-right: 3px;">Period:</span><sc-for list="{{ reportPills }}" as="rp" hint-placeholder-count="4"><button onclick="{{ rp.onClick }}" style="{{ rp.style }}">{{ rp.label }}</button></sc-for></div>
           <div style="background: var(--accentBg); border-left: 3px solid var(--accent); border-radius: 8px; padding: 14px 16px; margin-bottom: 22px;"><div style="font: 700 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 7px;">Executive summary</div><div style="font: 500 14px/1.6 'IBM Plex Sans', sans-serif; color: var(--text);">{{ report.headline }}</div></div>
           <div style="font: 700 13px/1 'Source Serif 4', serif; color: var(--textStrong); margin-bottom: 10px;">Forecast accuracy · {{ reviewName }}</div>
           <div style="border: 1px solid var(--cardBorder); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px;"><div style="height: 200px;">{{ reviewChart }}</div></div>
           <div style="font: 500 12.5px/1.6 'IBM Plex Sans', sans-serif; color: var(--textMuted); margin-bottom: 24px;">{{ reviewNote }}</div>
           <div style="font: 700 13px/1 'Source Serif 4', serif; color: var(--textStrong); margin-bottom: 10px;">What we expect · {{ report.periodLabel }}</div>
-          <div style="border: 1px solid var(--cardBorder); border-radius: 10px; overflow: hidden; margin-bottom: 22px;">
-            <div style="display: grid; grid-template-columns: 2fr 1.3fr 1.2fr 1fr; gap: 4px 10px; padding: 10px 16px; background: var(--card); font: 600 9.5px/1 'IBM Plex Mono', monospace; letter-spacing: 0.04em; text-transform: uppercase; color: var(--textSubtle); border-bottom: 1px solid var(--cardBorder);"><div>Line</div><div style="text-align: right;">Expected</div><div>Model</div><div style="text-align: right;">Status</div></div>
-            <sc-for list="{{ report.rows }}" as="r" hint-placeholder-count="5"><div style="display: grid; grid-template-columns: 2fr 1.3fr 1.2fr 1fr; gap: 4px 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); align-items: center;"><div style="font: 600 12.5px/1.2 'IBM Plex Sans', sans-serif; color: var(--textStrong);">{{ r.name }}</div><div style="text-align: right; font: 600 12px/1 'IBM Plex Mono', monospace; color: var(--textStrong);">{{ r.expect }}</div><div style="font: 500 11px/1 'IBM Plex Mono', monospace; color: var(--textMuted);">{{ r.model }}</div><div style="text-align: right; font: 500 11px/1 'IBM Plex Sans', sans-serif; color: var(--textMuted);">{{ r.note }}</div></div></sc-for>
+          <div class="v-table" style="border: 1px solid var(--cardBorder); border-radius: 10px; overflow: hidden; margin-bottom: 22px;">
+            <div class="v-row" style="display: grid; grid-template-columns: 2fr 1.3fr 1.2fr 1fr; gap: 4px 10px; padding: 10px 16px; background: var(--card); font: 600 9.5px/1 'IBM Plex Mono', monospace; letter-spacing: 0.04em; text-transform: uppercase; color: var(--textSubtle); border-bottom: 1px solid var(--cardBorder);"><div>Line</div><div style="text-align: right;">Expected</div><div>Model</div><div style="text-align: right;">Status</div></div>
+            <sc-for list="{{ report.rows }}" as="r" hint-placeholder-count="5"><div class="v-row" style="display: grid; grid-template-columns: 2fr 1.3fr 1.2fr 1fr; gap: 4px 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); align-items: center;"><div style="font: 600 12.5px/1.2 'IBM Plex Sans', sans-serif; color: var(--textStrong);">{{ r.name }}</div><div style="text-align: right; font: 600 12px/1 'IBM Plex Mono', monospace; color: var(--textStrong);">{{ r.expect }}</div><div style="font: 500 11px/1 'IBM Plex Mono', monospace; color: var(--textMuted);">{{ r.model }}</div><div style="text-align: right; font: 500 11px/1 'IBM Plex Sans', sans-serif; color: var(--textMuted);">{{ r.note }}</div></div></sc-for>
           </div>
           <div style="font: 700 13px/1 'Source Serif 4', serif; color: var(--textStrong); margin-bottom: 10px;">What we recommend</div>
           <div style="display: flex; flex-direction: column; gap: 9px; margin-bottom: 22px;"><sc-for list="{{ report.recs }}" as="rec" hint-placeholder-count="3"><div style="display: flex; gap: 10px; padding: 11px 14px; border: 1px solid var(--cardBorder); border-left: 3px solid var(--accent); border-radius: 8px;"><span style="color: var(--accent); font-weight: 700;">→</span><div style="font: 500 12.5px/1.55 'IBM Plex Sans', sans-serif; color: var(--text);">{{ rec }}</div></div></sc-for></div>
@@ -466,7 +480,7 @@ class Component extends DCLogic {
       const vars = this.state.mode === 'dark'
         ? '--bg:#0c1f2a;--card:#132e3c;--cardBorder:#1e4050;--text:#c8c0b0;--textStrong:#f0e8d8;--textMuted:#8da4ae;--textSubtle:#5f7a86;--accent:#d4a844;--topbar:#0a1820;--topbarText:#d4c8b4;--topbarSubtext:#6a8a95;--pillBg:rgba(255,255,255,0.08);--pillText:#8da4ae;--border:#1e4050;--watneys:#C4384C;--watneysLight:rgba(196,56,76,0.14);--sectionLabel:#d4a844;--kpiValue:#f0e8d8;--watermarkOpacity:0.05;--watermarkBlend:screen;--inputBg:#0e2530;--inputBorder:#264555;--cardShadow:0 4px 18px -8px rgba(0,0,0,0.5)'
         : '--bg:#f0ebe2;--card:#faf8f4;--cardBorder:#e2d8c6;--text:#163544;--textStrong:#0e2530;--textMuted:#5f7a88;--textSubtle:#93a0a8;--accent:#c5993e;--topbar:#163544;--topbarText:#e8dcc8;--topbarSubtext:#8da4ae;--pillBg:rgba(255,255,255,0.12);--pillText:#c0b49e;--border:#e2d8c6;--watneys:#8B2332;--watneysLight:rgba(139,35,50,0.10);--sectionLabel:#c5993e;--kpiValue:#0e2530;--watermarkOpacity:0.04;--watermarkBlend:multiply;--inputBg:#fff;--inputBorder:#d4c8b2;--cardShadow:0 4px 18px -8px rgba(40,30,15,0.12)';
-      return { wrapperStyle: vars + ';min-height:100vh;background:var(--bg);color:var(--text);font-family:IBM Plex Sans,sans-serif', modeIcon: this.state.mode === 'light' ? '☾' : '☀', modeLabel: 'Toggle mode', ...handlers, kpis: [], heroName: '—', horizonLabel: '6 mo', heroChart: null, scenDelta: '', explHead: 'Loading…', explBody: 'Computing forecasts…', explColor: 'var(--accent)', explBg: 'transparent', actual: '', skuRows: [], alerts: [], champName: '—', champWape: '—', modelReason: '', modelRows: [], scenarioCards: [], scenChart: null, provenance: [], references: [], gaps: [], skuPills: [], entryMonth: '', onHandVal: '', onOrderVal: '', addLabel: 'Add', dataModified: false, stockPlan: { month: '', unit: '', recHold: '—', demand: '—', range: '—', safety: '—', avail: '—', onHand: '—', onOrder: '—', gapLabel: '', gapColor: 'var(--accent)', gapNote: '', formula: '—', wape: '—', conf: '—', confColor: 'var(--accent)' }, monthPills: [], actions: [], actionCount: 0, policyHeadline: '', policyRationale: '', detail: null, detailOpen: false, company: 'Kindred Goods', subtitle: 'DTC demand & inventory forecast · Jul–Dec 2025', industryTag: 'DTC RETAIL', entityLabel: 'Products', colNext: 'Next', col1: 'Cover', col2: 'Reorder', planTitle: '', planQ: '', invLabel1: '', invLabel2: '' };
+      return { wrapperStyle: vars + ';min-height:100vh;background:var(--bg);color:var(--text);font-family:IBM Plex Sans,sans-serif', modeIcon: this.state.mode === 'light' ? '☾' : '☀', modeLabel: 'Toggle mode', ...handlers, kpis: [], heroName: '—', horizonLabel: '6 mo', heroChart: null, scenDelta: '', explHead: 'Loading…', explBody: 'Computing forecasts…', explColor: 'var(--accent)', explBg: 'transparent', actual: '', skuRows: [], alerts: [], champName: '—', champWape: '—', champMetricLabel: 'BACK-TESTED WAPE', modelReason: '', modelRows: [], scenarioCards: [], scenChart: null, provenance: [], references: [], gaps: [], skuPills: [], entryMonth: '', onHandVal: '', onOrderVal: '', addLabel: 'Add', dataModified: false, stockPlan: { month: '', unit: '', holdLabel: '', unitLabel: '', sentence: '', metric: '—', recHold: '—', demand: '—', range: '—', safety: '—', avail: '—', onHand: '—', onOrder: '—', gapLabel: '', gapColor: 'var(--accent)', gapNote: '', formula: '—', wape: '—', conf: '—', confColor: 'var(--accent)' }, monthPills: [], actions: [], actionCount: 0, policyHeadline: '', policyRationale: '', detail: null, detailOpen: false, company: 'Kindred Goods', subtitle: 'DTC demand & inventory forecast · Jul–Dec 2025', industryTag: 'DTC RETAIL', entityLabel: 'Products', colNext: 'Next', col1: 'Cover', col2: 'Reorder', planTitle: '', planQ: '', invLabel1: '', invLabel2: '' };
     }
     return this.UI.buildRenderVals(this.state, this.props, this.E, this.D, handlers);
   }
