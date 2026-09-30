@@ -65,8 +65,10 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   <div class="note"><strong>These are the working tools, not demonstrations.</strong> They carry the complete
   corpus — all <strong>308,597</strong> sanctions and crime entities (73,026 of them sanctions-listed, the
   rest criminal, warrant and debarment records), all 12,113 relationship records and all
-  2,347 vessels and aircraft from the 2 August 2026 snapshot. Sentinel Screen pulls 55&nbsp;MB for its core
-  pack, the other three carry their own smaller ones — 87&nbsp;MB for the suite. Once a tool and its pack have
+  2,347 vessels and aircraft from the 2 August 2026 snapshot. Sentinel Screen downloads a 19&nbsp;MB compressed
+  core pack (58&nbsp;MB once unpacked in the browser, so allow 20–40 seconds) and a further 2.7&nbsp;MB of listing
+  detail in the background; the other three carry their own smaller packs — 2.2&nbsp;MB, 0.24&nbsp;MB and
+  0.05&nbsp;MB — about 25&nbsp;MB compressed for the suite. Once a tool and its pack have
   loaded, the machine can go off the network and that tool keeps answering. The only component held back
   is the 771,755-record PEP overlay, which is a 141&nbsp;MB pack that cannot be published here; it runs in the
   local build and every tool says so rather than hiding it.</div>
@@ -78,7 +80,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
       <p>Screen a name, an identifier or a pasted list against all 308,597 sanctions and crime entities.
       Produces a dated, checksum-stamped attestation for a compliance file. The 771,755-record PEP overlay
       runs in the local build.</p>
-      <div class="pills"><span class="pill">batch CSV</span><span class="pill">attestation</span><span class="pill">PEP overlay (local build)</span></div>
+      <div class="pills"><span class="pill">batch CSV</span><span class="pill">attestation</span><span class="pill">PEP overlay (local build)</span><span class="pill">19 MB download</span></div>
       <div class="go">Open →</div>
     </a>
     <a class="tool" href="Exposure-Graph.html">
@@ -86,7 +88,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
       <h2>Exposure Graph</h2>
       <p>Walk 12,113 relationship records to find the shortest route from a counterparty to a designated party —
       each hop carrying its own source.</p>
-      <div class="pills"><span class="pill">shortest paths</span><span class="pill">SVG map</span><span class="pill">dossier export</span></div>
+      <div class="pills"><span class="pill">shortest paths</span><span class="pill">SVG map</span><span class="pill">dossier export</span><span class="pill">2.2 MB download</span></div>
       <div class="go">Open →</div>
     </a>
     <a class="tool" href="Vessel-Screener.html">
@@ -94,7 +96,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
       <h2>Vessel &amp; Trade Screener</h2>
       <p>Screen an IMO, MMSI, call sign or a pasted manifest against 2,347 vessels and aircraft,
       with ownership chains and sanctioned owners flagged.</p>
-      <div class="pills"><span class="pill">IMO / MMSI</span><span class="pill">manifest batch</span><span class="pill">ownership</span></div>
+      <div class="pills"><span class="pill">IMO / MMSI</span><span class="pill">manifest batch</span><span class="pill">ownership</span><span class="pill">0.24 MB download</span></div>
       <div class="go">Open →</div>
     </a>
     <a class="tool" href="Meridian-Sanctions-Console.html">
@@ -102,7 +104,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
       <h2>Meridian Sanctions Console</h2>
       <p>1,317 tracked companies pre-screened against the snapshot, with a review queue filterable by score
       band — candidates for adjudication, never findings.</p>
-      <div class="pills"><span class="pill">1,317 companies</span><span class="pill">score bands</span><span class="pill">CSV export</span></div>
+      <div class="pills"><span class="pill">1,317 companies</span><span class="pill">score bands</span><span class="pill">CSV export</span><span class="pill">0.05 MB download</span></div>
       <div class="go">Open →</div>
     </a>
   </div>

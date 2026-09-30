@@ -10,7 +10,7 @@
     --good:#43c59e;--radius:12px;--mono:ui-monospace,'Cascadia Code',Consolas,monospace;
     --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
   html[data-theme="light"]{--bg:#f4f1ec;--surface:#fff;--surface2:#faf7f2;--ink:#221e18;--ink2:#4c473e;
-    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f;--gold:#836819--good:#0f7a5a;--warn:#8a5a10;--bad:#a32a1e;}
+    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f;--gold:#836819;--good:#0f7a5a;--warn:#8a5a10;--bad:#a32a1e;}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55}
   header{border-bottom:1px solid var(--line);padding:14px 20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:var(--surface)}
@@ -18,12 +18,15 @@
   .tag{font-size:.7rem;padding:2px 8px;border:1px solid var(--line);border-radius:99px;color:var(--muted)}
   .spacer{flex:1}
   button{background:var(--accent);color:#04211e;border:0;border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer;font-size:.86rem}
+  html[data-theme="light"] button:not(.ghost){color:#fff}
   button.ghost{background:transparent;color:var(--ink2);border:1px solid var(--line)}
   button:disabled{opacity:.5;cursor:not-allowed}
   main{padding:20px;max-width:1240px;margin:0 auto}
   .grid{display:grid;grid-template-columns:340px 1fr;gap:20px}
+  .grid>*{min-width:0}
   @media(max-width:900px){.grid{grid-template-columns:1fr}}
   .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:16px}
+  #resultCard{overflow-x:auto}
   label{display:block;font-size:.75rem;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.06em}
   input,textarea,select{width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--ink);
     border-radius:8px;padding:8px 10px;font-family:inherit;font-size:.9rem}
@@ -32,6 +35,9 @@
   th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
   th{color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em}
   .pill{display:inline-block;font-size:.68rem;padding:1px 7px;border-radius:99px;border:1px solid var(--line);margin:1px 3px 1px 0;white-space:nowrap}
+  /* The list label is three words long; it wraps inside its pill rather than widening the column. */
+  td.listcell{max-width:150px}
+  td.listcell .pill{white-space:normal;line-height:1.35;border-radius:10px}
   .p-S{background:rgba(224,87,74,.15);border-color:var(--bad);color:var(--bad)}
   .p-C{background:rgba(224,161,58,.15);border-color:var(--warn);color:var(--warn)}
   .p-P{background:rgba(67,179,166,.15);border-color:var(--accent);color:var(--accent-ink)}
@@ -67,11 +73,11 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   <span class="spacer"></span>
   <a class="tag" href="index.html" data-keep-theme style="text-decoration:none">← Suite</a>
   <button class="ghost noprint" id="themeBtn">Theme</button>
-  <button class="ghost noprint" id="selfTestBtn">Self-test</button>
+  <button class="ghost noprint" id="selfTestBtn" disabled>Self-test</button>
 </header>
 <main>
   <div id="warn"></div>
-  <div class="banner" id="provenance">Loading data pack…</div>
+  <div class="banner" id="provenance">Loading the 19 MB screening pack… (about 20–40 s on a normal connection).</div>
   <div class="grid">
     <div>
       <div class="card">
@@ -92,9 +98,11 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
         </select>
         <label id="pepWrap"><input type="checkbox" id="usePeps" style="width:auto"> include PEP list (loads a large extra pack)</label>
         <div style="margin-top:12px;display:flex;gap:8px">
-          <button id="runBtn">Screen</button>
+          <button id="runBtn" disabled>Screen</button>
           <button class="ghost" id="clearBtn">Clear</button>
         </div>
+        <div class="muted" id="loadNote" style="margin-top:8px">Loading the 19 MB screening pack… (about 20–40 s on a normal connection).
+          The buttons enable when it has parsed; a name typed meanwhile is screened as soon as it does.</div>
       </div>
       <div class="card">
         <strong style="font-size:.9rem">Batch</strong>
@@ -106,7 +114,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
         <label for="file">…or choose a CSV/TXT file</label>
         <input type="file" id="file" accept=".csv,.txt">
         <div style="margin-top:12px;display:flex;gap:8px">
-          <button id="batchBtn">Screen batch</button>
+          <button id="batchBtn" disabled>Screen batch</button>
           <button class="ghost" id="csvBtn" disabled>Export CSV</button>
         </div>
       </div>
@@ -212,10 +220,24 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
       return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});
   }
   function arr(v){ return Array.isArray(v) ? v : []; }
+  // Some source rows arrive still wrapped in CSV quoting, with inner quotes
+  // doubled: "Limited Liability Company ""Zelinsky Group""". Matching is not
+  // affected — norm() drops punctuation — but the artefact must not be shown.
+  function dq(s){
+    s = String(s==null?"":s);
+    if(s.length>1 && s.charAt(0)==='"' && s.charAt(s.length-1)==='"' && s.indexOf('""')>=0)
+      s = s.slice(1,-1).replace(/""/g,'"');
+    // A lone unmatched quote at either end is the same artefact, cut short.
+    if(s.length>1 && (s.match(/"/g)||[]).length===1 && (s.charAt(0)==='"' || s.charAt(s.length-1)==='"'))
+      s = s.replace(/^"|"$/,"");
+    return s;
+  }
+  // The "crime" collection is wider than its name: enforcement actions,
+  // procurement debarments and disqualifications sit alongside warrants.
   function listLabel(l){
     var a = arr(l);
     if(!a.length) return "Unknown";
-    var names = a.map(function(x){ return x==="S"?"Sanctions":x==="C"?"Crime":x==="P"?"PEP":"Unknown"; });
+    var names = a.map(function(x){ return x==="S"?"Sanctions":x==="C"?"Crime / enforcement / debarment":x==="P"?"PEP":"Unknown"; });
     return names.join(" + ");
   }
   function listClass(l){
@@ -308,6 +330,11 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
         if(!distinctive){
           var only = Array.from(small)[0];
           distinctive = (docFreq(only) <= rareCutoff()) && only.length >= 4;
+          // A one-token containment may fire only when the QUERY is the contained
+          // side. A person's bare forename or surname held as an alias must not
+          // carry a match against a longer query: "Nicolas Maduro" was answered
+          // first by an unrelated person whose alias list held "NICOLAS".
+          if(small === rC && String(rec.s || "") === "Person") distinctive = false;
         }
         if(distinctive && notAllGeneric) sc = Math.max(sc, 0.95);
       }
@@ -317,7 +344,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   }
 
   function candidates(pack, idx, queryName){
-    var ts = toks(queryName,true);
+    var ts = toks(queryName,true).filter(function(t,i,a){ return a.indexOf(t)===i; });
     if(!ts.length) return [];
     var seen = Object.create(null), any=false;
     for(var i=0;i<ts.length;i++){
@@ -327,7 +354,25 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     if(!any) return [];
     var out = Object.keys(seen).map(Number);
     out.sort(function(a,b){ return (seen[b]-seen[a]) || (a-b); });
+    out.counts = seen;        // how many of the query's tokens reached each record
+    out.tokens = ts;
     return out;
+  }
+
+  // The index was built from every name form of every record, but the shipped
+  // pack carries at most eight aliases per record. A record can therefore be
+  // reached through a token — a Cyrillic name, a ninth alias — that none of
+  // its shipped names contains, and score() then sees nothing to score. Such a
+  // record must be reported as inconclusive, never folded into a clean "no
+  // match". This returns the query tokens absent from the shipped names.
+  function unshippedTokens(rec, ts){
+    var have = Object.create(null);
+    var names = [rec.n].concat(arr(rec.a));
+    for(var i=0;i<names.length;i++){
+      toks(names[i],false).forEach(function(t){ have[t]=1; });
+      toks(names[i],true).forEach(function(t){ have[t]=1; });
+    }
+    return ts.filter(function(t){ return !have[t]; });
   }
 
   function getIdIndex(){
@@ -382,13 +427,37 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
         });
       }
     }
+    var unscored = [], unscoredTotal = 0;
     if(q){
       var cand = candidates(CORE, CORE.idx, q);
+      var nt = cand.tokens ? cand.tokens.length : 0;
+      // Records the index reached through every token of the query are worth
+      // naming when they cannot be scored, as is a record reached through an
+      // omitted form of the query's rarest distinctive token ("Сбербанк России"
+      // finds no form carrying both words, but "сбербанк" alone is decisive).
+      // A lone common token would name hundreds; that case is already reported
+      // as a near miss below.
+      var nameUnscored = nt >= 2 || (nt === 1 && docFreq(cand.tokens[0]) <= rareCutoff());
+      var rarest = null, viaRare = Object.create(null);
+      if(nameUnscored){
+        cand.tokens.forEach(function(t){
+          if(t.length >= 4 && !GENERIC.has(t) && docFreq(t) <= rareCutoff() && (!rarest || docFreq(t) < docFreq(rarest))) rarest = t;
+        });
+        if(rarest) (CORE.idx[rarest] || []).forEach(function(p){ viaRare[p] = 1; });
+      }
       for(var k=0;k<cand.length;k++){
         var rec = CORE.recs[cand[k]];
         if(!rec) continue;
         var s = score(q, rec);
-        if(s.score >= thr) consider(rec, s.score, s.via, "name");
+        if(s.score >= thr){ consider(rec, s.score, s.via, "name"); continue; }
+        var full = nameUnscored && cand.counts[cand[k]] === nt;
+        if(full || viaRare[cand[k]]){
+          var missing = unshippedTokens(rec, cand.tokens);
+          if(missing.length && (full || missing.indexOf(rarest) >= 0)){
+            unscoredTotal++;
+            if(unscored.length < 20) unscored.push({rec:rec, tokens:cand.tokens.slice()});
+          }
+        }
       }
       if(pepsActive && PEPS){
         var pidx = getPepIdx();
@@ -447,11 +516,24 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     function nameOf(h){ return (h.reason==="identifier" || h.reason==="identifier-nonunique") ? h.rec.n : (h.via || h.rec.n); }
     function rankKeep(h){ if(!c1.has(h)) c1.set(h, rankScore(q, nameOf(h), h.rec.s, false)); return c1.get(h); }
     function rankShow(h){ if(!c2.has(h)) c2.set(h, rankScore(q, nameOf(h), h.rec.s, true)); return c2.get(h); }
+    // Ties at equal score and equal overlap are common — every two-word name
+    // containing a one-word query ties — and were broken by record id, which put
+    // sixty-odd private individuals surnamed Wagner ahead of PMC Wagner. Three
+    // honest signals break them instead: a sanctions listing before a crime or
+    // debarment record, a match on the record's primary name before one on an
+    // alias, and the record cited by more source lists first. Presentation only.
+    function tieKey(h){
+      return (arr(h.rec.l).indexOf("S")>=0 ? 4 : 0) + ((h.via || h.rec.n) === h.rec.n ? 2 : 0);
+    }
     function order(rank){
       return function(a,b){
         if(b.score !== a.score) return b.score - a.score;
         var rb = rank(b), ra = rank(a);
         if(rb !== ra) return rb - ra;
+        var tb = tieKey(b), ta = tieKey(a);
+        if(tb !== ta) return tb - ta;
+        var sb = arr(b.rec.d).length, sa = arr(a.rec.d).length;
+        if(sb !== sa) return sb - sa;
         var x=String(a.rec.i), y=String(b.rec.i);      // codepoint order, locale-independent
         return x<y ? -1 : x>y ? 1 : 0;
       };
@@ -467,7 +549,8 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
       if(qc.length === 1) nearMisses = docFreq(qc[0]);
     }
     return {hits:list, truncated:capped, total:total,
-            nearMisses:nearMisses, countryUnknown:countryUnknown, idRefused:idRefused};
+            nearMisses:nearMisses, countryUnknown:countryUnknown, idRefused:idRefused,
+            unscored:unscored, unscoredTotal:unscoredTotal};
   }
 
   function scoreClass(s){ return s>=0.85?"s-hi":(s>=0.65?"s-md":"s-lo"); }
@@ -475,6 +558,27 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     var n = CORE.recs.length.toLocaleString()+" sanctions and crime records";
     if(pepsActive && PEPS) n += " plus "+PEPS.recs.length.toLocaleString()+" PEP records";
     return n;
+  }
+
+  // Candidates the index reached but the shipped names cannot score. Listed by
+  // name so the analyst can re-screen the Latin form and confirm on the source.
+  function renderUnscored(res){
+    var u = arr(res.unscored);
+    if(!u.length) return "";
+    var h = '<div class="warnbar"><strong>Inconclusive — '+res.unscoredTotal+' record'+(res.unscoredTotal===1?'':'s')+
+      ' matched on a name form not included in this pack.</strong> Every token of the query appears in the '+
+      'indexed name forms of the record'+(res.unscoredTotal===1?'':'s')+' below, but the form that carries it is '+
+      'one of the aliases this pack omits (it holds at most eight per record), so no score can be given here. '+
+      'Screen the Latin-script name shown and confirm on the source list before treating this as clear.'+
+      '<table style="margin-top:8px"><thead><tr><th>Candidate</th><th>List</th><th>Type</th><th>Country</th></tr></thead><tbody>';
+    u.forEach(function(x){
+      var r = x.rec;
+      h += '<tr><td><strong>'+esc(dq(r.n))+'</strong>'+(r.b?'<div class="muted">DOB '+esc(r.b)+'</div>':'')+'</td>'+
+        '<td class="listcell"><span class="pill p-'+listClass(r.l)+'">'+esc(listLabel(r.l))+'</span></td>'+
+        '<td>'+esc(r.s||"")+'</td><td>'+esc(arr(r.c).join(", "))+'</td></tr>';
+    });
+    h += '</tbody></table>'+(res.unscoredTotal>u.length?'<div class="muted">Showing the first '+u.length+' of '+res.unscoredTotal+'.</div>':'')+'</div>';
+    return h;
   }
 
   function renderHits(q, res, pepsActive){
@@ -490,6 +594,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
           'reliably. Only the name was screened. Supply the identifier in full before treating this '+
           'as clear.</div>';
       }
+      w += renderUnscored(res);
       if(res.nearMisses){
         w += '<div class="warnbar"><strong>Inconclusive — not a clear result.</strong> "'+esc(q)+
           '" reduces to a single distinguishing token. '+res.nearMisses+' record(s) in this snapshot '+
@@ -512,14 +617,15 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     if(res.idRefused) h += '<div class="warnbar">The identifier supplied was not searched: it is masked or shorter than six characters, which cannot be matched reliably. Only the name was screened.</div>';
     if(res.countryUnknown) h += '<div class="warnbar">Country filter not applied: that country was not recognised, so no country comparison was performed.</div>';
     if(res.truncated) h += '<div class="warnbar">Showing the 200 highest-scoring of '+res.total+' results — narrow the query or raise the threshold. Exports carry a TRUNCATED row.</div>';
+    h += renderUnscored(res);
     h += '<table><thead><tr><th>Score</th><th>Name / matched via</th><th>List</th><th>Type</th><th>Country</th><th>Programmes</th><th>Sources</th></tr></thead><tbody>';
     hits.forEach(function(x){
       var r = x.rec;
       var detail = (DETAIL && DETAIL.detail) ? arr(DETAIL.detail[r.i]) : [];
       h += '<tr><td class="score '+scoreClass(x.score)+'">'+x.score.toFixed(2)+'</td>';
-      h += '<td><strong>'+esc(r.n)+'</strong>';
-      if(x.via && x.via!==r.n) h += '<div class="muted">via '+esc(x.via)+'</div>';
-      if(x.alt) h += '<div class="muted">also recorded as '+esc(x.alt)+'</div>';
+      h += '<td><strong>'+esc(dq(r.n))+'</strong>';
+      if(x.via && x.via!==r.n) h += '<div class="muted">via '+esc(dq(x.via))+'</div>';
+      if(x.alt) h += '<div class="muted">also recorded as '+esc(dq(x.alt))+'</div>';
       if(x.reason==="identifier-nonunique") h += '<div class="muted" style="color:var(--warn)">identifier is not a unique key in this snapshot — verify before relying on it</div>';
       if(r.b){
         var dl = x.dobMatch==="exact" ? ' ✓ matches query' :
@@ -540,11 +646,14 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
         h += '<div class="muted"><em>listing detail pack not loaded</em></div>';
       }
       h += '</td>';
-      h += '<td><span class="pill p-'+listClass(r.l)+'">'+esc(listLabel(r.l))+'</span></td>';
+      h += '<td class="listcell"><span class="pill p-'+listClass(r.l)+'">'+esc(listLabel(r.l))+'</span></td>';
       h += '<td>'+esc(r.s||"")+'</td>';
       h += '<td>'+esc(arr(r.c).join(", "))+(x.countryMatch===true?' ✓':(x.countryMatch===false?' <span class="muted">(differs)</span>':''))+'</td>';
       h += '<td>'+arr(r.p).map(function(p){return '<span class="pill">'+esc(p)+'</span>'}).join("")+'</td>';
-      h += '<td class="muted">'+esc(arr(r.d).join("; "))+'</td></tr>';
+      // Two sources on the face of the row; the rest on hover and in the export.
+      var srcs = arr(r.d);
+      h += '<td class="muted"'+(srcs.length>2?' title="'+esc(srcs.join("; "))+'"':'')+'>'+esc(srcs.slice(0,2).join("; "))+
+           (srcs.length>2?' <span style="white-space:nowrap">+'+(srcs.length-2)+' more</span>':'')+'</td></tr>';
     });
     return h+'</tbody></table>';
   }
@@ -717,10 +826,11 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
           h += '<tr><td><strong>'+esc(r.query)+'</strong></td>'+
             '<td>'+statusCell+'</td>'+
             '<td class="score '+(top?scoreClass(top.score):'')+'">'+(top?top.score.toFixed(2):'—')+'</td>'+
-            '<td>'+(top?esc(top.rec.n)+' <span class="muted">('+esc(listLabel(top.rec.l))+')</span>'
+            '<td>'+(top?esc(dq(top.rec.n))+' <span class="muted">('+esc(listLabel(top.rec.l))+')</span>'
                       :(r.res.idRefused?'<span class="muted">identifier not searched — name only</span>'
+                       :(r.res.unscoredTotal?'<span class="muted">name form not in this pack — '+r.res.unscoredTotal+' candidate(s), e.g. '+esc(dq(r.res.unscored[0].rec.n))+'</span>'
                        :(r.res.nearMisses?'<span class="muted">single-token query — '+r.res.nearMisses+' record(s) contain it</span>'
-                                        :'<span class="muted">no match</span>')))+'</td></tr>';
+                                        :'<span class="muted">no match</span>'))))+'</td></tr>';
         });
         document.getElementById("resultCard").innerHTML = h+'</tbody></table>';
         document.getElementById("attBtn").disabled = false;
@@ -739,8 +849,12 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   function verdictOf(res){
     if(res.hits.length) return "hit";
     if(res.idRefused) return "inconclusive - identifier not searched";
+    if(res.unscoredTotal) return "inconclusive - matched on a name form not in this pack";
     if(res.nearMisses) return "inconclusive - single-token query";
     return "clear";
+  }
+  function unscoredNames(res){
+    return arr(res.unscored).map(function(x){ return dq(x.rec.n); }).join("; ");
   }
   function isClear(res){ return verdictOf(res)==="clear"; }
 
@@ -758,11 +872,14 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
       "programmes","sources","snapshot_version","screened_utc","corpus","licence","attribution"]];
     lastRun.rows.forEach(function(r){
       if(!r.res.hits.length){
+        // An unscorable candidate is named in the export so the file shows what
+        // the analyst was told to confirm.
         rows.push([r.query, verdictOf(r.res),
-          "","","","","","","","",m.snapshot_version,when,corpus,m.licence,m.attribution]);
+          "",(r.res.unscoredTotal?"candidates to confirm: "+unscoredNames(r.res):""),"","","","","","",
+          m.snapshot_version,when,corpus,m.licence,m.attribution]);
       } else {
         r.res.hits.forEach(function(h){
-          rows.push([r.query,"hit",h.score.toFixed(3),h.rec.n,h.rec.i,listLabel(h.rec.l),h.rec.s||"",
+          rows.push([r.query,"hit",h.score.toFixed(3),dq(h.rec.n),h.rec.i,listLabel(h.rec.l),h.rec.s||"",
             arr(h.rec.c).join(" "),arr(h.rec.p).join(" "),arr(h.rec.d).join(" "),
             m.snapshot_version,when,corpus,m.licence,m.attribution]);
         });
@@ -825,13 +942,15 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
       h += '<div class="rowline '+(isClear(r.res)?'clearrow':'hit')+'"><strong>'+esc(r.query)+'</strong> — '+
         (r.res.hits.length ? r.res.total+' result(s); highest score '+r.res.hits[0].score.toFixed(2)
          : (r.res.idRefused ? 'INCONCLUSIVE — the identifier supplied was masked or too short to search; only the name was screened'
+         : (r.res.unscoredTotal ? 'INCONCLUSIVE — '+r.res.unscoredTotal+' record(s) matched on a name form this pack does not carry; confirm on the source list: '+esc(unscoredNames(r.res))
          : (r.res.nearMisses ? 'INCONCLUSIVE — single distinguishing token; '+r.res.nearMisses+' record(s) contain it, none scored as a match'
-         : 'no match at threshold')))+'</div>';
+         : 'no match at threshold'))))+'</div>';
       if(r.res.hits.length){
+        if(r.res.unscoredTotal) h += '<div class="muted">Also inconclusive: '+r.res.unscoredTotal+' record(s) matched on a name form this pack does not carry — '+esc(unscoredNames(r.res))+'.</div>';
         var shown = r.res.hits.slice(0,25);
         h += '<table><thead><tr><th>Score</th><th>Name</th><th>List</th><th>Programmes</th><th>Record id</th></tr></thead><tbody>';
         shown.forEach(function(x){
-          h += '<tr><td class="score">'+x.score.toFixed(2)+'</td><td>'+esc(x.rec.n)+'</td><td>'+esc(listLabel(x.rec.l))+'</td>'+
+          h += '<tr><td class="score">'+x.score.toFixed(2)+'</td><td>'+esc(dq(x.rec.n))+'</td><td>'+esc(listLabel(x.rec.l))+'</td>'+
             '<td>'+esc(arr(x.rec.p).join(", "))+'</td><td class="mono">'+esc(x.rec.i)+'</td></tr>';
         });
         h += '</tbody></table>';
@@ -958,6 +1077,48 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
          verdictOf({hits:[],idRefused:false,nearMisses:12}) === "inconclusive - single-token query");
       ok("a fully searched nil result is clear",
          verdictOf({hits:[],idRefused:false,nearMisses:0}) === "clear");
+      ok("a match on a name form the pack does not carry is inconclusive, not clear",
+         verdictOf({hits:[],idRefused:false,nearMisses:0,unscoredTotal:1}) !== "clear");
+      // A person's one-token alias must not be the contained side of a match.
+      ok("a person's bare forename alias does not match a longer query",
+         score("Nicolas Maduro",{n:"Carlos Antonio Moreno Tuberquia",a:["NICOLAS"],s:"Person"}).score < 0.65,
+         "scored "+score("Nicolas Maduro",{n:"Carlos Antonio Moreno Tuberquia",a:["NICOLAS"],s:"Person"}).score.toFixed(2));
+      ok("a query contained in a person's full name still matches",
+         score("Nicolas Maduro",{n:"Nicolas MADURO MOROS",a:[],s:"Person"}).score >= 0.95);
+      ok("an organisation's one-token name still matches inside a longer query", (function(){
+        var t=null;
+        for(var k in CORE.idx){ if(CORE.idx[k].length===1 && k.length>=6 && !GENERIC.has(k)){ t=k; break; } }
+        if(!t) return true;
+        return score(t+" trading alpha",{n:t,a:[],s:"Organization"}).score >= 0.95;
+      })());
+      // The index holds every name form; the pack ships at most eight. A record
+      // reached only through an unshipped form must surface as inconclusive.
+      ok("a record reached only through an unshipped name form is reported, never cleared", (function(){
+        var saveRecs=CORE.recs, saveIdx=CORE.idx;
+        CORE.recs=[{i:"U1",n:"Vladimir Vladimirovich Putin",a:["PUTIN, Vladimir"],l:["S"],s:"Person",c:["ru"]}];
+        CORE.idx={"vladimir":[0],"putin":[0],"владимир":[0],"путин":[0]};
+        var r=screenOne("Владимир Путин",{threshold:0.65,country:"",dob:"",identifier:"",peps:false},false);
+        CORE.recs=saveRecs; CORE.idx=saveIdx;
+        return r.hits.length===0 && r.unscoredTotal===1 && r.unscored[0].rec.i==="U1" && verdictOf(r)!=="clear";
+      })());
+      ok("a scored match is not also listed as unscorable", (function(){
+        var saveRecs=CORE.recs, saveIdx=CORE.idx;
+        CORE.recs=[{i:"U1",n:"Vladimir Vladimirovich Putin",a:["PUTIN, Vladimir"],l:["S"],s:"Person",c:["ru"]}];
+        CORE.idx={"vladimir":[0],"putin":[0],"владимир":[0],"путин":[0]};
+        var r=screenOne("Vladimir Putin",{threshold:0.65,country:"",dob:"",identifier:"",peps:false},false);
+        CORE.recs=saveRecs; CORE.idx=saveIdx;
+        return r.hits.length===1 && r.unscoredTotal===0;
+      })());
+      ok("at equal score a sanctions listing ranks before a crime record", (function(){
+        var saveRecs=CORE.recs, saveIdx=CORE.idx;
+        CORE.recs=[{i:"A",n:"Keith Wagner",a:[],l:["C"],s:"Person",d:["x"]},{i:"B",n:"PMC Wagner",a:[],l:["S","C"],s:"Organization",d:["x","y"]}];
+        CORE.idx={"keith":[0],"wagner":[0,1],"pmc":[1]};
+        var r=screenOne("Wagner",{threshold:0.65,country:"",dob:"",identifier:"",peps:false},false);
+        CORE.recs=saveRecs; CORE.idx=saveIdx;
+        return r.hits.length===2 && r.hits[0].rec.i==="B";
+      })());
+      ok("csv quoting artefacts are removed for display", dq('"Limited Liability Company ""Zelinsky Group"""')==='Limited Liability Company "Zelinsky Group"'
+         && dq('Joint Stock Company "Rigel"')==='Joint Stock Company "Rigel"');
       ok("X is a letter, not a mask glyph", cleanId("X1234567L") === "X1234567L",
          "got \""+cleanId("X1234567L")+"\"");
       ok("genuine masks are still refused", cleanId("**********0211")==="" && cleanId("####1234")==="");
@@ -1017,7 +1178,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   function setProvenance(){
     var el=document.getElementById("provenance"), w=document.getElementById("warn");
     if(!CORE){
-      el.innerHTML='<strong style="color:var(--bad)">Data pack not found or malformed.</strong> Run 01-build\\BUILD-ALL.cmd, then reopen this page.';
+      el.innerHTML='<strong style="color:var(--bad)">The data pack did not load</strong> — reload the page or check your connection.';
       return;
     }
     var m=CORE.meta, ds=m.datasets||{};
@@ -1025,7 +1186,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     if(m.sample_build) w.innerHTML='<div class="warnbar"><strong>SAMPLE BUILD.</strong> These packs were built from truncated data with <code>--sample</code> and must not be used for screening.</div>';
     else if(m.demo_subset) w.innerHTML='<div class="warnbar" style="border-color:var(--warn);color:var(--warn);background:rgba(224,161,58,.10)"><strong>Reduced corpus.</strong> '+esc(m.demo_note||"")+'</div>';
     if(window.PACK_MANIFEST && window.PACK_MANIFEST.built_from_snapshot!==m.built_from_snapshot)
-      w.innerHTML+='<div class="warnbar"><strong>Pack mismatch.</strong> This pack was built from a different snapshot than the manifest — re-run BUILD-ALL.cmd.</div>';
+      w.innerHTML+='<div class="warnbar"><strong>Pack mismatch.</strong> This pack was built from a different snapshot than the manifest, so the stated snapshot cannot be relied on.</div>';
     el.innerHTML='<strong>Dataset:</strong> OpenSanctions · sanctions <span class="mono">'+esc((ds.sanctions&&ds.sanctions.version)||"?")+
       '</span>, crime <span class="mono">'+esc((ds.crime&&ds.crime.version)||"?")+
       '</span>, PEP <span class="mono">'+esc((ds.peps&&ds.peps.version)||"?")+'</span> · '+
@@ -1067,11 +1228,28 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     if(m && m.pep_available===false){
       var cb=document.getElementById("usePeps"), wrap=document.getElementById("pepWrap");
       if(cb){ cb.checked=false; cb.disabled=true; }
-      if(wrap) wrap.innerHTML='<span class="muted">PEP overlay — 771,755 records — runs in the local build. '+
-        'The pack is 141 MB, past what can be published here.</span>';
+      // A plain element, not the <label>: the label style upper-cases and
+      // letter-spaces everything inside it.
+      if(wrap && wrap.parentNode){
+        var note=document.createElement("div");
+        note.id="pepWrap"; note.className="muted"; note.style.marginTop="10px";
+        note.textContent="PEP overlay — 771,755 records — runs in the local build. The pack is 141 MB, past what can be published here.";
+        wrap.parentNode.replaceChild(note, wrap);
+      }
     }
   })();
   setProvenance();
+  // The core pack is a blocking download and the handlers are bound only after
+  // it, so the action buttons start disabled in the markup. Now that the pack
+  // has parsed, open the desk and screen anything the visitor typed meanwhile.
+  (function(){
+    var note=document.getElementById("loadNote");
+    if(note) note.parentNode.removeChild(note);
+    if(!CORE) return;
+    ["runBtn","batchBtn","selfTestBtn"].forEach(function(id){ document.getElementById(id).disabled=false; });
+    var typed=document.getElementById("q").value.trim() || document.getElementById("qid").value.trim();
+    if(typed) runSingle();
+  })();
 })();
 </script>
 <script>
