@@ -165,9 +165,18 @@
   .salvopanel .sv-rc{color:var(--muted);font-size:9.8px;line-height:1.45}
   .salvopanel .sv-rc b{color:var(--accent-ink)}
   .salvopanel .sv-cd{display:block;margin-top:4px;color:#84d6ca;font-size:9.5px;letter-spacing:.04em}
-  .shotpanel{position:absolute;bottom:118px;left:12px;z-index:3;width:252px;padding:10px 12px;border-radius:10px;
+  /* docked in the RIGHT lane under the target cam (dockShotPanel() sets top/max-height live, so it
+     never sits on the force legend, the mode row or the launch controls); the body scrolls inside
+     its box and the long "why the fast dart" note is folded behind a disclosure */
+  .shotpanel{position:absolute;top:258px;right:12px;z-index:3;width:264px;max-height:120px;overflow:auto;overscroll-behavior:contain;padding:10px 12px;border-radius:10px;
     border:1px solid var(--line2);background:color-mix(in oklab,var(--bg2),transparent 6%);backdrop-filter:blur(8px);
     font-family:var(--fm);font-size:10.5px;color:var(--ink2);line-height:1.5;box-shadow:var(--shadow)}
+  .shotpanel .sp-why{margin-top:5px}
+  .shotpanel .sp-why>summary{cursor:pointer;list-style:none;color:var(--accent-ink);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase}
+  .shotpanel .sp-why>summary::-webkit-details-marker{display:none}
+  .shotpanel .sp-why>summary::after{content:' \25B8'}
+  .shotpanel .sp-why[open]>summary::after{content:' \25BE'}
+  .shotpanel .sp-why>span{display:block;margin-top:4px}
   .shotpanel .sp-t{color:var(--accent-ink);letter-spacing:.06em;margin-bottom:6px;font-size:9.5px;text-transform:uppercase}
   .shotpanel .sp-n{color:var(--ink);font-size:12.5px;font-weight:600;margin-bottom:2px}
   .shotpanel .sp-dv{color:var(--ink2);margin-bottom:6px}
@@ -185,6 +194,7 @@
   .parts{display:flex;flex-direction:column;gap:6px}
   .part{display:flex;align-items:center;gap:10px;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--bg2);cursor:pointer;transition:.14s}
   .part:hover{border-color:var(--line2)}
+  .part:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   .part.on{border-color:var(--accent);background:color-mix(in oklab,var(--accent) 12%,transparent)}
   .part .sw{width:13px;height:13px;border-radius:4px;flex:0 0 auto}
   .part .pn{flex:1;font-size:13px;color:var(--ink)}
@@ -235,6 +245,7 @@
   html[data-theme="light"] .shotpanel .sp-n{color:#e9eef7}
   html[data-theme="light"] .shotpanel .sp-dv{color:#aab7cc}
   html[data-theme="light"] .shotpanel .sp-note{color:#93a2ba}
+  html[data-theme="light"] .shotpanel .sp-why>summary{color:#84d6ca}
 
   /* ---- phone: get to the demo -------------------------------------------
      At 390px these pages ran to four or five screens, of which the canvas was
@@ -265,15 +276,28 @@
     .viewbox:not(.hud-on) .modes,.viewbox:not(.hud-on) .hud,.viewbox:not(.hud-on) .scaleinset{display:none!important}
     .viewbox:not(.hud-on) .controls>*:not(#fireBtn):not(#resetBtn){display:none!important}
   }
+  /* embedded in the Research Lab lightbox: no second header, introduction folded so the tool is on top */
+  html.embed .top{display:none}
+  html.embed .wrap{padding-top:10px}
+  details.embedintro{margin:0 0 4px}
+  details.embedintro>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:8px;font-family:var(--fm);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);padding:4px 0}
+  details.embedintro>summary::-webkit-details-marker{display:none}
+  details.embedintro>summary::after{content:'\25B8';font-size:10px}
+  details.embedintro[open]>summary::after{content:'\25BE'}
+  /* the wrapped header is a quarter of a phone screen; let it scroll away */
+  @media (max-width:640px){.top{position:static}}
 </style>
+<script>/* ?embed=1: opened inside the Research Lab lightbox, which has its own title bar and close
+   control, so this page's header is dropped and its introduction folds below (see the end of the page). */
+try{if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.classList.add('embed');}catch(e){}</script>
   <link rel="stylesheet" href="../../assets/fonts.css">
 </head>
 <body>
   <div class="wrap">
     <div class="top" style="margin:calc(-1 * clamp(20px,4vw,34px)) calc(-1 * clamp(16px,4vw,32px)) 0;border-radius:0">
-      <a class="brand" href="../../publications/index.html"><span class="crest">CF</span><span><span class="nm">Christopher Farmer</span><br><span class="rl">ARGUS-PD Launch Architecture · 3D</span></span></a>
+      <a class="brand" href="../../publications/index.html" target="_top"><span class="crest">CF</span><span><span class="nm">Christopher Farmer</span><br><span class="rl">ARGUS-PD Launch Architecture · 3D</span></span></a>
       <div style="display:flex;gap:8px">
-        <a class="btn" href="../../publications/index.html">&#8592; Publications</a>
+        <a class="btn" href="../../publications/index.html" target="_top">&#8592; Publications</a>
         <button class="btn" id="theme" aria-label="Toggle theme">&#9789;</button>
       </div>
     </div>
@@ -353,7 +377,8 @@
           <div class="sp-t">Deflection — planetary defence (illustrative)</div>
           <div class="sp-n" id="sp-n">≈ — flight windows in a notional 1-yr warning</div>
           <div class="sp-dv" id="sp-dv">each imparts Δv ≈ —</div>
-          <div class="sp-note">Repeated small nudges walk it off an Earth-bound track — not one Hollywood hit.<br><span id="sp-resp"></span> Illustrative — not operational.</div>
+          <div class="sp-note">Repeated small nudges walk it off an Earth-bound track — not one Hollywood hit.<br><span id="sp-resp"></span> Illustrative — not operational.
+            <details class="sp-why"><summary>Why the fast dart</summary><span id="sp-why"></span></details></div>
         </div>
       </div>
 
@@ -453,6 +478,7 @@ function glowTexture(){ // soft radial glow (no square) for the Sun and impact p
   GLOW_TEX=new THREE.CanvasTexture(c);return GLOW_TEX;
 }
 let firing=false,fireT=0,phase='ready',speed=0.5,impactFlash=null,impacted=false,dragMoved=false;
+let FDT=0.016,_fdtPrev=0; // seconds since the previous frame, clamped to [0, 0.05]: the same pace on 60, 90 or 120 Hz displays
 let freeLook=false,freeZoom=1;   // free-look orbit around the flying projectile (opt-in)
 // ---- SALVO (multi-shot campaign): fire N shots, RECHARGING the pulse buffer between each. Recharge time is
 //      tied to electricity per Paper II §8 (VERIFIED): a 428.571 GJ pulse ÷ 10 MW net charging ≈ 11.9 h ideal
@@ -1029,6 +1055,7 @@ function flybyTarget(){
    perspective does the work: the Moon swells to ~14° as the shot crosses it and Mars to ~39°,
    and both shrink away behind. Nothing is scaled at runtime. */
 function loop(){raf=requestAnimationFrame(loop);
+  {const _n=performance.now();FDT=_fdtPrev?Math.min(0.05,Math.max(0,(_n-_fdtPrev)/1000)):0.016;_fdtPrev=_n;}
   // cinematic factor ramps up in coast/impact, down otherwise
   const cineGoal=(firing&&(phase==='coast'||phase==='impact'))?1:0;
   cine+=(cineGoal-cine)*0.06;
@@ -1083,7 +1110,7 @@ function loop(){raf=requestAnimationFrame(loop);
     // demonstrator and into Earth. It holds station at 900 u instead — the closest approach the
     // scene ever shows — and says so in the readout.
     const atFloor=axisRange(asteroid.position)<=900;
-    const dstep=atFloor?0:DRIFT_UPS*0.016*speed;
+    const dstep=atFloor?0:DRIFT_UPS*FDT*speed;
     if(atFloor&&!firing&&!salvoActive&&!recharging&&phase==='ready')
       document.getElementById('phase').textContent='inbound body held at closest approach shown — press ↺ Reset to run it again from 1.5 AU';
     asteroid.position.addScaledVector(asteroidVel,dstep);asteroidTravel+=dstep;
@@ -1099,7 +1126,7 @@ function loop(){raf=requestAnimationFrame(loop);
   // so without this the stars would visibly slide as the projectile ran out. Zero parallax now.
   if(skyShell)skyShell.position.copy(camera.position);
   // tracked fragments: rapid initial separation damping to a slow drift; fracture-face glow cools
-  frags.forEach(f=>{f.mesh.position.addScaledVector(f.vel,0.016*speed);f.vel.multiplyScalar(0.988);
+  frags.forEach(f=>{f.mesh.position.addScaledVector(f.vel,FDT*speed);f.vel.multiplyScalar(0.988);
     f.mesh.rotation.x+=f.spin.x;f.mesh.rotation.y+=f.spin.y;f.mesh.rotation.z+=f.spin.z;
     if(f.mesh.material.emissiveIntensity>0.05)f.mesh.material.emissiveIntensity*=0.99;});
   if(autoAim&&mode==='system')updateAutoAim(0.02); // geomagnetic auto-aim: the SHIP keeps slewing too — even during a launch (the plan freezes at muzzle exit)
@@ -1258,7 +1285,7 @@ function startSurfaceRun(mode){ // 'normal' | 'fracture' (stage 1: about to brea
 }
 function stepSurface(){
   const R=surfRun;if(!R||!surfScene)return;
-  if(!R.done)R.t+=0.016*speed;
+  if(!R.done)R.t+=FDT*speed;
   const t=R.t,cr=R.craterR;
   // incoming streak — a sub-second bright line from the sky; the tungsten ROD is visible as it plunges in
   surfStreak.material.opacity=(t<0.14)?0.9*(1-t/0.14):0;
@@ -1326,7 +1353,7 @@ function stepSurface(){
           spin:new THREE.Vector3((Math.random()-0.5)*0.02,(Math.random()-0.5)*0.02,(Math.random()-0.5)*0.02)};
         surfScene.add(ch);surfSlabs.push(ch);}
     }
-    const dt2=0.016*speed;
+    const dt2=FDT*speed;
     surfSlabs.forEach(s2=>{s2.position.addScaledVector(s2.userData.v,dt2);
       s2.rotation.x+=s2.userData.spin.x;s2.rotation.y+=s2.userData.spin.y;s2.rotation.z+=s2.userData.spin.z;});
     // (camera settle/roll handled in the central shake block below — lookAt there would wipe it here)
@@ -1379,7 +1406,7 @@ function stepSurface(){
       E.vel[i*3]=Math.cos(a)*Math.cos(el)*v;E.vel[i*3+1]=Math.sin(el)*v;E.vel[i*3+2]=Math.sin(a)*Math.cos(el)*v;
       ea.setXYZ(i,0,0.4,0);}
     E.pts.material.opacity=0.85;E.pts.material.color.setHex(R.pen?0xC9B8A0:0xEFE6D8);}
-  if(E.alive){const dt=0.016*speed;
+  if(E.alive){const dt=FDT*speed;
     for(let i=0;i<ea.count;i++){E.vel[i*3+1]-=6*dt;
       ea.setXYZ(i,ea.getX(i)+E.vel[i*3]*dt,Math.max(0,ea.getY(i)+E.vel[i*3+1]*dt),ea.getZ(i)+E.vel[i*3+2]*dt);}
     ea.needsUpdate=true;E.pts.material.opacity=Math.max(0,0.85-t*0.16);}
@@ -1393,7 +1420,7 @@ function stepSurface(){
       // diamond: white-blue plasma/vapour → whitening steam-like plume; tungsten: grey-brown dust
       s.material.color.setHex(R.pen?0x9a8f80:(i<8?0xcfe4ff:0xffffff));
       s.scale.setScalar(2+Math.random()*2);}
-    const age=t-born,dt=0.016*speed;
+    const age=t-born,dt=FDT*speed;
     s.position.y+=s.userData.vy*dt;s.material.rotation+=s.userData.rot;
     s.scale.setScalar(s.scale.x+s.userData.grow*dt);
     s.material.opacity=Math.max(0,(R.pen?0.5:0.55)*Math.exp(-age*0.30));
@@ -1500,7 +1527,7 @@ function makeFloating(el,chipLabel,opts){
   if(!opts.noMin){
     const btn=document.createElement('button');btn.className='fp-min';btn.textContent='—';btn.title='Minimize (drag anywhere to move)';
     el.appendChild(btn);
-    btn.addEventListener('click',e=>{e.stopPropagation();const col=el.classList.toggle('fp-collapsed');
+    btn.addEventListener('click',e=>{e.stopPropagation();const col=el.classList.toggle('fp-collapsed');delete el.dataset.autoMin;
       btn.textContent=col?'▢':'—';btn.title=col?'Restore':'Minimize (drag anywhere to move)';});
   }
   let drag=false,moved=false,sx=0,sy=0,ox=0,oy=0;
@@ -1513,7 +1540,7 @@ function makeFloating(el,chipLabel,opts){
     e.preventDefault();e.stopPropagation();
   });
   window.addEventListener('pointermove',e=>{if(!drag)return;
-    if(Math.abs(e.clientX-sx)+Math.abs(e.clientY-sy)>4)moved=true;
+    if(Math.abs(e.clientX-sx)+Math.abs(e.clientY-sy)>4){moved=true;el.classList.add('fp-moved');}
     el.style.left=(ox+e.clientX-sx)+'px';el.style.top=(oy+e.clientY-sy)+'px';});
   window.addEventListener('pointerup',()=>{drag=false;setTimeout(()=>{moved=false;},0);}); // flag survives just long enough to eat the drag's own click
   el.addEventListener('click',e=>{if(moved){e.stopPropagation();moved=false;}},true); // a drag is not a click
@@ -1542,7 +1569,7 @@ const T_ACCEL=5.0, T_COAST=4.5, T_HOLD=3.4;
 function coastFor(fam){return T_COAST*(1+1.60*Math.log10(1e6/fam.v));}
 let coastT=T_COAST;
 function stepFire(){
-  fireT+=0.016*speed;
+  fireT+=FDT*speed;
   if(fireT<=T_ACCEL){
     phase='accelerating';document.getElementById('phase').textContent='cell wave · accelerating';
     let f=fireT/T_ACCEL;const eased=f*f;
@@ -1593,7 +1620,7 @@ function stepFire(){
   } else if(fireT<=T_ACCEL+coastT+T_HOLD){
     phase='impact';
     // SAFETY NET. The coast branch fires the impact when cf crosses 0.985, but fireT advances in
-    // fixed 0.016·speed steps — at higher speeds, or with a long coast, a single step can jump
+    // frame-sized steps — at higher speeds, or with a long coast, a single step can jump
     // clean over that window and out of the coast branch entirely, so the shot would arrive with
     // no impact resolved at all (salvos silently banked "landed" shots that never fired). Resolve
     // it here the first time we enter the impact phase, whatever the timestep did.
@@ -1813,9 +1840,9 @@ function triggerImpact(){
   scene.add(fx);impactFlash=fx;boreProjectile.visible=false;
 }
 function animateImpact(){
-  if(!impactFlash)return;const u=impactFlash.userData;u.t+=0.016*speed;
+  if(!impactFlash)return;const u=impactFlash.userData;u.t+=FDT*speed;
   // transient FX ride along with the still-drifting struck body (flash stays ON the surface, not behind it)
-  if(u.follow&&u.follow.visible)impactFlash.position.addScaledVector(asteroidVel,DRIFT_UPS*0.016*speed);
+  if(u.follow&&u.follow.visible)impactFlash.position.addScaledVector(asteroidVel,DRIFT_UPS*FDT*speed);
   const s=Math.min(u.t/1.35,3);   // long readable tails (plume / rings / dust)
   const spike=Math.min(u.t/0.5,3);// the flash itself stays a quick spike
   if(u.flash){u.flash.scale.setScalar(u.flashBase*(1+spike*1.6));u.flash.material.opacity=Math.max(0,1.0-spike*1.35);}
@@ -1824,12 +1851,12 @@ function animateImpact(){
   // fast luminous shock spreads ACROSS the surface; the dust ring follows slower and lingers
   if(u.shock){const g=1+s*(u.hyper?7:4);u.shock.scale.set(g,g,1);u.shock.material.opacity=Math.max(0,0.85-s*0.8);}
   if(u.dust){const g2=1+s*1.6;u.dust.scale.set(g2,g2,1);u.dust.material.opacity=Math.max(0,0.34-s*0.16);}
-  [u.ejHot,u.ejDust].forEach((ej,idx)=>{if(!ej)return;const pos=ej.pts.geometry.attributes.position,st=0.016*speed;
+  [u.ejHot,u.ejDust].forEach((ej,idx)=>{if(!ej)return;const pos=ej.pts.geometry.attributes.position,st=FDT*speed;
     for(let i=0;i<pos.count;i++){pos.setXYZ(i,pos.getX(i)+ej.vel[i*3]*st,pos.getY(i)+ej.vel[i*3+1]*st,pos.getZ(i)+ej.vel[i*3+2]*st);}
     pos.needsUpdate=true;ej.pts.material.opacity=Math.max(0,idx===0?0.95-s*0.55:0.8-s*0.28);});
   if(u.hot)u.hot.material.opacity=Math.max(0.22,0.9-s*0.55); // cools to a persistent faint rim (cumulative damage stays readable)
   if(u.glassScar)u.glassScar.material.emissiveIntensity=Math.max(0.05,0.5*Math.exp(-s)); // melt sheet cools to glass
-  if(asteroid&&u.deflect&&asteroid.visible)asteroid.position.addScaledVector(u.deflect,0.016*speed);
+  if(asteroid&&u.deflect&&asteroid.visible)asteroid.position.addScaledVector(u.deflect,FDT*speed);
 }
 function clearImpact(){
   if(!impactFlash)return;
@@ -2034,7 +2061,7 @@ function prepNextShot(){ // reset the launcher for the next salvo shot WITHOUT s
   if(vectorRing)vectorRing.rotation.z=0;
 }
 function stepRecharge(){ // sped-up recharge countdown; the readout states the REAL ~11.9 h / ~1-per-day figures
-  rechargeT+=0.016*speed;
+  rechargeT+=FDT*speed;
   const dur=salvoDone?SALVO_RECHARGE_DUR*2.2:SALVO_RECHARGE_DUR; // linger on the final tally
   const frac=Math.min(1,rechargeT/dur),cd=document.getElementById('sv-cd');
   // ANIMATED off-track nudge, applied INCREMENTALLY so the body's own drift continues underneath it
@@ -2149,7 +2176,7 @@ function updateCone(){
 function updateForces(){
   if(!forceGroup)return;forceGroup.visible=showForces;if(boreForceGroup)boreForceGroup.visible=showForces;
   document.getElementById('forcelegend').style.display=showForces?'block':'none';
-  const sp=document.getElementById('shotpanel');if(sp)sp.style.display=(showForces&&mode==='system')?'block':'none';
+  const sp=document.getElementById('shotpanel');if(sp){const want=(showForces&&mode==='system')?'block':'none';if(sp.style.display!==want){sp.style.display=want;if(want==='block')dockShotPanel();}}
   if(coneGroup)coneGroup.visible=showForces&&mode==='system';updateCone();
   if(!showForces)return;
   // accelerating Lorentz force rides the projectile down the bore — all in sysRoot-local coords, so it rotates with the structure
@@ -2182,14 +2209,52 @@ function updateShotPanel(){
   const tResp=HALF_AU/f.v;                                     // s for THIS dart to cross 0.5 AU
   const N=Math.max(1,Math.round(WARNING_S/tResp));             // notional warning ÷ response time
   const respTxt=tResp>=86400?(tResp/86400).toFixed(1)+' d':(tResp/3600).toFixed(1)+' h';
-  const n=document.getElementById('sp-n'),dv=document.getElementById('sp-dv'),rp=document.getElementById('sp-resp');
+  const n=document.getElementById('sp-n'),dv=document.getElementById('sp-dv'),rp=document.getElementById('sp-resp'),why=document.getElementById('sp-why');
   if(n)n.textContent='≈ '+N.toLocaleString('en-GB')+' flight windows in a notional 1-yr warning';
   if(dv)dv.innerHTML='each imparts Δv ≈ <b style="color:#84d6ca">'+fmtDv(d.dv)+'</b> ('+f.id+' → '+t.id+' body · β≈1 assumed)';
   const cFrac=Math.round(299792.458/(f.v/1000)),hFast=(HALF_AU/FAMILY[0].v/3600).toFixed(0),dSlow=(HALF_AU/FAMILY[4].v/86400).toFixed(1);
-  if(rp)rp.textContent='('+f.id+' crosses 0.5 AU in ~'+respTxt+' at '+(f.v/1000).toLocaleString('en-GB')+' km/s ≈ c/'+cFrac+'.) '
-    +'WHY THE FAST DART: R-DART reaches 0.5 AU in ~'+hFast+' h (T-DART: ~'+dSlow+' d). It cannot penetrate — but a tiny Δv applied EARLY multiplies into a large miss distance (Δposition ≈ Δv × time-to-encounter): a body with, say, a 5% impact probability can be gently tapped far out — below threshold, or into a different gravitational corridor — long before a heavy penetrator could even arrive. Count = warning ÷ one-way flight time (a screening quotient); the ≈1 shot/day recharge cadence separately caps a year at ≈365 launches.';
+  if(rp)rp.textContent='('+f.id+' crosses 0.5 AU in ~'+respTxt+' at '+(f.v/1000).toLocaleString('en-GB')+' km/s ≈ c/'+cFrac+'.)';
+  if(why)why.textContent='R-DART reaches 0.5 AU in ~'+hFast+' h (T-DART: ~'+dSlow+' d). It cannot penetrate — but a tiny Δv applied EARLY multiplies into a large miss distance (Δposition ≈ Δv × time-to-encounter): a body with, say, a 5% impact probability can be gently tapped far out — below threshold, or into a different gravitational corridor — long before a heavy penetrator could even arrive. Count = warning ÷ one-way flight time (a screening quotient); the ≈1 shot/day recharge cadence separately caps a year at ≈365 launches.';
+  dockShotPanel();
 }
+// ---- dock the deflection panel: right lane, under the HUD chips and the target cam, above the scale
+//      inset. The lane is measured live (the target cam moves, grows in surface view, or hides), the
+//      panel gets the room that is left and scrolls inside it; with under ~96px it folds to its chip
+//      (restore with ▢). A panel the viewer has dragged is left where they put it. ----
+function dockShotPanel(){
+  const el=document.getElementById('shotpanel');if(!el||el.style.display==='none'||el.classList.contains('fp-moved'))return;
+  const vb=el.offsetParent;if(!vb)return;
+  const H=vb.clientHeight||600;
+  const vis=x=>x&&getComputedStyle(x).display!=='none'&&x.offsetParent===vb;
+  const hud=document.querySelector('.hud'),tc=document.getElementById('tgtcamFrame'),si=document.getElementById('scaleinset');
+  let top=12,bottom=H-12;
+  if(vis(hud))top=Math.max(top,hud.offsetTop+hud.offsetHeight+8);
+  if(vis(tc))top=Math.max(top,tc.offsetTop+tc.offsetHeight+8);
+  if(vis(si)&&si.offsetTop>top)bottom=Math.min(bottom,si.offsetTop-8);
+  let room=bottom-top;
+  if(room<40&&vis(si)){ // nothing left between the cam and the scale inset: take the strip below the inset
+    const t2=si.offsetTop+si.offsetHeight+8; if(H-12-t2>=32){top=t2;bottom=H-12;room=bottom-top;}
+  }
+  // on a squeezed canvas (≈500px at a 900px window) the force legend reaches into the right lane:
+  // the panel narrows to what is left beside it, and folds if that is too little to read
+  const lg=document.getElementById('forcelegend');let left=12;
+  if(vis(lg)&&!(lg.offsetTop>=bottom||lg.offsetTop+lg.offsetHeight<=top))left=lg.offsetLeft+lg.offsetWidth+8;
+  const laneW=vb.clientWidth-12-left;
+  el.style.left='auto';el.style.right='12px';el.style.bottom='auto';el.style.top=top+'px';el.style.transform='none';
+  el.style.width=Math.min(264,Math.max(120,laneW))+'px';
+  el.style.maxHeight=Math.max(32,room)+'px';
+  const b=el.querySelector('.fp-min'),fits=room>=96&&laneW>=200;
+  if(!fits&&!el.classList.contains('fp-collapsed')){el.classList.add('fp-collapsed');el.dataset.autoMin='1';if(b){b.textContent='▢';b.title='Restore';}}
+  else if(fits&&el.dataset.autoMin==='1'){delete el.dataset.autoMin;el.classList.remove('fp-collapsed');if(b){b.textContent='—';b.title='Minimize (drag anywhere to move)';}} // folded by the lane, not the viewer: unfold when the room comes back
+}
+(function(){ // re-dock whenever the lane changes shape: target cam shown/hidden/enlarged, canvas resized, full screen
+  if(!window.ResizeObserver)return;
+  try{const ro=new ResizeObserver(()=>dockShotPanel());
+    const tc=document.getElementById('tgtcamFrame'),vb=document.querySelector('.viewbox');
+    if(tc)ro.observe(tc);if(vb)ro.observe(vb);}catch(e){}
+})();
 document.getElementById('forceBtn').addEventListener('click',function(){showForces=!showForces;this.classList.toggle('on',showForces);
+  this.textContent=showForces?'⇢ Hide forces':'⇢ Show forces';
   updateShotPanel();
   if(vectorRing)vectorRing.material&&0;});
 // ---- force-legend MINIMIZE/EXPAND: collapse the big legend to a compact "⚑ Forces ▸" chip and back. It still
@@ -2316,7 +2381,10 @@ function buildList(){
     : SUBSYS.map(s=>({id:s.id,name:s.name,color:s.color,meta:''}));
   items.forEach(it=>{const el=document.createElement('div');el.className='part';el.dataset.id=it.id;
     el.innerHTML='<span class="sw" style="background:#'+it.color.toString(16).padStart(6,'0')+'"></span><span class="pn">'+it.name+'</span><span class="pm">'+it.meta+'</span>';
-    el.onclick=()=>select(it.id);box.appendChild(el);});
+    el.tabIndex=0;el.setAttribute('role','button'); // reachable with Tab, activated with Enter or Space
+    el.onclick=()=>select(it.id);
+    el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select(it.id);}});
+    box.appendChild(el);});
 }
 function findMesh(id){let f=null;(mode==='projectile'?projGroup:scene).traverse(o=>{if(o.userData&&o.userData.pick===id)f=o;});return f;}
 function select(id){
@@ -2408,5 +2476,20 @@ else{ cv.outerHTML='<div class="note" style="margin:20px">3D library unavailable
 </script>
 <script>(function(){var vb=document.querySelector('.viewbox'),b=document.getElementById('hudTgl');if(!vb||!b)return;
 b.addEventListener('click',function(){var on=vb.classList.toggle('hud-on');b.innerHTML=on?'\u2715 Close':'\u2630 Info';b.setAttribute('aria-expanded',on?'true':'false');});})();</script>
+<script>
+/* Embedded in the Research Lab lightbox (?embed=1): fold everything above the tool into a
+   disclosure so the frame opens on the thing that can be used. Nothing is removed. */
+(function(){
+  if(!document.documentElement.classList.contains('embed')) return;
+  var first=document.querySelector('.grid,.stage,.viewbox,main.wrap>section.panel'); if(!first) return;
+  var list=[],n=first.previousElementSibling;
+  while(n){ if(!n.classList.contains('top')) list.unshift(n); n=n.previousElementSibling; }
+  if(!list.length) return;
+  var d=document.createElement('details'); d.className='embedintro';
+  var s=document.createElement('summary'); s.textContent='About this tool'; d.appendChild(s);
+  first.parentNode.insertBefore(d,list[0]);
+  list.forEach(function(e){ d.appendChild(e); });
+})();
+</script>
 </body>
 </html>

@@ -89,21 +89,41 @@
 
   /* ---- phone HUD fold: the scene owns the screen; ☰ opens the instruments ---- */
   #hudTgl{display:none;position:absolute;top:8px;right:8px;z-index:30;font:600 12px/1 var(--font-mono,ui-monospace,monospace);padding:8px 12px;border-radius:999px;border:1px solid var(--line,#26304a);background:color-mix(in oklab,var(--bg2,#0f1522) 82%,transparent);color:var(--ink,#e8edf6);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);cursor:pointer}
+  .scen .sht{display:none}
   @media (max-width:700px){
     #hudTgl{display:inline-flex;align-items:center;gap:6px}
-    .viewbox:not(.hud-on) .scen,.viewbox:not(.hud-on) .lat,.viewbox:not(.hud-on) .tally,.viewbox:not(.hud-on) .phase{display:none!important}
-    /* when open, the log, status and controls flow BELOW the scene rather than printing over each other */
-    .viewbox.hud-on .tally,.viewbox.hud-on .phase,.viewbox.hud-on .ctl{position:static;margin:8px 10px}
+    /* the scenario row and the phase line stay on the scene, so a phone visitor can pick a
+       scenario and read what is happening without opening ☰ Info; the latency chips and the
+       engagement log are what ☰ Info adds */
+    .viewbox:not(.hud-on) .lat,.viewbox:not(.hud-on) .tally{display:none!important}
+    .scen{max-width:calc(100% - 94px);gap:5px}
+    .scen button{font-size:10px;padding:5px 7px}
+    .scen .lng{display:none}
+    .scen .sht{display:inline}
+    .viewbox:not(.hud-on) .phase{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-size:11px;padding:6px 10px}
+    /* when open, the chips, log, status and controls flow BELOW the scene rather than printing over each other */
+    .viewbox.hud-on .lat,.viewbox.hud-on .tally,.viewbox.hud-on .phase,.viewbox.hud-on .ctl{position:static;margin:8px 10px;max-width:none}
   }
+  /* embedded in the Research Lab lightbox: no second header, introduction folded so the tool is on top */
+  html.embed .top{display:none}
+  html.embed .wrap{padding-top:10px}
+  details.embedintro{margin:0 0 4px}
+  details.embedintro>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:8px;font-family:var(--fm);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);padding:4px 0}
+  details.embedintro>summary::-webkit-details-marker{display:none}
+  details.embedintro>summary::after{content:'\25B8';font-size:10px}
+  details.embedintro[open]>summary::after{content:'\25BE'}
 </style>
+<script>/* ?embed=1: opened inside the Research Lab lightbox, which has its own title bar and close
+   control, so this page's header is dropped and its introduction folds below (see the end of the page). */
+try{if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.classList.add('embed');}catch(e){}</script>
   <link rel="stylesheet" href="../../assets/fonts.css">
 </head>
 <body>
   <div class="top">
-    <a class="brand" href="../../publications/index.html"><span class="crest">CF</span><span><span class="nm">Christopher Farmer</span><br><span class="rl">Spatial Intelligence · Interposition Demo</span></span></a>
+    <a class="brand" href="../../publications/index.html" target="_top"><span class="crest">CF</span><span><span class="nm">Christopher Farmer</span><br><span class="rl">Spatial Intelligence · Interposition Demo</span></span></a>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <a class="btn" href="../../publications/phase2-theory/spatial-intelligence-robotics.html">Read the paper</a>
-      <a class="btn" href="../../publications/index.html">&#8592; Publications</a>
+      <a class="btn" href="../../publications/phase2-theory/spatial-intelligence-robotics.html" target="_top">Read the paper</a>
+      <a class="btn" href="../../publications/index.html" target="_top">&#8592; Publications</a>
       <button class="btn" id="theme">&#9789;</button>
     </div>
   </div>
@@ -117,10 +137,10 @@
       <canvas id="scene"></canvas>
       <button id="hudTgl" aria-expanded="false" aria-label="Show or hide the instrument panels">☰ Info</button>
       <div class="scen" id="scen">
-        <button data-s="package" class="on">▤ Fragile package protection</button>
-        <button data-s="arena">◧ Arena · machine vs machine</button>
-        <button data-s="vip">◉ VIP protection</button>
-        <button data-s="cordon">▣ Cordon containment</button>
+        <button data-s="package" class="on">▤ <span class="lng">Fragile package protection</span><span class="sht">Package</span></button>
+        <button data-s="arena">◧ <span class="lng">Arena · machine vs machine</span><span class="sht">Arena</span></button>
+        <button data-s="vip">◉ <span class="lng">VIP protection</span><span class="sht">VIP</span></button>
+        <button data-s="cordon">▣ <span class="lng">Cordon containment</span><span class="sht">Cordon</span></button>
       </div>
       <div class="lat">
         <span class="mk">IR marker <b>the only human input</b></span>
@@ -1451,6 +1471,27 @@ if(window.THREE&&window.THREE.GLTFLoader&&window.ROBOT_GLB_B64){
 })();
 </script>
 <script>(function(){var vb=document.querySelector('.viewbox'),b=document.getElementById('hudTgl');if(!vb||!b)return;
-b.addEventListener('click',function(){var on=vb.classList.toggle('hud-on');b.innerHTML=on?'\u2715 Close':'\u2630 Info';b.setAttribute('aria-expanded',on?'true':'false');});})();</script>
+b.addEventListener('click',function(){var on=vb.classList.toggle('hud-on');b.innerHTML=on?'\u2715 Close':'\u2630 Info';b.setAttribute('aria-expanded',on?'true':'false');fit();});
+/* phone, HUD closed: the phase line sits just above the control row, however many rows the
+   controls wrap to (two on a 390px screen, three once the arena's sensing button appears) */
+var ph=document.getElementById('phase'),ctl=document.querySelector('.ctl');
+function fit(){if(!ph||!ctl)return;if(vb.classList.contains('hud-on')||!matchMedia('(max-width:700px)').matches){ph.style.bottom='';return;}ph.style.bottom=(ctl.offsetHeight+20)+'px';}
+if(window.ResizeObserver){try{new ResizeObserver(fit).observe(ctl);}catch(e){}}
+addEventListener('resize',fit);fit();})();</script>
+<script>
+/* Embedded in the Research Lab lightbox (?embed=1): fold everything above the tool into a
+   disclosure so the frame opens on the thing that can be used. Nothing is removed. */
+(function(){
+  if(!document.documentElement.classList.contains('embed')) return;
+  var first=document.querySelector('.grid,.stage,.viewbox,main.wrap>section.panel'); if(!first) return;
+  var list=[],n=first.previousElementSibling;
+  while(n){ if(!n.classList.contains('top')) list.unshift(n); n=n.previousElementSibling; }
+  if(!list.length) return;
+  var d=document.createElement('details'); d.className='embedintro';
+  var s=document.createElement('summary'); s.textContent='About this tool'; d.appendChild(s);
+  first.parentNode.insertBefore(d,list[0]);
+  list.forEach(function(e){ d.appendChild(e); });
+})();
+</script>
 </body>
 </html>

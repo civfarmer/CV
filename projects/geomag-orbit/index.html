@@ -44,6 +44,10 @@
   .sub{color:var(--muted);font-size:12px;margin-bottom:14px}
   #scene{width:100%;height:520px;border-radius:12px;background:radial-gradient(circle at 50% 40%,#0a1424,#05080f);border:1px solid var(--line);display:block;touch-action:none;cursor:grab}
   #scene:active{cursor:grabbing}
+  .scenewrap{position:relative}
+  .zoom{position:absolute;right:10px;bottom:10px;display:flex;flex-direction:column;gap:4px;z-index:2}
+  .zoom button{width:34px;height:34px;border-radius:8px;border:1px solid #2c3d54;background:color-mix(in oklab,#0e1420,transparent 18%);color:#e9eef7;font-size:19px;line-height:1;cursor:pointer;font-family:var(--fb)}
+  .zoom button:hover{border-color:var(--accent)}
   .ctrl{margin:15px 0}
   .ctrl label{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;margin-bottom:7px}
   .ctrl .val{font-family:var(--fm);font-size:13px;color:var(--accent-ink);font-weight:600}
@@ -54,6 +58,8 @@
   .out{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
   .metric{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
   .metric .k{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+  .metric .k .sym{text-transform:none} /* η stays η: upper-cased it reads as a Latin H */
+  .axisgloss{color:var(--muted);font-size:11.5px;line-height:1.45;margin-top:7px}
   .metric .v{font-family:var(--fm);font-size:16px;font-weight:600;color:var(--ink);margin-top:3px}
   .metric .u{font-size:10.5px;color:var(--muted)}
   .verdict{margin-top:12px;padding:11px 13px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);font-size:13px}
@@ -86,14 +92,27 @@
       border-bottom:1px dotted var(--line,#233145);cursor:pointer}
   }
   @media print{.lede.clamped{display:block;-webkit-line-clamp:none}details.mnote{display:block}}
+  /* the wrapped header is a quarter of a phone screen; let it scroll away */
+  @media (max-width:640px){.top{position:static}}
+  /* embedded in the Research Lab lightbox: no second header, introduction folded so the tool is on top */
+  html.embed .top{display:none}
+  html.embed .wrap{padding-top:10px}
+  details.embedintro{margin:0 0 4px}
+  details.embedintro>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:8px;font-family:var(--fm);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);padding:4px 0}
+  details.embedintro>summary::-webkit-details-marker{display:none}
+  details.embedintro>summary::after{content:'\25B8';font-size:10px}
+  details.embedintro[open]>summary::after{content:'\25BE'}
 </style>
+<script>/* ?embed=1: opened inside the Research Lab lightbox, which has its own title bar and close
+   control, so this page's header is dropped and its introduction folds below (see the end of the page). */
+try{if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.classList.add('embed');}catch(e){}</script>
   <link rel="stylesheet" href="../../assets/fonts.css">
 </head>
 <body>
   <div class="top">
-    <a class="brand" href="../../publications/index.html"><span class="crest">CF</span><span><span class="nm">Christopher Farmer</span><br><span class="rl">Geomagnetic Orbit Screen · 3D</span></span></a>
+    <a class="brand" href="../../publications/index.html" target="_top"><span class="crest">CF</span><span><span class="nm">Christopher Farmer</span><br><span class="rl">Geomagnetic Orbit Screen · 3D</span></span></a>
     <div style="display:flex;gap:8px">
-      <a class="btn" href="../../publications/index.html">&#8592; Publications</a>
+      <a class="btn" href="../../publications/index.html" target="_top">&#8592; Publications</a>
       <button class="btn" id="theme" aria-label="Toggle theme">&#9789;</button>
     </div>
   </div>
@@ -108,8 +127,11 @@
     <div class="grid">
       <div class="panel">
         <h2>Orbit &amp; field</h2>
-        <div class="sub">Drag to rotate · scroll to zoom</div>
-        <canvas id="scene"></canvas>
+        <div class="sub">Drag to rotate · scroll, pinch or ± to zoom</div>
+        <div class="scenewrap">
+          <canvas id="scene"></canvas>
+          <div class="zoom" id="zoom"><button type="button" data-z="in" aria-label="Zoom in">+</button><button type="button" data-z="out" aria-label="Zoom out">&minus;</button></div>
+        </div>
         <div class="legend">
           <span><span class="sw" style="background:#4ea3ff"></span> orbit track</span>
           <span><span class="sw" style="background:#d4b24c"></span> geomagnetic dipole field</span>
@@ -136,6 +158,7 @@
             <button data-ax="ECI-Y">ECI-Y</button>
             <button data-ax="ECI-Z">ECI-Z</button>
           </div>
+          <div class="axisgloss">Earth-centred inertial axes: Z along the spin axis, X in the equatorial plane at the orbit's ascending node, Y completing the right-handed set.</div>
         </div>
 
         <div class="out" id="metrics"></div>
@@ -253,10 +276,11 @@ function initThree(){
   const atmo=new THREE.Mesh(new THREE.SphereGeometry(1.03,48,48),
     new THREE.MeshBasicMaterial({color:0x5aa9ff,transparent:true,opacity:0.10,side:THREE.BackSide}));
   scene.add(atmo);
-  // spin axis
-  const ax=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,-1.4),new THREE.Vector3(0,0,1.4)]),new THREE.LineBasicMaterial({color:0x53617a}));
-  scene.add(ax);
-  fieldGroup=new THREE.Group(); scene.add(fieldGroup);
+  // spin axis — the scene maps ECI/ECEF (x,y,z) to three.js (x,z,-y), so the polar axis is three.js Y
+  const ax=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,-1.4,0),new THREE.Vector3(0,1.4,0)]),new THREE.LineBasicMaterial({color:0x53617a}));
+  earth.add(ax);
+  // the dipole is fixed in the Earth frame, so its field lines are children of the globe and turn with it
+  fieldGroup=new THREE.Group(); earth.add(fieldGroup);
   vecGroup=new THREE.Group(); scene.add(vecGroup);
   resize();
   loop();
@@ -264,8 +288,9 @@ function initThree(){
 function dipoleFieldLines(){
   // magnetic dipole field lines from degree-1 tilt (drawn as r = L sin^2(theta) shells, rotated to dipole axis)
   const g=new THREE.Group();
-  // dipole moment direction (unit) from Gauss coeffs in ECEF: m ∝ (g11, h11, g10)
-  const m=new THREE.Vector3(G11,H11,G10).normalize();
+  // dipole moment direction (unit) from Gauss coeffs in ECEF: m ∝ (g11, h11, g10), written in the
+  // scene frame with the same (x,z,-y) swap the orbit track and field vectors use
+  const m=new THREE.Vector3(G11,G10,-H11).normalize();
   const zx=new THREE.Vector3(0,0,1);
   const quat=new THREE.Quaternion().setFromUnitVectors(zx,m);
   const col=0xd4b24c;
@@ -312,16 +337,30 @@ function rebuild(alt,inc,axis){
   return s;
 }
 function loop(){ raf=requestAnimationFrame(loop);
-  const cx=dist*Math.cos(pitch)*Math.sin(yaw), cy=dist*Math.sin(pitch), cz=dist*Math.cos(pitch)*Math.cos(yaw);
+  // on a portrait canvas the horizontal field of view is the narrow one, so the camera backs off
+  // by 1/aspect and the whole globe stays inside the frame
+  const d=dist/Math.min(1,camera.aspect||1);
+  const cx=d*Math.cos(pitch)*Math.sin(yaw), cy=d*Math.sin(pitch), cz=d*Math.cos(pitch)*Math.cos(yaw);
   camera.position.set(cx,cy,cz); camera.lookAt(0,0,0);
   if(earth) earth.rotation.y+=0.0009;
   renderer.render(scene,camera);
 }
 function resize(){ const w=cv.clientWidth,h=cv.clientHeight||520; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); }
-cv.addEventListener('pointerdown',e=>{dragging=true;lx=e.clientX;ly=e.clientY;cv.setPointerCapture(e.pointerId);});
-cv.addEventListener('pointermove',e=>{if(!dragging)return;yaw-=(e.clientX-lx)*0.008;pitch=Math.max(-1.3,Math.min(1.3,pitch+(e.clientY-ly)*0.008));lx=e.clientX;ly=e.clientY;});
-cv.addEventListener('pointerup',()=>dragging=false);
-cv.addEventListener('wheel',e=>{e.preventDefault();dist=Math.max(1.8,Math.min(7,dist+Math.sign(e.deltaY)*0.25));},{passive:false});
+function zoomBy(step){dist=Math.max(1.8,Math.min(7,dist+step));}
+const ptrs=new Map(); let pinchD=0;
+cv.addEventListener('pointerdown',e=>{ptrs.set(e.pointerId,[e.clientX,e.clientY]);try{cv.setPointerCapture(e.pointerId);}catch(_){}
+  if(ptrs.size===2){const p=[...ptrs.values()];pinchD=Math.hypot(p[0][0]-p[1][0],p[0][1]-p[1][1]);dragging=false;}
+  else{dragging=true;lx=e.clientX;ly=e.clientY;}});
+cv.addEventListener('pointermove',e=>{
+  if(ptrs.has(e.pointerId))ptrs.set(e.pointerId,[e.clientX,e.clientY]);
+  if(ptrs.size===2){ // pinch: two fingers apart zooms in, together zooms out
+    const p=[...ptrs.values()],dNow=Math.hypot(p[0][0]-p[1][0],p[0][1]-p[1][1]);
+    if(pinchD>0)zoomBy((pinchD-dNow)*0.02);pinchD=dNow;return;}
+  if(!dragging)return;yaw-=(e.clientX-lx)*0.008;pitch=Math.max(-1.3,Math.min(1.3,pitch+(e.clientY-ly)*0.008));lx=e.clientX;ly=e.clientY;});
+const endPtr=e=>{ptrs.delete(e.pointerId);if(ptrs.size<2)pinchD=0;if(ptrs.size===0)dragging=false;};
+cv.addEventListener('pointerup',endPtr);cv.addEventListener('pointercancel',endPtr);
+cv.addEventListener('wheel',e=>{e.preventDefault();zoomBy(Math.sign(e.deltaY)*0.25);},{passive:false});
+document.querySelectorAll('#zoom button').forEach(b=>b.addEventListener('click',()=>zoomBy(b.dataset.z==='in'?-0.5:0.5)));
 window.addEventListener('resize',resize);
 
 // ---- UI ----
@@ -333,8 +372,8 @@ function refresh(){
   document.getElementById('incLab').textContent=inc.toFixed(1)+'°';
   const s=rebuild(alt,inc,ax);
   const M=[['B mean',fmt(s.field_mean_uT),'µT'],['B range',fmt(s.field_min_uT)+'–'+fmt(s.field_max_uT),'µT'],
-    ['Authority η mean',s.authority_mean.toFixed(3),''],['η min',s.authority_min.toFixed(3),''],
-    ['Period',fmt(s.period_min),'min'],['η RMS',s.authority_rms.toFixed(3),'']];
+    ['Authority <span class="sym">η</span> mean',s.authority_mean.toFixed(3),''],['<span class="sym">η</span> min',s.authority_min.toFixed(3),''],
+    ['Period',fmt(s.period_min),'min'],['<span class="sym">η</span> RMS',s.authority_rms.toFixed(3),'']];
   document.getElementById('metrics').innerHTML=M.map(x=>`<div class="metric"><div class="k">${x[0]}</div><div class="v">${x[1]} <span class="u">${x[2]}</span></div></div>`).join('');
   const v=document.getElementById('verdict');
   const good=s.authority_mean>=0.5;
@@ -357,8 +396,9 @@ document.getElementById('theme').addEventListener('click',()=>{
 });
 try{var _q=new URLSearchParams(location.search).get('theme');if(_q){document.documentElement.setAttribute('data-theme',_q);}else{var t=localStorage.getItem('cf-theme');if(t)document.documentElement.setAttribute('data-theme',t);}}catch(e){}
 
-if(window.THREE){ try{ initThree(); }catch(e){ cv.outerHTML='<div class="note">This device could not start WebGL, so the 3D globe is unavailable — the IGRF-14 numeric screen below is fully live.</div>'; } }
-else{ cv.outerHTML='<div class="note">3D library unavailable offline — the IGRF-14 numeric screen below is fully live.</div>'; }
+function noScene(msg){const z=document.getElementById('zoom');if(z)z.remove();cv.outerHTML='<div class="note">'+msg+'</div>';}
+if(window.THREE){ try{ initThree(); }catch(e){ noScene('This device could not start WebGL, so the 3D globe is unavailable — the IGRF-14 numeric screen below is fully live.'); } }
+else{ noScene('3D library unavailable offline — the IGRF-14 numeric screen below is fully live.'); }
 refresh();
 </script>
 
@@ -408,6 +448,21 @@ refresh();
       grid.insertBefore(best, grid.firstElementChild);
     }
   });
+})();
+</script>
+<script>
+/* Embedded in the Research Lab lightbox (?embed=1): fold everything above the tool into a
+   disclosure so the frame opens on the thing that can be used. Nothing is removed. */
+(function(){
+  if(!document.documentElement.classList.contains('embed')) return;
+  var first=document.querySelector('.grid,.stage,.viewbox,main.wrap>section.panel'); if(!first) return;
+  var list=[],n=first.previousElementSibling;
+  while(n){ if(!n.classList.contains('top')) list.unshift(n); n=n.previousElementSibling; }
+  if(!list.length) return;
+  var d=document.createElement('details'); d.className='embedintro';
+  var s=document.createElement('summary'); s.textContent='About this tool'; d.appendChild(s);
+  first.parentNode.insertBefore(d,list[0]);
+  list.forEach(function(e){ d.appendChild(e); });
 })();
 </script>
 </body>
