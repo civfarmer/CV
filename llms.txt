@@ -1,0 +1,109 @@
+# Christopher I. V. Farmer
+
+> Strategic operator and legally trained consultant across legal, risk and technology transformation, based in Geneva (Swiss B permit — work-authorised, no sponsorship needed). I turn strategy into operating reality — programmes delivered, operating models redesigned, and the systems that make the change stick. Nearly a decade leading an eight-site organisation, ultimately with full executive authority. Target roles: strategy and operations, business and digital transformation, programme and PMO leadership, operating-model and process improvement, legal operations and regulatory change, risk and controls, business continuity, AI enablement and AI or technology governance, and transformation or management consulting. This site is my portfolio: eight working legal-tech and analytics platforms that run live in the browser, case studies on how each was built and the legal reasoning behind it, a corpus of 28 preprints, manuscripts and reports on economic warfare law, autonomous systems, verification and space law, and a Research Lab of interactive models and 3D demonstrations. LL.M. in international law (dissertation awarded 100%); more than five years of confirmed SRA qualifying work experience, formal submission pending, SQE planned; Python/SQL. Strongest where transformation meets regulation: legal operations, business continuity and organisational resilience, sanctions and financial-crime exposure, cross-border data transfer, AI governance and audit-ready control frameworks.
+
+All eight platforms run client-side: everything computes in the visitor's browser, so no subject data ever leaves the page. All platform data is synthetic or a dated, frozen local dataset. The tools are decision-support, not legal advice, and not systems of record.
+
+- Home: https://civfarmer.github.io/CV/
+- CV (PDF): https://civfarmer.github.io/CV/docs/CV-Christopher-Farmer-2026-08.pdf
+- Sitemap: https://civfarmer.github.io/CV/sitemap.xml
+
+## Platforms
+
+- FRIS — Forensic & Regulatory Intelligence Suite — a forensic workbench for financial-crime investigations: 23 analysis engines spanning beneficial-ownership tracing, sanctions and adverse-media screening, crypto peel-chain tracing and an insolvency-recovery waterfall; ~20,000 lines of vanilla JavaScript, offline — https://civfarmer.github.io/CV/projects/fris/FRIS-Standalone.html
+- Sanctions Suite — four offline screening tools on one dated, checksummed OpenSanctions snapshot (308,597 sanctions and crime entities): screen a name or a manifest, trace a counterparty's route to a designated party, produce a dated attestation with source checksums — https://civfarmer.github.io/CV/projects/sanctions-suite/index.html
+- Ground Truth — three instruments that check a claim against the authoritative record with the network disconnected: Chokepoint (economic-coercion exposure across 323,929 importer-product cells), Veritas (does a cited authority exist, resolve and stand unretracted), Lineage (479,762 filed corporate control relationships) — https://civfarmer.github.io/CV/projects/ground-truth/index.html
+- Meridian — Regulatory & Market Intelligence — a market tracker that flags the regulatory changes most likely to hit a company, matching rules, amendments and sanctions moves to each issuer's actual business; provenance-first, every figure carries its own source and as-of date — https://civfarmer.github.io/CV/projects/meridian/index.html
+- Vantage — Forecasting & Predictive Analytics — a multi-industry demand-forecasting sandbox with a dependency-free engine (Holt-Winters, ETS, Croston, OLS) back-tested on rolling origins — https://civfarmer.github.io/CV/projects/vantage/Vantage.dc.html
+- Helm — Automated Project Manager — turns a written brief into a live schedule: dependency graphs, capacity and critical-path planning, blocker tracking and a multi-project portfolio view; log a delay and every view re-plans around it — https://civfarmer.github.io/CV/projects/helm/helm-platform.dc.html
+- Frontier — Cross-border Data-Transfer & TIA Assessor — determines the lawful basis for moving personal data across a border (EU GDPR Chapter V, Swiss FADP, UK GDPR), runs a Schrems II-style Transfer Impact Assessment and exports an audit-ready record — https://civfarmer.github.io/CV/projects/frontier/index.html
+- Sentinel — AI-Governance & Export-Control Readiness Assessor — returns a deployment's EU AI Act risk class with the obligations triggered, a dual-use export screen (EU Regulation 2021/821, Wassenaar) and the human-control and auditability controls needed, with an audit-ready control record — https://civfarmer.github.io/CV/projects/sentinel/index.html
+
+Also on the site: Morris Anderson Construction — a commercial client build (public site, build-cost estimator and client portal; design and estimator preview with demo data) — https://civfarmer.github.io/CV/projects/morris-anderson/index.html
+
+## Case studies
+
+Eight working platforms read as case studies in regulatory judgement. Each names a compliance failure mode, the control designed for it, and the legal reasoning behind the build.
+
+- All case studies: https://civfarmer.github.io/CV/case-studies/index.html
+- FRIS — twenty-three analysis engines for financial-crime investigations, built to trace value through the third parties that formal sanctions and AML regimes struggle to reach — https://civfarmer.github.io/CV/case-studies/fris.html
+- Meridian — a provenance-first intelligence platform that answers the board's real question: which regulatory changes actually hit us, and does it matter — https://civfarmer.github.io/CV/case-studies/meridian.html
+- Sanctions Suite — a screening desk, an ownership-exposure graph, a vessel screener and a portfolio console, all on one checksummed OpenSanctions snapshot, running with the network cable unplugged — https://civfarmer.github.io/CV/case-studies/sanctions-suite.html
+- Ground Truth — three questions, four open registers, and no network call at any point — https://civfarmer.github.io/CV/case-studies/ground-truth.html
+- Vantage — a forecasting engine that shows its error before it shows its forecast — https://civfarmer.github.io/CV/case-studies/vantage.html
+- Helm — a scheduling engine that turns a written brief into a live programme and, when something slips, re-plans every view while keeping the record of why — https://civfarmer.github.io/CV/case-studies/helm.html
+- Frontier — is this cross-border transfer of personal data lawful, and can you prove it? Three regimes in one rules engine — https://civfarmer.github.io/CV/case-studies/frontier.html
+- Sentinel — one deterministic pass over the two legal questions a regulated AI programme must answer together: is it lawful to build and use, and is it lawful to move — https://civfarmer.github.io/CV/case-studies/sentinel.html
+
+## Publications
+
+28 works, 2024–2026: international law, economics, engineering. Preprints and manuscripts; several are submitted and pending peer review; the reports are grey literature awaiting Zenodo deposit. Nothing here is legal advice. Index: https://civfarmer.github.io/CV/publications/index.html — relationship map: https://civfarmer.github.io/CV/publications/map.html
+
+Economic warfare and the privatisation of hostile power (a nine-paper sequence, written to be read in order):
+
+- Economic Warfare: The Unregulated War — 2024 LL.M. dissertation, thesis of record, awarded 100% — https://civfarmer.github.io/CV/publications/economic-warfare/00-economic-warfare-the-unregulated-war-2024-dissertation.pdf
+- Economic Warfare: The Unregulated War — 2026 publication edition, revised, 19,700 words — https://civfarmer.github.io/CV/publications/economic-warfare/00-economic-warfare-the-unregulated-war-2026.pdf
+- Paper 1 — Economic Warfare after the Embargo (2026, manuscript) — https://civfarmer.github.io/CV/publications/economic-warfare/01-economic-warfare-after-the-embargo.pdf
+- Paper 2 — The Algorithmic Auxiliary (2026, manuscript) — https://civfarmer.github.io/CV/publications/economic-warfare/02-the-algorithmic-auxiliary.pdf
+- Paper 3 — Sovereignty in Fragments (2026, manuscript) — https://civfarmer.github.io/CV/publications/economic-warfare/03-sovereignty-in-fragments.pdf
+- Paper 3B — The MOSAIC Protocol (2026, manuscript) — https://civfarmer.github.io/CV/publications/economic-warfare/03b-the-mosaic-protocol.pdf
+- Paper 4 — Private Sovereigns at War (2026, manuscript) — https://civfarmer.github.io/CV/publications/economic-warfare/04-private-sovereigns-at-war.pdf
+- Paper 5 — The UK Economic Warfare Prevention and Response Act (2026, manuscript; the instrument drafted in full) — https://civfarmer.github.io/CV/publications/economic-warfare/05-uk-economic-warfare-prevention-and-response-act.pdf
+- Paper 6 — The Attribution Threshold (2026, manuscript) — https://civfarmer.github.io/CV/publications/economic-warfare/06-the-attribution-threshold.pdf
+
+Autonomous systems and the law of the machine:
+
+- Regulating Robots by Owning Them (2026, manuscript) — https://civfarmer.github.io/CV/publications/manuscripts/regulating-robots-by-owning-them.pdf
+- Holding a Civil Reserve by Owning It Rather Than by Requiring It — submission to the Swiss Confederation, filed 6 August 2026 — https://civfarmer.github.io/CV/publications/manuscripts/swiss-submission-retained-interest.pdf
+- A Robot Left in a Field Is a Mine the Law Cannot See (2026, preprint, under submission) — DOI 10.5281/zenodo.21971256 — https://civfarmer.github.io/CV/publications/manuscripts/a-robot-left-in-a-field.pdf
+- The Interval, Not the Autonomy (2026, preprint, under submission) — DOI 10.5281/zenodo.21970778 — https://civfarmer.github.io/CV/publications/manuscripts/the-interval-not-the-autonomy.pdf
+- Holding Ground with Machines That Do Not Move (2026, manuscript) — https://civfarmer.github.io/CV/publications/manuscripts/holding-ground-with-machines-that-do-not-move.pdf
+
+Space law and orbital conduct:
+
+- Orbital Denial and the Limits of the Outer Space Treaty (2026, manuscript) — https://civfarmer.github.io/CV/publications/phase2-theory/space-law-orbital-kinetic-systems.html
+- Conventional Counterspace Conduct and the Outer Space Treaty (2026, working draft v1.1.0) — https://civfarmer.github.io/CV/publications/drafts/Counterspace_Conduct_and_Outer_Space_Treaty_v1.1.0.pdf
+- Authorising Planetary Defence (2026, working draft v0.2.0) — https://civfarmer.github.io/CV/publications/drafts/Authorising_Planetary_Defence_v0.2.0.pdf
+
+Verification, compliance and regulatory systems:
+
+- The Magnitsky Model for AI: Localized Legislative Cascades (2026, submitted) — https://civfarmer.github.io/CV/publications/phase2-theory/magnitsky-model-for-ai.html — policy simulator: https://civfarmer.github.io/CV/publications/magnitsky-simulator/
+- Who Pays to Check the Machine (2026, under submission) — https://civfarmer.github.io/CV/publications/manuscripts/who-pays-to-check-the-machine.pdf
+- Coercion Without an Author (2026, under submission) — https://civfarmer.github.io/CV/publications/manuscripts/coercion-without-an-author.pdf
+- Strategic Procurement and Feasibility Modeling for Large-Scale Autonomous Systems (2026, submitted) — https://civfarmer.github.io/CV/publications/phase2-theory/large-scale-autonomous-systems-feasibility.html
+- Sentinel — a methods and positioning note (2026) — https://civfarmer.github.io/CV/publications/sentinel-positioning-note.html
+
+Applied systems and forecasting:
+
+- Deterministic Peel Chains for Regulatory Compliance in Autonomous, Offline Environments (2026, submitted, TechRxiv) — https://civfarmer.github.io/CV/publications/phase1-preprints/fris-deterministic-peel-chains.html
+- Mapping Real-Time Regulatory Impacts to Asset Vulnerability Under Strict API Budgets (2026, submitted, arXiv cs.CY) — https://civfarmer.github.io/CV/publications/phase1-preprints/meridian-regulatory-impact-mapping.html
+- Comparative Efficacy of Holt-Winters, ETS and Croston Methods in Multi-Industry Rolling-Origin Backtesting (2026, submitted) — https://civfarmer.github.io/CV/publications/phase1-preprints/vantage-forecasting-backtesting.html
+
+Reports and advisory case studies (grey literature; Zenodo deposit pending):
+
+- Insolvency Avoidance and Executive Crisis Intervention Model — a simulated charity-governance case study — https://civfarmer.github.io/CV/publications/zenodo-reports/hvoss-coverpage.html
+- Compliance-Led Operational Architecture — a legal and compliance operating model for publicly-funded education delivery (redacted) — https://civfarmer.github.io/CV/publications/zenodo-reports/rsl-coverpage.html
+- Project Finance and Structuring Advisory — a utility-scale PV project on a Philippine island province — https://civfarmer.github.io/CV/publications/zenodo-reports/keystonesolar-coverpage.html
+
+## Research Lab
+
+Independent research on space systems, robotics and space law, with interactive tools that run the papers' own screening code in the browser: https://civfarmer.github.io/CV/publications/research-lab.html
+
+- Solar Generation and High-Density Energy Storage for Large Self-Powered Orbital Platforms — https://civfarmer.github.io/CV/publications/phase1-preprints/solar-power-storage-orbital-platforms.html
+- Geomagnetic Attitude Control and Slew Dynamics of Very Large Flexible Space Structures — https://civfarmer.github.io/CV/publications/phase2-theory/geomagnetic-attitude-control-large-structures.html
+- A Software-First Spatial-Intelligence Layer for Contact-Capable Robots — https://civfarmer.github.io/CV/publications/phase2-theory/spatial-intelligence-robotics.html
+- Interactive: protective spatial intelligence in 3D — https://civfarmer.github.io/CV/projects/spatial-demo/index.html
+- Interactive: ARGUS-PD tradespace explorer — https://civfarmer.github.io/CV/projects/argus-explorer/index.html
+- Interactive: geomagnetic orbit screen (3D) — https://civfarmer.github.io/CV/projects/geomag-orbit/index.html
+- Interactive: launch architecture and projectile (3D) — https://civfarmer.github.io/CV/projects/argus-3d/index.html
+- Interactive: slew-time / dipole tradeoff — https://civfarmer.github.io/CV/projects/slew-tradeoff/index.html
+- Interactive: evidence-gate sequence — https://civfarmer.github.io/CV/projects/evidence-gates/index.html
+
+## Contact
+
+- Email: civfarmer@gmail.com
+- LinkedIn: https://www.linkedin.com/in/civfarmer
+- GitHub: https://github.com/civfarmer
+- Location: Geneva, Switzerland (Swiss B permit — work-authorised, no sponsorship needed)
+- Phone: +33 6 82 91 37 80 (mobile; French number, Geneva-based)
+- Privacy: https://civfarmer.github.io/CV/privacy.html
