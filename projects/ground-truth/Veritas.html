@@ -356,19 +356,29 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     A.forEach(function(t){ if(B[t]) n++; });
     return A.length ? n / A.length : 0;
   }
-  // Retraction Watch dates arrive as "M/D/YYYY" with a truncated time tail;
-  // reasons and titles are cut at a fixed length in the pack. Neither is
-  // rebuilt here: the date is read into ISO form and a cut string is shown
-  // with an ellipsis rather than as if it ended there.
+  // The retraction pack comes in two shapes. Format 2 (meta.complete) keeps
+  // every record whole: ISO dates, full titles and journals, and reasons as
+  // indices into meta.reasons, Retraction Watch's closed vocabulary. Format 1
+  // cut titles at 160 characters and reasons at 200 and kept the raw
+  // "M/D/YYYY H:" date; a string cut there is shown with an ellipsis rather
+  // than as if it ended there. Either pack reads correctly.
+  var RW_WHOLE = !!(RETR && RETR.meta && RETR.meta.complete);
+  var RW_REASONS = (RETR && RETR.meta && RETR.meta.reasons) || [];
   function rwDate(r){
-    var m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(String(r||""));
+    var s = String(r||"");
+    if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+    var m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(s);
     if(!m) return "";
     return m[3] + "-" + (m[1].length < 2 ? "0" : "") + m[1] + "-" + (m[2].length < 2 ? "0" : "") + m[2];
   }
-  function rwText(s, cap){ s = String(s||""); return s.length >= cap ? s + "…" : s; }
+  function rwText(s, cap){ s = String(s||""); return !RW_WHOLE && s.length >= cap ? s + "…" : s; }
+  function rwReasons(w){
+    if(Array.isArray(w)) return w.map(function(i){ return RW_REASONS[i] || ""; }).filter(Boolean).join("; ");
+    return String(w||"");
+  }
   function rwRecord(r){
-    var dt = rwDate(r.r);
-    return r.n + (dt ? " (" + dt + ")" : "") + (r.w ? ": " + rwText(r.w, 200) : "");
+    var dt = rwDate(r.r), why = rwReasons(r.w);
+    return r.n + (dt ? " (" + dt + ")" : "") + (why ? ": " + rwText(why, 200) : "");
   }
   function checkDoi(d){
     var recs = byDoi[d.key];
@@ -713,10 +723,17 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
       delete byDoi[k];
       return a === "reinstated" && b === "retracted"; })());
     ok("Retraction Watch dates are read into ISO form",
-       rwDate("3/9/2026 0:") === "2026-03-09" && rwDate("12/31/2024 ") === "2024-12-31" && rwDate("") === "");
-    ok("a reason cut by the pack ends with an ellipsis, a whole one does not", (function(){
-      var cut = new Array(201).join("x");
-      return /…$/.test(rwText(cut, 200)) && rwText("short", 200) === "short"; })());
+       rwDate("3/9/2026 0:") === "2026-03-09" && rwDate("12/31/2024 ") === "2024-12-31" &&
+       rwDate("2026-03-09") === "2026-03-09" && rwDate("") === "");
+    ok(RW_WHOLE ? "the pack keeps reasons whole: coded reasons read back in full, with no ellipsis"
+                : "a reason cut by the pack ends with an ellipsis, a whole one does not", (function(){
+      var long = new Array(201).join("x");
+      if(!RW_WHOLE) return /…$/.test(rwText(long, 200)) && rwText("short", 200) === "short";
+      var sample = null;
+      for(var i=0;i<RETR.retractions.length;i++){ if(RETR.retractions[i].w.length > 3){ sample = RETR.retractions[i]; break; } }
+      var text = sample ? rwReasons(sample.w) : "";
+      return rwText(long, 200) === long && RW_REASONS.length > 50 && !!sample &&
+             text.split("; ").length === sample.w.length && text.indexOf("undefined") < 0 && !/…$/.test(rwRecord(sample)); })());
     ok("an unretracted DOI is not asserted to exist", (function(){
       var r = checkDoi({key:"10.9999/definitely-not-a-real-doi"});
       return r.verdict === "unchecked" && /does not confirm/.test(r.note); })());
