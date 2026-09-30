@@ -161,6 +161,8 @@
   /* Projects */
   .pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;margin-top:26px}
   .pgrid .pcard{order:5}
+  .client-grid .client-wide{grid-column:1/-1}
+  @media(max-width:820px){.client-grid{grid-template-columns:1fr}}
   html[data-lens="legal"] .pcard[data-project="sanctions"]{order:0}
   html[data-lens="hybrid"] .pcard[data-project="sanctions"]{order:0}
   html[data-lens="governance"] .pcard[data-project="sanctions"]{order:0}
@@ -887,8 +889,8 @@ html[data-theme="light"] .skyline-canvas.cf-fixed{opacity:.38}
         </div>
 
         <div class="eyebrow" style="margin-top:32px">Client work — commercial build</div>
-        <div class="pgrid" style="grid-template-columns:1fr">
-          <article class="pcard" data-project="morris" data-href="projects/morris-anderson/index.html" data-title="Morris Anderson Construction — website, estimator &amp; client portal" data-icon="assets/img/morris-mark.svg">
+        <div class="pgrid client-grid">
+          <article class="pcard client-wide" data-project="morris" data-href="projects/morris-anderson/index.html" data-title="Morris Anderson Construction — website, estimator &amp; client portal" data-icon="assets/img/morris-mark.svg">
             <div class="pmedia" style="aspect-ratio:48/9">
               <span class="badge">Commercial client build</span><span class="live">&#9654; Preview</span>
               <img class="shot" src="assets/img/morris-mark.svg" alt="Morris Anderson Construction mark — gold monogram on the dark client-build palette" loading="lazy" style="object-fit:contain;padding:24px 20px 28px">
@@ -902,6 +904,39 @@ html[data-theme="light"] .skyline-canvas.cf-fixed{opacity:.38}
                 <button class="plink" data-open>Open <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button>
                 <a class="plink ghost" data-newtab href="projects/morris-anderson/index.html" target="_blank" rel="noopener">New tab</a>
                 <span class="note">Client build · design &amp; estimator preview with demo data</span>
+              </div>
+            </div>
+          </article>
+          <article class="pcard" data-project="keystone" data-ext="https://keystoneanalytics.io/work" data-title="Keystone Analytics — consultancy">
+            <div class="pmedia">
+              <span class="badge">Consultancy client</span><span class="live">&#9654; Preview</span>
+              <img class="shot" src="assets/img/keystone-shot.jpg" alt="Keystone Analytics — the studio's home page" loading="lazy">
+              <video class="demo" muted loop playsinline preload="none" data-src="assets/video/keystone-demo.mp4"></video>
+            </div>
+            <div class="pbody">
+              <h3>Keystone Analytics <span class="sub">Consultant · legal, compliance &amp; technology</span></h3>
+              <p>A software studio that ships native apps, public-data directories and research audits. I advise on legal, compliance, financial and strategic matters across its applications and ventures and help shape the data and risk logic behind them — including the compliance and rollout framework for <b>AidNow</b>, its verified emergency-services directory for Negros Island. The Work page is the shipped record.</p>
+              <div class="tags"><span class="tag">Advisory · compliance frameworks</span><span class="tag">AI / LLM workflow governance</span><span class="tag">Product &amp; data logic</span></div>
+              <div class="pactions">
+                <a class="plink" data-newtab href="https://keystoneanalytics.io/work" target="_blank" rel="noopener">See the work <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg></a>
+                <a class="plink ghost" data-newtab href="https://keystoneanalytics.io/" target="_blank" rel="noopener">keystoneanalytics.io</a>
+                <span class="note">Their site, their numbers — the advisory role is described in Experience</span>
+              </div>
+            </div>
+          </article>
+          <article class="pcard" data-project="brickbranch" data-ext="https://www.brickandbranchlandscaping.com/" data-title="Brick &amp; Branch Botanical Landscaping — website">
+            <div class="pmedia">
+              <span class="badge">Commercial client build</span><span class="live">&#9654; Preview</span>
+              <img class="shot" src="assets/img/brickbranch-shot.jpg" alt="Brick &amp; Branch Botanical Landscaping — home page" loading="lazy">
+              <video class="demo" muted loop playsinline preload="none" data-src="assets/video/brickbranch-demo.mp4"></video>
+            </div>
+            <div class="pbody">
+              <h3>Brick &amp; Branch Botanical Landscaping <span class="sub">Website · designed and built</span></h3>
+              <p>The public site for a Worcestershire garden-design, landscaping and maintenance business — services, a three-step process, a filterable project portfolio, client testimonials and an enquiry form. Designed and built by me end to end, for a client whose own work is in soil and stone rather than software.</p>
+              <div class="tags"><span class="tag">Hand-built static site · Tailwind</span><span class="tag">Portfolio &amp; enquiries</span><span class="tag">Kempsey &amp; Worcester</span></div>
+              <div class="pactions">
+                <a class="plink" data-newtab href="https://www.brickandbranchlandscaping.com/" target="_blank" rel="noopener">Visit the site <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg></a>
+                <span class="note">Live client site · design, build and copy</span>
               </div>
             </div>
           </article>
@@ -1313,6 +1348,7 @@ html[data-theme="light"] .skyline-canvas.cf-fixed{opacity:.38}
     function launch(e){ if(e){e.preventDefault();e.stopPropagation();} if(!href) return; openApp(href,title,slug); }
     card.querySelectorAll('[data-open]').forEach(function(b){ b.addEventListener('click', launch); });
     var media=card.querySelector('.pmedia'); if(media) media.addEventListener('click', launch);
+    var ext=card.getAttribute('data-ext'); if(ext&&media) media.addEventListener('click', function(){ window.open(ext,'_blank','noopener'); });   /* client sites live elsewhere: the preview opens the site */
     /* let the explicit "New tab" anchor behave normally */
     card.querySelectorAll('[data-newtab]').forEach(function(a){ a.addEventListener('click', function(e){ e.stopPropagation(); }); });
     /* honest note + "How it's built" panel */
