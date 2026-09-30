@@ -28,6 +28,8 @@
   th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
   th{color:var(--muted);font-size:.7rem;text-transform:uppercase}
   .pill{display:inline-block;font-size:.68rem;padding:1px 7px;border-radius:99px;border:1px solid var(--line);margin:1px 3px 1px 0}
+  /* round country flags (assets/flags — circle-flags, MIT) beside ISO codes */
+  .cflag{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:-2px;margin-right:4px;box-shadow:0 0 0 1px rgba(127,127,127,.35)}
   .flag{background:rgba(224,87,74,.15);border-color:var(--bad);color:var(--bad)}
   .ok{background:rgba(67,197,158,.13);border-color:var(--good);color:var(--good)}
   .muted{color:var(--muted);font-size:.8rem}
@@ -108,6 +110,11 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   var NODES = P ? P.nodes : {}, EDGES = P ? P.edges : [], NAMEIDX = P ? P.nameidx : {};
   var ADJ = null, current = null, currentPaths = null, currentResult = null;
 
+  /* Round flags from assets/flags (circle-flags, MIT): a small flag before an ISO-2 code; a code with no file shows the code alone. */
+  var FLAGDIR='../../assets/flags/';
+  function flag(code){ code=String(code||'').toLowerCase().split('-')[0]; if(!/^[a-z]{2}$/.test(code)) return ''; return '<img class="cflag" src="'+FLAGDIR+code+'.svg" alt="" width="14" height="14" loading="lazy" decoding="async" onerror="this.remove()">'; }
+  function flagged(code){ code=String(code==null?'':code); return flag(code)+esc(code.toUpperCase()); }
+  function flaggedList(list){ return (list||[]).map(flagged).join(', '); }
   function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){
     return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
   // Unicode-aware — an ASCII-only filter made every Cyrillic, Arabic and CJK
@@ -343,7 +350,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
       '<strong style="font-size:1.05rem">'+esc(n.n)+'</strong>'+
       (isSanctioned(id)?'<span class="pill flag">DIRECTLY SANCTIONED</span>':'')+
       '<span class="pill">'+esc(n.s||"entity")+'</span>'+
-      (n.c&&n.c.length?'<span class="pill">'+esc(n.c.join(", "))+'</span>':'')+
+      (n.c&&n.c.length?'<span class="pill">'+flaggedList(n.c)+'</span>':'')+
       '</div><div class="mono muted">'+esc(id)+'</div>';
 
     if(isSanctioned(id)){
@@ -412,7 +419,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
         var n=NODES[id];
         return '<div class="res" data-id="'+esc(id)+'"><strong>'+esc(n.n)+'</strong>'+
           (isSanctioned(id)?' <span class="pill flag">sanctioned</span>':'')+
-          '<div class="muted">'+esc(n.s||"")+(n.c&&n.c.length?" · "+esc(n.c.join(", ")):"")+'</div></div>';
+          '<div class="muted">'+esc(n.s||"")+(n.c&&n.c.length?" · "+flaggedList(n.c):"")+'</div></div>';
       }).join("");
     Array.prototype.forEach.call(el.querySelectorAll(".res"), function(d){
       d.onclick=function(){ showEntity(d.getAttribute("data-id")); };

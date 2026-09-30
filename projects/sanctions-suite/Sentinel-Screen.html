@@ -35,6 +35,8 @@
   th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
   th{color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em}
   .pill{display:inline-block;font-size:.68rem;padding:1px 7px;border-radius:99px;border:1px solid var(--line);margin:1px 3px 1px 0;white-space:nowrap}
+  /* round country flags (assets/flags — circle-flags, MIT) beside ISO codes */
+  .cflag{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:-2px;margin-right:4px;box-shadow:0 0 0 1px rgba(127,127,127,.35)}
   /* The list label is three words long; it wraps inside its pill rather than widening the column. */
   td.listcell{max-width:150px}
   td.listcell .pill{white-space:normal;line-height:1.35;border-radius:10px}
@@ -215,6 +217,11 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     var v = String(s).toUpperCase().replace(/[^A-Z0-9]/g,"");
     return v.length>=6 ? v : "";
   }
+  /* Round flags from assets/flags (circle-flags, MIT): a small flag before an ISO-2 code; a code with no file shows the code alone. */
+  var FLAGDIR='../../assets/flags/';
+  function flag(code){ code=String(code||'').toLowerCase().split('-')[0]; if(!/^[a-z]{2}$/.test(code)) return ''; return '<img class="cflag" src="'+FLAGDIR+code+'.svg" alt="" width="14" height="14" loading="lazy" decoding="async" onerror="this.remove()">'; }
+  function flagged(code){ code=String(code==null?'':code); return flag(code)+esc(code.toUpperCase()); }
+  function flaggedList(list){ return (list||[]).map(flagged).join(', '); }
   function esc(s){
     return String(s==null?"":s).replace(/[&<>"']/g,function(c){
       return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});
@@ -575,7 +582,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
       var r = x.rec;
       h += '<tr><td><strong>'+esc(dq(r.n))+'</strong>'+(r.b?'<div class="muted">DOB '+esc(r.b)+'</div>':'')+'</td>'+
         '<td class="listcell"><span class="pill p-'+listClass(r.l)+'">'+esc(listLabel(r.l))+'</span></td>'+
-        '<td>'+esc(r.s||"")+'</td><td>'+esc(arr(r.c).join(", "))+'</td></tr>';
+        '<td>'+esc(r.s||"")+'</td><td>'+flaggedList(arr(r.c))+'</td></tr>';
     });
     h += '</tbody></table>'+(res.unscoredTotal>u.length?'<div class="muted">Showing the first '+u.length+' of '+res.unscoredTotal+'.</div>':'')+'</div>';
     return h;
@@ -648,7 +655,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
       h += '</td>';
       h += '<td class="listcell"><span class="pill p-'+listClass(r.l)+'">'+esc(listLabel(r.l))+'</span></td>';
       h += '<td>'+esc(r.s||"")+'</td>';
-      h += '<td>'+esc(arr(r.c).join(", "))+(x.countryMatch===true?' ✓':(x.countryMatch===false?' <span class="muted">(differs)</span>':''))+'</td>';
+      h += '<td>'+flaggedList(arr(r.c))+(x.countryMatch===true?' ✓':(x.countryMatch===false?' <span class="muted">(differs)</span>':''))+'</td>';
       h += '<td>'+arr(r.p).map(function(p){return '<span class="pill">'+esc(p)+'</span>'}).join("")+'</td>';
       // Two sources on the face of the row; the rest on hover and in the export.
       var srcs = arr(r.d);

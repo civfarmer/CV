@@ -107,6 +107,10 @@
   .node{flex:1;min-width:0}
   .node .rl{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
   .node .jn{font-family:var(--font-display);font-weight:700;font-size:17px;margin-top:3px;line-height:1.1}
+  /* round country flags (assets/flags — circle-flags, MIT) beside jurisdiction names */
+  .cflag{display:inline-block;width:18px;height:18px;border-radius:50%;vertical-align:-3px;margin-right:6px;box-shadow:0 0 0 1px rgba(127,127,127,.35)}
+  .cflag.sm{width:15px;height:15px;vertical-align:-2px;margin-right:5px}
+  .selflag{display:flex;align-items:center;gap:8px}.selflag select{flex:1 1 auto;min-width:0}.selflag .cflag{flex:0 0 auto;margin:0}
   .node .rg{font-size:11.5px;color:var(--ink2);margin-top:2px}
   .arrowcell{flex:0 0 96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative}
   .arrowline{width:100%;height:3px;border-radius:2px;position:relative;background:var(--line2)}
@@ -315,7 +319,7 @@
 
       <div class="fld">
         <label for="recipient">2 · Recipient / importer country</label>
-        <select id="recipient"></select>
+        <div class="selflag"><img class="cflag" id="recFlag" src="../../assets/flags/us.svg" alt="" width="18" height="18"><select id="recipient"></select></div>
       </div>
 
       <div class="fld cond" id="usCert">
@@ -440,6 +444,10 @@ var EEA=['at','be','bg','hr','cy','cz','dk','ee','fi','fr','de','gr','hu','ie','
 var EEA_ROW=['eea','EU / EEA member state','HOME','F','F',[0,0,0,1]];
 
 /* country: [iso, name, euStatus, chStatus, ukStatus, [gov,rol,redress,onward], law?, scope?] */
+/* Round flags from assets/flags (circle-flags, MIT). A two-letter ISO code with no file just shows nothing. */
+var FLAGDIR='../../assets/flags/';
+function flag(code,cls){ code=String(code||'').toLowerCase().split('-')[0]; if(code==='eea'||code==='gdpr') code='eu'; if(!/^[a-z]{2}$/.test(code)) return ''; return '<img class="cflag'+(cls?' '+cls:'')+'" src="'+FLAGDIR+code+'.svg" alt="" width="18" height="18" loading="lazy" decoding="async" onerror="this.remove()">'; }
+var EXPFLAG={GDPR:'eu',FADP:'ch',UKGDPR:'gb'};
 var C=[
   ['gb','United Kingdom','F','F','HOME',[1,0,1,1],null,'EU renewed UK adequacy Dec 2025, valid to 27 Dec 2031.'],
   ['ch','Switzerland','F','HOME','F',[0,0,0,1],null,'Mutually adequate with the EU.'],
@@ -573,6 +581,7 @@ function setMedium(v){ mediumVal=v; document.querySelectorAll('#medium button').
 document.getElementById('medium').addEventListener('click',function(e){ var b=e.target.closest('button[data-v]'); if(!b) return; setMedium(b.getAttribute('data-v')); });
 function syncConds(){
   var iso=recSel.value;
+  var rf=document.getElementById('recFlag'); if(rf){ var fc=(iso==='eea')?'eu':iso; rf.style.visibility=/^[a-z]{2}$/.test(fc)?'visible':'hidden'; rf.src=FLAGDIR+(/^[a-z]{2}$/.test(fc)?fc:'un')+'.svg'; }
   document.getElementById('usCert').classList.toggle('show',iso==='us');
   document.getElementById('caCert').classList.toggle('show',iso==='ca');
 }
@@ -1004,9 +1013,9 @@ function render(res){
   h+='<div class="v-'+v+'">';
   /* route visual */
   h+='<div class="route">'
-    +'<div class="node"><div class="rl">Exporter</div><div class="jn">'+esc(expName.split(' (')[0])+'</div><div class="rg">'+esc(R.chap)+'</div></div>'
+    +'<div class="node"><div class="rl">Exporter</div><div class="jn">'+flag(EXPFLAG[i.regime])+esc(expName.split(' (')[0])+'</div><div class="rg">'+esc(R.chap)+'</div></div>'
     +'<div class="arrowcell"><div class="lbl">'+(i.medium==='physical'?'physical':'data')+'</div><div class="arrowline '+v+'"></div>'+GLYPH[v]+'</div>'
-    +'<div class="node" style="text-align:right"><div class="rl">Recipient</div><div class="jn">'+esc(recName)+'</div><div class="rg">'+(res.country&&res.country[6]?'surveillance-law flag':'destination')+'</div></div>'
+    +'<div class="node" style="text-align:right"><div class="rl">Recipient</div><div class="jn">'+flag(res.country?res.country[0]:i.recipient)+esc(recName)+'</div><div class="rg">'+(res.country&&res.country[6]?'surveillance-law flag':'destination')+'</div></div>'
     +'</div>';
   /* verdict */
   h+='<div class="verdict"><div class="vbadge">'+VICON[v]+'</div><div class="vtxt"><div class="vt">'+esc(res.headline)+'</div><div class="vs">'+res.sub+'</div></div></div>';

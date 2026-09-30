@@ -118,6 +118,10 @@
   .node{flex:1;min-width:0}
   .node .rl{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
   .node .jn{font-family:var(--font-display);font-weight:700;font-size:17px;margin-top:3px;line-height:1.1}
+  /* round country flags (assets/flags — circle-flags, MIT) beside jurisdiction names */
+  .cflag{display:inline-block;width:18px;height:18px;border-radius:50%;vertical-align:-3px;margin-right:6px;box-shadow:0 0 0 1px rgba(127,127,127,.35)}
+  .cflag.sm{width:15px;height:15px;vertical-align:-2px;margin-right:5px}
+  .selflag{display:flex;align-items:center;gap:8px}.selflag select{flex:1 1 auto;min-width:0}.selflag .cflag{flex:0 0 auto;margin:0}
   .node .rg{font-size:11.5px;color:var(--ink2);margin-top:2px}
   .arrowcell{flex:0 0 96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative}
   .arrowline{width:100%;height:3px;border-radius:2px;position:relative;background:var(--line2)}
@@ -410,6 +414,10 @@ var OVERSIGHT=[
   ['audit','Human reviews after the fact (audit only)'],
   ['none','No human oversight']
 ];
+/* Round flags from assets/flags (circle-flags, MIT). A two-letter ISO code with no file just shows nothing. */
+var FLAGDIR='../../assets/flags/';
+function flag(code,cls){ code=String(code||'').toLowerCase().split('-')[0]; if(code==='eea'||code==='gdpr') code='eu'; if(!/^[a-z]{2}$/.test(code)) return ''; return '<img class="cflag'+(cls?' '+cls:'')+'" src="'+FLAGDIR+code+'.svg" alt="" width="18" height="18" loading="lazy" decoding="async" onerror="this.remove()">'; }
+var JURFLAG={EU:'eu',CH:'ch',UK:'gb',US:'us',CN:'cn'};
 var JUR={ EU:'EU / EEA', CH:'Switzerland', UK:'United Kingdom', US:'United States', OTHER:'Other' };
 var REGION={ EU:'EU / EEA', CH:'Switzerland', UK:'United Kingdom', US:'United States', CN:'China', GULF:'Gulf / MENA', GLOBAL:'Global / multi-market', OTHER:'Other' };
 var AUTONOMY={ assistive:'Assistive (human decides)', hitl:'Human-in-the-loop', hotl:'Human-on-the-loop', full:'Fully autonomous' };
@@ -857,9 +865,9 @@ function render(res){
   var h='<div class="v-'+vcss+'">';
   /* route */
   h+='<div class="route">'
-    +'<div class="node"><div class="rl">Built in</div><div class="jn">'+esc(buildName)+'</div><div class="rg">'+esc(capLabelPlain(i.capability))+'</div></div>'
+    +'<div class="node"><div class="rl">Built in</div><div class="jn">'+flag(JURFLAG[i.buildJur])+esc(buildName)+'</div><div class="rg">'+esc(capLabelPlain(i.capability))+'</div></div>'
     +'<div class="arrowcell"><div class="lbl">'+(xp.crossBorder?'export':'deploy')+'</div><div class="arrowline '+vcss+'"></div>'+GLYPH[vcss]+'</div>'
-    +'<div class="node" style="text-align:right"><div class="rl">Used in</div><div class="jn">'+esc(useName)+'</div><div class="rg">'+esc(sectorLabelPlain(i.sector))+'</div></div>'
+    +'<div class="node" style="text-align:right"><div class="rl">Used in</div><div class="jn">'+flag(JURFLAG[i.useRegion])+esc(useName)+'</div><div class="rg">'+esc(sectorLabelPlain(i.sector))+'</div></div>'
     +'</div>';
   /* verdict */
   h+='<div class="verdict" id="vFocus" tabindex="-1"><div class="vbadge">'+VICON[vcss]+'</div><div class="vtxt"><div class="vt">'+esc(res.headline)+'</div><div class="vs">'+res.sub+'</div></div></div>';

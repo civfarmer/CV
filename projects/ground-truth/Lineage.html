@@ -39,6 +39,8 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
   th{color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em}
   .pill{display:inline-block;font-size:.66rem;padding:1px 7px;border-radius:99px;border:1px solid var(--line);margin:1px 3px 1px 0;white-space:nowrap;color:var(--muted)}
+  /* round country flags (assets/flags — circle-flags, MIT) beside ISO codes */
+  .cflag{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:-2px;margin-right:4px;box-shadow:0 0 0 1px rgba(127,127,127,.35)}
   .p-direct{border-color:var(--accent);color:var(--accent-ink)}
   .p-ultimate{border-color:var(--gold);color:var(--gold)}
   .p-branch,.p-feeder,.p-subfund,.p-fund-manager{border-color:var(--line);color:var(--muted)}
@@ -118,6 +120,11 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   var E = ENT ? ENT.entities : {};
   var lastRun = null;
 
+  /* Round flags from assets/flags (circle-flags, MIT): a small flag before an ISO-2 code; a code with no file shows the code alone. */
+  var FLAGDIR='../../assets/flags/';
+  function flag(code){ code=String(code||'').toLowerCase().split('-')[0]; if(!/^[a-z]{2}$/.test(code)) return ''; return '<img class="cflag" src="'+FLAGDIR+code+'.svg" alt="" width="14" height="14" loading="lazy" decoding="async" onerror="this.remove()">'; }
+  function flagged(code){ code=String(code==null?'':code); return flag(code)+esc(code); }
+  function flaggedList(list){ return (list||[]).map(flagged).join(', '); }
   function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){
     return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
   function nm(lei){ var e = E[lei]; return e ? e.n : "(not in Level 1)"; }
@@ -260,8 +267,8 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   function statusPills(lei){
     var e = E[lei]; if(!e) return '<span class="pill p-alert">not in Level 1</span>';
     var h = "";
-    if(e.j) h += '<span class="pill">' + esc(e.j) + '</span>';
-    if(e.h && e.h !== e.j) h += '<span class="pill">HQ ' + esc(e.h) + '</span>';
+    if(e.j) h += '<span class="pill">' + flagged(e.j) + '</span>';
+    if(e.h && e.h !== e.j) h += '<span class="pill">HQ ' + flagged(e.h) + '</span>';
     if(e.k) h += '<span class="pill">' + esc(e.k) + '</span>';
     if(e.s && e.s !== "ACTIVE") h += '<span class="pill p-alert">' + esc(e.s) + '</span>';
     if(e.r && e.r !== "ISSUED") h += '<span class="pill p-alert">registration ' + esc(e.r) + '</span>';
@@ -335,7 +342,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
 
     if(res.jurisdictions.length){
       h += '<h2 style="font-size:1rem">Jurisdictions in the chain</h2><div>' +
-        res.jurisdictions.map(function(j){ return '<span class="pill">' + esc(j) + '</span>'; }).join("") +
+        res.jurisdictions.map(function(j){ return '<span class="pill">' + flagged(j) + '</span>'; }).join("") +
         '</div><div class="muted">' + res.countries.length + ' countr' + (res.countries.length === 1 ? 'y' : 'ies') +
         ' along the chain, so ' + res.crossings + ' border' + (res.crossings === 1 ? '' : 's') +
         ' crossed; a sub-national code such as US-DE counts with its country.</div>';
