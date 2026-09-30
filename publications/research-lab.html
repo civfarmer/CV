@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f17'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='27' font-weight='700' fill='%23d4b24c' text-anchor='middle'%3ECF%3C/text%3E%3C/svg%3E">
 <title>Research Lab — Christopher Farmer</title>
-<meta name="description" content="Research Lab — independent research by Christopher I. V. Farmer on space systems, robotics and space law: orbital solar power and storage, geomagnetic attitude control of very large flexible structures, a software-first spatial-intelligence layer for contact-capable robots, orbital denial and the limits of the Outer Space Treaty, eight working drafts, and six interactive tools that run the papers' own screening code in the browser. Preprints — submitted; pending peer review.">
+<meta name="description" content="Research Lab — independent research by Christopher I. V. Farmer on space systems, robotics and space law: orbital solar power and storage, geomagnetic attitude control of very large flexible structures, a software-first spatial-intelligence layer for contact-capable robots, orbital denial and the limits of the Outer Space Treaty, six working drafts, and seven interactive tools that run the papers' own screening code in the browser. Preprints — submitted; pending peer review.">
 <style>
   /* Offline-first: font families name Zilla Slab / Inter / IBM Plex Mono but fall back to
      system fonts. No network requests, no CDN. */
@@ -192,7 +192,9 @@
   .pubclasses a:hover{color:var(--ink);border-color:var(--accent);transform:translateY(-1px)}
   .pubclasses a .pcl-tri{color:var(--accent);font-size:9px}
   @media(max-width:640px){.pubclasses{overflow-x:auto;flex-wrap:wrap;-webkit-overflow-scrolling:touch}}
-  @media(max-width:440px){.pubclasses{top:75px}}
+  /* below 1080px the .cftop bar is the header: the second brand bar is dropped, and the
+     category strip sticks under the 61px .cftop instead of the 66px .top */
+  @media(max-width:1079.98px){.top{display:none}.pubclasses{top:61px}}
   /* every jump target clears the pinned .top bar — previously only the demos section did */
   section.papers,section.papers h2{scroll-margin-top:84px}
   /* Top-of-page jump pointer to the interactive section */
@@ -315,7 +317,7 @@
   .movednote a{color:var(--gold,#d4b24c)}
 
   /* ---- expandable descriptions ------------------------------------------
-     Twelve of the sixteen descriptions on this page run past 320 characters and
+     Most of the seventeen descriptions on this page run past 320 characters and
      one reaches 1,321, which is a wall of text under every image. The clamp is
      applied by script rather than in the stylesheet, so a reader without
      JavaScript keeps the whole thing and loses nothing. */
@@ -330,7 +332,7 @@
     .abmore{display:none!important}}
 
   /* ---- phone: tighten the Lab card ---------------------------------------
-     Sixteen cards at a median 494px is thirteen phone screens. Nothing is
+     Seventeen cards at a median 494px is fourteen phone screens. Nothing is
      removed - the previews earn their place on a page of demonstrations - but
      the chrome around them does not need desktop proportions on a phone. */
   @media (max-width:640px){
@@ -417,7 +419,7 @@ document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
       <div class="eyebrow">Independent research &middot; space systems, robotics &amp; space law</div>
       <h1>Research Lab</h1>
 <p class="movednote">The public-international-law papers on orbital conduct and planetary defence now sit under <a href="index.html#space-law">Space law and orbital conduct</a> on the publications index. What follows is the models, the working drafts and the demonstrations that run them.</p>
-      <p class="lead">Independent research, kept deliberately separate from the applied regulatory and compliance work. This is where the engineering, robotics and space-law strand lives &mdash; orbital power and attitude control, a software-first spatial-intelligence layer for contact-capable robots, and the legal status of conduct in orbit. The six interactive tools are not illustrations of the papers: they run the papers' own screening code in your browser.</p>
+      <p class="lead">Independent research, kept deliberately separate from the applied regulatory and compliance work. This is where the engineering, robotics and space-law strand lives &mdash; orbital power and attitude control, a software-first spatial-intelligence layer for contact-capable robots, and the legal status of conduct in orbit. The seven interactive tools are not illustrations of the papers: they run the papers' own screening code in your browser.</p>
 
       <div class="note" role="note">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9L2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
@@ -440,9 +442,9 @@ document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
       <div class="sechead">
         <span class="ph">Interactive</span>
         <h2 id="demos-h">Interactive demonstrations</h2>
-        <span class="demos-cue"><span class="tri">&#9654;</span> 6 live tools &middot; run in-browser</span>
+        <span class="demos-cue"><span class="tri">&#9654;</span> 7 live tools &middot; run in-browser</span>
       </div>
-      <p class="ab" style="max-width:72ch">The six differ in what they rest on. Four run the deposited, unit-tested v1.2.0 models directly, and the geomagnetic orbit screen checks itself against the deposited screen on load; the slew tradeoff reproduces the companion paper's reference case from the deposited orbit-mean field; the arena demo illustrates the robotics paper's architecture and has no deposited dataset.</p>
+      <p class="ab" style="max-width:72ch">The seven differ in what they rest on. Four run the deposited, unit-tested v1.2.0 models directly, and the geomagnetic orbit screen checks itself against the deposited screen on load; the slew tradeoff reproduces the companion paper's reference case from the deposited orbit-mean field; the arena demo illustrates the robotics paper's architecture and has no deposited dataset; the Magnitsky simulator scores the legal paper's cascade argument on illustrative weights and is a reasoning aid, not a forecast.</p>
       <div class="grid">
         <article class="card">
           <div class="meta"><span class="chip">Interactive 3D · illustrative</span><span class="chip venue">Spatial-intelligence paper</span><span class="chip play"><span class="tri">&#9654;</span> Interactive</span></div>
@@ -528,6 +530,18 @@ document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
             <span class="fmt">Live · offline</span>
           </div>
         </article>
+        <article class="card">
+          <div class="meta"><span class="chip">Interactive · illustrative</span><span class="chip venue">Magnitsky Model for AI</span><span class="chip play"><span class="tri">&#9654;</span> Interactive</span></div>
+          <h3>The Magnitsky Model for AI &mdash; policy simulator</h3>
+          <img class="demo-shot" src="assets/previews/magnitsky.jpg" alt="The Magnitsky simulator: scenario, target and jurisdiction choices above a stage-by-stage cascade rail and verdict" loading="lazy">
+          <div class="code">Double veil &middot; targeted designations &middot; market, banking and emulation cascade &middot; verdict with reasons</div>
+          <p class="ab">A hands-on companion to the Phase II legal paper. Choose how an AI system is used to circumvent international law and who is behind the corporate and algorithmic veils, watch attribution fail, then enact Magnitsky-style designations in one or more jurisdictions and tune the market, banking, de-risking and emulation levers. The model scores exclusion inside the enacting coalition and legislative emulation beyond it, and returns a verdict &mdash; Contained, Circumvented or Cascaded to compliance &mdash; with plain reasons. A transparent scoring of the paper's argument on illustrative weights: not a prediction, not legal advice.</p>
+          <div class="foot">
+            <a class="read" href="magnitsky-simulator/index.html" data-modal data-modal-title="The Magnitsky Model for AI &mdash; policy simulator" target="_blank" rel="noopener" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg> Open the simulator</a>
+            <a class="cf-newtab" href="magnitsky-simulator/index.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg> <span>New tab</span></a>
+            <span class="fmt">Live · offline</span>
+          </div>
+        </article>
       </div>
     </section>
 
@@ -562,7 +576,7 @@ document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
       <div class="sechead">
         <span class="ph">Phase II</span>
         <h2 id="p2">Theory &amp; methodology</h2>
-        <span class="cnt">3 papers · submitted; pending peer review</span>
+        <span class="cnt">2 papers · submitted; pending peer review</span>
       </div>
       <div class="grid">
 
@@ -604,9 +618,9 @@ document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
       <div class="sechead">
         <span class="ph">Drafts</span>
         <h2 id="drafts-h">Working drafts — space systems &amp; space law</h2>
-        <span class="cnt">8 drafts + annex · package v1.2.0 · not yet submitted</span>
+        <span class="cnt">6 drafts + annex · package v1.2.0 · not yet submitted</span>
       </div>
-      <p class="ab" style="max-width:72ch;margin-top:0">Eight drafts posted for reading (July 2026), plus the consolidated reproducibility annex. Papers&nbsp;I&ndash;III, the legal article and the geomagnetic article are now at <b>manuscript v1.1.0</b> — their final revised editions — and the launcher-science study, the planetary-defence authorisation paper and the programme capstone are new. Two revise work already on this page: the geomagnetic paper corrects four overclaims in the Phase II web version, and Paper&nbsp;II supersedes the earlier 49&nbsp;km analyses. All are drawn from publication package v1.2.0, whose 228-file checksum manifest verifies clean; DOIs are not yet minted.</p>
+      <p class="ab" style="max-width:72ch;margin-top:0">Six drafts posted for reading (July 2026), plus the consolidated reproducibility annex. Papers&nbsp;I&ndash;III and the geomagnetic article are now at <b>manuscript v1.1.0</b> — their final revised editions — and the launcher-science study and the programme capstone are new; the legal article and the planetary-defence authorisation paper sit under <a href="index.html#space-law">Space law and orbital conduct</a> on the publications index. Two revise work already on this page: the geomagnetic paper corrects four overclaims in the Phase II web version, and Paper&nbsp;II supersedes the earlier 49&nbsp;km analyses. All are drawn from publication package v1.2.0, whose 228-file checksum manifest verifies clean; DOIs are not yet minted.</p>
       <div class="grid">
         <article class="card">
           <div class="meta"><span class="chip">Supplementary materials</span><span class="chip venue">Reproducibility annex v1.0.0 · superseded by package v1.2.0</span></div>
@@ -783,7 +797,7 @@ document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
       titleEl.textContent = label || 'Interactive tool';
       newtab.setAttribute('href', src);
       var theme = document.documentElement.getAttribute('data-theme') || 'dark';
-      var srcT = src + (src.indexOf('?')>=0 ? '&' : '?') + 'theme=' + theme;   // match tool theme to page
+      var srcT = src + (src.indexOf('?')>=0 ? '&' : '?') + 'theme=' + theme + '&embed=1';   // match tool theme to page; embed=1 folds the tool's own header and intro so the frame opens on the tool
       frame.setAttribute('src', srcT);                         // document load — file:// safe
       armLoadStop();                                           // clear the loader when the frame is ready
       modal.hidden = false;

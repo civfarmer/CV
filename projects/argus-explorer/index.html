@@ -90,14 +90,27 @@
       border-bottom:1px dotted var(--line,#233145);cursor:pointer}
   }
   @media print{.lede.clamped{display:block;-webkit-line-clamp:none}details.mnote{display:block}}
+  /* embedded in the Research Lab lightbox: no second header, introduction folded so the tool is on top */
+  html.embed .top{display:none}
+  html.embed .wrap{padding-top:10px}
+  details.embedintro{margin:0 0 4px}
+  details.embedintro>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:8px;font-family:var(--fm);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);padding:4px 0}
+  details.embedintro>summary::-webkit-details-marker{display:none}
+  details.embedintro>summary::after{content:'\25B8';font-size:10px}
+  details.embedintro[open]>summary::after{content:'\25BE'}
+  /* the wrapped header is a quarter of a phone screen; let it scroll away */
+  @media (max-width:640px){.top{position:static}}
 </style>
+<script>/* ?embed=1: opened inside the Research Lab lightbox, which has its own title bar and close
+   control, so this page's header is dropped and its introduction folds below (see the end of the page). */
+try{if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.classList.add('embed');}catch(e){}</script>
   <link rel="stylesheet" href="../../assets/fonts.css">
 </head>
 <body>
   <div class="top">
-    <a class="brand" href="../../publications/index.html"><span class="crest">CF</span><span><span class="nm">Christopher Farmer</span><br><span class="rl">ARGUS-PD Tradespace Explorer</span></span></a>
+    <a class="brand" href="../../publications/index.html" target="_top"><span class="crest">CF</span><span><span class="nm">Christopher Farmer</span><br><span class="rl">ARGUS-PD Tradespace Explorer</span></span></a>
     <div style="display:flex;gap:8px">
-      <a class="btn" href="../../publications/index.html">&#8592; Publications</a>
+      <a class="btn" href="../../publications/index.html" target="_top">&#8592; Publications</a>
       <button class="btn" id="theme" aria-label="Toggle theme">&#9789;</button>
     </div>
   </div>
@@ -130,7 +143,7 @@
         <div class="gates" id="gates"></div>
       </div>
 
-      <div class="panel">
+      <div class="panel" data-noreorder>
         <h2>Screening outputs</h2>
         <div class="sub">Recomputed live from the deposited relations</div>
         <div class="out" id="metrics"></div>
@@ -175,42 +188,51 @@ function shot(m, v){
   const miss = Math.sqrt(Math.pow(AUM*sAng,2)+Math.pow(v*sTim,2)+sTgt*sTgt);
   return {E,p,F,a,t,admitted,installed,Bideal,areaAtField,dia,flightDays,miss};
 }
-const fmt=(x,d=3)=>{
-  if(x===0)return '0';
-  const abs=Math.abs(x);
-  if(abs>=1e9)return (x/1e9).toFixed(d)+'e9';
-  if(abs>=1e6)return (x/1e6).toFixed(d)+'e6';
-  if(abs>=1e3)return x.toLocaleString('en-GB',{maximumFractionDigits:0});
-  if(abs<0.01)return x.toExponential(2);
-  return x.toFixed(d);
-};
-
 const massMin=0.15, massMax=30; // log span across the family
 function sliderToMass(s){ return massMin*Math.pow(massMax/massMin, s); }
 function massToSlider(m){ return Math.log(m/massMin)/Math.log(massMax/massMin); }
+// A preset carries its exact deposited mass: the slider's 0.0001 log step lands a hair off it
+// (1.2 kg became 1.20018 kg), which read as 150.022 GJ against a 150 GJ ceiling. The exact
+// value is held until the mass slider is next moved by hand.
+let presetMass=null;
+// One tolerance for both hard screens, shared with the evidence-gates page: a preset on the
+// 150 GJ line passes, a shot 1% over it fails.
+const TOL=1e-3;
+// value + SI prefix for the read-outs: 150.0 GJ rather than 150.000e9 J
+function siU(x,u){
+  const a=Math.abs(x);
+  if(a>=1e9) return {v:(x/1e9).toFixed(1),u:'G'+u};
+  if(a>=1e6) return {v:(x/1e6).toFixed(1),u:'M'+u};
+  if(a>=1e3) return {v:x.toLocaleString('en-GB',{maximumFractionDigits:0}),u:u};
+  if(a>0&&a<0.01) return {v:x.toExponential(2),u:u};
+  return {v:x.toFixed(3),u:u};
+}
+const fmtU=(x,u)=>{const s=siU(x,u);return s.v+' '+s.u;};
 
 function gate(pass, lab, why){ return {pass,lab,why}; }
 function evalGates(m,v,r){
   // The only HARD conservation screens are E_k ≤ 150 GJ (mechanical ceiling)
   // and B_ideal ≤ 16.5 T (Paper I §6.1). Installed nameplate, coupling area, 0.5-AU flight time and
   // miss-σ are REPORTED ATTRIBUTES (shown in the read-outs), not pass/fail gates.
+  const ekPass=r.E <= 1.5e11*(1+TOL), bPass=r.Bideal <= C.FIELD*(1+TOL);
   return [
-    gate(r.E <= 1.5e11*1.02, "Kinetic-energy ceiling", `${fmt(r.E)} J ≤ 150 GJ (mechanical ceiling)`),
-    gate(r.Bideal <= C.FIELD, "Magnetic-pressure screen", `B_ideal ${r.Bideal.toFixed(2)} T ≤ ${C.FIELD} T`),
+    gate(ekPass, "Kinetic-energy ceiling", `E_k ${fmtU(r.E,'J')} ${ekPass?'≤':'>'} 150 GJ (mechanical ceiling)`),
+    gate(bPass, "Magnetic-pressure screen", `B_ideal ${r.Bideal.toFixed(2)} T ${bPass?'≤':'>'} ${C.FIELD} T`),
   ];
 }
 
 function render(){
   const mS=+document.getElementById('mSlider').value;
-  const m=sliderToMass(mS);
+  const m=presetMass!==null?presetMass:sliderToMass(mS);
   const v=+document.getElementById('vSlider').value;
   document.getElementById('mLab').textContent=m.toFixed(3)+' kg';
   document.getElementById('vLab').textContent=Math.round(v).toLocaleString('en-GB')+' m/s';
   const r=shot(m,v);
+  const E=siU(r.E,'J'),P=siU(r.p,'N·s'),I=siU(r.installed,'J'),F=siU(r.F,'N');
   const M=[
-    ['Kinetic energy',fmt(r.E),'J'],['Momentum',fmt(r.p),'N·s'],
-    ['Installed nameplate',fmt(r.installed),'J'],['Ideal field',r.Bideal.toFixed(2),'T'],
-    ['Coupling Ø @16.5 T',r.dia.toFixed(3),'m'],['Mean force',fmt(r.F),'N'],
+    ['Kinetic energy',E.v,E.u],['Momentum',P.v,P.u],
+    ['Installed nameplate',I.v,I.u],['Ideal field',r.Bideal.toFixed(2),'T'],
+    ['Coupling Ø @16.5 T',r.dia.toFixed(3),'m'],['Mean force',F.v,F.u],
     ['0.5 AU flight',r.flightDays.toFixed(2),'days'],['Screening σ_miss',r.miss.toFixed(1),'m'],
   ];
   document.getElementById('metrics').innerHTML=M.map(x=>`<div class="metric"><div class="k">${x[0]}</div><div class="v">${x[1]} <span class="u">${x[2]}</span></div></div>`).join('');
@@ -220,7 +242,13 @@ function render(){
 
 function drawChart(cur){
   const cv=document.getElementById('chart'), x=cv.getContext('2d');
-  const W=cv.width,H=cv.height,pad=52;
+  // buffer follows the container width and the device pixel ratio: crisp on a phone or a
+  // high-density screen instead of a fixed 720px bitmap stretched to fit
+  const dpr=Math.min(window.devicePixelRatio||1,3);
+  const cssW=Math.max(280,Math.round(cv.getBoundingClientRect().width||720)), cssH=Math.round(cssW*380/720);
+  if(cv.width!==Math.round(cssW*dpr)||cv.height!==Math.round(cssH*dpr)){cv.width=Math.round(cssW*dpr);cv.height=Math.round(cssH*dpr);}
+  x.setTransform(dpr,0,0,dpr,0,0);
+  const W=cssW,H=cssH,pad=52;
   const css=getComputedStyle(document.body);
   const col=n=>css.getPropertyValue(n).trim();
   x.clearRect(0,0,W,H);
@@ -257,15 +285,21 @@ function boot(d){
   d.family.forEach(f=>{
     const b=document.createElement('button');b.className='chip';
     b.textContent=`${f.case} · ${(+f.total_moving_mass_kg.toFixed(3)).toLocaleString('en-GB')} kg`;
-    b.onclick=()=>{document.getElementById('mSlider').value=massToSlider(f.total_moving_mass_kg);
+    b.onclick=()=>{presetMass=f.total_moving_mass_kg;document.getElementById('mSlider').value=massToSlider(f.total_moving_mass_kg);
       document.getElementById('vSlider').value=f.velocity_m_s;render();};
     pr.appendChild(b);
   });
+  // open on the R-DART 0.300 kg / 1,000 km/s reference, as the label says
+  const ref=d.family.find(f=>f.case==='R-DART')||d.family[0];
+  presetMass=ref.total_moving_mass_kg;
+  document.getElementById('mSlider').value=massToSlider(ref.total_moving_mass_kg);
+  document.getElementById('vSlider').value=ref.velocity_m_s;
   render();
 }
 try{ boot(JSON.parse(document.getElementById('argus-data').textContent)); }
 catch(e){ fetch('data.json').then(r=>r.json()).then(boot); }
-['mSlider','vSlider'].forEach(id=>document.getElementById(id).addEventListener('input',render));
+document.getElementById('mSlider').addEventListener('input',()=>{presetMass=null;render();});
+document.getElementById('vSlider').addEventListener('input',render);
 document.getElementById('theme').addEventListener('click',()=>{
   const h=document.documentElement,n=h.getAttribute('data-theme')==='light'?'dark':'light';
   h.setAttribute('data-theme',n);try{localStorage.setItem('cf-theme',n)}catch(e){}
@@ -312,6 +346,7 @@ window.addEventListener('resize',()=>{if(DATA)render();});
     if(panels.length<2) return;
     var best=null,bestArea=0;
     panels.forEach(function(pl){
+      if(pl.hasAttribute('data-noreorder')) return;   /* read-outs follow the sliders that drive them */
       var v=pl.querySelector('canvas,svg');
       if(!v) return;
       var r=v.getBoundingClientRect(), a=r.width*r.height;
@@ -321,6 +356,21 @@ window.addEventListener('resize',()=>{if(DATA)render();});
       grid.insertBefore(best, grid.firstElementChild);
     }
   });
+})();
+</script>
+<script>
+/* Embedded in the Research Lab lightbox (?embed=1): fold everything above the tool into a
+   disclosure so the frame opens on the thing that can be used. Nothing is removed. */
+(function(){
+  if(!document.documentElement.classList.contains('embed')) return;
+  var first=document.querySelector('.grid,.stage,.viewbox,main.wrap>section.panel'); if(!first) return;
+  var list=[],n=first.previousElementSibling;
+  while(n){ if(!n.classList.contains('top')) list.unshift(n); n=n.previousElementSibling; }
+  if(!list.length) return;
+  var d=document.createElement('details'); d.className='embedintro';
+  var s=document.createElement('summary'); s.textContent='About this tool'; d.appendChild(s);
+  first.parentNode.insertBefore(d,list[0]);
+  list.forEach(function(e){ d.appendChild(e); });
 })();
 </script>
 </body>

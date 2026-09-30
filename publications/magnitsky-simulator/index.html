@@ -190,6 +190,7 @@
   .verdict .vscore{text-align:right;font-family:var(--font-mono)}
   .verdict .vscore .n{font-size:28px;font-weight:600;color:var(--ink)}
   .verdict .vscore .l{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .verdict .vscore .n.sm{font-size:18px;margin-top:7px;color:var(--ink2)}
   .verdict.v-contained{border-color:color-mix(in oklab,var(--accent) 55%,transparent);background:color-mix(in oklab,var(--accent) 10%,var(--surface))}
   .verdict.v-contained .vbig{color:var(--accent-ink)}
   .verdict.v-cascaded{border-color:color-mix(in oklab,var(--gold) 55%,transparent);background:color-mix(in oklab,var(--gold) 11%,var(--surface))}
@@ -274,7 +275,22 @@
     .cfside.open{transform:none;visibility:visible;transition:transform .25s ease,visibility 0s}
   }
   @media print{.cftop,.cfscrim,.cfside{display:none!important}}
+  /* with the .cftop bar pinned on small screens, a second pinned bar cost a quarter of a phone
+     screen; the page header keeps its links but scrolls away */
+  @media(max-width:1079.98px){.top{position:static}}
+  /* embedded in the Research Lab lightbox: no second chrome, introduction folded so the model is on top */
+  html.embed .top,html.embed .cftop,html.embed .cfside,html.embed .pubnav,html.embed .cfscrim{display:none!important}
+  html.embed body{padding-left:0}
+  html.embed .hero{padding-top:6px}
+  details.embedintro{margin:8px 0 4px}
+  details.embedintro>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);padding:4px 0}
+  details.embedintro>summary::-webkit-details-marker{display:none}
+  details.embedintro>summary::after{content:'\25B8';font-size:10px}
+  details.embedintro[open]>summary::after{content:'\25BE'}
 </style>
+<script>/* ?embed=1: opened inside the Research Lab lightbox, which has its own title bar and close
+   control, so this page's chrome is dropped and its introduction folds below (see the end of the page). */
+try{if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.classList.add('embed');}catch(e){}</script>
   <link rel="stylesheet" href="../../assets/fonts.css">
 <script>/* Respect the operating system's choice before first paint. Without this a deep
    link from a submission email always lands on dark navy whatever the reader prefers,
@@ -285,7 +301,7 @@ document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
 </head>
 <body>
 <div class="cftop">
-  <a class="cfb" href="../../index.html"><img src="../../assets/img/portrait-2026.png" alt=""><span class="nm">Christopher Farmer</span></a>
+  <a class="cfb" href="../../index.html" target="_top"><img src="../../assets/img/portrait-2026.png" alt=""><span class="nm">Christopher Farmer</span></a>
   <button class="cfburger" id="cfburger" aria-label="Menu" aria-expanded="false" aria-controls="cfsidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
 </div>
 <div class="cfscrim" id="cfscrim" hidden></div>
@@ -295,16 +311,16 @@ document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
       <div><div class="nm">Christopher Farmer</div><div class="rl">Legal, Risk &amp; Technology Transformation</div></div>
     </div>
     <nav>
-      <a href="../../index.html#overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg><span>Overview</span></a>
-      <a href="../../index.html#projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Projects</span></a>
-      <a href="../../case-studies/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 5h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h7z"/></svg><span>Case studies</span></a>
-      <a href="../../index.html#experience"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Experience</span></a>
-      <a href="../../index.html#warroom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>Crisis case studies</span></a>
-      <a href="../../index.html#expertise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.1L12 17l-5.5 3.3 1-6.1L3 8.9 9 8z"/></svg><span>Expertise</span></a>
-      <a href="../../index.html#credentials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg><span>Credentials</span></a>
-      <a href="../../publications/index.html" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg><span>Publications</span></a>
-      <a href="../../publications/research-lab.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3h6"/><path d="M10 3v7L5 20h14l-5-10V3"/><path d="M8 15h8"/></svg><span>Research Lab</span></a>
-      <a href="../../index.html#contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M4 7l8 6 8-6"/></svg><span>Contact</span></a>
+      <a href="../../index.html#overview" target="_top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg><span>Overview</span></a>
+      <a href="../../index.html#projects" target="_top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Projects</span></a>
+      <a href="../../case-studies/index.html" target="_top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 5h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h7z"/></svg><span>Case studies</span></a>
+      <a href="../../index.html#experience" target="_top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Experience</span></a>
+      <a href="../../index.html#warroom" target="_top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>Crisis case studies</span></a>
+      <a href="../../index.html#expertise" target="_top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.1L12 17l-5.5 3.3 1-6.1L3 8.9 9 8z"/></svg><span>Expertise</span></a>
+      <a href="../../index.html#credentials" target="_top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg><span>Credentials</span></a>
+      <a href="../../publications/index.html" class="on" target="_top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/><path d="M8 13h6M8 17h6"/></svg><span>Publications</span></a>
+      <a href="../../publications/research-lab.html" target="_top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3h6"/><path d="M10 3v7L5 20h14l-5-10V3"/><path d="M8 15h8"/></svg><span>Research Lab</span></a>
+      <a href="../../index.html#contact" target="_top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M4 7l8 6 8-6"/></svg><span>Contact</span></a>
     </nav>
     <div class="cffoot">
       <div class="cfbtns">
@@ -315,16 +331,16 @@ document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
   </aside>
 
   <div class="top">
-    <a class="brand" href="../index.html" aria-label="Back to Publications">
+    <a class="brand" href="../index.html" aria-label="Back to Publications" target="_top">
       <div class="crest">CF</div>
       <div><div class="nm">Christopher Farmer</div><div class="rl">Magnitsky Simulator</div></div>
     </a>
     <div class="topacts">
-      <a class="btn" href="../index.html">
+      <a class="btn" href="../index.html" target="_top">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M15 18l-6-6 6-6"/></svg>
         Publications
       </a>
-      <a class="btn" href="../phase2-theory/magnitsky-model-for-ai.md">
+      <a class="btn" href="../phase2-theory/magnitsky-model-for-ai.html" target="_top">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h10l4 4v12H4z"/><path d="M14 4v4h4"/></svg>
         The paper
       </a>
@@ -334,16 +350,16 @@ document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
     </div>
   </div>
 <nav class="pubnav" aria-label="Site">
-  <a href="../../index.html#overview">Overview</a>
-  <a href="../../index.html#projects">Projects</a>
-  <a href="../../case-studies/index.html">Case studies</a>
-  <a href="../../index.html#experience">Experience</a>
-  <a href="../../index.html#warroom">Crisis case studies</a>
-  <a href="../../index.html#expertise">Expertise</a>
-  <a href="../../index.html#credentials">Credentials</a>
-  <a href="../index.html" aria-current="page">Publications</a>
-  <a href="../research-lab.html">Research Lab</a>
-  <a href="../../index.html#contact">Contact</a>
+  <a href="../../index.html#overview" target="_top">Overview</a>
+  <a href="../../index.html#projects" target="_top">Projects</a>
+  <a href="../../case-studies/index.html" target="_top">Case studies</a>
+  <a href="../../index.html#experience" target="_top">Experience</a>
+  <a href="../../index.html#warroom" target="_top">Crisis case studies</a>
+  <a href="../../index.html#expertise" target="_top">Expertise</a>
+  <a href="../../index.html#credentials" target="_top">Credentials</a>
+  <a href="../index.html" aria-current="page" target="_top">Publications</a>
+  <a href="../research-lab.html" target="_top">Research Lab</a>
+  <a href="../../index.html#contact" target="_top">Contact</a>
 </nav>
 
   <main class="wrap">
@@ -422,7 +438,7 @@ document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
     <!-- STEP 3 -->
     <section class="panel">
       <div class="step"><span class="num">3</span><h2>Enact targeted designations &amp; tune the cascade</h2></div>
-      <p class="sub">Select which jurisdictions enact a Magnitsky-style designation. Their combined market size, banking centrality (dollar-clearing / correspondent access) and emulation propensity drive the cascade. Then tune the four levers.</p>
+      <p class="sub">Select which jurisdictions enact a Magnitsky-style designation. Their combined market size, banking centrality (dollar-clearing / correspondent access) and emulation propensity drive the cascade. Then tune the four levers; every change re-runs the model at once.</p>
       <div class="console">
         <div>
           <div class="rowlabel">Enacting jurisdiction(s)</div>
@@ -433,9 +449,9 @@ document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
           <div class="rowlabel">Cascade levers</div>
           <div id="levers"></div>
           <div class="runrow">
-            <button class="btn primary" id="run">
+            <button class="btn primary" id="run" title="Every change above re-runs the model at once; this replays the stage-by-stage animation">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l14 9-14 9V3z"/></svg>
-              Run the cascade
+              Replay the cascade
             </button>
             <button class="btn" id="reset">Reset</button>
             <span class="spacer"></span>
@@ -460,7 +476,10 @@ document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
             <div class="vbig" id="vbig">—</div>
           </div>
           <div class="vsum" id="vsum"></div>
-          <div class="vscore"><div class="n" id="vscoren">0</div><div class="l">Global exclusion</div></div>
+          <div class="vscore">
+            <div class="n" id="vscoren">0</div><div class="l" id="vscorel">In-coalition exclusion</div>
+            <div class="n sm" id="vscore2">0</div><div class="l" id="vscore2l">Legislative emulation</div>
+          </div>
         </div>
         <ul class="reasons" id="reasons"></ul>
       </div>
@@ -469,9 +488,9 @@ document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
     <footer>
       <div class="row">
         <span>© <span id="yr">2026</span> Christopher I. V. Farmer</span><span>·</span>
-        <a href="../index.html">Publications</a><span>·</span>
+        <a href="../index.html" target="_top">Publications</a><span>·</span>
         <a href="../../docs/CV-Christopher-Farmer-2026-08.pdf" target="_blank" rel="noopener">CV</a><span>·</span>
-        <a href="../phase2-theory/magnitsky-model-for-ai.md">Read the paper</a><span>·</span>
+        <a href="../phase2-theory/magnitsky-model-for-ai.html" target="_top">Read the paper</a><span>·</span>
         <span class="mono" style="color:var(--muted)">Illustrative model — not a prediction, not legal advice</span>
       </div>
     </footer>
@@ -884,7 +903,14 @@ document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
     var label = v==="cascaded" ? "Cascaded to compliance" : (v==="contained" ? "Contained" : "Circumvented");
     $("vbig").textContent=label;
     $("vsum").textContent=res.summary;
-    $("vscoren").textContent=M.pct(res.scores.globalExclusion);
+    // The verdict turns on two numbers, so both are shown with the line each has to clear:
+    // exclusion inside the enacting coalition (the measure bites at all) and legislative
+    // emulation beyond it (the cascade). The rail's Outcome node keeps the combined figure.
+    var ex=res.scores.initialExclusion, em=res.channels.emulation;
+    $("vscoren").textContent=(M.clamp(ex)*100).toFixed(1);
+    $("vscorel").textContent="In-coalition exclusion · "+(ex>=M.THRESH.contain?"clears":"under")+" the "+M.pct(M.THRESH.contain)+" line";
+    $("vscore2").textContent=(M.clamp(em)*100).toFixed(1);
+    $("vscore2l").textContent="Legislative emulation · "+(em>=M.THRESH.cascade?"clears":"under")+" the "+M.pct(M.THRESH.cascade)+" line";
     var ul=$("reasons"); ul.innerHTML="";
     res.reasons.forEach(function(r){
       var li=el("li",r.tone);
@@ -945,6 +971,21 @@ document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
   document.addEventListener('keydown',function(e){if(e.key==='Escape')set(false);});
   side.addEventListener('click',function(e){if(e.target.closest('a'))set(false);});
   addEventListener('resize',function(){if(innerWidth>=1080)set(false);});
+})();
+</script>
+<script>
+/* Embedded in the Research Lab lightbox (?embed=1): fold everything above the model into a
+   disclosure so the frame opens on the thing that can be used. Nothing is removed. */
+(function(){
+  if(!document.documentElement.classList.contains('embed')) return;
+  var first=document.querySelector('main.wrap>section.panel'); if(!first) return;
+  var list=[],n=first.previousElementSibling;
+  while(n){ list.unshift(n); n=n.previousElementSibling; }
+  if(!list.length) return;
+  var d=document.createElement('details'); d.className='embedintro';
+  var s=document.createElement('summary'); s.textContent='About this tool'; d.appendChild(s);
+  first.parentNode.insertBefore(d,list[0]);
+  list.forEach(function(e){ d.appendChild(e); });
 })();
 </script>
 </body>

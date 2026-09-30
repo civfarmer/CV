@@ -111,15 +111,28 @@
       border-bottom:1px dotted var(--line,#233145);cursor:pointer}
   }
   @media print{.lede.clamped{display:block;-webkit-line-clamp:none}details.mnote{display:block}}
+  /* embedded in the Research Lab lightbox: no second header, introduction folded so the tool is on top */
+  html.embed .top{display:none}
+  html.embed .wrap{padding-top:10px}
+  details.embedintro{margin:0 0 4px}
+  details.embedintro>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:8px;font-family:var(--fm);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);padding:4px 0}
+  details.embedintro>summary::-webkit-details-marker{display:none}
+  details.embedintro>summary::after{content:'\25B8';font-size:10px}
+  details.embedintro[open]>summary::after{content:'\25BE'}
+  /* the wrapped header is a quarter of a phone screen; let it scroll away */
+  @media (max-width:640px){.top{position:static}}
 </style>
+<script>/* ?embed=1: opened inside the Research Lab lightbox, which has its own title bar and close
+   control, so this page's header is dropped and its introduction folds below (see the end of the page). */
+try{if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.classList.add('embed');}catch(e){}</script>
   <link rel="stylesheet" href="../../assets/fonts.css">
 </head>
 <body>
   <div class="wrap">
     <div class="top" style="margin:calc(-1 * clamp(20px,4vw,34px)) calc(-1 * clamp(16px,4vw,32px)) 0;border-radius:0">
-      <a class="brand" href="../../publications/index.html"><span class="crest">CF</span><span><span class="nm">Christopher Farmer</span><br><span class="rl">ARGUS-PD Evidence Gates</span></span></a>
+      <a class="brand" href="../../publications/index.html" target="_top"><span class="crest">CF</span><span><span class="nm">Christopher Farmer</span><br><span class="rl">ARGUS-PD Evidence Gates</span></span></a>
       <div style="display:flex;gap:8px">
-        <a class="btn" href="../../publications/index.html">&#8592; Publications</a>
+        <a class="btn" href="../../publications/index.html" target="_top">&#8592; Publications</a>
         <button class="btn" id="theme" aria-label="Toggle theme">&#9789;</button>
       </div>
     </div>
@@ -219,10 +232,17 @@ const C={L:7000,ETA:0.35,RESERVE:0.20,AREA:0.200,FIELD:16.5,AU:149597870700,MU0:
 const AUM=0.5*C.AU;
 const EK_CEIL=1.5e11;                 // 150 GJ mechanical ceiling (Paper I §6.1)
 const SANG=1e-9,STIM=1e-4,STGT=100.0; // deposited covariance-miss defaults
-const family=[['R-DART',0.3,1000000],['Q-DART',1.2,500000],['V-DART',3.3333,300000],['M-DART',13.3333,150000],['T-DART',30,100000]];
+const family=[['R-DART',0.3,1000000],['Q-DART',1.2,500000],['V-DART',10/3,300000],['M-DART',40/3,150000],['T-DART',30,100000]]; // exact deposited iso-energy masses (reference_family.csv)
 const massMin=0.15,massMax=30;
 const s2m=s=>massMin*Math.pow(massMax/massMin,s);
 const m2s=m=>Math.log(m/massMin)/Math.log(massMax/massMin);
+// A preset carries its exact mass. The slider's 0.0001 step on a log scale rounds 1.2 kg to
+// 1.20018 kg, which put the page's own iso-energy family a hair over its own ceiling; the
+// exact value is held here until the slider is next moved by hand.
+let presetMass=null;
+// One tolerance for both screens, shared with the tradespace explorer: a preset sitting exactly
+// on the 150 GJ line passes, a shot 1% over it does not.
+const TOL=1e-3;
 function shot(m,v){
   const E=0.5*m*v*v,F=E/C.L,a=v*v/(2*C.L),p=m*v;
   const admitted=E/C.ETA,installed=admitted*(1+C.RESERVE);
@@ -235,8 +255,8 @@ function shot(m,v){
 const sci=x=>{const e=Math.floor(Math.log10(Math.abs(x)));const mm=x/Math.pow(10,e);return mm.toFixed(2)+'e'+e;};
 // Tier A: the two deposited conservation screens (E_k ceiling, Maxwell-pressure). Both hard pass/fail.
 function screens(s){
-  const ekPass=s.E<=EK_CEIL*(1+1e-6);
-  const bPass=s.Bideal<=C.FIELD*(1+1e-9);
+  const ekPass=s.E<=EK_CEIL*(1+TOL);
+  const bPass=s.Bideal<=C.FIELD*(1+TOL);
   return [
     {name:'Mechanical ceiling',pass:ekPass,
       what:'Kinetic energy stays under the deposited 150 GJ mechanical ceiling.',
@@ -247,7 +267,7 @@ function screens(s){
   ];
 }
 function render(){
-  const m=s2m(+document.getElementById('mass').value),v=+document.getElementById('vel').value;
+  const m=presetMass!==null?presetMass:s2m(+document.getElementById('mass').value),v=+document.getElementById('vel').value;
   document.getElementById('mLab').textContent=m.toFixed(3)+' kg';
   document.getElementById('vLab').textContent=Math.round(v).toLocaleString('en-GB')+' m/s';
   const s=shot(m,v),sc=screens(s);
@@ -278,18 +298,20 @@ function render(){
     sum.innerHTML=`<b>Screening-feasible, pending gates P1–P8.</b> This shot clears both deposited conservation screens (E_k ≤ 150 GJ, B_ideal ≤ 16.5 T). At ${(v/1000).toFixed(0)} km/s it is a reference screening point — not a validated design. Its development gates P1–P8 below all remain untested, and what happens to the point when they are tested is set out beneath them.`;
   }else{
     const over=[];
-    if(s.E>EK_CEIL*(1+1e-6)) over.push(`E_k ${(s.E/1e9).toFixed(1)} GJ > 150 GJ (mechanical ceiling)`);
-    if(s.Bideal>C.FIELD*(1+1e-9)) over.push(`B_ideal ${s.Bideal.toFixed(2)} T > 16.5 T (Maxwell-pressure screen)`);
+    if(!sc[0].pass) over.push(`E_k ${(s.E/1e9).toFixed(1)} GJ > 150 GJ (mechanical ceiling)`);
+    if(!sc[1].pass) over.push(`B_ideal ${s.Bideal.toFixed(2)} T > 16.5 T (Maxwell-pressure screen)`);
     sum.innerHTML=`<b>Screened out by the conservation ceiling.</b> This configuration exceeds ${over.join(' and ')}. It is removed by the deposited conservation screens now, before any development gate — a mechanical / field-density limit, <i>not</i> a thermal or velocity cap.`;
   }
 }
 const pr=document.getElementById('presets');
 family.forEach(([n,mm,vv])=>{const b=document.createElement('button');b.className='chip';b.textContent=n;
-  b.onclick=()=>{document.getElementById('mass').value=m2s(mm);document.getElementById('vel').value=vv;render();};pr.appendChild(b);});
-['mass','vel'].forEach(id=>document.getElementById(id).addEventListener('input',render));
+  b.onclick=()=>{presetMass=mm;document.getElementById('mass').value=m2s(mm);document.getElementById('vel').value=vv;render();};pr.appendChild(b);});
+document.getElementById('mass').addEventListener('input',()=>{presetMass=null;render();});
+document.getElementById('vel').addEventListener('input',render);
 document.getElementById('theme').addEventListener('click',()=>{const h=document.documentElement,n=h.getAttribute('data-theme')==='light'?'dark':'light';h.setAttribute('data-theme',n);try{localStorage.setItem('cf-theme',n)}catch(e){}});
 try{var _q=new URLSearchParams(location.search).get('theme');if(_q){document.documentElement.setAttribute('data-theme',_q);}else{var t=localStorage.getItem('cf-theme');if(t)document.documentElement.setAttribute('data-theme',t);}}catch(e){}
 // open on the R-DART 1,000 km/s reference so the default view shows feasibility
+presetMass=0.300;
 document.getElementById('mass').value=m2s(0.300);
 document.getElementById('vel').value=1000000;
 render();
@@ -341,6 +363,21 @@ render();
       grid.insertBefore(best, grid.firstElementChild);
     }
   });
+})();
+</script>
+<script>
+/* Embedded in the Research Lab lightbox (?embed=1): fold everything above the tool into a
+   disclosure so the frame opens on the thing that can be used. Nothing is removed. */
+(function(){
+  if(!document.documentElement.classList.contains('embed')) return;
+  var first=document.querySelector('.grid,.stage,.viewbox,main.wrap>section.panel'); if(!first) return;
+  var list=[],n=first.previousElementSibling;
+  while(n){ if(!n.classList.contains('top')) list.unshift(n); n=n.previousElementSibling; }
+  if(!list.length) return;
+  var d=document.createElement('details'); d.className='embedintro';
+  var s=document.createElement('summary'); s.textContent='About this tool'; d.appendChild(s);
+  first.parentNode.insertBefore(d,list[0]);
+  list.forEach(function(e){ d.appendChild(e); });
 })();
 </script>
 </body>
