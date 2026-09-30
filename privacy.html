@@ -83,18 +83,19 @@
 
   .cfside{display:none}
   @media(min-width:1080px){
-    body{padding-left:280px}
-    .cfside{position:fixed;left:0;top:0;bottom:0;width:280px;z-index:30;display:flex;flex-direction:column;gap:14px;
-      padding:20px 18px;background:var(--bg2);border-right:1px solid var(--line);overflow-y:auto;scrollbar-width:none}
+    body{padding-left:264px}
+    .cfside{position:fixed;left:0;top:0;bottom:0;width:264px;z-index:30;display:flex;flex-direction:column;gap:18px;
+      padding:24px 20px;background:linear-gradient(180deg,color-mix(in oklab,var(--bg2) 86%,transparent),color-mix(in oklab,var(--bg) 86%,transparent));backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);border-right:1px solid var(--line);overflow-y:auto;scrollbar-width:none}
+    .top{display:none}   /* the sidebar carries the brand, the way home and the theme switch, exactly as on the home page */
     .cfside::-webkit-scrollbar{display:none}   /* it can still scroll on a short window, without a bar down the middle of the page */
-    @media(max-height:720px){aside.cfside{gap:10px;padding:16px 18px} aside.cfside nav{gap:2px} aside.cfside nav a{padding:7px 12px} aside.cfside .cffoot{gap:8px} aside.cfside .cfbrand .rl{display:none}}   /* short windows: the whole sidebar fits without scrolling */
+    @media(max-height:720px){aside.cfside{gap:12px;padding:18px 20px} aside.cfside nav{gap:1px} aside.cfside nav a{padding:7px 12px} aside.cfside .cffoot{gap:8px}}   /* short windows: tighter, and it scrolls invisibly if it still has to */
   }
-  .cfside .cfbrand{display:flex;align-items:center;gap:11px}
+  .cfside .cfbrand{display:flex;align-items:center;gap:12px}
   .cfside .cfbrand img{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:0 0 auto}
-  .cfside .cfbrand .nm{font-family:var(--font-display);font-weight:700;font-size:15.5px;color:var(--ink);line-height:1.1}
-  .cfside .cfbrand .rl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px;line-height:1.5}
-  .cfside nav{display:flex;flex-direction:column;gap:4px}
-  .cfside nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;color:var(--ink2);font-size:14px;font-weight:500;border:1px solid transparent;text-decoration:none}
+  .cfside .cfbrand .nm{font-family:var(--font-display);font-weight:700;font-size:17px;letter-spacing:.02em;color:var(--ink);line-height:1.05}
+  .cfside .cfbrand .rl{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:3px;line-height:1.5}
+  .cfside nav{display:flex;flex-direction:column;gap:2px}
+  .cfside nav a{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:10px;color:var(--ink2);font-size:14px;font-weight:500;border:1px solid transparent;text-decoration:none}
   .cfside nav a svg{width:18px;height:18px;flex:0 0 auto}
   .cfside nav a:hover{background:var(--surface);color:var(--ink)}
   .cfside nav a.on{background:var(--surface);border-color:var(--line);color:var(--ink)}
@@ -103,7 +104,8 @@
   .cfside .cfdot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 10px var(--good);flex:0 0 auto;margin-top:4px}
   .cfside .cfbtns{display:flex;gap:8px}
   .cfside .cfcv{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:12px;font-weight:600;font-size:13px;
-    background:var(--accent);border:1px solid var(--accent);color:#fff;text-decoration:none}
+    background:linear-gradient(145deg,var(--accent),var(--accent-ink));border:1px solid transparent;color:#fff;text-decoration:none}
+  html[data-theme="dark"] .cfside .cfcv{background:linear-gradient(145deg,#0e7b6f,#0b655b)}
   .cfside .cfcv:hover{filter:brightness(1.08)}
   .cfside .cftheme{width:40px;display:inline-flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer}
   .cfside .cftheme svg{width:16px;height:16px}
@@ -148,14 +150,14 @@
 </head>
 <body>
 <div class="cftop">
-  <a class="cfb" href="index.html"><img src="assets/img/portrait-2026.png" alt=""><span class="nm">Christopher Farmer</span></a>
+  <a class="cfb" href="index.html"><img src="assets/img/profile-still-160.webp" alt=""><span class="nm">Christopher Farmer</span></a>
   <button class="cfburger" id="cfburger" aria-label="Menu" aria-expanded="false" aria-controls="cfsidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
 </div>
 <div class="cfscrim" id="cfscrim" hidden></div>
   <aside class="cfside" aria-label="Site navigation">
     <div class="cfbrand">
-      <img src="assets/img/portrait-2026.png" alt="Christopher Farmer">
-      <div><div class="nm">Christopher Farmer</div><div class="rl">Legal, Risk &amp; Technology Transformation</div></div>
+      <img src="assets/img/profile-still-160.webp" alt="Christopher Farmer">
+      <div><div class="nm">Christopher Farmer</div><div class="rl">Legal, Strategy &amp; AI Transformation</div></div>
     </div>
     <nav>
       <a href="index.html#overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg><span>Overview</span></a>
@@ -170,7 +172,7 @@
       <a href="index.html#contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M4 7l8 6 8-6"/></svg><span>Contact</span></a>
     </nav>
     <div class="cffoot">
-      <div class="cfavail"><span class="cfdot"></span> Open to legal, risk &amp; transformation roles &mdash; Geneva</div>
+      <div class="cfavail"><span class="cfdot"></span> Open to legal, strategy &amp; transformation roles &mdash; Geneva</div>
       <div class="cfbtns">
         <a class="cfcv" href="docs/CV-Christopher-Farmer-2026-08.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg> CV</a>
         <button class="cftheme" onclick="document.getElementById('theme')?document.getElementById('theme').click():(function(){var h=document.documentElement,n=h.getAttribute('data-theme')==='light'?'dark':'light';h.setAttribute('data-theme',n);try{localStorage.setItem('cf-theme',n)}catch(e){}})()" title="Toggle theme" aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
