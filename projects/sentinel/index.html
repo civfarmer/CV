@@ -72,7 +72,10 @@
 
   /* Layout */
   .grid{display:grid;grid-template-columns:minmax(0,430px) minmax(0,1fr);gap:22px;align-items:start;padding:22px 0 60px}
-  @media(max-width:900px){ .grid{grid-template-columns:1fr} }
+  @media(max-width:900px){ .grid{grid-template-columns:minmax(0,1fr)} }
+  /* Mobile header: one row, so the sticky bar does not cover the Built-in → Used-in strip */
+  .pill .short{display:none}
+  @media(max-width:640px){ .brandtxt .sub{display:none} .pill .full{display:none} .pill .short{display:inline} .topin{flex-wrap:nowrap} }
   .panel{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
   .panel .ph{display:flex;align-items:center;gap:10px;padding:15px 18px;border-bottom:1px solid var(--line)}
   .panel .ph h2{font-size:15.5px}
@@ -165,6 +168,7 @@
   table.tia th,table.tia td{text-align:left;padding:8px 8px;border-bottom:1px solid var(--line);vertical-align:top}
   table.tia th{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
   table.tia td:first-child{color:var(--ink);font-weight:600;white-space:nowrap}
+  @media(max-width:640px){ table.tia td:first-child{white-space:normal} }
   .bandbar{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--ink2);flex-wrap:wrap}
   .bandpill{font-family:var(--font-mono);font-size:11px;font-weight:600;padding:4px 10px;border-radius:999px;white-space:nowrap}
   .bp-LOW{background:rgba(67,197,158,.16);color:var(--good)} .bp-MEDIUM{background:rgba(224,161,58,.17);color:var(--warn)}
@@ -218,7 +222,7 @@
       <div class="sub">AI-governance &amp; export-control readiness</div>
     </div>
     <div class="topsp">
-      <span class="pill" id="asofPill">Law as-of 2026-07 · verify</span>
+      <span class="pill" id="asofPill"><span class="full">Law as-of 2026-07 · verify</span><span class="short">as-of 2026-07</span></span>
       <button class="iconbtn" id="theme" title="Toggle theme" aria-label="Toggle light / dark theme" aria-pressed="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
     </div>
@@ -243,7 +247,7 @@
 <div class="wrap grid">
   <!-- INPUT -->
   <section class="panel form">
-    <div class="ph"><h2>Describe the deployment</h2><span class="step">9 inputs</span></div>
+    <div class="ph"><h2>Describe the deployment</h2><span class="step">9 steps</span></div>
     <div class="pbody">
       <div class="presets" id="presets">
         <span class="subhead" style="width:100%;margin:0 0 2px">Load an illustrative worked example</span>
@@ -376,6 +380,7 @@ var CAP=[
   ['genai','Generative content (text / image / audio / video)'],
   ['gpai','General-purpose / foundation model'],
   ['recommend','Recommendation / ranking / curation'],
+  ['classify','Content classification / moderation (labels inputs, generates nothing)'],
   ['cyber','Network / cyber tooling']
 ];
 var SECTORS=[
@@ -417,7 +422,8 @@ var TIER={
 };
 var XLEVEL={
   none:{label:'No listing triggered',band:'LOW'},
-  screen:{label:'Cross-border screening',band:'MEDIUM'},
+  screen:{label:'Cross-border screening',band:'LOW'},
+  catchall:{label:'Catch-all due diligence',band:'MEDIUM'},
   listed:{label:'Control-listed',band:'HIGH'},
   high:{label:'High-sensitivity',band:'SEVERE'}
 };
@@ -489,6 +495,12 @@ function classifyAIAct(input){
     hi.forEach(function(x){ out.reasons.push(reason('fact','<b>High-risk trigger.</b> '+x)); out.triggers.push('high-risk'); });
     out.reasons.push(reason('assess','Article 6(3) carve-out: a system in a listed area is <i>not</i> high-risk if it performs only a narrow procedural task, improves the result of prior human activity, or flags patterns without replacing human judgement — but it stays high-risk whenever it profiles individuals. Confirm which side of that line this sits.'));
     if(cap==='emotion'||cap==='bioCat') out.reasons.push(reason('fact','<b>Plus Art 50(3) transparency.</b> Even as a high-risk system, people exposed to an emotion-recognition or biometric-categorisation system must be informed that it is operating.'));
+    /* Art 50 is cumulative with the high-risk tier: a generative system in a high-risk setting still owes the marking and disclosure duties */
+    if(cap==='genai'||cap==='gpai'){
+      out.reasons.push(reason('fact','<b>Plus Art 50(1)-(2) transparency.</b> Even as a high-risk system, content it generates must be marked as artificially generated or manipulated, and people must be told when they are interacting with AI — these duties sit alongside the Chapter III obligations.'));
+      out.reasons.push(reason('verify','<b>New Art 5 prohibition (Digital Omnibus).</b> A generative system must not have the purpose of producing non-consensual intimate imagery or child sexual abuse material, and providers must build in reasonable safeguards against it &mdash; a prohibited practice from 2 Dec 2026. Confirm adequate safeguards are in place.'));
+      out.triggers.push('transparency');
+    }
     gpaiOverlay(out,input);
     return out;
   }
@@ -545,6 +557,11 @@ function aiActObligations(out,input){
         'Where you are a public body or provide public / essential services: complete a Fundamental Rights Impact Assessment before first use (Art 27).',
         'Inform affected persons where required; monitor and report serious incidents (Art 72/73).'
       ] };
+    if(input.capability==='genai'||input.capability==='gpai'){
+      out.obl.provider.push('Art 50: disclose AI interaction to the user and machine-mark generated content in a robust, interoperable format (Art 50(1)-(2)) — cumulative with the high-risk duties.');
+      out.obl.deployer.push('Art 50(4): label deepfakes and AI-generated text published to inform the public on matters of public interest.');
+      out.timeline.push('Article 50 transparency duties apply from 2 August 2026 (with transitional relief for the Art 50(2) marking of generative systems already on the market, to 2 December 2026) — earlier than the high-risk dates below.');
+    }
     out.timeline.push('Annex III (use-case) high-risk obligations apply from 2 December 2027 — moved from 2 Aug 2026 by the Digital Omnibus (adopted by the European Parliament 16 Jun and Council 29 Jun 2026, signed 8 Jul 2026; not yet in force — awaiting Official-Journal publication). The Commission may bring the date forward once harmonised standards are ready.');
     out.timeline.push('High-risk AI embedded in products already covered by EU harmonisation law (Annex I) applies from 2 August 2028.');
     return;
@@ -580,16 +597,24 @@ function isCrossBorder(input){
 }
 
 function exportScreen(input){
-  var sc=input.security||{}, x={ level:'none', reasons:[], items:[], licence:false, itar:false, crossBorder:false };
+  /* listed = an Annex I / Wassenaar entry is engaged (LEGAL FACT); catchall = a non-listed cyber-surveillance capability that the
+     Art 5 catch-all and Rec. 2024/2659 due diligence may reach (ASSESSMENT); high = a sensitivity flag (compute, military, repression). */
+  var sc=input.security||{}, x={ level:'none', reasons:[], items:[], licence:false, itar:false, crossBorder:false, listed:false, catchall:false, high:false };
   var add=function(regime,cite,note){ x.items.push({regime:regime,cite:cite,note:note}); };
-  var listed=false, high=false;
+  var listed=false, high=false, catchall=false;
   x.crossBorder=isCrossBorder(input);
 
-  if(sc.covertSurveil||sc.ipMonitor){
+  if(sc.ipMonitor){
     listed=true;
-    x.reasons.push(reason('fact','<b>Cyber-surveillance item.</b> A capability to covertly monitor, extract or analyse data from people or networks falls within the EU Dual-Use Regulation 2021/821 definition of cyber-surveillance items.'));
-    add('EU 2021/821','Art 5 + Annex I Cat 5 Pt 1','Cyber-surveillance / IP-network monitoring: authorisation required where the exporter is informed by — or its own due diligence shows — a risk of use for internal repression or serious human-rights violations (Rec. (EU) 2024/2659).');
+    x.reasons.push(reason('fact','<b>IP-network communications surveillance.</b> Systems, equipment and software for IP-network communications surveillance are a listed dual-use item (Annex I 5A001.j, mirroring Wassenaar) and a cyber-surveillance item within Art 2(20) of Reg. (EU) 2021/821.'));
+    add('EU 2021/821','Annex I Cat 5 Pt 1 · 5A001.j + Art 5','Listed IP-network surveillance item: export authorisation required; the Art 5 human-rights due diligence (Rec. (EU) 2024/2659) applies on top.');
     add('Wassenaar','Cat 5 Pt 1 · 5A001.j','IP-network communications surveillance systems; controls updated at the Dec 2024 plenary.');
+    x.itar=true;
+  }
+  if(sc.covertSurveil && !sc.ipMonitor){
+    catchall=true;
+    x.reasons.push(reason('assess','<b>Covert surveillance capability (visual, biometric or location).</b> Not an Annex I control-list entry in itself. It is a “cyber-surveillance item” under Art 2(20) of Reg. (EU) 2021/821 only if it is specially designed for covert surveillance of natural persons by monitoring, extracting, collecting or analysing data from information and telecommunication systems — that turns on the design. If it is, the Art 5 catch-all and the Rec. (EU) 2024/2659 due diligence apply to any export; if not, the human-rights due diligence is still expected practice.'));
+    add('EU 2021/821','Art 5 catch-all · Rec. (EU) 2024/2659','Non-listed cyber-surveillance items: authorisation required where the competent authority informs the exporter — or the exporter is aware from its own due diligence — that the item is or may be intended for internal repression or serious human-rights violations.');
     x.itar=true;
   }
   if(sc.intrusion){
@@ -620,26 +645,40 @@ function exportScreen(input){
   }
   if(sc.repression){
     high=true;
-    x.reasons.push(reason('verify','<b>Human-rights red flag.</b> A realistic risk that the system enables internal repression or serious human-rights harm triggers heightened due diligence and, in practice, is where authorities refuse licences.'));
+    if(listed||catchall){
+      x.reasons.push(reason('verify','<b>Human-rights red flag on a surveillance item.</b> A realistic risk that the item enables internal repression or serious human-rights harm is exactly what Art 5 of Reg. (EU) 2021/821 and Rec. (EU) 2024/2659 address: the exporter must notify the competent authority, which decides whether authorisation is required, and in practice this is where licences are refused.'));
+    } else {
+      x.reasons.push(reason('verify','<b>Human-rights red flag — no control-list entry.</b> Nothing in the description is a listed or cyber-surveillance item, so the dual-use regime does not, on this description, bite. The flag is a due-diligence red flag: apply the human-rights due diligence in Rec. (EU) 2024/2659 by analogy, check whether the Art 4 / Art 5 catch-alls of Reg. (EU) 2021/821 could be engaged by the end-use, and document the assessment before any transfer.'));
+    }
   }
   if(x.itar){
     x.reasons.push(reason('verify','<b>US ITAR / EAR may also bite — honestly flagged, not resolved here.</b> If any US-origin content, US persons, US-made chips or US-developed technology are involved, the EAR (BIS, Commerce) and possibly the ITAR (DDTC, State, for defence articles) can apply extraterritorially. Screen separately; "deemed-export" rules can even reach foreign nationals on the team.'));
   }
-  if(x.crossBorder && (listed||high)){
+  x.listed=listed; x.catchall=catchall; x.high=high;
+  if(x.crossBorder && listed){
     x.licence=true;
-    x.reasons.push(reason('action','Because the item is controlled <i>and</i> crosses a customs border, an <b>export authorisation</b> is likely required before shipment or technology transfer. Determine the correct classification and licence type per destination (BIS / BAFA / ECJU as relevant).'));
+    x.reasons.push(reason('action','Because the item is control-listed <i>and</i> crosses a customs border, an <b>export authorisation</b> is likely required before shipment or technology transfer. Determine the correct classification and licence type per destination (BIS / BAFA / ECJU as relevant).'));
+  } else if(x.crossBorder && (catchall||high)){
+    x.reasons.push(reason('action','No control-list entry is triggered, but a catch-all or sensitivity flag is raised and the deployment crosses a border: run enhanced end-use / end-user due diligence (Rec. (EU) 2024/2659), decide whether the Art 4 / Art 5 catch-alls apply, and if the authority informs you — or your own due diligence shows — a risk, apply for authorisation before any transfer.'));
   } else if(x.crossBorder){
     x.reasons.push(reason('action','No specific control-list entry is triggered by the description, but the deployment crosses a border — run standard end-use / end-user screening (sanctions, denied-party) and keep the assessment on file.'));
+  } else if(listed){
+    x.reasons.push(reason('action','A control-list entry is engaged but no cross-border movement is indicated. <b>Classify the item now</b> (Annex I entry / ECCN) and obtain the export authorisation <b>before any transfer outside the EU</b> — including intangible transfers such as remote access, code or model transfer, and access by foreign nationals.'));
+  } else if(catchall||high){
+    x.reasons.push(reason('action','No control-list entry is triggered and no cross-border movement is indicated, so no authorisation is needed now. The flag above is a due-diligence matter: document the end-use assessment and re-screen before any export or technology transfer.'));
   } else {
     x.reasons.push(reason('fact','No dual-use control-list entry or cyber-surveillance catch-all is triggered by the description, and no cross-border export is indicated. General trade-compliance due diligence still applies.'));
   }
-  x.level = high?'high':(listed?'listed':(x.crossBorder?'screen':'none'));
+  x.level = high?'high':(listed?'listed':(catchall?'catchall':(x.crossBorder?'screen':'none')));
   return x;
 }
 
-function humanControls(input,ai){
+function humanControls(input,ai,xp){
   var s=input.sens||{}, sc=input.security||{}, hc={ control:[], audit:[], xport:[] };
   var high=(ai.tier==='high'||ai.tier==='prohibited');
+  var prohibited=(ai.tier==='prohibited');
+  /* a prohibited practice cannot be deployed at all; the pre-deployment controls below are for a re-scoped, permitted variant only */
+  if(prohibited) hc.note='As described this practice is prohibited, so nothing below makes it deployable. These controls apply only if the system is re-scoped into a permitted variant (see the options above).';
   if(input.autonomy==='full'){
     hc.control.push('<b>Human-in-command authority.</b> A person must retain the standing power to override, pause and shut the system down (a reachable stop / kill function); no irreversible or rights-affecting action should complete without that authority being real, not nominal.');
   } else if(input.autonomy==='hotl'){
@@ -656,14 +695,18 @@ function humanControls(input,ai){
   hc.audit.push('Automatic, tamper-evident event logs capturing inputs, model/version, output and the human decision — retained for the sector-appropriate period (Art 12; deployers keep logs under Art 26(6)).');
   hc.audit.push('Decision provenance: record which model version, dataset version and configuration produced each output, so any decision can be reconstructed and explained.');
   hc.audit.push('Post-market monitoring and serious-incident reporting (Art 72/73); a defined route for affected people to contest a decision.');
-  if(high) hc.audit.push('Fundamental Rights Impact Assessment before first use where you are a public body or provide essential services (Art 27).');
+  if(high) hc.audit.push((prohibited?'Only if re-scoped to a permitted high-risk variant: ':'')+'Fundamental Rights Impact Assessment before first use where you are a public body or provide essential services (Art 27).');
   if(s.special||(input.dataCats&&input.dataCats.indexOf('biometric')>=0)) hc.audit.push('A GDPR Data Protection Impact Assessment (Art 35) is required for biometric / special-category or large-scale monitoring processing — run it alongside this assessment.');
 
-  if(sc.covertSurveil||sc.intrusion||sc.ipMonitor||sc.crypto||sc.hpCompute||sc.military||sc.repression||sc.exportable){
+  var flagged=(sc.covertSurveil||sc.intrusion||sc.ipMonitor||sc.crypto||sc.hpCompute||sc.military||sc.repression||sc.exportable);
+  if(flagged){
     hc.xport.push('End-use and end-user screening before any export or technology transfer (sanctions / denied-party / human-rights due diligence per Rec. (EU) 2024/2659).');
-    hc.xport.push('Classify the item (control-list review) and obtain the correct export authorisation per destination before shipment or code / model transfer.');
+    hc.xport.push((xp&&xp.listed?'Classify the item (control-list review) and obtain the correct export authorisation per destination before shipment or code / model transfer.':'Classify the item (control-list review) and record why no entry applies, or obtain the correct export authorisation per destination before shipment or code / model transfer.'));
     hc.xport.push('Control intangible technology transfer and "deemed exports" — access by foreign nationals to controlled technology can itself be an export.');
     hc.xport.push('Keep the screening record, classification rationale and licences on file for the statutory retention period.');
+  } else if(xp && xp.crossBorder){
+    /* nothing controlled, but it crosses a border: the routine step, listed as the step it is */
+    hc.xport.push('Standard end-use / end-user screening (sanctions and denied-party lists) before shipment or remote provision to the destination; keep the screening record on file.');
   }
   return hc;
 }
@@ -672,18 +715,24 @@ function decideVerdict(ai,xp,input){
   if(!input.capability) return { verdict:'manual', headline:'More information needed', sub:'No primary capability was described. Choose what the system actually does — plus its sector, data and jurisdictions — then re-run so Sentinel can classify it.' };
   if(ai.tier==='prohibited') return { verdict:'blocked', headline:'Blocked — prohibited AI practice', sub:'As described this is an Article 5 prohibited practice; it cannot be deployed in the EU. Re-scope into a permitted variant or drop the capability.' };
   var sc=input.security||{};
-  if(sc.repression && xp.crossBorder) return { verdict:'blocked', headline:'Blocked — export barrier (human-rights risk)', sub:'A controlled item with a realistic internal-repression / human-rights risk should not be exported without authority clearance, and is where licences are refused. Resolve before any transfer.' };
-  var needs = (ai.tier==='high'||ai.tier==='limited'||ai.gpai||xp.level!=='none'||xp.licence||input.autonomy==='full'||input.oversight==='none');
+  /* the "controlled item" export barrier needs an item the dual-use regime actually reaches: a listed entry, or a cyber-surveillance
+     capability the Art 5 catch-all can catch. A repression flag on anything else is a due-diligence red flag, not a barrier. */
+  if(sc.repression && xp.crossBorder && xp.listed) return { verdict:'blocked', headline:'Blocked — export barrier (human-rights risk)', sub:'A control-listed item with a realistic internal-repression / human-rights risk should not be exported without authority clearance, and is where licences are refused. Resolve before any transfer.' };
+  if(sc.repression && xp.crossBorder && xp.catchall) return { verdict:'blocked', headline:'Blocked — export barrier (human-rights risk)', sub:'A cyber-surveillance capability with a realistic internal-repression risk engages the Art 5 catch-all of Reg. (EU) 2021/821: notify the competent authority, which decides whether authorisation is required, and do not export before that decision (VERIFY the item is within Art 2(20)).' };
+  var xExposure=(xp.level==='listed'||xp.level==='high'||xp.level==='catchall');
+  var needs = (ai.tier==='high'||ai.tier==='limited'||ai.gpai||xExposure||xp.licence||input.autonomy==='full'||input.oversight==='none');
   if(needs){
     var why=[];
     if(ai.tier==='high') why.push('high-risk AI Act obligations');
     else if(ai.tier==='limited') why.push('transparency obligations');
     if(ai.gpai) why.push('GPAI model duties');
-    if(xp.level!=='none') why.push('export-control exposure');
+    if(xp.listed) why.push('export-control listing');
+    else if(xp.catchall) why.push('export catch-all due diligence');
+    else if(xp.high) why.push('export sensitivity flags (due diligence)');
     if(input.autonomy==='full'||input.oversight==='none') why.push('meaningful-human-control gaps');
     return { verdict:'controls', headline:'Deployable — with controls', sub:'Permitted, but conditional on the controls below: '+why.join(', ')+'. Put them in place and keep the record before go-live.' };
   }
-  return { verdict:'deployable', headline:'Deployable', sub:'No prohibition, no listed high-risk trigger and no dual-use control-list exposure identified from the description. Maintain baseline governance and re-assess on any change.' };
+  return { verdict:'deployable', headline:'Deployable', sub:'No prohibition, no listed high-risk trigger and no dual-use control-list exposure identified from the description.'+(xp.crossBorder?' The deployment crosses a border, so run the standard end-user screening listed below.':'')+' Maintain baseline governance and re-assess on any change.' };
 }
 
 function assess(input){
@@ -691,7 +740,7 @@ function assess(input){
   var out={ ref:input.ref||'', asOf:'2026-07', input:input, sources:SOURCES };
   var ai=classifyAIAct(input); aiActObligations(ai,input);
   var xp=exportScreen(input);
-  var hc=humanControls(input,ai);
+  var hc=humanControls(input,ai,xp);
   var vd=decideVerdict(ai,xp,input);
   out.aiact=ai; out.xport=xp; out.controls=hc;
   out.verdict=vd.verdict; out.headline=vd.headline; out.sub=vd.sub;
@@ -719,6 +768,14 @@ function dcLabel(id){ var r=id; DATACATS.forEach(function(d){ if(d[0]===id) r=pl
 function sensLabel(s){ var a=[]; if(s.special)a.push('special-category'); if(s.infersSensitive)a.push('infers-sensitive'); if(s.realTime)a.push('real-time'); if(s.publicSpace)a.push('public-space'); if(s.placeBased)a.push('place-based'); if(s.largeScale)a.push('large-scale'); if(s.children)a.push('children/vulnerable'); if(s.safetyComponent)a.push('safety-component'); return a.length?a.join(', '):'none flagged'; }
 function secLabel(sc){ var a=[]; if(sc.covertSurveil)a.push('covert surveillance'); if(sc.intrusion)a.push('intrusion/offensive-cyber'); if(sc.ipMonitor)a.push('IP-network monitoring'); if(sc.crypto)a.push('cryptography'); if(sc.hpCompute)a.push('advanced compute'); if(sc.repression)a.push('repression/HR risk'); if(sc.military)a.push('military end-use'); if(sc.exportable)a.push('cross-border'); return a.length?a.join(', '):'none flagged'; }
 function roleLabel(r){ return r==='provider'?'Provider (builds / places on market)':r==='deployer'?'Deployer (uses)':'Provider &amp; deployer'; }
+/* Obligation blocks in the order the chosen role needs them: yours first, the other role's list labelled as information. */
+function oblBlocks(ai,role){
+  if(!ai.obl) return [];
+  var P={name:'Provider obligations',color:'#43b3a6',items:ai.obl.provider,mine:true}, D={name:'Deployer obligations',color:'#d4b24c',items:ai.obl.deployer,mine:true};
+  if(role==='deployer'){ P.name='For information — the provider’s duties'; P.mine=false; return [D,P]; }
+  if(role==='provider'){ D.name='For information — the deployer’s duties'; D.mine=false; return [P,D]; }
+  return [P,D];
+}
 
 /* ============================ UI (guarded — skipped under Node) ============================ */
 if(typeof document==='undefined' || !document.getElementById){ return; }
@@ -816,8 +873,7 @@ function render(res){
   if(res.rescope){ h+=sgBlock('Permitted re-scope options','var(--good)',res.rescope); }
   if(ai.obl && (ai.obl.provider.length||ai.obl.deployer.length)){
     h+='<div style="font-size:12.6px;color:var(--ink2);margin:12px 0 10px">'+ai.obl.head+'</div>';
-    h+=sgBlock('Provider obligations','#43b3a6',ai.obl.provider);
-    h+=sgBlock('Deployer obligations','#d4b24c',ai.obl.deployer);
+    oblBlocks(ai,i.role).forEach(function(b){ h+=sgBlock(b.name,b.color,b.items); });
   } else if(ai.obl){ h+='<div style="font-size:12.6px;color:var(--ink2);margin:10px 0 0">'+ai.obl.head+'</div>'; }
   if(ai.timeline.length){ h+='<div style="margin-top:10px">'; ai.timeline.forEach(function(x){ h+='<div class="reason"><span class="tag verify">TIMELINE</span><div>'+x+'</div></div>'; }); h+='</div>'; }
   h+='</div>';
@@ -835,6 +891,7 @@ function render(res){
 
   /* 3 — Human authority + auditability */
   h+='<div class="sect"><h3>3 · Human authority, meaningful control &amp; auditability</h3>';
+  if(hc.note) h+='<div class="reason"><span class="tag verify">ONLY IF RE-SCOPED</span><div>'+hc.note+'</div></div>';
   h+=sgBlock('Meaningful human control','#43b3a6',hc.control);
   h+=sgBlock('Auditability &amp; logging','#84d6ca',hc.audit);
   if(hc.xport.length) h+=sgBlock('Export-control operations','#d4b24c',hc.xport);
@@ -849,7 +906,8 @@ function render(res){
     +row('AI Act class',TIER[ai.tier].label+(ai.gpai?' + GPAI':''))+row('Export level',XLEVEL[xp.level].label)
     +row('Build &rarr; Use',esc(buildName)+' &rarr; '+esc(useName))+row('Oversight',esc(oversightLabel(i.oversight)))
     +row('Data categories',i.dataCats.length?i.dataCats.map(dcLabel).join(', '):'—')
-    +row('Verdict',VLABEL[v])+'</div>';
+    +row('Verdict',VLABEL[v])
+    +(i.descTxt?row('Description',esc(i.descTxt)):'')+'</div>';
   h+='<div class="exports">'
     +'<button class="xb prime" data-x="html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>Download record (HTML)</button>'
     +'<button class="xb" data-x="json"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6z"/></svg>JSON</button>'
@@ -871,7 +929,10 @@ function render(res){
   document.getElementById('placeholder').style.display='none';
   var o=document.getElementById('out'); o.style.display='block'; o.innerHTML=h;
   o.querySelectorAll('.xb').forEach(function(b){ b.addEventListener('click',function(){ doExport(b.getAttribute('data-x'),res); }); });
-  document.getElementById('result').scrollIntoView({behavior:'smooth',block:'start'});
+  /* keep the Built-in → Used-in strip clear of the sticky header */
+  var res_el=document.getElementById('result'), hdr=document.querySelector('header.top');
+  res_el.style.scrollMarginTop=((hdr?hdr.offsetHeight:0)+12)+'px';
+  res_el.scrollIntoView({behavior:'smooth',block:'start'});
   var vf=document.getElementById('vFocus'); if(vf){ try{ vf.focus({preventScroll:true}); }catch(e){ try{ vf.focus(); }catch(_){} } }
 }
 
@@ -901,8 +962,7 @@ function summaryText(res){
   L.push('');
   L.push('1) EU AI Act class: '+TIER[ai.tier].label+(ai.gpai?' + GPAI':''));
   ai.reasons.forEach(function(r){ L.push('   ['+tagText(r.tag)+'] '+strip(r.text)); });
-  if(ai.obl && ai.obl.provider.length){ L.push('   Provider obligations:'); ai.obl.provider.forEach(function(x){ L.push('     - '+strip(x)); }); }
-  if(ai.obl && ai.obl.deployer.length){ L.push('   Deployer obligations:'); ai.obl.deployer.forEach(function(x){ L.push('     - '+strip(x)); }); }
+  oblBlocks(ai,i.role).forEach(function(b){ if(b.items.length){ L.push('   '+strip(b.name)+':'); b.items.forEach(function(x){ L.push('     - '+strip(x)); }); } });
   if(ai.timeline.length){ L.push('   Timeline:'); ai.timeline.forEach(function(x){ L.push('     - '+strip(x)); }); }
   if(res.rescope){ L.push('   Re-scope options:'); res.rescope.forEach(function(x){ L.push('     - '+strip(x)); }); }
   L.push('');
@@ -911,6 +971,7 @@ function summaryText(res){
   xp.items.forEach(function(it){ L.push('   * '+strip(it.regime)+' ('+strip(it.cite)+'): '+strip(it.note)); });
   L.push('');
   L.push('3) Human control & auditability:');
+  if(hc.note) L.push('   [ONLY IF RE-SCOPED] '+strip(hc.note));
   L.push('   Meaningful human control:'); hc.control.forEach(function(x){ L.push('     - '+strip(x)); });
   L.push('   Auditability & logging:'); hc.audit.forEach(function(x){ L.push('     - '+strip(x)); });
   if(hc.xport.length){ L.push('   Export-control operations:'); hc.xport.forEach(function(x){ L.push('     - '+strip(x)); }); }
@@ -944,13 +1005,13 @@ function recordHTML(res){
   h+='<h2>1 · EU AI Act classification — '+TIER[ai.tier].label+(ai.gpai?' + GPAI':'')+'</h2>';
   ai.reasons.forEach(function(r){ h+='<div class="dr"><span class="tag">'+tagText(r.tag)+'</span>'+r.text+'</div>'; });
   if(res.rescope){ h+='<p class="small"><b>Permitted re-scope options</b></p><ul>'; res.rescope.forEach(function(x){ h+='<li>'+x+'</li>'; }); h+='</ul>'; }
-  if(ai.obl && ai.obl.provider.length){ h+='<b style="font-size:13px">Provider obligations</b><ul>'; ai.obl.provider.forEach(function(x){ h+='<li>'+x+'</li>'; }); h+='</ul>'; }
-  if(ai.obl && ai.obl.deployer.length){ h+='<b style="font-size:13px">Deployer obligations</b><ul>'; ai.obl.deployer.forEach(function(x){ h+='<li>'+x+'</li>'; }); h+='</ul>'; }
+  oblBlocks(ai,i.role).forEach(function(b){ if(b.items.length){ h+='<b style="font-size:13px">'+b.name+'</b><ul>'; b.items.forEach(function(x){ h+='<li>'+x+'</li>'; }); h+='</ul>'; } });
   if(ai.timeline.length){ h+='<p class="small"><b>Timeline</b></p><ul>'; ai.timeline.forEach(function(x){ h+='<li>'+x+'</li>'; }); h+='</ul>'; }
   h+='<h2>2 · Export-control &amp; dual-use screening — '+XLEVEL[xp.level].label+'</h2>';
   xp.reasons.forEach(function(r){ h+='<div class="dr"><span class="tag">'+tagText(r.tag)+'</span>'+r.text+'</div>'; });
   if(xp.items.length){ h+='<table><tr><th>Regime</th><th>Reference</th><th>Why it applies</th></tr>'; xp.items.forEach(function(it){ h+='<tr><td>'+esc(it.regime)+'</td><td>'+esc(it.cite)+'</td><td>'+it.note+'</td></tr>'; }); h+='</table>'; }
   h+='<h2>3 · Human authority, meaningful control &amp; auditability</h2>';
+  if(hc.note) h+='<div class="dr"><span class="tag">ONLY IF RE-SCOPED</span>'+hc.note+'</div>';
   h+='<b style="font-size:13px">Meaningful human control</b><ul>'; hc.control.forEach(function(x){ h+='<li>'+x+'</li>'; }); h+='</ul>';
   h+='<b style="font-size:13px">Auditability &amp; logging</b><ul>'; hc.audit.forEach(function(x){ h+='<li>'+x+'</li>'; }); h+='</ul>';
   if(hc.xport.length){ h+='<b style="font-size:13px">Export-control operations</b><ul>'; hc.xport.forEach(function(x){ h+='<li>'+x+'</li>'; }); h+='</ul>'; }
@@ -967,9 +1028,9 @@ function doExport(kind,res){
     var clean={ reference:i.ref, asOf:res.asOf, generated:i.ts,
       deployment:{ capability:plain(capLabelPlain(i.capability)), sector:plain(sectorLabelPlain(i.sector)), role:strip(roleLabel(i.role)), autonomy:AUTONOMY[i.autonomy]||i.autonomy, oversight:plain(oversightLabel(i.oversight)), builtIn:plain(JUR[i.buildJur]||i.buildJur), usedIn:plain(REGION[i.useRegion]||i.useRegion), dataCategories:i.dataCats, sensitivity:i.sens, security:i.security, description:i.descTxt||null },
       verdict:res.verdict, headline:strip(res.headline), whatToDoNow:strip(TODO[res.verdict].t)+' '+strip(TODO[res.verdict].s),
-      aiAct:{ tier:ai.tier, tierLabel:TIER[ai.tier].label, gpai:ai.gpai, triggers:ai.triggers, reasons:ai.reasons.map(function(r){return {type:tagText(r.tag),text:strip(r.text)};}), providerObligations:(ai.obl?ai.obl.provider.map(strip):[]), deployerObligations:(ai.obl?ai.obl.deployer.map(strip):[]), timeline:ai.timeline.map(strip), rescopeOptions:(res.rescope?res.rescope.map(strip):null) },
-      exportControl:{ level:xp.level, levelLabel:XLEVEL[xp.level].label, crossBorder:xp.crossBorder, licenceLikely:xp.licence, usControlsFlagged:xp.itar, reasons:xp.reasons.map(function(r){return {type:tagText(r.tag),text:strip(r.text)};}), items:xp.items.map(function(it){return {regime:strip(it.regime),reference:strip(it.cite),why:strip(it.note)};}) },
-      humanControl:{ meaningfulControl:hc.control.map(strip), auditabilityLogging:hc.audit.map(strip), exportOperations:hc.xport.map(strip) },
+      aiAct:{ tier:ai.tier, tierLabel:TIER[ai.tier].label, gpai:ai.gpai, triggers:ai.triggers, reasons:ai.reasons.map(function(r){return {type:tagText(r.tag),text:strip(r.text)};}), yourRole:i.role, providerObligations:(ai.obl?ai.obl.provider.map(strip):[]), deployerObligations:(ai.obl?ai.obl.deployer.map(strip):[]), timeline:ai.timeline.map(strip), rescopeOptions:(res.rescope?res.rescope.map(strip):null) },
+      exportControl:{ level:xp.level, levelLabel:XLEVEL[xp.level].label, crossBorder:xp.crossBorder, controlListed:xp.listed, catchAll:xp.catchall, licenceLikely:xp.licence, usControlsFlagged:xp.itar, reasons:xp.reasons.map(function(r){return {type:tagText(r.tag),text:strip(r.text)};}), items:xp.items.map(function(it){return {regime:strip(it.regime),reference:strip(it.cite),why:strip(it.note)};}) },
+      humanControl:{ note:(hc.note?strip(hc.note):null), meaningfulControl:hc.control.map(strip), auditabilityLogging:hc.audit.map(strip), exportOperations:hc.xport.map(strip) },
       disclaimer:'Decision-support, not legal advice, and not an official export-control classification or licence determination. Verify current EU AI Act (post-Omnibus), EU dual-use lists, Wassenaar & US ITAR/EAR.' };
     download('sentinel-'+i.ref+'.json','application/json',JSON.stringify(clean,null,2)); toast('JSON downloaded.');
   }
@@ -989,11 +1050,11 @@ var PRESETS={
     autonomy:'full', oversight:'monitor', buildJur:'EU', useRegion:'GLOBAL',
     security:{covertSurveil:true,intrusion:false,ipMonitor:false,crypto:false,hpCompute:false,repression:false,military:false,exportable:true},
     descTxt:'Autonomous UAV inspecting power lines and pipelines; onboard cameras could support wide-area monitoring; sold internationally.' },
-  contentmod:{ capability:'gpai', sector:'platform', role:'both', dataCats:['comms','behaviour','children'],
+  contentmod:{ capability:'classify', sector:'platform', role:'both', dataCats:['comms','behaviour','children'],
     sens:{special:false,infersSensitive:false,realTime:true,publicSpace:false,placeBased:false,largeScale:true,children:true,safetyComponent:false},
     autonomy:'hitl', oversight:'monitor', buildJur:'US', useRegion:'EU',
     security:{covertSurveil:false,intrusion:false,ipMonitor:false,crypto:false,hpCompute:false,repression:false,military:false,exportable:false},
-    descTxt:'Foundation-model content-moderation classifier for a social platform; US-built, serving EU users; flagged posts reviewed by human moderators.' },
+    descTxt:'Content-moderation classifier (fine-tuned from a licensed foundation model) for a social platform; labels posts, generates nothing; US-built, serving EU users; flagged posts reviewed by human moderators.' },
   policing:{ capability:'crimePredict', sector:'lawEnforcement', role:'both', dataCats:['contact','location','criminal','behaviour'],
     sens:{special:false,infersSensitive:false,realTime:false,publicSpace:false,placeBased:false,largeScale:true,children:false,safetyComponent:false},
     autonomy:'hitl', oversight:'monitor', buildJur:'EU', useRegion:'EU',
