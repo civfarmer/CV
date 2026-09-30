@@ -100,6 +100,10 @@ add('GET', 'api/overview', () => {
   const alerts = runDetections({ wallets: T('wallets'), transactions: T('crypto_transactions') });
   const group = (arr, key) => { const m = {}; for (const r of arr) { const k = r[key]; if (k == null) continue; m[k] = (m[k] || 0) + 1; } return m; };
   const rb = group(ents.filter((e) => e.risk_flag), 'risk_flag');
+  // Entities with no flight-risk band yet are still entities under review, so the
+  // donut carries them as an explicit "Unrated" segment and adds up to the KPI.
+  const unrated = ents.filter((e) => !e.risk_flag).length;
+  if (unrated) rb.Unrated = unrated;
   const ib = group(T('regulatory_instruments'), 'impact_level');
   return {
     modules: {
@@ -179,7 +183,7 @@ add('GET', 'api/wallets', ({ query }) => {
   let rows = T('wallets');
   if (query.type) rows = rows.filter((w) => w.node_type === query.type);
   if (query.risk) rows = rows.filter((w) => w.risk_category === query.risk);
-  if (query.q) rows = rows.filter((w) => like(w.address, query.q) || like(w.label, query.q));
+  if (query.q) rows = rows.filter((w) => like(w.id, query.q) || like(w.address, query.q) || like(w.label, query.q));
   return paginate(rows, query, ['id', 'node_type', 'risk_category', 'balance_minor'], 'node_type');
 });
 
@@ -223,20 +227,75 @@ add('GET', 'api/crypto/risk-preview', ({ query }) => {
   return { config: cfg, indicators, present: indicators.filter((i) => i.present).length };
 });
 
+// Persist a saved simulation the same way the seeded reference trace is stored:
+// every hop becomes a forward transaction (main wallet -> next wallet) plus a peel
+// transaction (main wallet -> cash-out destination), each spine/deposit address
+// becomes a wallet row, and exchange / merchant / bridge / mixer peels land on the
+// existing service wallets of that type. The Transaction Graph, wallet drawers and
+// detection alerts then read the saved trace exactly like TRC-001.
+function pseudoHex(str, len) {
+  let h = 2166136261; let out = '';
+  for (let i = 0; out.length < len; i++) { h ^= str.charCodeAt(i % str.length) + i; h = Math.imul(h, 16777619) >>> 0; out += h.toString(16).padStart(8, '0'); }
+  return out.slice(0, len);
+}
+function nextSeqId(table, prefix, width) {
+  const max = T(table).reduce((m, r) => { const n = parseInt(String(r.id || '').replace(prefix + '-', ''), 10); return Number.isFinite(n) && n > m ? n : m; }, 0);
+  return `${prefix}-${String(max + 1).padStart(width, '0')}`;
+}
+function persistSimulatedTrace(traceId, name, result) {
+  const wallets = T('wallets'), txs = T('crypto_transactions');
+  const asset = result.config.assetSymbol;
+  const byAddr = new Map(wallets.map((w) => [w.address, w]));
+  const pools = { exchange: wallets.filter((w) => w.node_type === 'exchange'), merchant: wallets.filter((w) => w.node_type === 'merchant'), bridge: wallets.filter((w) => w.node_type === 'bridge'), mixer: wallets.filter((w) => w.node_type === 'mixer') };
+  const day = (ts) => String(ts).slice(0, 10);
+  const ensureWallet = (address, nodeType, ts, label) => {
+    const hit = byAddr.get(address); if (hit) { if (day(ts) > hit.last_seen) hit.last_seen = day(ts); return hit; }
+    const w = { id: nextSeqId('wallets', 'W', 6), address, node_type: nodeType, label: label || null, cluster_id: null, asset, first_seen: day(ts), last_seen: day(ts), is_dormant: 0, risk_category: 'Medium', balance_minor: 0, data_classification: 'simulated-analysis' };
+    wallets.push(w); byAddr.set(address, w); return w;
+  };
+  const serviceWallet = (type, address, ts) => {
+    const pool = pools[type];
+    if (pool && pool.length) return pool[parseInt(pseudoHex(address, 8), 16) % pool.length];
+    return ensureWallet(address, type, ts);
+  };
+  const typeById = new Map(wallets.map((w) => [w.id, String(w.node_type || 'wallet')]));
+  const pushTx = (hop, from, to, amountMinor, feeMinor, ts, kind) => {
+    typeById.set(from.id, from.node_type); typeById.set(to.id, to.node_type);
+    const tx = { id: nextSeqId('crypto_transactions', 'TX', 6), hash: '0x' + pseudoHex(`${traceId}:${hop}:${kind}`, 48), from_id: from.id, to_id: to.id, asset, amount_minor: amountMinor, fee_minor: feeMinor, ts, hop, trace_id: traceId, pattern: 'peel', risk_score: 0, risk_reason: '', data_classification: 'simulated-analysis' };
+    const s = scoreTransaction(tx, typeById); tx.risk_score = s.score; tx.risk_reason = s.reason;
+    txs.push(tx);
+  };
+  let origin = null;
+  for (const h of result.hops) {
+    const from = ensureWallet(h.fromAddr, 'wallet', h.ts, h.hop === 1 ? `Peel-chain origin (${name})` : null);
+    if (!origin) origin = from;
+    const next = ensureWallet(h.toAddr, 'wallet', h.ts);
+    const dest = h.peelDestType === 'wallet' ? ensureWallet(h.peelDestAddr, 'deposit', h.ts) : serviceWallet(h.peelDestType, h.peelDestAddr, h.ts);
+    pushTx(h.hop, from, next, Number(h.forwardedSats), Number(h.feeSats), h.ts, 'fwd');
+    pushTx(h.hop, from, dest, Number(h.peelSats), Number(h.feeSats), h.ts, 'peel');
+  }
+  return origin ? origin.id : null;
+}
+
 add('POST', 'api/crypto/simulate', ({ body }) => {
   const cfg = { seed: asNum(body.seed, 20260701), initialValue: asNum(body.initialValue, 500, 0.01, 1e7), assetSymbol: enumOf(body.assetSymbol, ['ETH', 'BTC', 'USDT', 'USDC', 'XMR'], 'ETH'), hops: asInt(body.hops, 55, 1, 500), peelPercent: asNum(body.peelPercent, 0.07, 0.001, 0.9), minPeel: asNum(body.minPeel, 0.4, 0), feePerTx: asNum(body.feePerTx, 0.002, 0), timeIntervalSec: asNum(body.timeIntervalSec, 900, 1), intervalVariance: asNum(body.intervalVariance, 0.4, 0, 1), exchangeAggregation: !!body.exchangeAggregation, bridgeEvent: body.bridgeEvent === undefined ? true : !!body.bridgeEvent, mixerEvent: body.mixerEvent === undefined ? true : !!body.mixerEvent };
   const result = simulatePeelChain(cfg);
-  if (body.save) { const id = uid('TRC'); T('traces').unshift({ id, name: body.name || 'Saved trace', seed_wallet_id: null, config_json: JSON.stringify(result.config), summary_json: JSON.stringify(result.summary), created_at: now(), data_classification: 'simulated-analysis' }); audit('simulate', 'chainlink', 'trace', id, `Peel-chain simulation saved (${result.summary.hopCount} hops)`); }
+  if (body.save) { const id = uid('TRC'); const name = String(body.name || 'Saved trace').slice(0, 80); const seedWalletId = persistSimulatedTrace(id, name, result); T('traces').unshift({ id, name, seed_wallet_id: seedWalletId, config_json: JSON.stringify(result.config), summary_json: JSON.stringify(result.summary), created_at: now(), data_classification: 'simulated-analysis' }); audit('simulate', 'chainlink', 'trace', id, `Peel-chain simulation saved (${result.summary.hopCount} hops)`); }
   else audit('simulate', 'chainlink', 'trace', null, `Peel-chain simulation run (${result.summary.hopCount} hops)`);
   return { config: result.config, summary: result.summary, alerts: result.alerts, hops: result.hops.slice(0, 300) };
 });
 
 add('GET', 'api/insolvency/cases', () => ({ rows: T('insolvency_cases').map((c) => ({ ...c, assets: T('estate_assets').filter((a) => a.case_id === c.id).length, creditors: T('creditors').filter((cr) => cr.case_id === c.id).length })) }));
 
+// The one base-case assumption set for a seeded estate. The case list, the case
+// detail's first render and its assumption sliders all start from this, so the
+// blended recovery shown in the list is the figure the detail opens on.
+const CASE_BASE_ASSUMPTIONS = Object.freeze({ administratorCostPct: 3, discountRatePct: 5, fxRates: { EUR: 0.96, USD: 0.89 } });
+
 add('GET', 'api/insolvency/cases/:id', ({ params }) => {
   const c = byId('insolvency_cases', params.id); if (!c) throw new HttpError(404, 'case not found');
   const assets = T('estate_assets').filter((a) => a.case_id === params.id), creditors = T('creditors').filter((cr) => cr.case_id === params.id);
-  return { case: c, assets, creditors, scenarios: T('scenarios').filter((s) => s.case_id === params.id), waterfall: computeWaterfall({ currency: c.currency, assets, creditors }, {}) };
+  return { case: c, assets, creditors, scenarios: T('scenarios').filter((s) => s.case_id === params.id), waterfall: computeWaterfall({ currency: c.currency, assets, creditors }, CASE_BASE_ASSUMPTIONS) };
 });
 
 add('POST', 'api/insolvency/cases/:id/waterfall', ({ params, body }) => {
@@ -814,7 +873,7 @@ add('GET', 'api/cases/:id/dossier', ({ params }) => assembleCase(params.id));
 add('GET', 'api/cases/:id/report', ({ params }) => {
   const d = assembleCase(params.id);
   audit('case.report', 'cross', 'case', params.id, `Dossier report generated for case ${d.case.title}`);
-  return { ...d, report: { ref: d.case.id, generatedAt: now(), product: 'Forensic & Regulatory Intelligence Suite', provenance: 'This dossier is generated from a local FRIS workspace. All data is synthetic demonstration material and does not represent any real person or company, except regulatory instruments (Regulatory Horizon), which are drawn from real, publicly-sourced references. Analytical scores are illustrative, not factual allegations.' } };
+  return { ...d, report: { ref: d.case.id, generatedAt: now(), product: 'Forensic & Regulatory Intelligence Suite', provenance: 'This dossier is generated from a local FRIS workspace. All data is synthetic demonstration material and does not represent any real person or company, with two exceptions: regulatory instruments (Regulatory Horizon) are drawn from real, publicly-sourced references, and seven screening fixtures carry the names of real, publicly-designated sanctioned parties — the names are real, but no attribute, relationship or score attached to them is. Analytical scores are illustrative, not factual allegations.' } };
 });
 add('POST', 'api/notes', ({ body }) => {
   const tt = enumOf(body.target_type, ['entity', 'wallet', 'transaction', 'instrument', 'case', 'scenario', 'finding'], 'entity');

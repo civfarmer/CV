@@ -111,7 +111,7 @@ export function home(root) {
     ['financials', 'data', 'cases', 'audit', 'settings', 'about']);
 
   root.append(el('p', { class: 'muted small', style: { textAlign: 'center', marginTop: '24px' } },
-    'All data is synthetic and for demonstration only — nothing here represents a real person or company.'));
+    'All data is synthetic and for demonstration only — nothing here represents a real person or company, apart from seven screening fixtures that carry the names of real, publicly-designated sanctioned parties; their names are real, nothing attached to them is.'));
 }
 
 /* ---------- Local helpers used only by about() ---------- */
@@ -150,8 +150,8 @@ export function about(root) {
   root.append(el('div', { class: 'intro' },
     el('span', { class: 'ico' }, icon('info', 18)),
     el('div', { class: 't' },
-      el('b', {}, 'FRIS brings four normally-separate investigations into one workspace.'),
-      ' Tracing who really owns a company, following crypto out of a wallet, modelling who gets paid in an insolvency, and keeping up with the regulation that governs all of it are usually done in different tools, by different people, with results that never quite line up.')));
+      el('b', {}, 'FRIS brings normally-separate investigations into one workspace.'),
+      ' Tracing who really owns a company, following crypto out of a wallet, modelling who gets paid in an insolvency, and keeping up with the regulation that governs all of it are usually done in different tools, by different people, with results that never quite line up. It started as four modules; the sidebar now holds seventeen, plus the shared workspace pages, all on one dataset and one set of cases.')));
 
   root.append(card('The problem it solves', {},
     el('p', { class: 'about-p' }, 'Financial-crime, due-diligence and recovery work is fragmented and largely manual. An analyst pulls ownership data from one register, hand-builds a spreadsheet of wallet hops from a block explorer, models creditor recoveries in a separate workbook, and tracks regulatory change across a scatter of newsletters and PDFs. Each hand-off loses context, and no single view connects an entity to its money, its downside, and the rules that apply to it.'),
@@ -175,17 +175,19 @@ export function about(root) {
     el('p', { class: 'about-p', style: { marginTop: '14px' } },
       'It also fits cross-cutting users: financial regulators mapping systemic exposure, law firms preparing cases and disclosures, fintech risk teams standing up controls, and academic or teaching settings that need a realistic, self-contained sandbox for forensic and compliance work.')));
 
-  // 2b. What's inside — the four modules and the capabilities added since launch.
+  // 2b. What's inside — the four founding modules and the capabilities added since launch.
   root.append(el('div', { class: 'mt2' }, aboutH('What is inside')));
   root.append(el('div', { class: 'grid k2' },
-    card('Four modules, one workspace', { sub: 'Each with a plain-English intro and per-page help' },
+    card('The four founding modules', { sub: 'Each with a plain-English intro and per-page help' },
       el('ul', { class: 'about-list' },
         el('li', {}, el('b', {}, 'Sovereign Nexus'), ' — corporate-ownership forensics: a network explorer, an offline jurisdiction map, and an Ownership X-ray that traces the control chain up to the ultimate beneficial owner.'),
         el('li', {}, el('b', {}, 'Chain-Link Engine'), ' — crypto tracing: a transaction graph with step-through peel-chain playback, a wallet directory, and detection alerts.'),
         el('li', {}, el('b', {}, 'Liquidation Waterfall'), ' — insolvency-recovery modelling: distribute an estate across creditor classes in priority order with live, exact recalculation.'),
         el('li', {}, el('b', {}, 'Regulatory Horizon'), ' — compliance intelligence over a register of 47 real instruments: an alert feed, a coverage matrix, upcoming effective dates, and the comparison sandbox.'))),
-    card('Recently added', { sub: 'Capabilities layered on since the first release' },
+    card('Added since', { sub: 'Thirteen further modules and the capabilities layered on since the first release' },
       el('ul', { class: 'about-list' },
+        el('li', {}, el('b', {}, 'Financial crime & AML'), ' — Screening & Watchlist, Transaction Monitoring & SAR, Adverse-Media / OSINT, Vendor Risk, KYC & Onboarding, Trade Surveillance and the Typology Lab.'),
+        el('li', {}, el('b', {}, 'Regulatory & compliance'), ' — the Compliance Sandbox, the Control Register (GRC), the Enforcement Tracker and the Country & Sector Risk Index; plus Asset Tracing & Recovery and a Financial Report.'),
         el('li', {}, el('b', {}, 'Cross-module case dossiers'), ' — link entities, wallets, instruments, traces and scenarios into one case, with a printable PDF report.'),
         el('li', {}, el('b', {}, 'Command palette'), ' (⌘/Ctrl-K) — jump to any page or record, or run a command, from the keyboard.'),
         el('li', {}, el('b', {}, 'Ownership X-ray'), ' in Nexus and a regulatory ', el('b', {}, 'coverage matrix'), ' that maps instruments by sector and jurisdiction to expose gaps.'),
@@ -211,7 +213,7 @@ export function about(root) {
       el('p', { class: 'about-p' }, 'The regulatory register is genuine. Regulatory Horizon is built on 47 real, publicly-sourced instruments \u2014 including the GDPR, MiCA, DORA, FINMA circulars, the Swiss FADP / nFADP and Geneva\u2019s LIPAD \u2014 and every instrument links out to its official source so you can verify the obligations, authority and effective dates yourself.'),
       el('p', { class: 'about-p' }, 'Only the internal policies compared against those rules in the sandbox are fabricated, so the comparison has something to check against. The register itself is the real thing, and is meant to be verified rather than trusted blindly.')),
     card('Synthetic demonstration data', { sub: 'Nexus \u00b7 Chain-Link \u00b7 Waterfall' },
-      el('p', { class: 'about-p' }, 'The corporate, crypto and insolvency modules run on synthetic demonstration data \u2014 realistic but entirely fictional entities, wallets and cases. This is a deliberate, responsible design choice: attaching a flight-risk, laundering or recovery score to a real, named party would be inappropriate and could defame someone, so no record here represents a real person or company.'),
+      el('p', { class: 'about-p' }, 'The corporate, crypto and insolvency modules run on synthetic demonstration data \u2014 realistic but entirely fictional entities, wallets and cases. This is a deliberate, responsible design choice: attaching a flight-risk, laundering or recovery score to a real, named party would be inappropriate and could defame someone, so no record here represents a real person or company. The one exception is deliberate and labelled: seven entity-directory rows carry the names of real, publicly-designated sanctioned parties so the screening demo produces genuine hits. Their names are real; no jurisdiction, relationship, asset or score is attached to them, and they are badged as screening fixtures wherever they appear.'),
       el('p', { class: 'about-p' }, 'The engines, however, are real and deterministic. The scoring, the peel-chain simulation and the insolvency distribution are the same production logic you would run on real data \u2014 only the inputs are fictional.'))));
 
   // 5. Built & verified \u2014 capabilities, kept brief.
@@ -223,4 +225,10 @@ export function about(root) {
       el('li', {}, 'Every risk score can be opened and read factor by factor \u2014 nothing is a black box.'),
       el('li', {}, 'The same engines run on a server, fully in the browser, and inside the desktop and mobile wrappers.'),
       el('li', {}, 'Built for accessibility: keyboard-operable controls and rows, screen-reader announcements for alerts and confirmations, associated form labels, and respect for the OS reduced-motion setting.')))));
+
+  // 6. Back to the portfolio this app belongs to.
+  root.append(el('p', { class: 'muted small', style: { textAlign: 'center', marginTop: '24px' } },
+    'FRIS is one of the projects in Christopher Farmer\u2019s portfolio \u2014 ',
+    el('a', { href: '../../index.html', title: 'Back to the portfolio site' }, '\u2190 back to the portfolio'), ' \u00b7 ',
+    el('a', { href: '../../case-studies/fris.html', title: 'Read the FRIS case study' }, 'read the case study'), '.'));
 }

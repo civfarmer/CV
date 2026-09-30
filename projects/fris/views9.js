@@ -105,7 +105,7 @@ async function renderMatrix(root) {
         r.seeded ? el('span', { class: 'badge sq neutral', style: { marginLeft: '6px', fontSize: '9px' }, title: 'Secrecy band anchored to a seeded FRIS fact' }, 'sourced') : null));
     const cells = r.cells.map((c) => heatCell(c));
     const overallTd = el('td', { style: { textAlign: 'center' } }, bandBadge(r.overall));
-    return el('tr', { class: 'clickable' }, nameTh, ...cells, overallTd);
+    return el('tr', { class: 'clickable', onclick: (ev) => { if (ev.target.closest('a, button, input, select')) return; location.hash = '#/risk-index/jurisdiction/' + r.code; } }, nameTh, ...cells, overallTd);
   });
   const tbody = el('tbody', {}, ...bodyRows);
 

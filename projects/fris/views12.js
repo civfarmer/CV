@@ -223,7 +223,7 @@ function obligationRow(o) {
   const ownerTd = el('td', {}, el('span', { class: 'small' }, owners.slice(0, 2).join(', ') + (owners.length > 2 ? ` +${owners.length - 2}` : '')));
   const statusTd = el('td', { style: { textAlign: 'center' } }, statusBadge(o.headlineStatus), o.anyOverdue ? el('span', { class: 'badge sq', style: { marginLeft: '4px', background: hexToRgba(RESULT_COLOR.Overdue, 0.16), color: RESULT_COLOR.Overdue, borderColor: hexToRgba(RESULT_COLOR.Overdue, 0.5) }, title: 'A control test is overdue' }, 'Overdue') : null);
   const covTd = el('td', { style: { textAlign: 'center', minWidth: '110px' } }, coverageBar(o.coveragePct));
-  return el('tr', { class: 'clickable' }, fwTd, citeTd, titleTh, ownerTd, statusTd, covTd);
+  return el('tr', { class: 'clickable', onclick: (ev) => { if (ev.target.closest('a, button, input, select')) return; location.hash = '#/register/obligation/' + encodeURIComponent(o.id); } }, fwTd, citeTd, titleTh, ownerTd, statusTd, covTd);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

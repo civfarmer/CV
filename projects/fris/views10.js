@@ -291,7 +291,7 @@ function caseRow(r) {
   const regTd = el('td', {}, el('span', { class: 'small', title: r.regulators.join(', ') }, r.regulators.slice(0, 3).join(', ') + (r.regulators.length > 3 ? ` +${r.regulators.length - 3}` : '')));
   const jurTd = el('td', {}, el('span', { class: 'small muted' }, r.jurisdiction));
   const statusTd = el('td', {}, statusBadgeEnf(r));
-  return el('tr', { class: 'clickable' }, nameTh, el('td', { class: 'tabular small nowrap' }, fmt.date(r.date)), amtTd, catTd, regTd, jurTd, statusTd);
+  return el('tr', { class: 'clickable', onclick: (ev) => { if (ev.target.closest('a, button, input, select')) return; location.hash = '#/enforcement/case/' + encodeURIComponent(r.id); } }, nameTh, el('td', { class: 'tabular small nowrap' }, fmt.date(r.date)), amtTd, catTd, regTd, jurTd, statusTd);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

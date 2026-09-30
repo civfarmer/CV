@@ -46,7 +46,7 @@ export async function typology(root, parts) {
   root.append(el('div', { class: 'intro', role: 'note', style: { marginTop: '10px', '--mc': ACCENT } },
     el('span', { class: 'ico' }, icon('info', 18)),
     el('div', { class: 't' }, el('b', {}, 'Training / simulation sandbox — synthetic; not operational advice. '),
-      'Every generated entity, shell, wallet, invoice, transaction and asset is 100% FICTIONAL and produced deterministically from a fixed seed. The typology METHODS mirror REAL, well-known, publicly-documented FATF / public methodology (placement / layering / integration, structuring & smurfing, shell-company layering, crypto peel chains, trade-based over/under-invoicing, mule networks, real-estate integration, loan-backs) — the methods are legitimate public knowledge, the data is invented. Nothing here names or implicates any real person, company or wallet. This is NOT operational advice, NOT a how-to and NOT a detection system of record; it is a detector-validation lab showing how money is hidden and how you would catch it.')));
+      'Every generated entity, shell, wallet, invoice, transaction and asset is 100% FICTIONAL and produced deterministically from a fixed seed (the one exception: a sanctions-evasion trade stage names a real, publicly-designated party as the counterparty so the screening detector fires — the invoice and flow are invented). The typology METHODS mirror REAL, well-known, publicly-documented FATF / public methodology (placement / layering / integration, structuring & smurfing, shell-company layering, crypto peel chains, trade-based over/under-invoicing, mule networks, real-estate integration, loan-backs) — the methods are legitimate public knowledge, the data is invented. Nothing here names or implicates any real person, company or wallet. This is NOT operational advice, NOT a how-to and NOT a detection system of record; it is a detector-validation lab showing how money is hidden and how you would catch it.')));
 
   const body = el('div', { class: 'mt' });
   root.append(body);
@@ -88,6 +88,9 @@ async function renderStudio(root, parts) {
 // Build + POST the current spec, then re-render. `initial` swallows the button state.
 async function runSimulation(initial) {
   if (!STATE) return;
+  // Nothing composed: say so in place rather than silently running a preset.
+  if (!(STATE.spec.stages || []).length) { STATE.validation = 'Add at least one stage, or load a preset, before running.'; renderComposerAndResults(); return; }
+  STATE.validation = null;
   STATE.running = true;
   if (!initial) renderComposerAndResults(); // reflect the running state
   let result = null;
@@ -153,10 +156,13 @@ function composerCard() {
     ? spec.stages.map((st, idx) => stageEditor(st, idx))
     : [el('div', { class: 'small muted', style: { padding: '10px 0' } }, 'No stages yet — add a placement, layering and integration stage, or load a preset above.')];
 
+  const noStages = !(spec.stages || []).length;
   const runBtn = el('button', {
-    class: 'btn primary', disabled: STATE.running ? 'disabled' : null,
+    class: 'btn primary', disabled: (STATE.running || noStages) ? 'disabled' : null,
+    title: noStages ? 'Add at least one stage, or load a preset, before running' : null,
     onclick: () => runSimulation(false),
   }, icon(STATE.running ? 'history' : 'chain', 15), STATE.running ? 'Running…' : 'Run simulation');
+  const validation = (noStages || STATE.validation) ? el('span', { class: 'small', role: 'status', style: { color: '#e5a53b' } }, STATE.validation || 'Add a stage or load a preset to run.') : null;
 
   const seedInput = el('input', {
     type: 'number', value: String(spec.seed), title: 'Deterministic seed — same seed + same stages → identical result',
@@ -176,7 +182,7 @@ function composerCard() {
     el('div', { class: 'small muted', style: { marginBottom: '6px', fontWeight: '600', color: 'var(--text)' } }, `Composed typology (${(spec.stages || []).length} stage${(spec.stages || []).length === 1 ? '' : 's'})`),
     el('div', { style: { marginBottom: '12px' } }, ...stageRows),
     el('div', { class: 'row wrap', style: { gap: '10px', alignItems: 'center' } },
-      runBtn,
+      runBtn, validation,
       el('span', { class: 'small muted' }, 'Seed'), seedInput,
       spec.tagline ? el('span', { class: 'small muted', style: { flex: '1 1 auto', minWidth: '0' } }, spec.tagline) : null));
 }
@@ -244,7 +250,7 @@ function moveStage(idx, dir) {
   if (j < 0 || j >= s.length) return;
   [s[idx], s[j]] = [s[j], s[idx]]; STATE.spec.id = 'custom'; renderComposerAndResults();
 }
-function clearStages() { STATE.spec = { id: 'custom', name: 'Custom scenario', seed: STATE.spec.seed, stages: [] }; STATE.result = null; renderComposerAndResults(); }
+function clearStages() { STATE.spec = { id: 'custom', name: 'Custom scenario', seed: STATE.spec.seed, stages: [] }; STATE.result = null; STATE.validation = null; renderComposerAndResults(); }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // RESULTS — coverage summary, money-flow narrative, coverage report, directory.

@@ -47,7 +47,7 @@ export async function onboarding(root, parts) {
   root.append(el('div', { class: 'intro', role: 'note', style: { marginTop: '10px', '--mc': ACCENT } },
     el('span', { class: 'ico' }, icon('info', 18)),
     el('div', { class: 't' }, el('b', {}, 'Synthetic applicants, real methodology. '),
-      'Every applicant, its ownership, declared activity, product and channel is FICTIONAL and generated deterministically for demonstration; nothing here refers to a real customer or person. A handful of applicants reuse synthetic Sovereign Nexus entity ids (and thus their synthetic watchlist / adverse-media matches) so the cross-module CDD signal can be shown end-to-end. The customer-risk rating applies a REAL, publicly-documented CDD/EDD risk-factor weighting methodology to those synthetic inputs — the methodology is legitimate, the data is not, and a rating is NOT a factual allegation against any party. This is NOT a KYC / onboarding system of record and NOT compliance advice.')));
+      'Every applicant, its ownership, declared activity, product and channel is FICTIONAL and generated deterministically for demonstration; nothing here refers to a real customer or person, with one labelled exception — applicant APP-0018 carries the name of a real, publicly-designated sanctioned party as a screening fixture (the name is real; every attribute attached to it is invented). A handful of applicants reuse synthetic Sovereign Nexus entity ids (and thus their synthetic watchlist / adverse-media matches) so the cross-module CDD signal can be shown end-to-end. The customer-risk rating applies a REAL, publicly-documented CDD/EDD risk-factor weighting methodology to those synthetic inputs — the methodology is legitimate, the data is not, and a rating is NOT a factual allegation against any party. This is NOT a KYC / onboarding system of record and NOT compliance advice.')));
 
   const body = el('div', { class: 'mt' });
   root.append(body);
@@ -146,8 +146,9 @@ function queueTableCard(data) {
     const nameTh = el('th', { scope: 'row', style: { textAlign: 'left' } },
       el('a', { href: '#/onboarding/' + encodeURIComponent(a.applicantId), style: { color: 'var(--text)', textDecoration: 'none', fontWeight: '600' }, title: 'Open the CDD assessment for ' + a.legalName },
         a.legalName,
-        el('span', { class: 'small muted', style: { marginLeft: '6px' } }, a.applicantId)));
-    return el('tr', { class: 'clickable' },
+        el('span', { class: 'small muted', style: { marginLeft: '6px' } }, a.applicantId)),
+      a.nameFixture ? el('div', { style: { marginTop: '3px' } }, el('span', { class: 'badge sq', style: { color: '#f0616d', borderColor: '#f0616d66' }, title: 'The name is a real public sanctions designation, inserted as a screening fixture; every attribute of this applicant is invented.' }, 'Real designation — screening fixture')) : null);
+    return el('tr', { class: 'clickable', onclick: (ev) => { if (ev.target.closest('a, button, input, select')) return; location.hash = '#/onboarding/' + encodeURIComponent(a.applicantId); } },
       nameTh,
       el('td', {}, el('span', { class: 'small' }, a.typeLabel), a.pep ? el('span', { class: 'badge sq high', style: { marginLeft: '6px', fontSize: '9px' }, title: 'Self-declared politically-exposed person' }, 'PEP') : null),
       el('td', {}, el('span', { class: 'small' }, a.countryName || a.country), a.countryBand ? el('span', { class: 'badge sq neutral', style: { marginLeft: '6px', fontSize: '9px', color: CR_COLOR[a.countryBand] }, title: 'Country-risk band' }, bandShort(a.countryBand)) : null),
@@ -193,7 +194,9 @@ async function renderAssessment(root, id) {
           el('div', { class: 'row wrap', style: { gap: '10px', alignItems: 'center', marginBottom: '4px' } },
             el('span', { style: { fontWeight: '800', color: 'var(--text)', fontSize: '20px' } }, d.legalName),
             el('span', { class: 'badge sq neutral' }, d.applicantId),
-            d.pep ? el('span', { class: 'badge sq high', title: 'Self-declared politically-exposed person' }, 'PEP') : null),
+            d.pep ? el('span', { class: 'badge sq high', title: 'Self-declared politically-exposed person' }, 'PEP') : null,
+            d.nameFixture ? el('span', { class: 'badge sq', style: { color: '#f0616d', borderColor: '#f0616d66' }, title: 'The name is a real public sanctions designation, inserted as a screening fixture; every attribute of this applicant is invented.' }, 'Real designation — screening fixture') : null),
+          d.nameFixture ? el('div', { class: 'small', style: { color: 'var(--text-2)', marginBottom: '4px' } }, 'The legal name is a real, public sanctions designation used as a screening fixture so the hard-stop path can be shown; the customer type, country, sector, product, channel, activity and rating below are invented, as for every other applicant.') : null,
           el('div', { class: 'small muted' }, `${d.typeLabel} · ${d.countryName || d.country} · ${d.sectorLabel || d.sector}`),
           el('div', { class: 'small', style: { color: 'var(--text-2)', marginTop: '8px', lineHeight: '1.6' } }, d.rationale)),
         el('div', { style: { flex: '0 0 auto', textAlign: 'center', minWidth: '150px' } },
