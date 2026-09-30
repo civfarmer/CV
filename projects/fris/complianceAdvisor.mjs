@@ -185,7 +185,15 @@ function resolveRegions(profile) {
 // as a whole word ("ai", "aws"); longer tokens may still match as a prefix/stem so
 // "exfiltrat" catches "exfiltration" and "sanction" catches "sanctions".
 function matchTopicCue(q, lower) {
-  if (/[^a-z]/.test(q)) return lower.includes(q);
+  if (/[^a-z ]/.test(q)) return lower.includes(q);
+  if (q.includes(' ')) {
+    // A multi-word cue tolerates one filler word between its words, so
+    // "lost laptop" also catches "lost a laptop" / "lost the laptop", and
+    // "delete their data" catches "delete all their data".
+    if (lower.includes(q)) return true;
+    const words = q.split(' ').filter(Boolean);
+    return new RegExp('\\b' + words.join('(?:\\W+\\w+)?\\W+')).test(lower);
+  }
   if (q.length <= 3) return new RegExp('\\b' + q + '\\b').test(lower);
   return new RegExp('\\b' + q).test(lower);
 }
@@ -332,20 +340,27 @@ function sizeNoteFor(obligationId, size) {
  * @param {{topicIds:string[], lower:string, obligationIds:string[], flags:Record<string,boolean>, regionCount:number}} ctx
  */
 function resolveTriage(ctx) {
-  const fired = [];
+  const textFired = [];    // signals the QUERY itself triggered (phrase, topic, implicated obligation)
+  const profileFired = []; // signals triggered only by the profile's shape (multi-region, transfer flag)
   for (const sig of TRIAGE_SIGNALS) {
     let hit = false;
     if (sig.patterns && sig.patterns.some((p) => ctx.lower.includes(String(p).toLowerCase()))) hit = true;
     if (!hit && sig.whenTopic && sig.whenTopic.some((t) => ctx.topicIds.includes(t))) hit = true;
     if (!hit && sig.whenObligation && sig.whenObligation.some((o) => ctx.obligationIds.includes(o))) hit = true;
-    if (!hit && sig.whenProfile) {
+    if (hit) { textFired.push(sig); continue; }
+    if (sig.whenProfile) {
       for (const cond of sig.whenProfile) {
         if (cond.type === 'flag' && ctx.flags[cond.name]) { hit = true; break; }
         if (cond.type === 'multiRegion' && ctx.regionCount >= (cond.min || 3)) { hit = true; break; }
       }
     }
-    if (hit) fired.push(sig);
+    if (hit) profileFired.push(sig);
   }
+  // When the text matched a topic, the verdict and its "why" come from the signals
+  // that text triggered; a profile-only signal (e.g. "you span two regimes, so
+  // transfers need a mechanism") must not headline a question about something
+  // else. With no text match, the profile signals are all there is.
+  const fired = (ctx.topicIds.length && textFired.length) ? textFired : textFired.concat(profileFired);
 
   // Highest-order verdict with any fired signal wins.
   let winner = null;

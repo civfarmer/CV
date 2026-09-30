@@ -106,7 +106,8 @@ export const VENDORS = Object.freeze([
     data_classification: 'synthetic-demo',
   },
   {
-    id: 'VEN-0002', name: 'Sovcomflot', category: 'commodities',
+    // The name is a REAL public sanctions designation used as a screening fixture; every other attribute is invented.
+    id: 'VEN-0002', name: 'Sovcomflot', nameFixture: 'real-public-sanctions-designation', category: 'commodities',
     homeJurisdiction: 'BVI', jurisdictionLabel: 'British Virgin Islands',
     annualSpend: 9800, criticality: 2, dataAccess: 'confidential', contractStatus: 'renewal_due',
     onboardedAt: '2022-06-01', lastReviewedAt: '2024-09-18', entityId: 'ENT-0065',
@@ -260,7 +261,7 @@ export const REVIEW_CADENCE_DAYS = Object.freeze({ 1: 180, 2: 270, 3: 365, 4: 54
 
 // The disclaimer every vendor-risk API response / view carries.
 export const VENDOR_DISCLAIMER =
-  'Synthetic demonstration third-party / vendor register. Every vendor, category, spend figure and risk score is FICTIONAL and generated deterministically for demonstration; nothing here refers to a real supplier, counterparty or client. A composite risk score is an illustrative aggregation, NOT a factual allegation against any party. This is NOT a third-party-risk-management system of record.';
+  'Synthetic demonstration third-party / vendor register. Every vendor, category, spend figure and risk score is FICTIONAL and generated deterministically for demonstration; nothing here refers to a real supplier, counterparty or client, with one labelled exception: vendor VEN-0002 carries the name of a real, publicly-designated sanctioned party as a screening fixture — the name is real, every attribute attached to it is invented. A composite risk score is an illustrative aggregation, NOT a factual allegation against any party. This is NOT a third-party-risk-management system of record.';
 
 // A stable version stamp (bump if the register changes) so the UI can display it.
 export const VENDOR_VERSION = Object.freeze({

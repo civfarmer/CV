@@ -65,7 +65,7 @@ export function barChart(container, data, opts = {}) {
   const H = opts.height || 200, W = 480, PAD = 26;
   const max = Math.max(1, ...data.map((d) => d.value));
   const bw = (W - PAD) / data.length;
-  const svg = S('svg', { viewBox: `0 0 ${W} ${H}`, height: H });
+  const svg = S('svg', { viewBox: `0 0 ${W} ${H}`, height: H, style: `width:100%;max-width:${W}px;height:auto;display:block` });
   data.forEach((d, i) => {
     const h = (d.value / max) * (H - 40);
     const x = PAD + i * bw + bw * 0.12, y = H - 22 - h;

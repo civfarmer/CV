@@ -39,7 +39,7 @@ const RISKC = { High: '#f0616d', Medium: '#e5a53b', Low: '#46b877' };
 
 /* ============ Executive Overview ============ */
 export async function overview(root) {
-  root.append(pageHead('Executive Overview', 'Unified intelligence across all four operational modules — synthetic demonstration data'));
+  root.append(pageHead('Executive Overview', 'Headline numbers across the whole suite — synthetic demonstration data'));
   const kpis = el('div', { class: 'grid k4' }, skeleton(96), skeleton(96), skeleton(96), skeleton(96));
   const body = el('div', { class: 'grid k2 mt2' });
   root.append(kpis, body);
@@ -142,19 +142,21 @@ async function nexusNetwork(panel, focusId) {
     return { nodes: ns, edges: es };
   }
 
-  function updateCounts(shownN, shownE) {
-    const flagged = allNodes.filter(nexusIsFlagged).length;
-    const circ = allEdges.filter((e) => e.is_circular).length;
-    countBar.replaceChildren(
-      el('span', {}, 'Showing ', el('strong', {}, String(shownN)), ' of ', String(allNodes.length), ' entities · ', el('strong', {}, String(shownE)), ' relationships'),
-      el('span', { class: 'badge sq high', title: 'Entities matching a red-flag signal' }, String(flagged), ' flagged'),
-      circ ? el('span', { class: 'badge sq high', title: 'Edges in a circular-ownership loop' }, String(circ), ' circular') : null,
-      el('span', { class: 'muted' }, 'Click a node to trace its controllers & holdings'));
+  function updateCounts(shownN, shownE, shown) {
+    // Count the subset actually drawn, so the bar agrees with the graph's own summary.
+    const nodesShown = shown ? shown.nodes : allNodes, edgesShown = shown ? shown.edges : allEdges;
+    const flagged = nodesShown.filter(nexusIsFlagged).length;
+    const circ = edgesShown.filter((e) => e.is_circular).length;
+    countBar.replaceChildren(...[
+      el('span', {}, 'Showing ', el('strong', {}, String(shownN)), ' of ', String(allNodes.length), ' entities · ', el('strong', {}, String(shownE)), ' of ', String(allEdges.length), ' relationships'),
+      el('span', { class: 'badge sq ' + (flagged ? 'high' : 'neutral'), title: 'Entities shown that match a red-flag signal' }, String(flagged), ' flagged'),
+      circ ? el('span', { class: 'badge sq high', title: 'Edges shown that sit in a circular-ownership loop' }, String(circ), ' circular') : null,
+      el('span', { class: 'muted' }, 'Click a node to trace its controllers & holdings')].filter(Boolean));
   }
 
   function build() {
     const d = filteredData();
-    if (!d.nodes.length) { graphBox.replaceChildren(emptyState('No entities match the current filters', 'Loosen a filter or clear the search to see the network.')); updateCounts(0, 0); graph = null; _lastNexusGraph = null; return; }
+    if (!d.nodes.length) { graphBox.replaceChildren(emptyState('No entities match the current filters', 'Loosen a filter or clear the search to see the network.')); updateCounts(0, 0, d); graph = null; _lastNexusGraph = null; return; }
     const box = el('div', { style: { height: '640px' } });
     graphBox.replaceChildren(box);
     // The tiered-ownership renderer (flowGraph). It draws its
@@ -183,7 +185,7 @@ async function nexusNetwork(panel, focusId) {
     // if the red-flags toggle is active across a re-filter, re-apply the spotlight
     if (state.flags) { try { fg.spotlightFlagged(true); } catch (_e) {} }
     _lastNexusGraph = graph; // let the drawer's Ownership X-ray trace on this graph
-    updateCounts(d.nodes.length, d.edges.length);
+    updateCounts(d.nodes.length, d.edges.length, d);
   }
 
   // re-filter without losing node positions when possible (rebuild is cheap + deterministic)
@@ -261,7 +263,7 @@ async function nexusDirectory(panel) {
       { key: 'risk_flag', label: 'Flight risk', sortable: true, sortVal: (r) => ({ High: 3, Medium: 2, Low: 1 }[r.risk_flag] || 0), render: (r) => r.risk_flag ? riskBadge(r.risk_flag) : el('span', { class: 'muted' }, '—') },
       { key: 'verification_status', label: 'Verification', sortable: true, render: (r) => statusBadge(r.verification_status) },
     ], d.rows, { searchable: true, searchKeys: ['legal_name', 'jurisdiction', 'entity_type'], searchPlaceholder: 'Search entities…', pageSize: 14, onRowClick: (r) => openEntityDrawer(r.id) });
-    panel.replaceChildren(card('Entity Directory', { sub: `${d.total} synthetic entities`, flush: true }, table));
+    panel.replaceChildren(card('Entity Directory', { sub: `${d.total} entities — synthetic, apart from seven badged screening fixtures`, flush: true }, table));
   } catch (e) { panel.replaceChildren(errorState(e.message)); }
 }
 
@@ -390,17 +392,22 @@ export async function openEntityDrawer(id) {
   // fetches (UBO names, and a full node/edge map for readable chains & holdings).
   const xrayBox = el('div', { class: 'mt2' }, skeleton(120));
   renderOwnershipXray(xrayBox, id, d).catch(() => { try { xrayBox.replaceChildren(ownershipXrayShell(el('div', { class: 'small muted' }, 'Ownership X-ray unavailable for this entity.'))); } catch (_e) {} });
-  body.replaceChildren(
+  // Seven directory rows carry the names of real, publicly-designated sanctioned
+  // parties so the screening demo produces genuine hits. Say so plainly, above
+  // the fold, and do not dress them in invented attributes.
+  const isFixture = e.data_classification === 'real-public-sanctions-demo';
+  body.replaceChildren(...[
     el('div', { class: 'row wrap', style: { gap: '8px', marginBottom: '14px' } }, el('span', { class: 'badge sq neutral' }, fmt.title(e.entity_type)), statusBadge(e.status), e.risk_flag ? riskBadge(e.risk_flag) : null, statusBadge(e.verification_status), classBadge(e.data_classification)),
+    isFixture ? el('div', { class: 'intro', role: 'note', style: { margin: '0 0 14px', '--mc': '#f0616d' } }, el('span', { class: 'ico' }, icon('alert', 16)), el('div', { class: 't' }, el('b', {}, 'Real designation — screening fixture. '), 'This name is a real, public sanctions listing, inserted so the screening demo produces a genuine hit. No jurisdiction, legal form, ownership, relationship, asset or score is recorded for it, because none would be real; the High flag reflects the public designation only.')) : null,
     el('dl', { class: 'dl' },
       dt('Synthetic ID'), dd(e.id), dt('Jurisdiction'), dd(e.jurisdiction || '—'), dt('Legal form'), dd(e.legal_form || '—'),
       dt('Incorporated'), dd(fmt.date(e.incorporation_date)), dt('Registered office'), dd(e.registered_office || '—'), dt('Source type'), dd(fmt.title(e.source_type || '—'))),
-    el('div', { class: 'card mt2' }, el('div', { class: 'card-head' }, el('div', { class: 'card-title' }, 'Jurisdictional Asset Flight Risk'), el('span', { class: 'spacer' }), el('span', { class: 'value tabular', style: { fontSize: '22px', color: RISKC[fr.band] } }, fr.score), riskBadge(fr.band)), el('div', { class: 'card-body' }, el('div', { class: 'small muted mb' }, `Deterministic score from ${fr.factors.length} weighted factors (0–100). Contributions:`), factorList)),
-    xrayBox,
+    isFixture ? null : el('div', { class: 'card mt2' }, el('div', { class: 'card-head' }, el('div', { class: 'card-title' }, 'Jurisdictional Asset Flight Risk'), el('span', { class: 'spacer' }), el('span', { class: 'value tabular', style: { fontSize: '22px', color: RISKC[fr.band] } }, fr.score), riskBadge(fr.band)), el('div', { class: 'card-body' }, el('div', { class: 'small muted mb' }, `Deterministic score from ${fr.factors.length} weighted factors (0–100). Contributions:`), factorList)),
+    isFixture ? null : xrayBox,
     el('div', { class: 'mt2' }, el('div', { class: 'card-title mb' }, 'Relationships & ownership'), relList),
     d.assets.length ? el('div', { class: 'mt2' }, el('div', { class: 'card-title mb' }, 'Assets'), ...d.assets.map((a) => el('div', { class: 'row', style: { padding: '5px 0' } }, el('span', { class: 'badge sq neutral' }, fmt.title(a.asset_type)), el('span', { class: 'small' }, a.label), el('span', { class: 'spacer small tabular' }, 'USD ' + fmt.num(a.value_usd))))) : null,
     el('div', { class: 'mt2' }, el('div', { class: 'card-title mb' }, 'Analyst notes'), el('div', { id: 'noteList' }, ...(d.notes || []).map(noteRow)), noteInput, el('button', { class: 'btn sm mt', onclick: async () => { if (!noteInput.value.trim()) return; try { const r = await api.post('/api/notes', { target_type: 'entity', target_id: id, body: noteInput.value }); noteInput.value = ''; document.getElementById('noteList').replaceChildren(...r.notes.map(noteRow)); toast('Note saved', { type: 'success' }); } catch (er) { toast(er.message, { type: 'error' }); } } }, 'Add note')),
-  );
+  ].filter(Boolean));
   // drawer footer actions
   const drawer = document.querySelector('.drawer');
   if (drawer && !drawer.querySelector('.drawer-foot')) drawer.append(el('div', { class: 'drawer-foot' }, addToCaseButton('entity', id, e.legal_name), el('button', { class: 'btn sm', onclick: async () => { try { const r = await api.post('/api/bookmarks', { target_type: 'entity', target_id: id, label: e.legal_name }); toast(r.bookmarked ? 'Bookmarked' : 'Bookmark removed', { type: 'success' }); } catch (er) { toast(er.message, { type: 'error' }); } } }, icon('bookmark', 14), 'Bookmark'), el('button', { class: 'btn sm', onclick: () => exportData('entities') }, icon('download', 14), 'Export')));
@@ -625,7 +632,7 @@ function chainFindings(d) {
   const nodes = d.nodes, edges = d.edges;
   const inE = new Map(), outE = new Map();
   for (const e of edges) { (outE.get(e.source) || outE.set(e.source, []).get(e.source)).push(e); (inE.get(e.target) || inE.set(e.target, []).get(e.target)).push(e); }
-  let source = nodes.find((n) => outE.has(n.id) && !inE.has(n.id)) || nodes[0];
+  let source = nodes.find((n) => outE.has(n.id) && !inE.has(n.id)) || nodes[0] || { id: '—', label: 'an unknown wallet' };
   const firstOut = (outE.get(source.id) || []).slice().sort((a, b) => b.amount - a.amount);
   const originated = (firstOut[0] ? firstOut[0].amount : 0) + (firstOut[1] ? firstOut[1].amount : 0);
   const sumInByType = (t) => nodes.filter((n) => n.type === t).reduce((acc, n) => acc + (inE.get(n.id) || []).reduce((a, e) => a + e.amount, 0), 0);
@@ -659,6 +666,11 @@ async function cryptoGraph(panel) {
     box.replaceChildren(skeleton(480));
     tableBox.replaceChildren();
     const d = await api.get('/api/crypto/graph?trace=' + encodeURIComponent(sel.value));
+    if (!d.nodes.length || !d.edges.length) {
+      graph = null;
+      box.replaceChildren(emptyState('No transactions are recorded for this trace', 'Open the Peeling-Chain Simulator and use “Run & save trace” — the saved hops appear here as a transaction graph.'));
+      return;
+    }
     const f = chainFindings(d);
 
     // ── Findings header: the story in words + KPI stat chips ──────────────────
@@ -887,7 +899,7 @@ export async function openWalletDrawer(id) {
     if (subEl) subEl.textContent = w.label ? w.label + ' · ' + id : id;
     const reasons = walletRiskReasons(w, [...d.out, ...d.in]);
     const outTx = d.out.slice(0, 20), inTx = d.in.slice(0, 20);
-    body.replaceChildren(
+    body.replaceChildren(...[
       el('div', { class: 'row wrap mb', style: { gap: '8px' } }, el('span', { class: 'badge sq neutral', title: 'Entity type' }, typeLabel), riskBadge(w.risk_category), w.is_dormant ? statusBadge('Watchlisted') : null, classBadge(w.data_classification)),
       w.label ? el('div', { class: 'card-title', style: { marginBottom: '6px' } }, w.label) : null,
       reasons.length ? el('div', { class: 'intro', style: { margin: '2px 0 10px' } }, el('span', { class: 'ico' }, icon('alert', 16)), el('div', { class: 't' }, el('b', {}, 'Why flagged: '), reasons.join(' '))) : null,
@@ -899,7 +911,7 @@ export async function openWalletDrawer(id) {
         ...outTx.map((t) => walletFlowRow(t, 'out')),
         inTx.length ? el('div', { class: 'small', style: { color: 'var(--text-3)', margin: '10px 0 2px' } }, '← Incoming — funds arrive here') : null,
         ...inTx.map((t) => walletFlowRow(t, 'in'))),
-    );
+    ].filter(Boolean));
     const drawer = document.querySelector('.drawer');
     if (drawer && !drawer.querySelector('.drawer-foot')) drawer.append(el('div', { class: 'drawer-foot' }, addToCaseButton('wallet', id, w.label || w.id), el('button', { class: 'btn sm', onclick: () => exportData('transactions') }, icon('download', 14), 'Export')));
   } catch (e) { body.replaceChildren(errorState(e.message)); }

@@ -85,6 +85,11 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
 .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
 .nav-badge { margin-left: auto; font-size: 10px; background: var(--surface-3); border: 1px solid var(--border); color: var(--text-2); padding: 1px 6px; border-radius: 10px; }
 .sidebar-foot { padding: 10px; border-top: 1px solid var(--border); }
+.sidebar-links { display: flex; gap: 6px; align-items: center; padding: 0 2px 8px; white-space: nowrap; }
+.sidebar-links a { color: var(--text-3); }
+.sidebar-links a:hover { color: var(--text); }
+/* Long labels end in an ellipsis instead of being cut mid-word by the sidebar's overflow:hidden. */
+.nav-item .nav-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 
 /* Topbar */
 .topbar { grid-area: topbar; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px; padding: 0 16px; }
@@ -155,6 +160,9 @@ html[data-fris-theme="light"] {
 .card-actions { margin-left: auto; display: flex; gap: 6px; }
 
 .grid { display: grid; gap: 16px; }
+/* Grid and split children may shrink below their content's min-content width, so a
+   wide donut row or filter row scrolls inside its card instead of pushing the page out. */
+.grid > *, .split > * { min-width: 0; }
 .grid.k2 { grid-template-columns: repeat(2, 1fr); }
 .grid.k3 { grid-template-columns: repeat(3, 1fr); }
 .grid.k4 { grid-template-columns: repeat(4, 1fr); }
@@ -221,7 +229,8 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
 
 /* Filters bar */
 .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
-.field { display: inline-flex; flex-direction: column; gap: 4px; }
+.field { display: inline-flex; flex-direction: column; gap: 4px; min-width: 0; max-width: 100%; }
+.field select, .field input { max-width: 100%; min-width: 0; }
 .field label { font-size: 11px; color: var(--text-3); }
 select, input[type="text"], input[type="number"], textarea { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 7px 10px; font-size: 13px; font-family: inherit; }
 select:focus, input:focus, textarea:focus { border-color: var(--accent); outline: none; }
@@ -232,8 +241,8 @@ textarea { resize: vertical; min-height: 90px; width: 100%; line-height: 1.5; }
 .chip .x { opacity: 0.6; }
 
 /* Tabs */
-.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
-.tab { padding: 9px 14px; color: var(--text-3); cursor: pointer; font-weight: 500; border-bottom: 2px solid transparent; font-size: 13px; }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin-bottom: 18px; overflow-x: auto; scrollbar-width: thin; }
+.tab { padding: 9px 14px; color: var(--text-3); cursor: pointer; font-weight: 500; border-bottom: 2px solid transparent; font-size: 13px; flex: 0 0 auto; white-space: nowrap; }
 .tab:hover { color: var(--text); }
 .tab.active { color: var(--text); border-bottom-color: var(--accent); }
 
@@ -403,16 +412,23 @@ button, input, select, textarea { font-family: var(--sans); }
 .sidebar-scrim { display: none; }
 @media (max-width: 900px) {
   .shell { grid-template-columns: 0 minmax(0,1fr); }
+  .crumbs { min-width: 0; flex: 1 1 auto; overflow: hidden; }
+  .crumbs > * { flex: 0 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .crumbs > *:not(.cur) { flex: 0 0 auto; }
   .sidebar { position: fixed; z-index: 120; width: var(--sidebar-w); transform: translateX(-100%); transition: transform 0.2s ease; box-shadow: var(--shadow); }
   .shell.mobile-open .sidebar { transform: none; }
   .sidebar-scrim { display: block; position: fixed; inset: 0; background: rgba(3,6,12,0.5); z-index: 110; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
   .shell.mobile-open .sidebar-scrim { opacity: 1; pointer-events: auto; }
-  .search { flex: 1; min-width: 0; }
+  .search { flex: 1 1 120px; min-width: 96px; max-width: none; }
 }
 @media (max-width: 560px) {
   /* Overflow fix: the top bar's fixed 14px gaps + 16px padding measured
      406px inside a 390px viewport, giving the document a horizontal scrollbar. */
   .topbar { gap: 8px; padding: 0 10px; }
+  /* At phone width the inline search box has no room; the palette button (which
+     searches the same records) becomes the search control. */
+  .search { display: none; }
+  .cmdk-btn .cmdk-hint { display: none; }
   /* Collapse only the visible label text — the button keeps its accessible
      name via aria-label, so the provenance signal is still announced. */
   .demo-tag { padding: 5px 8px; gap: 0; }
@@ -421,6 +437,7 @@ button, input, select, textarea { font-family: var(--sans); }
   .theme-toggle .theme-toggle-text { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
   .page { padding: 16px 14px 60px; }
   .home-title { font-size: 22px; }
+  .page-watermark { right: 4%; }
 }
 
 /* ───────────────────────── Case dossier & report ─────────────────────────── */

@@ -288,7 +288,7 @@ export function assessApplicant(applicant, ctx = {}) {
     sector: applicant.sector, sectorLabel: s.sectorLabel,
     product: applicant.product, productLabel: s.productLabel,
     channel: applicant.channel, channelLabel: s.channelLabel,
-    pep: s.pep, ubo: applicant.ubo || null, entityId: applicant.entityId || null,
+    pep: s.pep, ubo: applicant.ubo || null, entityId: applicant.entityId || null, nameFixture: applicant.nameFixture || null,
     stage: applicant.stage, expectedActivity: applicant.expectedActivity || null, expectedMonthlyUsdK: applicant.expectedMonthlyUsdK,
     // the rating
     score, baseScore, rating, ratingColor: band.color, ratingBlurb: band.blurb,
@@ -402,7 +402,7 @@ function compactRow(a) {
     applicantId: a.applicantId, legalName: a.legalName, type: a.type, typeLabel: a.typeLabel, kind: a.kind,
     country: a.country, countryName: a.countryName, sector: a.sector, sectorLabel: a.sectorLabel,
     product: a.product, productLabel: a.productLabel, channel: a.channel, channelLabel: a.channelLabel,
-    pep: a.pep, entityId: a.entityId, stage: a.stage,
+    pep: a.pep, entityId: a.entityId, nameFixture: a.nameFixture || null, stage: a.stage,
     score: a.score, rating: a.rating, ratingColor: a.ratingColor,
     requiresEDD: a.requiresEDD, ddLevel: a.ddLevel, triggerCount: a.dueDiligenceTriggers.length,
     cadenceMonths: a.cadenceMonths, nextReviewDate: a.nextReviewDate,

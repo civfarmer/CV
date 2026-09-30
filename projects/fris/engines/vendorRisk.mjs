@@ -200,6 +200,7 @@ export function scoreVendor(vendor, signals = {}) {
   return {
     vendorId: vendor.id,
     name: vendor.name,
+    nameFixture: vendor.nameFixture || null,
     category: vendor.category,
     categoryLabel: s.categoryLabel,
     homeJurisdiction: vendor.homeJurisdiction || null,

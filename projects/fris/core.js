@@ -165,6 +165,7 @@ export function statusBadge(s) {
 }
 export function classBadge(c) {
   const map = { 'verified-public-source': 'Verified Public Source', 'synthetic-scenario': 'Synthetic Scenario', 'imported-user-material': 'Imported User Material', 'simulated-analysis': 'Simulated Analysis', 'unverified-fixture': 'Unverified Fixture', 'synthetic-demo': 'Synthetic Demo' };
+  if (c === 'real-public-sanctions-demo') return el('span', { class: 'badge sq', style: { color: '#f0616d', borderColor: '#f0616d66' }, title: 'The name is a real public sanctions designation, inserted as a screening fixture; no attribute, relationship or score attached to it is real.' }, 'Real designation — screening fixture');
   return el('span', { class: 'badge sq neutral', title: 'Data classification' }, map[c] || c || 'Synthetic');
 }
 
@@ -325,13 +326,29 @@ export function modal({ title, body, actions, width }) {
 // Substring/subsequence fuzzy match: a query matches when every query char
 // appears in order within the command's haystack (title + keywords + hint).
 export function fuzzyMatch(query, text) {
-  const q = String(query || '').toLowerCase().replace(/\s+/g, '');
+  return fuzzyRank(query, text) > 0;
+}
+// Match quality, best first: 5 exact title/keyword, 4 prefix, 3 word-start,
+// 2 substring, 1 subsequence, 0 no match. The palette sorts by this so
+// "typology" opens the Typology Lab rather than the first command whose
+// haystack happens to contain those letters in order. Equal scores prefer the
+// shorter title ("Saved Cases" over "Enforcement - Data-protection cases").
+function fuzzyRank(query, text) {
+  const raw = String(query || '').toLowerCase().trim();
+  const q = raw.replace(/\s+/g, '');
   const t = String(text || '').toLowerCase();
-  if (!q) return true;
-  if (t.includes(q)) return true; // fast path: contiguous substring
+  if (!q) return 1;
+  if (raw) {
+    const words = t.split(/[^a-z0-9]+/).filter(Boolean);
+    if (words.includes(raw) || t.split(/\s*[·|/,]\s*/).includes(raw)) return 5;
+    if (t.startsWith(raw)) return 4;
+    if (new RegExp('(?:^|[^a-z0-9])' + raw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(t)) return 3;
+    if (t.includes(raw)) return 2;
+  }
+  if (t.includes(q)) return 2;
   let i = 0;
   for (let j = 0; j < t.length && i < q.length; j++) if (t[j] === q[i]) i++;
-  return i === q.length;
+  return i === q.length ? 1 : 0;
 }
 
 let paletteOpen = false;
@@ -404,16 +421,23 @@ export function commandPalette({ commands = [], searchRecords, placeholder = 'Ty
   function render(q) {
     list.replaceChildren();
     items = []; active = -1; input.removeAttribute('aria-activedescendant');
-    const matched = commands.filter((c) => fuzzyMatch(q, [c.title, c.hint, (c.keywords || []).join(' '), c.group].join(' ')));
-    const pool = matched.concat(recordCache);
+    // Score every command (title match outranks a keyword or hint match of the
+    // same quality), sort within each group by score, and lead with the group
+    // holding the best match so Enter runs the obvious candidate. Ties keep
+    // registry order (Array#sort is stable).
+    const scoreOf = (c) => { const rt = fuzzyRank(q, c.title); const rk = fuzzyRank(q, (c.keywords || []).join(' · ')); const rh = fuzzyRank(q, [c.hint, c.group].filter(Boolean).join(' ')); const best = Math.max(rt, rk, rh); return best ? best * 10 + rt : 0; };
+    const matched = commands.map((c) => ({ c, s: scoreOf(c) })).filter((x) => x.s > 0);
+    const pool = matched.concat(recordCache.map((c) => ({ c, s: Math.max(scoreOf(c), 1) })));
     const groups = new Map();
-    for (const c of pool) { const g = c.group || 'Commands'; if (!groups.has(g)) groups.set(g, []); groups.get(g).push(c); }
-    const orderedGroups = [...groups.keys()].sort((a, b) => (GROUP_ORDER[a] ?? 9) - (GROUP_ORDER[b] ?? 9));
+    for (const x of pool) { const g = x.c.group || 'Commands'; if (!groups.has(g)) groups.set(g, []); groups.get(g).push(x); }
+    for (const rows of groups.values()) rows.sort((a, b) => (b.s - a.s) || (String(a.c.title).length - String(b.c.title).length));
+    const bestIn = (g) => groups.get(g)[0].s;
+    const orderedGroups = [...groups.keys()].sort((a, b) => (q ? bestIn(b) - bestIn(a) : 0) || (GROUP_ORDER[a] ?? 9) - (GROUP_ORDER[b] ?? 9));
     for (const g of orderedGroups) {
       const rows = groups.get(g);
       if (!rows.length) continue;
       list.append(el('div', { class: 'sr-group', role: 'presentation' }, g));
-      for (const c of rows) { const n = optionNode(c); items.push(n); list.append(n); }
+      for (const x of rows) { const n = optionNode(x.c); items.push(n); list.append(n); }
     }
     if (!items.length) list.append(el('div', { class: 'sr-item muted', role: 'presentation' }, q ? 'No matches' : 'No commands'));
     else setActive(0);
@@ -517,7 +541,7 @@ export function infoDot(text) {
 export const PAGE_HELP = {
   home: {
     title: 'Home',
-    what: 'The landing page for FRIS. It introduces the four investigation modules and lets you jump straight into any of them.',
+    what: 'The landing page for FRIS. It introduces every module in the suite — the four founding investigations and the financial-crime, regulatory and workspace modules added since — and lets you jump straight into any of them.',
     why: 'This is your starting point. Pick a module card to open it, or use the left sidebar to navigate at any time.',
   },
   overview: {
@@ -574,6 +598,78 @@ export const PAGE_HELP = {
     title: 'Settings',
     what: 'Application preferences for FRIS.',
     why: 'Adjust display and data options here.',
+  },
+  compliance: {
+    title: 'Compliance Sandbox',
+    what: 'A deterministic, rule-based first-pass review. Describe a situation, paste a policy or ask a plain-language question, say where the business is based, trades and employs, and it tells you which frameworks and obligations apply, grouped by jurisdiction, with a triage verdict and next steps.',
+    why: 'Use it to work out what a problem touches before anyone spends legal time on it. Start with “Load example”, or type something like “we lost a laptop with customer records” and pick a location; leave the location blank to see every compiled framework.',
+    tips: ['It is a triage aid built on paraphrased public sources, not legal advice — confirm against the current source before acting.', 'The register it reuses is the real one from Regulatory Horizon.'],
+  },
+  screening: {
+    title: 'Screening & Watchlist',
+    what: 'Fuzzy name screening against a dated, illustrative subset of real public sanctions lists (OFAC SDN, UN and EU consolidated lists), returning ranked candidate matches with a 0–100 score and a why-it-matched breakdown.',
+    why: 'Use Search & screen to test a single name or wallet address, and Portfolio screening to screen the whole seeded directory and disposition each hit. Seven directory names are real designations, inserted so the demo produces genuine hits; everything else is synthetic.',
+    tips: ['A wallet address (0x…) screens like a name.', 'The lists are a dated snapshot, not a live feed.'],
+  },
+  monitoring: {
+    title: 'Transaction Monitoring & SAR',
+    what: 'Named AML/CFT typology rules — structuring, rapid in-out, fan-in / fan-out, dormant re-activation, layering and others — run over the seeded transactions, producing severity-scored alerts with a plain-language reason and the implicated subjects.',
+    why: 'Work the alert queue: open an alert, read why it fired, disposition it (escalate, close or false-positive), and generate a structured SAR narrative from the evidence when it warrants one.',
+    tips: ['Every narrative is illustrative — nothing here is a filed report.'],
+  },
+  financials: {
+    title: 'Financial Report',
+    what: 'One quarter of a fictional company’s results: a P&L that reconciles from revenue to net income, a cash-flow bridge from opening to closing cash, revenue by segment, a year-on-year comparison and the operating-expense breakdown.',
+    why: 'Pick a quarter and every section updates. It demonstrates reporting mechanics that tie out; it is not a set of accounts.',
+  },
+  vendors: {
+    title: 'Third-Party / Vendor Risk',
+    what: 'A register of fictional vendors, each scored 0–100 from signals the rest of the suite already holds — ownership opacity, sanctions and adverse-media hits, jurisdiction secrecy, financial exposure, criticality and contract governance.',
+    why: 'Sort and filter the register, then open a vendor for its per-dimension breakdown, linked entity, screening hits and the recommended due-diligence actions. Record a review disposition on the vendor file.',
+  },
+  'adverse-media': {
+    title: 'Adverse-Media / OSINT',
+    what: 'A fictional corpus of news-style mentions, each classified deterministically by risk category, severity, sentiment and source credibility, and linked to the seeded entities and vendors it concerns.',
+    why: 'Read the feed, filter by category or severity, open a mention to see exactly why it was classified, and mark it relevant or not. The watch dashboard shows mentions by category and the most-flagged subjects.',
+  },
+  'risk-index': {
+    title: 'Country & Sector Risk Index',
+    what: 'Jurisdictions rated across six inherent-risk dimensions and lines of business rated by inherent sector risk, as coarse categorical bands (Low / Moderate / High / Very-high).',
+    why: 'Start with the heat-map matrix and click a jurisdiction for its full profile, the entities and vendors registered there and the real regulations that apply. Combine a jurisdiction and a sector to read the inherent risk of running that business there.',
+    tips: ['Where FRIS holds a real fact (a jurisdiction’s secrecy score), the band is derived from it and says so.'],
+  },
+  enforcement: {
+    title: 'Enforcement Tracker',
+    what: 'Sixteen real, public-record enforcement actions, each confirmed against an official source and linked to it, with the native penalty, the regulators involved and the appeal or annulled status.',
+    why: 'Use it to answer “what actually gets firms fined for this”. Read the totals and the penalties-by-year trend, filter the table by conduct category or regulator, and open any case for its factual basis and the official record.',
+  },
+  surveillance: {
+    title: 'Trade Surveillance',
+    what: 'Explainable market-abuse detectors — insider dealing, spoofing / layering and wash trading — run over a fictional order book on a fictional venue.',
+    why: 'Filter the alert queue by typology, severity, instrument or subject, then open an alert for its rationale, the ordered evidence timeline and the insider-list cross-check. No real person or listed company is the subject of any alert.',
+  },
+  register: {
+    title: 'Control Register (GRC)',
+    what: 'Real regulatory obligations, each with its article or clause citation, mapped to the synthetic controls that satisfy them, an accountable owner, the evidence held and the latest test result.',
+    why: 'Read the posture KPIs and the framework × status matrix, filter the register by framework, status or owner, and open an obligation to see its exact requirement beside its controls. The Gaps tab lists what is failing or overdue.',
+  },
+  recovery: {
+    title: 'Asset Tracing & Recovery',
+    what: 'Pick a debtor and FRIS follows the asset: it resolves the debtor to its Nexus entity, walks the ownership graph to its beneficial owners and controlled entities, and attaches their wallet balances, assets and the estate’s realisable value, classifying each as Recoverable, Contested or Frozen.',
+    why: 'Use it to see where recoverable value sits before committing to a strategy. Open a target, read the recoverable-value summary, then work down the asset list by band.',
+    tips: ['It reuses the other modules’ engines and data rather than a separate dataset, so the figures agree with Nexus, Chain-Link and the Waterfall.'],
+  },
+  onboarding: {
+    title: 'KYC & Onboarding',
+    what: 'A customer due-diligence intake that turns each applicant into an explainable risk rating by weighting seven factors — customer type, geography, industry, product, channel, screening and adverse media — into Low, Medium, High or Prohibited, and decides whether standard or enhanced due diligence applies.',
+    why: 'Read the queue by stage, then open an applicant for the factor breakdown, the signals consumed from the other modules, the required due-diligence level and the next review date.',
+    tips: ['One applicant carries the name of a real designated party as a screening fixture; its attributes are invented, like every other applicant’s.'],
+  },
+  typology: {
+    title: 'Financial-Crime Typology Lab',
+    what: 'A red-team and detector-validation sandbox. Compose a laundering typology from stage blocks across placement, layering and integration (or load a preset), run it, and the lab generates the synthetic artefacts, threads the money through and runs the real FRIS detectors against them.',
+    why: 'Use it to see which stages your detectors would catch and where the gaps are. Load a preset first, run it, then swap or add stages and compare the coverage report.',
+    tips: ['Run needs at least one stage — Clear empties the composer.', 'Same seed and stages give the same result every time.'],
   },
 };
 function helpKey() {

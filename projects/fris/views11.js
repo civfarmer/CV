@@ -196,7 +196,7 @@ function alertRow(a) {
   const subjTd = el('td', {}, el('span', { class: 'small', title: a.subjectSummary }, a.subjectSummary));
   const rationaleTd = el('td', {}, el('span', { class: 'small muted', title: a.headline }, a.headline.length > 96 ? a.headline.slice(0, 93) + '…' : a.headline));
   const xTd = el('td', {}, a.insiderHit ? el('span', { class: 'badge', style: { background: hexToRgba(TYPE_COLOR['insider-dealing'], 0.16), color: TYPE_COLOR['insider-dealing'], borderColor: hexToRgba(TYPE_COLOR['insider-dealing'], 0.5) }, title: 'Corroborated by an insider-list cross-check' }, el('span', { class: 'dot', style: { background: TYPE_COLOR['insider-dealing'] } }), 'Insider list') : el('span', { class: 'small muted' }, '—'));
-  return el('tr', { class: 'clickable' }, sevTd, typeTd, instTd, subjTd, rationaleTd, xTd);
+  return el('tr', { class: 'clickable', onclick: (ev) => { if (ev.target.closest('a, button, input, select')) return; location.hash = '#/surveillance/alert/' + encodeURIComponent(a.id); } }, sevTd, typeTd, instTd, subjTd, rationaleTd, xTd);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -448,7 +448,7 @@ async function renderInsiderList(root) {
     el('th', { scope: 'col', style: { textAlign: 'left' } }, 'Announcement'),
     el('th', { scope: 'col', style: { textAlign: 'left' } }, 'Need-to-know window'),
     el('th', { scope: 'col', style: { textAlign: 'left' } }, 'Status')));
-  const rows = data.insiders.map((i) => el('tr', { class: i.raisedAlert ? 'clickable' : '' },
+  const rows = data.insiders.map((i) => el('tr', { class: i.raisedAlert ? 'clickable' : '', onclick: i.raisedAlert ? (ev) => { if (ev.target.closest('a, button, input, select')) return; location.hash = '#/surveillance/alert/' + encodeURIComponent(i.alertId); } : null },
     el('th', { scope: 'row', style: { textAlign: 'left' } }, el('span', { style: { fontWeight: '600', color: 'var(--text)' } }, i.person), el('div', { class: 'small muted' }, i.traderId)),
     el('td', {}, el('span', { class: 'small' }, i.role)),
     el('td', {}, el('span', { class: 'badge sq neutral', title: i.instrument.issuer }, i.symbol)),

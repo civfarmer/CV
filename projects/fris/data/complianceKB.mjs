@@ -1133,7 +1133,8 @@ export const FRAMEWORKS = [
 // engine against the tokenised query) and maps to the frameworks and obligations
 // it implicates, plus `triageHints` that nudge the triage verdict. This is what
 // turns "we lost a laptop with customer records" into breach-notification +
-// security-measures + an escalate-to-legal hint. Keep patterns specific enough to
+// security-measures + an escalate-to-legal hint (a multi-word cue tolerates one
+// filler word, so "lost laptop" also matches "lost a laptop"). Keep patterns specific enough to
 // avoid false hits but broad enough to catch synonyms. NOT exhaustive — the
 // engine also falls back to rankRegulations() over the real register.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1142,7 +1143,7 @@ export const FRAMEWORKS = [
 
 /** @type {Topic[]} */
 export const TOPICS = [
-  { id: 'breach', label: 'Data breach / security incident', patterns: ['breach', 'hacked', 'hack', 'ransomware', 'leak', 'leaked', 'lost laptop', 'lost device', 'stolen', 'exfiltrat', 'unauthorised access', 'unauthorized access', 'compromise', 'incident'],
+  { id: 'breach', label: 'Data breach / security incident', patterns: ['breach', 'hacked', 'hack', 'ransomware', 'leak', 'leaked', 'lost laptop', 'lost device', 'lost phone', 'lost usb', 'missing laptop', 'missing device', 'stolen', 'exfiltrat', 'unauthorised access', 'unauthorized access', 'compromise', 'incident'],
     frameworks: ['gdpr', 'uk-gdpr', 'fadp', 'ccpa', 'us-state-privacy', 'nis2', 'dora'], obligations: ['breach-notification', 'security-measures', 'dsr-handling'],
     triageHints: ['escalate-legal'] },
   { id: 'sar', label: 'Subject access / consumer rights request', patterns: ['subject access', 'access request', 'dsar', 'sar request', 'right to access', 'right to know', 'data request', 'copy of my data', 'erasure', 'right to erasure', 'right to be forgotten', 'to be forgotten', 'deletion request', 'requested deletion', 'request to delete', 'delete my data', 'delete their data', 'delete the data', 'delete customer data', 'delete personal data', 'asked us to delete', 'asked to delete', 'wants their data deleted', 'rectification', 'portability', 'opt out'],

@@ -113,7 +113,9 @@ function buildShell() {
       navEls[it.r] = { node, badge };
       return node;
     })))),
-    el('div', { class: 'sidebar-foot' }, el('div', { class: 'row small muted', style: { gap: '8px' } }, el('div', { class: 'brand-logo', style: { width: '26px', height: '26px' } }, el('span', { class: 'demo-user' }, 'DA')), el('div', { class: 'nav-label' }, el('div', {}, 'Demo Analyst'), el('div', { class: 'muted', style: { fontSize: '11px' } }, 'Local session')))));
+    el('div', { class: 'sidebar-foot' },
+      el('div', { class: 'nav-label sidebar-links small' }, el('a', { href: '../../index.html', title: 'Back to the portfolio site' }, '\u2190 Portfolio'), el('span', { class: 'muted', 'aria-hidden': 'true' }, '\u00b7'), el('a', { href: '../../case-studies/fris.html', title: 'Read the FRIS case study' }, 'Case study')),
+      el('div', { class: 'row small muted', style: { gap: '8px' } }, el('div', { class: 'brand-logo', style: { width: '26px', height: '26px' } }, el('span', { class: 'demo-user' }, 'DA')), el('div', { class: 'nav-label' }, el('div', {}, 'Demo Analyst'), el('div', { class: 'muted', style: { fontSize: '11px' } }, 'Local session')))));
 
   const results = el('div', { class: 'search-results', id: 'global-search-results', role: 'listbox', 'aria-label': 'Search results', style: { display: 'none' } });
   const search = el('input', { type: 'text', placeholder: 'Search entities, wallets, instruments…', 'aria-label': 'Global search', role: 'combobox', 'aria-expanded': 'false', 'aria-controls': 'global-search-results', 'aria-autocomplete': 'list', autocomplete: 'off' });
@@ -126,7 +128,7 @@ function buildShell() {
     crumbEl,
     themeToggleButton(),
     searchWrap,
-    el('button', { class: 'btn sm ghost cmdk-btn', title: 'Command palette (Ctrl/⌘ + K)', 'aria-label': 'Open command palette', 'aria-keyshortcuts': 'Control+K Meta+K', onclick: openPalette }, icon('search', 15), el('span', { class: 'cmdk-hint', 'aria-hidden': 'true', style: { fontFamily: 'var(--mono)', fontSize: '11px', opacity: '0.85' } }, '⌘K')),
+    el('button', { class: 'btn sm ghost cmdk-btn', title: 'Command palette (Ctrl/⌘ + K)', 'aria-label': 'Search and commands (command palette)', 'aria-keyshortcuts': 'Control+K Meta+K', onclick: openPalette }, icon('search', 15), el('span', { class: 'cmdk-hint', 'aria-hidden': 'true', style: { fontFamily: 'var(--mono)', fontSize: '11px', opacity: '0.85' } }, '⌘K')),
     el('button', { class: 'icon-btn', title: 'Alert centre', 'aria-label': 'Alert centre', onclick: openAlerts }, icon('bell', 18)),
     el('button', { class: 'demo-tag', title: 'Click to learn why this is here', 'aria-label': 'Synthetic demo data — why is this here?', onclick: showSyntheticInfo }, el('span', { class: 'dot', 'aria-hidden': 'true' }), el('span', { class: 'demo-tag-text' }, 'Synthetic Demo Data'), icon('info', 13)));
 
@@ -141,7 +143,7 @@ function buildShell() {
 function showSyntheticInfo() {
   modal({ title: 'Why "Synthetic Demo Data"?', body: (b) => b.append(
     el('p', { class: 'about-p' }, 'Most of FRIS is fabricated for demonstration — the companies, people, wallets, transactions and cases are all invented. Regulatory Horizon is the exception: its regulations are real and link to official sources; only the internal policies compared against them are synthetic.'),
-    el('p', { class: 'about-p' }, 'No synthetic record refers to a real party, and the analytical scores are illustrative, not factual allegations — so the app can be shared and explored freely.')),
+    el('p', { class: 'about-p' }, 'No synthetic record refers to a real party, and the analytical scores are illustrative, not factual allegations — so the app can be shared and explored freely. One labelled exception: seven entity-directory rows carry the names of real, publicly-designated sanctioned parties so the screening demo produces genuine hits. Their names are real; no jurisdiction, relationship, asset or score attached to them is, and they are badged as screening fixtures wherever they appear.')),
     actions: (close) => [el('button', { class: 'btn primary', onclick: close }, 'Got it')] });
 }
 

@@ -33,7 +33,7 @@ export async function vendors(root, parts) {
   root.append(el('div', { class: 'intro', role: 'note', style: { marginTop: '10px', '--mc': '#c1121f' } },
     el('span', { class: 'ico' }, icon('info', 18)),
     el('div', { class: 't' }, el('b', {}, 'Synthetic data — not a system of record. '),
-      'Every vendor, spend figure and risk score is FICTIONAL and generated deterministically. A composite score is an illustrative aggregation, NOT a factual allegation against any real supplier or counterparty. Some vendor names deliberately match synthetic watchlist entries to demonstrate the cross-module screening signal — they are still fictional. This is NOT a third-party-risk-management system of record.')));
+      'Every vendor, spend figure and risk score is FICTIONAL and generated deterministically. A composite score is an illustrative aggregation, NOT a factual allegation against any real supplier or counterparty. Some vendor names deliberately match watchlist entries to demonstrate the cross-module screening signal — they are still fictional, with one labelled exception: VEN-0002 carries the name of a real, publicly-designated sanctioned party as a screening fixture (the name is real; every attribute attached to it is invented). This is NOT a third-party-risk-management system of record.')));
 
   // A detail route (#/vendors/VEN-0002) opens the risk file; otherwise the tabs.
   if (parts[0] && /^VEN-/i.test(parts[0])) {
@@ -155,6 +155,7 @@ async function renderRegister(root) {
       return el('tr', { class: 'vendor-row', style: { cursor: 'pointer' }, title: 'Open risk file', tabindex: '0', role: 'button', 'aria-label': `${v.name}, ${v.rating} risk, score ${v.composite}`, onclick: () => { location.hash = '#/vendors/' + v.vendorId; } },
         el('td', {},
           el('div', { style: { fontWeight: '600', color: 'var(--text)' } }, v.name),
+          v.nameFixture ? el('span', { class: 'badge sq', style: { color: '#f0616d', borderColor: '#f0616d66' }, title: 'The name is a real public sanctions designation, inserted as a screening fixture; every attribute of this vendor record is invented.' }, 'Real designation — screening fixture') : null,
           el('div', { class: 'small muted tabular' }, v.vendorId + (v.entityId ? ' · ⇄ ' + v.entityId : '') + (v.review && v.review.status !== 'open' ? ' · reviewed' : ''))),
         el('td', {}, el('span', { class: 'badge sq neutral', style: { borderLeft: '3px solid ' + (CAT_COLOUR[v.category] || 'var(--accent)') } }, v.categoryLabel)),
         el('td', { class: 'small' }, v.jurisdictionLabel || v.homeJurisdiction || '—'),
@@ -315,7 +316,9 @@ async function renderRiskFile(root, vendorId) {
         el('div', { style: { flex: '1 1 320px', minWidth: '0' } },
           el('div', { class: 'row wrap', style: { gap: '10px', alignItems: 'center', marginBottom: '4px' } },
             el('span', { style: { fontWeight: '800', color: 'var(--text)', fontSize: '18px' } }, v.name),
-            el('span', { class: 'badge sq neutral', style: { borderLeft: '3px solid ' + (CAT_COLOUR[v.category] || 'var(--accent)') } }, v.categoryLabel)),
+            el('span', { class: 'badge sq neutral', style: { borderLeft: '3px solid ' + (CAT_COLOUR[v.category] || 'var(--accent)') } }, v.categoryLabel),
+            v.nameFixture ? el('span', { class: 'badge sq', style: { color: '#f0616d', borderColor: '#f0616d66' }, title: 'The name is a real public sanctions designation, inserted as a screening fixture; every attribute of this vendor record is invented.' }, 'Real designation — screening fixture') : null),
+          v.nameFixture ? el('div', { class: 'small', style: { color: 'var(--text-2)', marginBottom: '4px' } }, 'The vendor name is a real, public sanctions designation used as a screening fixture; the category, jurisdiction, spend, contract and score below are invented, as for every other vendor.') : null,
           el('div', { class: 'small muted' }, `${v.vendorId} · ${v.jurisdictionLabel || v.homeJurisdiction || '—'} · ${v.criticalityLabel} · USD ${fmtThousands(v.annualSpend)}k / yr · ${fmt.title(String(v.contractStatus).replace(/_/g, ' '))} contract`)),
         el('div', { style: { flex: '0 0 auto', textAlign: 'right' } },
           el('div', { class: 'tabular', style: { color: accent, fontWeight: '800', fontSize: '34px', lineHeight: '1' } }, String(v.composite)),

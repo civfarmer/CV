@@ -287,6 +287,9 @@ function buildModel(data) {
     if (!run.length) return;
     const members = run.slice(); run = [];
     const first = spine[members[0]], last = spine[members[members.length - 1]];
+    /* the chain's final wallet has no forwarding edge, so its hop is the hop that
+     * delivered the funds to it (its incoming edge) rather than null */
+    const hopOf = function (s) { if (s.hop != null) return s.hop; const ins = inE[s.id] || []; return ins.length ? ins[0].hop : null; };
     const mainIn = first.mainEdge ? first.mainEdge.amount : 0;
     const mainOut = last.mainEdge ? last.mainEdge.amount : 0;
     let peelTot = 0, peelCount = 0, worstRisk = 'Medium';
@@ -299,7 +302,7 @@ function buildModel(data) {
     flow.push({
       key: idOf('peel'), kind: 'peel',
       label: 'Peel relay ×' + members.length,
-      hopFrom: first.hop, hopTo: last.mainEdge ? last.mainEdge.hop : last.hop,
+      hopFrom: hopOf(first), hopTo: last.mainEdge ? last.mainEdge.hop : hopOf(last),
       inAmt: mainIn, outAmt: mainOut || mainIn, peelTot: peelTot, peelCount: peelCount,
       count: members.length, risk: worstRisk, members: memberIds,
       node: first.node,
