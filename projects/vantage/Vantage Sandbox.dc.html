@@ -14,17 +14,21 @@
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; }
   body { margin: 0; }
   a { color: var(--accent); text-decoration: none; }
   textarea:focus, input:focus { outline: none; box-shadow: 0 0 0 2px var(--accent); }
+  @media (max-width: 720px) {
+    .v-top { padding: 0 14px !important; }
+    .v-main { padding: 22px 16px 60px !important; }
+  }
 </style>
 </helmet>
 
 <div style="{{ wrapperStyle }}">
-  <div style="position: sticky; top: 0; z-index: 50; background: var(--topbar); border-bottom: 2px solid var(--watneys); padding: 0 28px; display: flex; justify-content: space-between; align-items: center; height: 56px;">
+  <div class="v-top" style="position: sticky; top: 0; z-index: 50; background: var(--topbar); border-bottom: 2px solid var(--watneys); padding: 0 28px; display: flex; justify-content: space-between; align-items: center; height: 56px;">
     <a href="Vantage.dc.html" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
       <img src="vantage-crest.png" style="height: 38px; width: auto;">
       <div>
@@ -38,7 +42,7 @@
     </div>
   </div>
 
-  <div style="max-width: 1000px; margin: 0 auto; padding: 30px 28px 80px;">
+  <div class="v-main" style="max-width: 1000px; margin: 0 auto; padding: 30px 28px 80px;">
     <div style="font: 600 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sectionLabel);">Forecasting Sandbox</div>
     <h1 style="font: 700 27px/1.15 'Source Serif 4', serif; color: var(--textStrong); margin: 8px 0 8px;">Upload a file or paste your figures. Pick your business. Get the right model.</h1>
     <p style="font: 500 14px/1.6 'IBM Plex Sans', sans-serif; color: var(--textMuted); margin: 0 0 22px; max-width: 730px;">Your business type sets the <em>model policy</em> and the <em>seasonality assumption</em> — so a SaaS series and a brewery series are forecast with genuinely different maths. Vantage back-tests every eligible model on your own numbers and returns the champion, with an ensemble option when no single model clearly wins.</p>
@@ -53,7 +57,7 @@
 
     <!-- step 2: data -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 12px; flex-wrap: wrap;">
-      <div style="font: 600 11px/1 'IBM Plex Sans', sans-serif; color: var(--textStrong);">2 · Your data <span style="color: var(--textSubtle); font-weight: 500;">— monthly, oldest first, any separator</span></div>
+      <div style="font: 600 11px/1 'IBM Plex Sans', sans-serif; color: var(--textStrong);">2 · Your data <span style="color: var(--textSubtle); font-weight: 500;">— oldest first, any separator; a date or label before each value is ignored</span></div>
       <div style="display: flex; gap: 8px;">
         <label style="font: 600 10.5px/1 'IBM Plex Sans', sans-serif; color: var(--accent); background: var(--accentBg); border: 1px solid var(--accent); border-radius: 5px; padding: 6px 11px; cursor: pointer;">↑ Upload CSV / accounts export<input type="file" accept=".csv,.tsv,.txt,text/csv" onchange="{{ onFile }}" style="display: none;"></label>
         <button onclick="{{ loadSample }}" style="font: 600 10.5px/1 'IBM Plex Sans', sans-serif; color: var(--accent); background: var(--accentBg); border: none; border-radius: 5px; padding: 6px 10px; cursor: pointer;">Load {{ typeShort }} sample</button>
@@ -104,7 +108,41 @@ class Component extends DCLogic {
   onText = (e) => this.setState({ text: e.target.value, fileNote: '' });
   loadSample = () => this.setState({ text: this.SAMPLES[this.state.type], fileNote: '' });
   setBlend = (b) => this.setState({ blend: b });
-  nums() { return (this.state.text.match(/-?\d+(\.\d+)?/g) || []).map(Number).filter(x => isFinite(x)); }
+  // Pasted figures, parsed line by line. A row that carries a date or label ("2024-05 150", "May 2024, 150",
+  // "12/05/2024;150") contributes its LAST value only — date-like tokens are never read as data. A row of
+  // plain numbers ("1180 1240 1380 …") contributes all of them. Text that starts with a header line
+  // ("Month,Revenue,Cost") goes through the CSV column picker instead. Negatives are counted and rejected.
+  parse() {
+    const txt = String(this.state.text || '');
+    const lines = txt.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    if (!lines.length) return { y: [], negatives: 0 };
+    const DELIM = /[,;\t|]/;
+    if (lines.length > 1 && !/\d/.test(lines[0]) && DELIM.test(lines[0])) {   // header row → column picker
+      const p = this.parseCSV(txt);
+      return { y: p.series.filter(v => v >= 0), negatives: p.series.filter(v => v < 0).length };
+    }
+    const MONTH = /^(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?,?$/i;
+    const DATEFMT = /^(\d{4}[-\/.]\d{1,2}([-\/.]\d{1,2})?|\d{1,2}[-\/.]\d{1,2}[-\/.]\d{2,4}|\d{1,2}[-\/.]\d{4}|[qh][1-4]|w\d{1,2}|fy\d{2,4}|\d{4}[-\/]\d{2}[-\/]\d{2}t?[\d:]*)$/i;
+    const THOUSANDS = /^[-+]?[£$€]?\d{1,3}(,\d{3})+(\.\d+)?%?$/;
+    const NUM = /^[-+]?[£$€]?(\d+(\.\d+)?|\.\d+)%?$/;
+    const toNum = t => Number(t.replace(/[£$€,%+]/g, ''));
+    const y = []; let negatives = 0;
+    for (const line of lines) {
+      const toks = line.split(/[\s\t|;]+/).flatMap(t => (THOUSANDS.test(t) ? [t] : t.split(','))).map(t => t.trim()).filter(Boolean);
+      const isNumTok = t => NUM.test(t) || THOUSANDS.test(t);
+      const nums = toks.filter(isNumTok);
+      const dated = toks.some(t => DATEFMT.test(t) || MONTH.test(t));
+      const yearLike = t => /^(19|20)\d{2}$/.test(t);
+      let vals;
+      if (dated || (nums.length <= 2 && nums.some(yearLike))) {      // "date value" row → the last non-year value
+        const cand = nums.filter(t => !yearLike(t));
+        vals = cand.length ? [cand[cand.length - 1]] : [];
+      } else vals = nums;                                              // a plain row of figures → all of them
+      for (const t of vals) { const v = toNum(t); if (!isFinite(v)) continue; if (v < 0) { negatives++; continue; } y.push(v); }
+    }
+    return { y, negatives };
+  }
+  nums() { return this.parse().y; }
   fmt = (n) => (n == null || isNaN(n)) ? '—' : Math.round(n).toLocaleString('en-GB');
 
   onFile = (e) => {
@@ -174,9 +212,13 @@ class Component extends DCLogic {
 
     const base = { wrapperStyle: vars + ';min-height:100vh;background:var(--bg);color:var(--text);font-family:IBM Plex Sans,sans-serif;transition:background .3s', modeIcon: dark ? '☀' : '☾', toggleMode: this.toggleMode, onText: this.onText, onFile: this.onFile, loadSample: this.loadSample, type: this.state.type, text: this.state.text, typePills, policyHeadline: pol.headline, policyWhy: pol.why, seasonNote, typeShort, fileNote: this.state.fileNote, hasFileNote: !!this.state.fileNote };
 
-    const y = this.nums();
+    const parsed = this.parse(), y = parsed.y;
     const mkBlendPills = (reco) => ['champion', 'blend'].map(b => ({ key: b, label: b === 'champion' ? 'Champion only' : 'Blend top 3 (ensemble)' + (reco === b ? ' · recommended' : ''), style: pillBase + (b === this.state.blend ? 'var(--accent);background:var(--accentBg);color:var(--accent);' : reco === b ? 'var(--accent);background:transparent;color:var(--accent);' : 'var(--border);background:transparent;color:var(--textMuted);'), onClick: () => this.setBlend(b) }));
 
+    if (parsed.negatives > 0) {
+      const msg = `${parsed.negatives} negative value${parsed.negatives > 1 ? 's' : ''} found — demand, revenue and enrolment series cannot go below zero, so nothing has been forecast. Remove the negatives (or paste the underlying positive figures) and the engine will run.`;
+      return { ...base, blendPills: mkBlendPills('champion'), recoNote: 'blend when models tie, trust the champion when one wins', nCount: String(y.length), statusNote: `${parsed.negatives} negative value${parsed.negatives > 1 ? 's' : ''} rejected`, results: R('div', { style: { padding: '28px', border: '1px dashed var(--cardBorder)', borderRadius: '12px', color: 'var(--textMuted)', font: "500 13px/1.6 'IBM Plex Sans',sans-serif", textAlign: 'center' } }, msg) };
+    }
     if (!this.state.ready || y.length < 8) {
       return { ...base, blendPills: mkBlendPills('champion'), recoNote: 'blend when models tie, trust the champion when one wins', nCount: String(y.length), statusNote: y.length < 8 ? 'need at least 8 to forecast' : 'loading engine…', results: R('div', { style: { padding: '28px', border: '1px dashed var(--cardBorder)', borderRadius: '12px', color: 'var(--textMuted)', font: "500 13px/1.6 'IBM Plex Sans',sans-serif", textAlign: 'center' } }, 'Paste at least 8 figures, oldest first (24+ periods gives seasonal models a fair chance) and the engine will back-test and forecast.') };
     }
@@ -192,13 +234,17 @@ class Component extends DCLogic {
     const top = sel.ranking.slice(0, 3);
     const paths = top.map(r => E.buildForecast(y, r.name, { season, horizon }).point);
     const ens = paths.length ? paths[0].map((_, k) => paths.reduce((t, p) => t + (p[k] || 0), 0) / paths.length) : fc.point;
-    const w0 = sel.ranking[0] ? (sel.ranking[0].metrics.wape ?? sel.ranking[0].metrics.smape) : 0;
-    const w1 = sel.ranking[1] ? (sel.ranking[1].metrics.wape ?? sel.ranking[1].metrics.smape) : w0 + 99;
+    // the engine ranks on WAPE when it is defined, otherwise on MAE (hold-out actuals all zero) — use the same score here
+    const useWape = sel.metric !== 'MAE';
+    const w0 = sel.ranking[0] ? sel.ranking[0].score : 0;
+    const w1 = sel.ranking[1] ? sel.ranking[1].score : w0 + 99;
     const gap = w1 - w0;
-    const reco = gap < 1.5 ? 'blend' : 'champion';
+    const gapTxt = useWape ? `${gap.toFixed(1)} pts` : `${Math.round(gap * 10) / 10} units`;
+    const fmtScore = (r) => (r.score == null ? '—' : useWape ? r.score.toFixed(1) + '%' : this.fmt(r.score));
+    const reco = (useWape ? gap < 1.5 : gap <= Math.max(0.5, 0.05 * w0)) ? 'blend' : 'champion';
     const blendMode = this.state.blend === 'blend';
     const shownPath = blendMode ? ens : fc.point, altPath = blendMode ? fc.point : ens, altLabel = blendMode ? short(champ) : 'ensemble';
-    const recoNote = reco === 'blend' ? `top models within ${gap.toFixed(1)} pts — ensemble recommended` : `${short(champ)} leads by ${gap.toFixed(1)} pts — champion recommended`;
+    const recoNote = reco === 'blend' ? `top models within ${gapTxt} — ensemble recommended` : `${short(champ)} leads by ${gapTxt} — champion recommended`;
     const blendPills = mkBlendPills(reco);
 
     const el = (children) => R('div', { style: { display: 'flex', flexDirection: 'column', gap: '16px' } }, children);
@@ -206,7 +252,7 @@ class Component extends DCLogic {
 
     const champCard = R('div', { key: 'ch', style: { ...cardS, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: '4px solid var(--accent)' } }, [
       R('div', { key: 'a' }, [ R('div', { key: '1', style: { font: "600 10px/1 'IBM Plex Mono',monospace", letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--accent)' } }, 'Champion model — chosen by back-test'), R('div', { key: '2', style: { font: "700 22px/1.1 'Source Serif 4',serif", color: 'var(--textStrong)', marginTop: '6px' } }, short(champ)) ]),
-      R('div', { key: 'b', style: { textAlign: 'right' } }, [ R('div', { key: '1', style: { font: "600 10px/1 'IBM Plex Mono',monospace", color: 'var(--textSubtle)' } }, 'BACK-TESTED WAPE'), R('div', { key: '2', style: { font: "700 24px/1 'IBM Plex Mono',monospace", color: 'var(--accent)', marginTop: '4px' } }, sel.champion && sel.champion.metrics.wape != null ? sel.champion.metrics.wape.toFixed(1) + '%' : '—') ]),
+      R('div', { key: 'b', style: { textAlign: 'right' } }, [ R('div', { key: '1', style: { font: "600 10px/1 'IBM Plex Mono',monospace", color: 'var(--textSubtle)' } }, useWape ? 'BACK-TESTED WAPE' : 'BACK-TESTED MAE (WAPE N/A)'), R('div', { key: '2', style: { font: "700 24px/1 'IBM Plex Mono',monospace", color: 'var(--accent)', marginTop: '4px' } }, sel.champion ? fmtScore(sel.champion) : '—') ]),
     ]);
 
     const nextV = shownPath[0];
@@ -219,14 +265,14 @@ class Component extends DCLogic {
     const recoCard = R('div', { key: 'reco', style: { ...cardS, borderLeft: '4px solid ' + (reco === 'blend' ? 'var(--accent)' : 'var(--textStrong)') } }, [
       R('div', { key: 't', style: { font: "600 10px/1 'IBM Plex Mono',monospace", letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: '6px' } }, 'Vantage recommends: ' + (reco === 'blend' ? 'blend the top models' : 'trust the champion')),
       R('div', { key: 'b', style: { font: "500 13px/1.6 'IBM Plex Sans',sans-serif", color: 'var(--text)' } }, reco === 'blend'
-        ? `The top ${top.length} models are within ${gap.toFixed(1)} points of each other on your back-test — no clear winner. Averaging them (${top.map(t => short(t.name)).join(', ')}) cancels out each model's individual mistakes, so the ensemble is the more robust call here. Toggle "Blend top 3" above to use it.`
-        : `${short(champ)} beats the runner-up (${short(sel.ranking[1] ? sel.ranking[1].name : '—')}) by ${gap.toFixed(1)} points on your back-test — a clear lead. Averaging in weaker models would only add error, so trust the champion.`),
+        ? `The top ${top.length} models are within ${gapTxt} of each other on your back-test — no clear winner. Averaging them (${top.map(t => short(t.name)).join(', ')}) cancels out each model's individual mistakes, so the ensemble is the more robust call here. Toggle "Blend top 3" above to use it.`
+        : `${short(champ)} beats the runner-up (${short(sel.ranking[1] ? sel.ranking[1].name : '—')}) by ${gapTxt} on your back-test — a clear lead. Averaging in weaker models would only add error, so trust the champion.`),
     ]);
 
-    const rankHead = R('div', { key: 'rh', style: { display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '4px 10px', padding: '0 4px 8px', font: "600 9.5px/1 'IBM Plex Mono',monospace", letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--textSubtle)', borderBottom: '1px solid var(--cardBorder)' } }, [R('div',{key:1},'Model'),R('div',{key:2,style:{textAlign:'right'}},'WAPE'),R('div',{key:3,style:{textAlign:'right'}},'RMSE'),R('div',{key:4,style:{textAlign:'center'}},'Status')]);
+    const rankHead = R('div', { key: 'rh', style: { display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '4px 10px', padding: '0 4px 8px', font: "600 9.5px/1 'IBM Plex Mono',monospace", letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--textSubtle)', borderBottom: '1px solid var(--cardBorder)' } }, [R('div',{key:1},'Model'),R('div',{key:2,style:{textAlign:'right'}},useWape ? 'WAPE' : 'MAE'),R('div',{key:3,style:{textAlign:'right'}},'RMSE'),R('div',{key:4,style:{textAlign:'center'}},'Status')]);
     const rankRows = sel.ranking.map((r, i) => R('div', { key: 'r' + i, style: { display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '4px 10px', padding: '9px 4px', alignItems: 'center', borderBottom: '1px solid var(--border)', background: (blendMode && i < 3) ? 'var(--accentBg)' : 'transparent' } }, [
       R('div', { key: 1, style: { font: "600 12px/1 'IBM Plex Sans',sans-serif", color: 'var(--textStrong)' } }, r.name + (blendMode && i < 3 ? ' · in blend' : '')),
-      R('div', { key: 2, style: { textAlign: 'right', font: "600 12px/1 'IBM Plex Mono',monospace", color: 'var(--textStrong)' } }, r.metrics.wape != null ? r.metrics.wape.toFixed(1) + '%' : '—'),
+      R('div', { key: 2, style: { textAlign: 'right', font: "600 12px/1 'IBM Plex Mono',monospace", color: 'var(--textStrong)' } }, fmtScore(r)),
       R('div', { key: 3, style: { textAlign: 'right', font: "500 11.5px/1 'IBM Plex Mono',monospace", color: 'var(--textMuted)' } }, this.fmt(r.metrics.rmse)),
       R('div', { key: 4, style: { textAlign: 'center' } }, R('span', { style: { display: 'inline-block', padding: '3px 8px', borderRadius: '20px', font: "600 10px/1 'IBM Plex Sans',sans-serif", background: r.name === champ ? 'var(--accentBg)' : 'var(--border)', color: r.name === champ ? 'var(--accent)' : 'var(--textSubtle)' } }, r.name === champ ? 'Champion' : 'Challenger')),
     ]));

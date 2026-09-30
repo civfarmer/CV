@@ -19,6 +19,21 @@ html,body{margin:0;padding:0;background:#F2EEE6;color:#26211C;font-family:'Sourc
 a{color:#275C56}a:hover{color:#B0512F}
 ::selection{background:rgba(39,92,86,.2)}
 @keyframes helmfade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (max-width:720px){
+  .h-shell{grid-template-columns:1fr !important}
+  .h-side{position:static !important;height:auto !important;overflow:visible !important}
+  .h-nav{display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px !important}
+  .h-nav>div{margin-bottom:0 !important}
+  .h-topbar{padding:12px 16px !important}
+  .h-content{padding:16px 16px 48px !important}
+  .h-page{padding:24px 16px 60px !important}
+  .h-1col{grid-template-columns:1fr !important}
+  .h-2col{grid-template-columns:1fr 1fr !important}
+  .h-wrap{flex-wrap:wrap !important}
+  .h-scroll{overflow-x:auto !important;-webkit-overflow-scrolling:touch}
+  .h-scroll .h-row-w{min-width:720px}
+  .h-board{overflow-x:auto !important;padding-bottom:8px}
+}
 </style>
 </helmet>
 
@@ -28,7 +43,7 @@ a{color:#275C56}a:hover{color:#B0512F}
 
 <!-- ═══════════════ PORTFOLIO LAYER ═══════════════ -->
 <sc-if value="{{ isPortfolio }}" hint-placeholder-val="{{ false }}">
-<div data-screen-label="Portfolio" style="position:relative;overflow:hidden;max-width:1280px;margin:0 auto;padding:40px 40px 80px;width:100%;box-sizing:border-box;animation:helmfade .3s ease">
+<div data-screen-label="Portfolio" class="h-page" style="position:relative;overflow:hidden;max-width:1280px;margin:0 auto;padding:40px 40px 80px;width:100%;box-sizing:border-box;animation:helmfade .3s ease">
   <img src="assets/helm-crest.png" alt="" style="position:absolute;right:-72px;top:-44px;width:330px;height:auto;opacity:.04;z-index:0;pointer-events:none">
   <div style="position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
     <div style="display:flex;align-items:center;gap:13px">
@@ -51,7 +66,7 @@ a{color:#275C56}a:hover{color:#B0512F}
     <span style="font:600 13.5px 'Source Sans 3',sans-serif;color:#FBF9F4;background:#275C56;padding:11px 18px;border-radius:8px;cursor:pointer;white-space:nowrap" style-hover="background:#1E4742" onClick="{{ openIngest }}">+ New project from a brief</span>
   </div>
 
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:18px;margin-top:32px">
+  <div class="h-1col" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:18px;margin-top:32px">
     <sc-for list="{{ portfolioCards }}" as="pc" hint-placeholder-count="5">
       <div style="background:#FFFEFB;border:1px solid rgba(50,42,32,.16);border-radius:12px;padding:20px 22px;cursor:pointer;display:flex;flex-direction:column;gap:12px" style-hover="border-color:rgba(39,92,86,.55);box-shadow:0 2px 10px rgba(40,32,22,.08)" onClick="{{ pc.onOpen }}">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
@@ -88,7 +103,7 @@ a{color:#275C56}a:hover{color:#B0512F}
     <span style="margin-left:auto"><strong style="color:#C97A5C">{{ pgEsc }}</strong> escalations need a human</span>
   </div>
 
-  <div style="display:grid;grid-template-columns:1.25fr 1fr;gap:18px;margin-top:18px">
+  <div class="h-1col" style="display:grid;grid-template-columns:1.25fr 1fr;gap:18px;margin-top:18px">
     <div style="background:#FBF9F4;border:1px solid rgba(50,42,32,.14);border-radius:12px;padding:18px 22px">
       <div style="font:600 11px 'Spline Sans Mono',monospace;letter-spacing:.1em;color:#8A8172;margin-bottom:10px">CROSS-PROJECT PREREQUISITE LINKS</div>
       <sc-for list="{{ portfolioLinks }}" as="pl" hint-placeholder-count="4">
@@ -113,10 +128,10 @@ a{color:#275C56}a:hover{color:#B0512F}
 
 <!-- ═══════════════ PROJECT LAYER ═══════════════ -->
 <sc-if value="{{ isProject }}" hint-placeholder-val="{{ false }}">
-<div style="display:grid;grid-template-columns:232px 1fr;min-height:100vh">
+<div class="h-shell" style="display:grid;grid-template-columns:232px 1fr;min-height:100vh">
 
   <!-- Sidebar -->
-  <div style="background:#26211C;color:#D9D2C4;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;box-sizing:border-box;overflow-y:auto">
+  <div class="h-side" style="background:#26211C;color:#D9D2C4;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;box-sizing:border-box;overflow-y:auto">
     <div style="padding:20px 20px 14px;border-bottom:1px solid rgba(217,210,196,.14);cursor:pointer" onClick="{{ projBack }}">
       <div style="display:flex;align-items:center;gap:10px">
         <img src="assets/helm-crest-light.png" alt="Helm" style="width:26px;height:auto;flex:none">
@@ -146,7 +161,7 @@ a{color:#275C56}a:hover{color:#B0512F}
         </sc-if>
       </div>
     </div>
-    <div style="padding:8px 12px 12px;flex:1">
+    <div class="h-nav" style="padding:8px 12px 12px;flex:1">
       <sc-for list="{{ navItems }}" as="nv" hint-placeholder-count="10">
         <div style="{{ nv.style }}" style-hover="{{ nv.hoverStyle }}" onClick="{{ nv.onClick }}">
           <span>{{ nv.label }}</span>
@@ -161,6 +176,7 @@ a{color:#275C56}a:hover{color:#B0512F}
           <span style="{{ rc.style }}" onClick="{{ rc.onClick }}">{{ rc.label }}</span>
         </sc-for>
       </div>
+      <div style="font:500 11px 'Source Sans 3',sans-serif;color:#9C9484;margin-top:12px"><a href="../../index.html" style="color:#D9D2C4">← Portfolio</a> · <a href="../../case-studies/helm.html" style="color:#D9D2C4">Case study</a></div>
     </div>
   </div>
 
@@ -168,7 +184,7 @@ a{color:#275C56}a:hover{color:#B0512F}
   <div style="min-width:0;display:flex;flex-direction:column">
 
     <!-- Topbar -->
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:14px;padding:16px 30px;border-bottom:1px solid rgba(50,42,32,.14);background:#FBF9F4;position:sticky;top:0;z-index:20;flex-wrap:wrap">
+    <div class="h-topbar" style="display:flex;justify-content:space-between;align-items:center;gap:14px;padding:16px 30px;border-bottom:1px solid rgba(50,42,32,.14);background:#FBF9F4;position:sticky;top:0;z-index:20;flex-wrap:wrap">
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
         <div>
           <div style="font:500 11.5px 'Source Sans 3',sans-serif;color:#8A8172">{{ projClient }} — {{ projName }}</div>
@@ -188,7 +204,7 @@ a{color:#275C56}a:hover{color:#B0512F}
       </div>
     </div>
 
-    <div style="padding:24px 30px 60px;max-width:1240px;width:100%;box-sizing:border-box">
+    <div class="h-content" style="padding:24px 30px 60px;max-width:1240px;width:100%;box-sizing:border-box">
 
     <!-- ── COMMAND VIEW ── -->
     <sc-if value="{{ vCommand }}" hint-placeholder-val="{{ false }}">
@@ -229,7 +245,7 @@ a{color:#275C56}a:hover{color:#B0512F}
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px">
+      <div class="h-1col" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px">
         <div style="background:#FFFEFB;border:1px solid rgba(50,42,32,.14);border-radius:12px;padding:16px 18px">
           <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font:600 11px 'Spline Sans Mono',monospace;letter-spacing:.1em;color:#35714A">HANDLED FOR YOU</span><span style="font:700 13px 'Source Sans 3',sans-serif;color:#35714A">{{ cmdHandledCount }}</span></div>
           <sc-for list="{{ cmdHandled }}" as="ch" hint-placeholder-count="5">
@@ -270,7 +286,7 @@ a{color:#275C56}a:hover{color:#B0512F}
         <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:12px"><span style="font:600 11px 'Spline Sans Mono',monospace;letter-spacing:.1em;color:#8A8172">CAPACITY · THIS WEEK</span><span style="font:500 11px 'Source Sans 3',sans-serif;color:#9C9484">7.5h workdays · no weekend or overtime assumptions</span></div>
         <div style="display:flex;flex-direction:column;gap:12px">
           <sc-for list="{{ cmdCap }}" as="cc" hint-placeholder-count="2">
-            <div style="display:grid;grid-template-columns:150px 1fr 150px;gap:14px;align-items:center">
+            <div class="h-1col" style="display:grid;grid-template-columns:150px 1fr 150px;gap:14px;align-items:center">
               <div><span style="font:600 13px 'Source Sans 3',sans-serif;color:#26211C">{{ cc.name }}</span> <span style="font:500 11px 'Spline Sans Mono',monospace;color:#8A8172">{{ cc.fte }}</span></div>
               <div style="display:flex;gap:5px">
                 <sc-for list="{{ cc.cells }}" as="cx" hint-placeholder-count="5"><div style="{{ cx.style }}" title="{{ cx.title }}"></div></sc-for>
@@ -291,7 +307,7 @@ a{color:#275C56}a:hover{color:#B0512F}
         <span style="font:600 12.5px 'Source Sans 3',sans-serif;color:#FBF9F4;background:#275C56;padding:8px 14px;border-radius:7px;white-space:nowrap;cursor:pointer" style-hover="background:#1E4742" onClick="{{ bannerAction }}">{{ bannerActionLabel }}</span>
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-top:16px">
+      <div class="h-2col" style="display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-top:16px">
         <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
           <div style="background:#FFFEFB;border:1px solid rgba(50,42,32,.14);border-radius:10px;padding:14px 16px">
             <div style="font:600 10.5px 'Spline Sans Mono',monospace;letter-spacing:.07em;color:#8A8172">{{ k.label }}</div>
@@ -304,7 +320,7 @@ a{color:#275C56}a:hover{color:#B0512F}
         </sc-for>
       </div>
 
-      <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-top:14px">
+      <div class="h-1col" style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-top:14px">
         <div style="background:#FFFEFB;border:1px solid rgba(50,42,32,.14);border-radius:10px;padding:18px 20px">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
             <div style="font:600 15px 'Source Sans 3',sans-serif;color:#26211C">Work remaining — plan vs baseline</div>
@@ -315,19 +331,19 @@ a{color:#275C56}a:hover{color:#B0512F}
           </div>
           <svg viewBox="0 0 760 230" style="width:100%;height:auto;margin-top:10px;display:block">
             <sc-for list="{{ chartY }}" as="cy" hint-placeholder-count="4">
-              <g><line x1="34" x2="748" y1="{{ cy.y }}" y2="{{ cy.y }}" stroke="rgba(50,42,32,.09)" stroke-width="1"></line>
-              <text x="28" y="{{ cy.ty }}" text-anchor="end" font-size="10" font-family="Spline Sans Mono" fill="#8A8172">{{ cy.label }}</text></g>
+              <g><line x1="34" x2="748" sc-camel-y1="{{ cy.y }}" sc-camel-y2="{{ cy.y }}" stroke="rgba(50,42,32,.09)" stroke-width="1"></line>
+              <text x="28" sc-camel-y="{{ cy.ty }}" text-anchor="end" font-size="10" font-family="Spline Sans Mono" fill="#8A8172">{{ cy.label }}</text></g>
             </sc-for>
             <sc-for list="{{ chartX }}" as="cx" hint-placeholder-count="6">
-              <text x="{{ cx.x }}" y="226" text-anchor="middle" font-size="10" font-family="Spline Sans Mono" fill="#8A8172">{{ cx.label }}</text>
+              <text sc-camel-x="{{ cx.x }}" y="226" text-anchor="middle" font-size="10" font-family="Spline Sans Mono" fill="#8A8172">{{ cx.label }}</text>
             </sc-for>
             <sc-for list="{{ chartStageX }}" as="sx" hint-placeholder-count="3">
-              <line x1="{{ sx.x }}" x2="{{ sx.x }}" y1="8" y2="210" stroke="rgba(50,42,32,.14)" stroke-dasharray="2 4"></line>
+              <line sc-camel-x1="{{ sx.x }}" sc-camel-x2="{{ sx.x }}" y1="8" y2="210" stroke="rgba(50,42,32,.14)" stroke-dasharray="2 4"></line>
             </sc-for>
-            <path d="{{ chartBasePath }}" fill="none" stroke="rgba(50,42,32,.35)" stroke-width="1.5" stroke-dasharray="5 4"></path>
-            <path d="{{ chartPath }}" fill="none" stroke="#275C56" stroke-width="2.5"></path>
-            <line x1="{{ chartTodayX }}" x2="{{ chartTodayX }}" y1="8" y2="210" stroke="#B0512F" stroke-width="2"></line>
-            <text x="{{ chartTodayLabelX }}" y="18" font-size="10.5" font-family="Spline Sans Mono" font-weight="600" fill="#B0512F">DAY {{ dayNum }}</text>
+            <path sc-camel-d="{{ chartBasePath }}" fill="none" stroke="rgba(50,42,32,.35)" stroke-width="1.5" stroke-dasharray="5 4"></path>
+            <path sc-camel-d="{{ chartPath }}" fill="none" stroke="#275C56" stroke-width="2.5"></path>
+            <line sc-camel-x1="{{ chartTodayX }}" sc-camel-x2="{{ chartTodayX }}" y1="8" y2="210" stroke="#B0512F" stroke-width="2"></line>
+            <text sc-camel-x="{{ chartTodayLabelX }}" y="18" font-size="10.5" font-family="Spline Sans Mono" font-weight="600" fill="#B0512F">DAY {{ dayNum }}</text>
           </svg>
           <div style="display:flex;gap:16px;font:500 11.5px 'Source Sans 3',sans-serif;color:#625A4E;margin-top:6px">
             <span><span style="display:inline-block;width:14px;height:3px;background:#275C56;border-radius:2px;margin-right:6px;vertical-align:3px"></span>current plan</span>
@@ -353,7 +369,7 @@ a{color:#275C56}a:hover{color:#B0512F}
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:14px;margin-top:14px">
+      <div class="h-1col" style="display:grid;grid-template-columns:1.2fr 1fr;gap:14px;margin-top:14px">
         <div>
           <div style="display:flex;justify-content:space-between;align-items:baseline;margin:4px 0 10px">
             <span style="font:600 12px 'Spline Sans Mono',monospace;letter-spacing:.1em;color:#B0512F">NEEDS YOU · {{ needsCount }}</span>
@@ -402,7 +418,7 @@ a{color:#275C56}a:hover{color:#B0512F}
 
       <div style="margin-top:18px">
         <div style="font:600 12px 'Spline Sans Mono',monospace;letter-spacing:.1em;color:#8A8172;margin-bottom:10px">TACTICAL — {{ weekLabel }}</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px">
+        <div class="h-1col" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px">
           <sc-for list="{{ weekCols }}" as="wc" hint-placeholder-count="3">
             <div style="background:#FFFEFB;border:1px solid rgba(50,42,32,.14);border-radius:10px;padding:13px 15px">
               <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
@@ -429,12 +445,12 @@ a{color:#275C56}a:hover{color:#B0512F}
     <!-- ── DAY BY DAY ── -->
     <sc-if value="{{ vDayplan }}" hint-placeholder-val="{{ false }}">
     <div data-screen-label="Day by day" style="animation:helmfade .25s ease;max-width:980px">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:16px">
+      <div class="h-wrap" style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:16px">
         <div style="font:400 13.5px/1.55 'Source Sans 3',sans-serif;color:#625A4E">Exactly what is being worked on, day by day — who is on it, and what each task needs before it can finish. Click a task to edit it. Toggle <strong>Detail</strong> for definitions of done.</div>
         <span style="font:600 12.5px 'Source Sans 3',sans-serif;color:#FBF9F4;background:#275C56;padding:7px 14px;border-radius:7px;cursor:pointer;white-space:nowrap;flex:none" style-hover="background:#1E4742" onClick="{{ openAdd }}">+ Add task</span>
       </div>
       <sc-for list="{{ dayRows }}" as="dr" hint-placeholder-count="8">
-        <div style="display:grid;grid-template-columns:150px 1fr;gap:16px;padding:14px 0;border-top:1px solid rgba(50,42,32,.14)">
+        <div class="h-1col" style="display:grid;grid-template-columns:150px 1fr;gap:16px;padding:14px 0;border-top:1px solid rgba(50,42,32,.14)">
           <div>
             <span style="{{ dr.badgeStyle }}">{{ dr.label }}</span>
             <div style="font:500 12px 'Source Sans 3',sans-serif;color:#8A8172;margin-top:6px">{{ dr.date }}</div>
@@ -610,16 +626,16 @@ a{color:#275C56}a:hover{color:#B0512F}
       <div style="font:400 12px 'Source Sans 3',sans-serif;color:#8A8172;margin-top:10px">{{ ganttFootnote }} Click any bar to edit the task — delay it, split it, reassign it, resize it.</div>
 
       <sc-if value="{{ ledgerOn }}" hint-placeholder-val="{{ false }}">
-        <div style="background:#FFFEFB;border:1px solid rgba(50,42,32,.14);border-radius:12px;padding:14px 18px;margin-top:14px">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:0 4px 8px">
+        <div class="h-scroll" style="background:#FFFEFB;border:1px solid rgba(50,42,32,.14);border-radius:12px;padding:14px 18px;margin-top:14px">
+          <div class="h-wrap" style="display:flex;justify-content:space-between;align-items:center;padding:0 4px 8px">
             <span style="font:600 10px 'Spline Sans Mono',monospace;letter-spacing:.07em;color:#8A8172">EVERY TASK — DRAG THE GRIP TO REORDER, CLICK A ROW TO EDIT</span>
             <span style="font:600 12px 'Source Sans 3',sans-serif;color:#275C56;border:1px solid rgba(39,92,86,.5);padding:6px 12px;border-radius:7px;cursor:pointer;white-space:nowrap" style-hover="background:rgba(39,92,86,.07)" onClick="{{ openAdd }}">+ Add task</span>
           </div>
-          <div style="display:grid;grid-template-columns:18px 2fr 1fr .9fr .7fr .6fr .9fr auto;gap:10px;padding:2px 4px 10px;font:600 10px 'Spline Sans Mono',monospace;letter-spacing:.07em;color:#8A8172">
+          <div class="h-row-w" style="display:grid;grid-template-columns:18px 2fr 1fr .9fr .7fr .6fr .9fr auto;gap:10px;padding:2px 4px 10px;font:600 10px 'Spline Sans Mono',monospace;letter-spacing:.07em;color:#8A8172">
             <span></span><span>TASK</span><span>WORKSTREAM</span><span>OWNER</span><span>WINDOW</span><span>SLACK</span><span>STATE</span><span></span>
           </div>
           <sc-for list="{{ planLedger }}" as="pl" hint-placeholder-count="10">
-            <div style="{{ pl.rowStyle }}" style-hover="background:rgba(39,92,86,.05)" draggable="true" onClick="{{ pl.onOpen }}" onDragStart="{{ pl.onDragStart }}" onDragOver="{{ pl.onDragOver }}" onDrop="{{ pl.onDrop }}" onDragEnd="{{ pl.onDragEnd }}">
+            <div class="h-row-w" style="{{ pl.rowStyle }}" style-hover="background:rgba(39,92,86,.05)" draggable="true" onClick="{{ pl.onOpen }}" onDragStart="{{ pl.onDragStart }}" onDragOver="{{ pl.onDragOver }}" onDrop="{{ pl.onDrop }}" onDragEnd="{{ pl.onDragEnd }}">
               <span style="{{ pl.gripStyle }}" title="Drag to reorder">⠿</span>
               <div style="overflow:hidden">
                 <div style="font:600 13px 'Source Sans 3',sans-serif;color:#26211C">{{ pl.title }}<span style="{{ pl.editedStyle }}">{{ pl.edited }}</span></div>
@@ -641,7 +657,7 @@ a{color:#275C56}a:hover{color:#B0512F}
     <!-- ── BOARD ── -->
     <sc-if value="{{ vBoard }}" hint-placeholder-val="{{ false }}">
     <div data-screen-label="Kanban board" style="animation:helmfade .25s ease">
-      <div style="display:grid;grid-template-columns:repeat(5,minmax(200px,1fr));gap:12px;align-items:start">
+      <div class="h-board" style="display:grid;grid-template-columns:repeat(5,minmax(200px,1fr));gap:12px;align-items:start">
         <sc-for list="{{ boardCols }}" as="bc" hint-placeholder-count="5">
           <div style="background:#F7F3EA;border:1px solid rgba(50,42,32,.12);border-radius:10px;padding:10px 10px 12px">
             <div style="display:flex;justify-content:space-between;align-items:baseline;padding:2px 6px 8px">
@@ -681,19 +697,19 @@ a{color:#275C56}a:hover{color:#B0512F}
             <div style="font:600 22px 'Source Serif 4',Georgia,serif;color:#26211C;margin-top:4px">{{ wsName }}</div>
             <div style="font:400 14px/1.55 'Source Sans 3',sans-serif;color:#4A4238;margin-top:6px"><strong>Objective.</strong> {{ wsObjective }}</div>
           </div>
-          <div style="display:flex;gap:22px">
+          <div class="h-wrap" style="display:flex;gap:22px">
             <div><div style="font:600 10.5px 'Spline Sans Mono',monospace;color:#8A8172">PROGRESS</div><div style="font:600 22px 'Source Serif 4',Georgia,serif;color:#26211C">{{ wsProg }}</div></div>
             <div><div style="font:600 10.5px 'Spline Sans Mono',monospace;color:#8A8172">NEXT GATE</div><div style="font:600 22px 'Source Serif 4',Georgia,serif;color:#26211C">{{ wsGate }}</div></div>
             <div><div style="font:600 10.5px 'Spline Sans Mono',monospace;color:#8A8172">STATUS</div><div style="{{ wsFlagStyle }}">{{ wsFlag }}</div></div>
           </div>
         </div>
         <div style="{{ wsNoteStyle }}">{{ wsNote }}</div>
-        <div style="margin-top:18px;border-top:1px solid rgba(50,42,32,.12)">
-          <div style="{{ wsGridHeadStyle }}">
+        <div class="h-scroll" style="margin-top:18px;border-top:1px solid rgba(50,42,32,.12)">
+          <div class="h-row-w" style="{{ wsGridHeadStyle }}">
             <span>TASK</span><span>OWNER</span><span>WINDOW</span><span>SLACK</span><span>STATE</span><span></span>
           </div>
           <sc-for list="{{ wsTasks }}" as="wt" hint-placeholder-count="6">
-            <div style="{{ wt.rowStyle }}">
+            <div class="h-row-w" style="{{ wt.rowStyle }}">
               <div style="cursor:pointer" onClick="{{ wt.onOpen }}">
                 <div style="font:600 13.5px 'Source Sans 3',sans-serif;color:#26211C;display:flex;gap:7px;align-items:baseline" style-hover="color:#275C56">{{ wt.title }}<span style="{{ wt.genStyle }}">auto</span></div>
                 <div style="{{ wt.descStyle }}">{{ wt.desc }}</div>
@@ -758,12 +774,12 @@ a{color:#275C56}a:hover{color:#B0512F}
           <span style="{{ rt.style }}" onClick="{{ rt.onClick }}">{{ rt.label }}</span>
         </sc-for>
       </div>
-      <div style="background:#FFFEFB;border:1px solid rgba(50,42,32,.14);border-radius:12px;overflow:hidden">
-        <div style="{{ regHeadStyle }}">
+      <div class="h-scroll" style="background:#FFFEFB;border:1px solid rgba(50,42,32,.14);border-radius:12px;overflow:hidden">
+        <div class="h-row-w" style="{{ regHeadStyle }}">
           <sc-for list="{{ regHead }}" as="rh" hint-placeholder-count="4"><span>{{ rh.h }}</span></sc-for>
         </div>
         <sc-for list="{{ regRows }}" as="rr" hint-placeholder-count="6">
-          <div style="{{ rr.style }}">
+          <div class="h-row-w" style="{{ rr.style }}">
             <div>
               <div style="font:600 13.5px 'Source Sans 3',sans-serif;color:#26211C">{{ rr.c1 }}</div>
               <div style="{{ rr.subStyle }}">{{ rr.sub }}</div>
@@ -790,7 +806,7 @@ a{color:#275C56}a:hover{color:#B0512F}
         <span>confidence <strong>{{ dConfB }}% → {{ dConfA }}%</strong></span>
         <span style="margin-left:auto;color:#625A4E">baseline locked Day 0</span>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+      <div class="h-1col" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
         <div style="background:#FFFEFB;border:1px solid rgba(50,42,32,.14);border-radius:10px;padding:16px 18px">
           <div style="font:600 12px 'Spline Sans Mono',monospace;letter-spacing:.09em;color:#8A8172;margin-bottom:6px">EVENT HISTORY — TRIGGERS</div>
           <sc-for list="{{ chEvents }}" as="ce" hint-placeholder-count="4">
@@ -835,10 +851,10 @@ a{color:#275C56}a:hover{color:#B0512F}
             <span style="font:600 18px 'Source Serif 4',Georgia,serif;color:#26211C">{{ e.title }}</span>
             <span style="{{ e.tagStyle }}">{{ e.tag }}</span>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 26px;margin-top:12px;font:400 13px/1.55 'Source Sans 3',sans-serif;color:#3A342C">
+          <div class="h-1col" style="display:grid;grid-template-columns:1fr 1fr;gap:4px 26px;margin-top:12px;font:400 13px/1.55 'Source Sans 3',sans-serif;color:#3A342C">
             <div><strong>What happened.</strong> {{ e.what }}</div>
             <div><strong>What the system tried.</strong> {{ e.tried }}</div>
-            <div><strong>Options.</strong> {{ e.options }}</div>
+            <div><strong>{{ e.optionsLabel }}</strong> {{ e.options }}</div>
             <div><strong>Impact.</strong> {{ e.impact }}</div>
           </div>
           <div style="{{ e.recStyle }}"><strong>Recommended decision.</strong> {{ e.recommend }}</div>
@@ -878,7 +894,7 @@ a{color:#275C56}a:hover{color:#B0512F}
     <div data-screen-label="Budget and spend" style="animation:helmfade .25s ease;max-width:980px">
       <div style="font:400 13.5px/1.55 'Source Sans 3',sans-serif;color:#625A4E;margin-bottom:16px">When money is committed and when it is actually released — every paid line held behind the readiness gate so nothing is spent ahead of a releasable product. If the gate moves, the spend dates move with it.</div>
 
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+      <div class="h-2col" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
         <sc-for list="{{ budKpis }}" as="bk" hint-placeholder-count="4">
           <div style="{{ bk.cardStyle }}">
             <div style="font:600 10px 'Spline Sans Mono',monospace;letter-spacing:.07em;color:#8A8172">{{ bk.k }}</div>
@@ -901,8 +917,8 @@ a{color:#275C56}a:hover{color:#B0512F}
           <sc-for list="{{ budYGrid }}" as="yg" hint-placeholder-count="5"><div style="{{ yg.lineStyle }}"></div></sc-for>
           <div style="{{ budZoneStyle }}"></div>
           <svg viewBox="0 0 1000 200" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%">
-            <path d="{{ budPlannedPath }}" fill="none" stroke="rgba(50,42,32,.42)" stroke-width="1.5" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"></path>
-            <path d="{{ budActualPath }}" fill="none" stroke="#2F5F5A" stroke-width="2.5" vector-effect="non-scaling-stroke"></path>
+            <path sc-camel-d="{{ budPlannedPath }}" fill="none" stroke="rgba(50,42,32,.42)" stroke-width="1.5" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"></path>
+            <path sc-camel-d="{{ budActualPath }}" fill="none" stroke="#2F5F5A" stroke-width="2.5" vector-effect="non-scaling-stroke"></path>
           </svg>
           <div style="{{ budGateLineStyle }}"></div>
           <div style="{{ budTodayStyle }}"></div>
@@ -935,12 +951,12 @@ a{color:#275C56}a:hover{color:#B0512F}
         <div style="font:400 11.5px/1.55 'Source Sans 3',sans-serif;color:#8A8172;margin-top:12px">{{ budPace.note }}</div>
       </div>
 
-      <div style="background:#FFFEFB;border:1px solid rgba(50,42,32,.14);border-radius:12px;padding:8px 22px 18px;margin-bottom:16px">
-        <div style="display:grid;grid-template-columns:2fr .8fr 1.2fr 2.4fr;gap:12px;padding:12px 4px 6px;font:600 10px 'Spline Sans Mono',monospace;letter-spacing:.06em;color:#8A8172">
+      <div class="h-scroll" style="background:#FFFEFB;border:1px solid rgba(50,42,32,.14);border-radius:12px;padding:8px 22px 18px;margin-bottom:16px">
+        <div class="h-row-w" style="display:grid;grid-template-columns:2fr .8fr 1.2fr 2.4fr;gap:12px;padding:12px 4px 6px;font:600 10px 'Spline Sans Mono',monospace;letter-spacing:.06em;color:#8A8172">
           <span>SPEND LINE</span><span>AMOUNT</span><span>STATUS · RELEASE DAY</span><span>RELEASE LOGIC</span>
         </div>
         <sc-for list="{{ budLines }}" as="bl" hint-placeholder-count="3">
-          <div style="{{ bl.rowStyle }}">
+          <div class="h-row-w" style="{{ bl.rowStyle }}">
             <div style="font:600 13.5px 'Source Sans 3',sans-serif;color:#26211C">{{ bl.label }}</div>
             <div style="font:700 14px 'Source Serif 4',Georgia,serif;color:#26211C">{{ bl.amt }}</div>
             <div>
@@ -1059,7 +1075,7 @@ a{color:#275C56}a:hover{color:#B0512F}
         <div style="font:400 14px/1.55 'Source Sans 3',sans-serif;color:#4A4238;max-width:720px">Inject a realistic problem and watch the system re-plan: it re-levels resources, pulls safe work forward, protects gates — and escalates only when it runs out of moves. Everything here also updates the overview, timeline, briefing and portfolio.</div>
         <span style="font:600 12.5px 'Source Sans 3',sans-serif;color:#A63B2A;border:1px solid rgba(166,59,42,.4);padding:7px 13px;border-radius:7px;cursor:pointer;white-space:nowrap" onClick="{{ resetDemo }}">Reset all demo events</span>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="h-1col" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
         <sc-for list="{{ scCards }}" as="sc" hint-placeholder-count="4">
           <div style="{{ sc.cardStyle }}">
             <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
@@ -1110,7 +1126,7 @@ a{color:#275C56}a:hover{color:#B0512F}
         <div style="font:600 15px 'Source Serif 4',Georgia,serif;color:#26211C">{{ ingSummary.head }}</div>
         <div style="font:600 12px 'Spline Sans Mono',monospace;color:#A5761F;margin-top:4px">{{ ingSummary.feas }}</div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 22px;font:400 12.5px/1.55 'Source Sans 3',sans-serif;color:#3A342C">
+      <div class="h-1col" style="display:grid;grid-template-columns:1fr 1fr;gap:6px 22px;font:400 12.5px/1.55 'Source Sans 3',sans-serif;color:#3A342C">
         <div>
           <div style="font:600 11px 'Spline Sans Mono',monospace;letter-spacing:.08em;color:#275C56;margin-bottom:5px">READ &amp; INFERRED</div>
           <div>· {{ ingSummary.explicit }}</div>
@@ -1162,7 +1178,7 @@ a{color:#275C56}a:hover{color:#B0512F}
     </div>
     <div style="{{ insp.blockNoteStyle }}">{{ insp.blockNote }}</div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 20px;margin-top:14px;font:400 12.5px/1.6 'Source Sans 3',sans-serif;color:#3A342C">
+    <div class="h-1col" style="display:grid;grid-template-columns:1fr 1fr;gap:4px 20px;margin-top:14px;font:400 12.5px/1.6 'Source Sans 3',sans-serif;color:#3A342C">
       <div><strong>Owner.</strong> {{ insp.owner }}</div>
       <div><strong>Window.</strong> {{ insp.window }}</div>
       <div style="grid-column:1/-1;color:#625A4E">{{ insp.baseWindow }}</div>
@@ -1236,7 +1252,7 @@ a{color:#275C56}a:hover{color:#B0512F}
     <div style="font:600 11px 'Spline Sans Mono',monospace;letter-spacing:.09em;color:#8A8172;margin:15px 0 6px">DEFINITION OF DONE <span style="color:#B8AF9C">— optional</span></div>
     <input value="{{ editor.dod }}" onInput="{{ editor.onDod }}" placeholder="How you'll know it's complete…" style="{{ editor.inputStyle }}">
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-top:16px">
+    <div class="h-1col" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-top:16px">
       <div>
         <div style="font:600 11px 'Spline Sans Mono',monospace;letter-spacing:.09em;color:#8A8172;margin-bottom:8px">EFFORT</div>
         <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
@@ -1259,7 +1275,7 @@ a{color:#275C56}a:hover{color:#B0512F}
       <sc-for list="{{ editor.trades }}" as="tr" hint-placeholder-count="4"><span style="{{ tr.style }}" onClick="{{ tr.onPick }}">{{ tr.label }}</span></sc-for>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-top:16px">
+    <div class="h-1col" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;margin-top:16px">
       <div>
         <div style="font:600 11px 'Spline Sans Mono',monospace;letter-spacing:.09em;color:#8A8172;margin-bottom:8px">WORKSTREAM</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
@@ -1373,7 +1389,7 @@ a{color:#275C56}a:hover{color:#B0512F}
         </div>
       </sc-for>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:16px">
+    <div class="h-1col" style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:16px">
       <div>
         <div style="font:600 11px 'Spline Sans Mono',monospace;letter-spacing:.09em;color:#8A8172;margin-bottom:8px">EXPECTED DELAY</div>
         <div style="display:flex;align-items:center;gap:10px">
@@ -1405,7 +1421,7 @@ a{color:#275C56}a:hover{color:#B0512F}
 </sc-if>
 
 <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
-<div data-screen-label="Home" style="position:relative;overflow:hidden;max-width:1120px;margin:0 auto;padding:44px 40px 90px;width:100%;box-sizing:border-box;animation:helmfade .3s ease">
+<div data-screen-label="Home" class="h-page" style="position:relative;overflow:hidden;max-width:1120px;margin:0 auto;padding:44px 40px 90px;width:100%;box-sizing:border-box;animation:helmfade .3s ease">
   <img src="assets/helm-crest.png" alt="" style="position:absolute;right:-72px;top:-44px;width:330px;height:auto;opacity:.04;z-index:0;pointer-events:none">
   <div style="position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
     <div style="display:flex;align-items:center;gap:13px">
@@ -1418,13 +1434,21 @@ a{color:#275C56}a:hover{color:#B0512F}
     </div>
     <div style="font: 600 11px 'Spline Sans Mono',monospace; letter-spacing: .12em; color: #8A8172; align-self: center; margin-left: 4px; width: 240px; height: 13px">AUTOMATED PROJECT MANAGEMENT</div><div style="font:500 13px 'Source Sans 3',sans-serif;color:#625A4E">{{ homeDate }} · Christopher Farmer · Senior view</div>
   </div>
+  <div style="position:relative;z-index:1;margin-top:10px;font:500 12.5px 'Source Sans 3',sans-serif;color:#8A8172"><a href="../../index.html">← Portfolio</a> · <a href="../../case-studies/helm.html">Case study</a></div>
 
   <div style="position:relative;z-index:1;margin-top:34px;max-width:820px">
     <div style="font:600 32px/1.2 'Source Serif 4',Georgia,serif;color:#26211C;margin:0 0 10px">Two ways in. The same automated project manager.</div>
     <div style="font:400 16px/1.6 'Source Sans 3',sans-serif;color:#4A4238">Helm reads a brief, builds the plan, schedules the work and re-plans around problems on its own — whether that is a single fixed-term contract or a multi-project programme where several projects gate each other. Choose a workspace to step inside.</div>
   </div>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:30px">
+  <sc-if value="{{ homeModified }}" hint-placeholder-val="{{ false }}">
+    <div style="position:relative;z-index:1;margin-top:22px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:rgba(165,118,31,.12);border:1px solid rgba(165,118,31,.4);border-radius:10px;padding:12px 16px">
+      <div style="font:500 13.5px/1.5 'Source Sans 3',sans-serif;color:#26211C"><strong>Demo modified.</strong> {{ homeModifiedNote }}</div>
+      <span style="font:600 12.5px 'Source Sans 3',sans-serif;color:#FBF9F4;background:#A5761F;padding:8px 14px;border-radius:7px;cursor:pointer;white-space:nowrap" style-hover="background:#8F6A1E" onClick="{{ resetAll }}">Reset to the seeded state</span>
+    </div>
+  </sc-if>
+
+  <div class="h-1col" style="display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:30px">
 
     <!-- Standalone contract -->
     <div style="background:#FFFEFB;border:1px solid rgba(50,42,32,.16);border-radius:16px;padding:26px 26px 22px;cursor:pointer;display:flex;flex-direction:column;gap:15px" style-hover="border-color:rgba(39,92,86,.55);box-shadow:0 5px 20px rgba(40,32,22,.11)" onClick="{{ homeSingle.onOpen }}">
@@ -1582,7 +1606,8 @@ class Component extends DCLogic {
           let text = '';
           for (let i = 1; i <= Math.min(doc.numPages, 12); i++) {
             const pg = await doc.getPage(i); const tc = await pg.getTextContent();
-            text += tc.items.map((it) => it.str).join(' ') + '\n';
+            // keep the PDF's own line breaks (pdf.js marks them with hasEOL) so bullets and headings stay on separate lines
+            text += tc.items.map((it) => it.str + (it.hasEOL ? '\n' : ' ')).join('').replace(/[ \t]+\n/g, '\n') + '\n';
           }
           if (text.trim().length > 40) finish(text);
           else finish('', 'This PDF has no text layer (scanned or vector-only). The full build OCRs these — for now, paste the text into the box.');
@@ -1769,7 +1794,7 @@ class Component extends DCLogic {
 
     if (!S.ready) {
       const _blankTile = { kicker: '', client: '', name: 'Loading…', healthTxt: '', healthStyle: 'display:none', tagline: '', s1: '…', s2: '…', s3: '…', s4: '…', progStyle: 'display:none', foot: '', chips: [] };
-      return { isHome: true, isPortfolio: false, isProject: false, homeSingle: _blankTile, homeProgram: _blankTile, homeCustom: [], homeHasCustom: false, homeDate: 'Loading…', portfolioDate: 'Loading…', portfolioHeadline: 'Reading the portfolio…', portfolioSub: '', portfolioCards: [], portfolioWatch: [], portfolioLinks: [], pgProjects: '…', pgOnTime: '…', pgLate: '…', pgMoves: '…', pgAdded: '…', pgEsc: '…', blkOpen: false, inspOn: false, ingOpen: false, toastOn: false, editorOn: false, splitOn: false, cascadeOn: false };
+      return { isHome: true, isPortfolio: false, isProject: false, homeSingle: _blankTile, homeProgram: _blankTile, homeCustom: [], homeHasCustom: false, homeModified: false, homeModifiedNote: '', resetAll: () => {}, homeDate: 'Loading…', portfolioDate: 'Loading…', portfolioHeadline: 'Reading the portfolio…', portfolioSub: '', portfolioCards: [], portfolioWatch: [], portfolioLinks: [], pgProjects: '…', pgOnTime: '…', pgLate: '…', pgMoves: '…', pgAdded: '…', pgEsc: '…', blkOpen: false, inspOn: false, ingOpen: false, toastOn: false, editorOn: false, splitOn: false, cascadeOn: false };
     }
 
     const P = this.P, SEEDS = P.SEEDS;
@@ -1840,7 +1865,7 @@ class Component extends DCLogic {
     const progConflicts = prog.conflicts.filter((c) => !c.projects.includes('WINDROSE'));
     const portfolioWatch = [
       ...progConflicts.map((c) => ({ dotStyle: 'width:9px;height:9px;border-radius:99px;background:' + TONE[c.sev] + ';flex:none;margin-top:5px', text: 'Shared resource — ' + c.detail })),
-      ...escAcross.slice(0, 4).map(({ pid, e }) => ({ dotStyle: 'width:9px;height:9px;border-radius:99px;background:' + TONE[e.sev === 'black' ? 'black' : e.sev] + ';flex:none;margin-top:5px', text: SEEDS[pid].name + ': ' + e.title + (e.due ? ' — due Day ' + e.due : '') + '.' })),
+      ...escAcross.slice(0, 4).map(({ pid, e }) => ({ dotStyle: 'width:9px;height:9px;border-radius:99px;background:' + TONE[e.sev === 'black' ? 'black' : e.sev] + ';flex:none;margin-top:5px', text: SEEDS[pid].name + ': ' + e.title + (e.due ? (e.due < prog.plans[pid].today ? ' — overdue, was due Day ' + e.due : ' — due Day ' + e.due) : '') + '.' })),
       ...(escAcross.length === 0 && progConflicts.length === 0 ? [{ dotStyle: 'width:9px;height:9px;border-radius:99px;background:#35714A;flex:none;margin-top:5px', text: 'Nothing needs programme-level attention. All four projects self-managing.' }] : []),
     ];
     const programStats = {
@@ -1858,14 +1883,20 @@ class Component extends DCLogic {
       this.setState({ projectId: npid, wsId: nseed.workstreams[0].id, inspTask: null, blkTask: null, blkOpen: false });
     };
     const pgShort = { pa: 'Marketing', pb: 'Product', pc: 'Infrastructure', pd: 'Delivery' };
+    // programme clock: counted from the earliest project start (every project shares the same calendar "today")
+    const pgFirst = programOrder.slice().sort((a, b) => (SEEDS[a].start < SEEDS[b].start ? -1 : 1))[0] || pid;
+    const pgToday = prog.plans[pgFirst] ? prog.plans[pgFirst].today : today;
+    const pgCal = prog.plans[pgFirst] ? prog.plans[pgFirst].cal : cal;
     const pgRank = { black: 3, red: 2, amber: 1, green: 0 };
     const pgWorst = programOrder.reduce((w, pid) => pgRank[prog.plans[pid].health] > pgRank[w] ? prog.plans[pid].health : w, 'green');
 
     // ── home launcher: one standalone contract + one multi-project programme ──
+    const storedList = Object.values(S.eventsBy || {}).flatMap((l) => (Array.isArray(l) ? l : []));
+    const storedEvents = storedList.length, storedScenarios = storedList.filter((e) => e.t === 'scenario').length;
     const wSeed = SEEDS.windrose, wPlan = prog.plans.windrose, wStat = prog.stats.windrose;
     const homeSingle = {
       kicker: 'STANDALONE CONTRACT · FROM CLIENT BRIEF (PDF)',
-      client: wSeed.client, name: wSeed.name, tagline: wSeed.tagline + ' Delivered by one implementation lead plus a junior analyst.',
+      client: wSeed.client, name: wSeed.name, tagline: wSeed.tagline.replace(/\.?$/, '.') + ' Delivered by one implementation lead plus a junior analyst.',
       healthTxt: healthTxt[wPlan.health], healthStyle: chip(healthTxt[wPlan.health], wPlan.health),
       s1: 'Day ' + wPlan.finishDay + '/' + wSeed.days, s2: wStat.done + '/' + wStat.total, s3: wPlan.confidence + '%',
       s4: wSeed.workstreams.length + ' workstreams',
@@ -2019,10 +2050,11 @@ class Component extends DCLogic {
     });
 
     // needs / handled
+    const dueTag = (due, prefix) => !due ? '' : due < today ? ' · OVERDUE — WAS DUE DAY ' + due : ' · ' + prefix + due;
     const needsList = escs.map((e) => {
       const dec = e.decisionId ? seed.decisions.find((d) => d.id === e.decisionId) : null;
       return {
-        title: e.title, tag: e.sev.toUpperCase() + (e.due ? ' · DUE D' + e.due : ''), tagStyle: chip(e.sev.toUpperCase(), e.sev === 'black' ? 'black' : e.sev),
+        title: e.title, tag: e.sev.toUpperCase() + dueTag(e.due, 'DUE D'), tagStyle: chip(e.sev.toUpperCase(), e.sev === 'black' ? 'black' : e.due && e.due < today ? 'red' : e.sev),
         what: e.what, tried: e.tried, recommend: e.recommend || (e.options || []).join(' · '), recStyle: e.recommend ? '' : 'color:#625A4E',
         impact: 'Impact: ' + e.impact, cardStyle: 'background:#FFFEFB;border:1px solid ' + TONE[e.sev === 'black' ? 'black' : e.sev] + '55;border-radius:10px;padding:17px 19px;margin-bottom:12px',
         btn1: dec ? dec.options[0].label : 'Open escalation centre',
@@ -2040,7 +2072,7 @@ class Component extends DCLogic {
       ...cur.notices.map((n) => ({ when: 'D' + today, title: n.kind === 'worked-around' ? 'Worked around a blocker' : n.kind === 'guard' ? 'Held a task to prevent waste' : 'Approval wait tracked', why: n.text })),
       ...delta.added.map((m) => ({ when: 'AUTO', title: 'Added missing task: ' + m.title, why: m.why })),
       ...delta.earlier.slice(0, 3).map((m) => ({ when: 'D' + today, title: 'Pulled forward: ' + m.title, why: m.why + ' (Day ' + m.from + ' → ' + m.to + ')' })),
-    ].slice(0, 6);
+    ];   // the heading counts exactly these items
 
     // tactical week
     const attention = cur.tasks.filter((t) => ['blocked', 'decision', 'held'].includes(t.state));
@@ -2078,9 +2110,15 @@ class Component extends DCLogic {
     // ── zoom model: px-per-working-day, from whole-project overview to day-by-day ──
     const ZLEVELS = [7, 11, 17, 26, 38, 54];   // px per working day
     const ZLABELS = ['Overview', 'Fortnight', 'Weekly', '3-day', '2-day', 'Day by day'];
-    const zi = Math.min(ZLEVELS.length - 1, Math.max(0, S.zoom ?? 1));
+    // room for the lane = window − sidebar − page and card padding (the sidebar stacks above the content on narrow screens)
+    const winW = typeof window !== 'undefined' ? window.innerWidth : 1366;
+    const laneRoom = winW - (winW > 720 ? 232 + 60 : 32) - 36 - 196;
+    const fitZoom = Math.max(0, ZLEVELS.map((px) => px * seed.days <= laneRoom).lastIndexOf(true));
+    const zi = Math.min(ZLEVELS.length - 1, Math.max(0, S.zoom ?? fitZoom));
     const pxPerDay = ZLEVELS[zi];
     const laneWpx = pxPerDay * seed.days;      // timeline lane width in px at this zoom
+    const ganttWider = laneWpx > laneRoom;     // wider than the window → the card scrolls sideways
+    const ganttMaxEnd = Math.max(seed.days, ...gplan.tasks.filter((t) => !t.dropped).map((t) => t.end));   // a task past the deadline overhangs the lane
     const tickStep = Math.max(1, Math.round(46 / pxPerDay));  // ~46px between day labels
     const ganttWeekLines = [];
     for (let d = 1 + tickStep; d <= seed.days; d += tickStep) ganttWeekLines.push({ style: 'position:absolute;left:' + pct(d) + '%;top:0;bottom:0;width:1px;background:rgba(50,42,32,.05)' });
@@ -2240,7 +2278,7 @@ class Component extends DCLogic {
     ];
 
     // ── budget & spend (spend-vs-readiness) ──
-    const money = (n) => '€' + (n >= 1000 ? (n / 1000) + 'k' : n);
+    const money = (n) => '€' + (n >= 1000 ? Math.round(n / 1000) + 'k' : n);
     const moneyFull = (n) => '€' + n.toLocaleString();
     const budMeta = {
       spent: { label: 'SPENT', tone: '#2F5F5A' }, released: { label: 'RELEASED', tone: '#3F7A50' },
@@ -2391,7 +2429,7 @@ class Component extends DCLogic {
         return {
           c1: d.title, sub: d.what, subStyle: 'font:400 12px/1.45 ' + SS + ';color:#8A8172;margin-top:2px;max-width:420px',
           c2: d.recommend, c3: 'Day ' + d.due + ' · ' + cal.fmtShort(d.due),
-          c4: resolved ? 'RESOLVED' : d.due <= today + 2 ? 'DUE NOW' : 'OPEN', c4Style: chip(resolved ? 'RESOLVED' : d.due <= today + 2 ? 'DUE NOW' : 'OPEN', resolved ? 'green' : d.due <= today + 2 ? 'red' : 'amber'),
+          c4: resolved ? 'RESOLVED' : d.due < today ? 'OVERDUE' : d.due <= today + 2 ? 'DUE NOW' : 'OPEN', c4Style: chip('x', resolved ? 'green' : d.due <= today + 2 ? 'red' : 'amber'),
           act: resolved ? (choice ? '✓ ' + choice.label.slice(0, 22) : '✓') : 'Approve',
           actStyle: resolved ? 'font:500 11.5px ' + SS + ';color:#35714A;text-align:right' : 'font:600 11.5px ' + SS + ';color:#FBF9F4;background:#275C56;padding:6px 10px;border-radius:7px;cursor:pointer;text-align:center',
           onAct: resolved ? () => {} : () => this.addEvents([{ t: 'decision', id: d.id, choice: d.options.find((o) => o.recommended)?.id || d.options[0].id }], 'Decision recorded.'),
@@ -2432,8 +2470,9 @@ class Component extends DCLogic {
     const escFull = escs.map((e) => {
       const dec = e.decisionId ? seed.decisions.find((d) => d.id === e.decisionId) : null;
       return {
-        title: e.title, tag: e.sev.toUpperCase() + (e.due ? ' · DUE DAY ' + e.due : ''), tagStyle: chip(e.sev.toUpperCase(), e.sev === 'black' ? 'black' : e.sev),
+        title: e.title, tag: e.sev.toUpperCase() + dueTag(e.due, 'DUE DAY '), tagStyle: chip(e.sev.toUpperCase(), e.sev === 'black' ? 'black' : e.due && e.due < today ? 'red' : e.sev),
         what: e.what, tried: e.tried, options: (e.options || []).join(' · '), impact: e.impact,
+        optionsLabel: dec ? 'Options.' : 'Options for the decision meeting.',   // no decision is wired here — the buttons below acknowledge or show the plan impact
         recommend: e.recommend || 'Review options and decide.', recStyle: 'margin-top:12px;background:rgba(39,92,86,.07);border:1px solid rgba(39,92,86,.25);border-radius:8px;padding:10px 14px;font:400 13px/1.5 ' + SS + ';color:#26211C',
         cardStyle: 'background:#FFFEFB;border:1px solid ' + TONE[e.sev === 'black' ? 'black' : e.sev] + '66;border-left:4px solid ' + TONE[e.sev === 'black' ? 'black' : e.sev] + ';border-radius:12px;padding:20px 24px;margin-bottom:14px',
         btn1: dec ? dec.options[0].label : 'Acknowledge — keep monitoring',
@@ -2484,7 +2523,7 @@ class Component extends DCLogic {
       briefBlocks = [
         Par('Day ' + today + ' of ' + seed.days + '. Confidence ' + cur.confidence + '% (' + cur.feasibility.label.toLowerCase() + '), ' + cur.buffer + ' days of buffer, next gate “' + (nextGateG ? nextGateG.title.replace(/GATE \d+ — /, '') : '—') + '” forecast Day ' + (nextGateG ? nextGateG.end : '—') + '.'),
         H('CHANGED AUTOMATICALLY'), ...(delta.moves.length ? delta.moves.slice(0, 4).map((m) => LI(m.title + (m.kind === 'added' ? ' — added: ' + m.why : ': D' + m.from + '→' + m.to + ' — ' + m.why))) : [LI('No deviations from baseline.')]),
-        H('NEEDS YOU TODAY'), ...(escs.length ? escs.map((e) => LI(e.title + (e.due ? ' — due Day ' + e.due : ''))) : [LI('Nothing. “No action needed” is a valid briefing.')]),
+        H('NEEDS YOU TODAY'), ...(escs.length ? escs.map((e) => LI(e.title + (e.due ? (e.due < today ? ' — overdue, was due Day ' + e.due : ' — due Day ' + e.due) : ''))) : [LI('Nothing. “No action needed” is a valid briefing.')]),
         H('WATCHING'), ...seed.risks.filter((r) => r.prob >= 30).slice(0, 3).map((r) => LI(r.title + ' — ' + r.prob + '% ' + (r.trend === 'up' ? '▲ rising' : r.trend === 'down' ? '▼ falling' : '— stable'))),
         H('GOING WELL'), ...[...seed.stages.map((st) => cur.byId[st.gate]).filter((g) => g && g.state === 'done').slice(0, 2).map((g) => LI('“' + g.title.replace(/GATE[^—]*— /, '') + '” passed on Day ' + g.end + '.')), ...(delta.earlier.length ? [LI(delta.earlier.length + ' tasks are running ahead of baseline.')] : []), ...(cur.notices.length ? [LI(cur.notices.length + ' blocker(s) absorbed without gate impact.')] : [])],
       ];
@@ -2679,6 +2718,8 @@ class Component extends DCLogic {
       return { name: w.name, prog: h.prog + '%', flag: h.tone.toUpperCase(), flagStyle: chip(h.tone.toUpperCase(), h.tone), note: h.blocked ? 'blocker worked around' : h.dec ? 'awaiting decision' : late ? late + ' finished late' : 'on plan' };
     });
     const liveTasks = cur.tasks.filter((t) => !t.dropped);
+    const laterIds = new Set(delta.later.map((m) => m.id));
+    const laterUnderway = delta.later.filter((m) => { const t = cur.byId[m.id]; return t && t.state !== 'scheduled'; }).length;
     const pieCats = [];
     {
       const used = new Set();
@@ -2690,7 +2731,7 @@ class Component extends DCLogic {
       take('Complete', '#2F5F5A', (t) => t.state === 'done');
       take('In progress', '#4A8A7B', (t) => t.state === 'active');
       take('Blocked / waiting', '#A63B2A', (t) => ['blocked', 'decision', 'held', 'approval'].includes(t.state));
-      take('Delayed vs baseline', '#C97A5C', (t) => base.byId[t.id] && t.start > base.byId[t.id].start + 1);
+      take('Later than baseline · not started', '#C97A5C', (t) => laterIds.has(t.id));   // same set as the change log's "later"
       take('Scheduled on plan', '#D8CFBB', () => true);
     }
     let acc = 0;
@@ -2707,7 +2748,7 @@ class Component extends DCLogic {
       })),
       genLine: 'Generated Day ' + today + ' · ' + cal.fmt(today) + ' · baseline locked Day 0 · Monte-Carlo 400 runs',
       status: cur.feasibility.label + ' — ' + cur.confidence + '% confidence, finish forecast Day ' + cur.finishDay + ' (' + cal.fmtShort(cur.finishDay) + '), buffer ' + cur.buffer + 'd, P80 Day ' + cur.p80 + '.',
-      origVs: delta.earlier.length + ' earlier · ' + delta.later.length + ' later · ' + delta.added.length + ' added by system · finish Day ' + delta.finishBefore + ' → ' + delta.finishAfter + ' · confidence ' + delta.confBefore + '% → ' + delta.confAfter + '%.',
+      origVs: delta.earlier.length + ' earlier · ' + delta.later.length + ' later' + (laterUnderway ? ' (' + laterUnderway + ' of them already under way)' : '') + ' · ' + delta.added.length + ' added by system · finish Day ' + delta.finishBefore + ' → ' + delta.finishAfter + ' · confidence ' + delta.confBefore + '% → ' + delta.confAfter + '%.',
       goingWell: goingWell.map((t) => ({ text: '· ' + t })),
       fallingShort: (fallingShort.length ? fallingShort : ['Nothing material. Watch-list risks are below their thresholds.']).map((t) => ({ text: '· ' + t })),
       rows: reportRows,
@@ -2750,7 +2791,7 @@ class Component extends DCLogic {
       return {
         title: t.title + ' · D' + t.start + '–' + t.end + (crit ? ' · critical path' : ''),
         label: t.title + (done ? '  ✓' : ''),
-        style: 'position:absolute;left:' + cmdX(t.start - 1) + '%;width:' + cmdX(t.end - t.start + 1) + '%;top:' + (cmdHeadH + row * (cmdLaneH + cmdLaneGap)) + 'px;height:' + cmdLaneH + 'px;background:' + bg + ';color:' + col + ';border:' + (blocked ? '1.5px dashed #C98A5C' : '1px solid transparent') + ';border-radius:5px;display:flex;align-items:center;padding:0 8px;font:600 11px ' + SS + ';white-space:nowrap;overflow:hidden;box-sizing:border-box;cursor:pointer;z-index:2',
+        style: 'position:absolute;left:' + cmdX(t.start - 1) + '%;width:' + cmdX(t.end - t.start + 1) + '%;top:' + (cmdHeadH + row * (cmdLaneH + cmdLaneGap)) + 'px;height:' + cmdLaneH + 'px;background:' + bg + ';color:' + col + ';border:' + (blocked ? '1.5px dashed #C98A5C' : '1px solid transparent') + ';border-radius:5px;display:block;line-height:' + (cmdLaneH - 2) + 'px;padding:0 8px;font:600 11px ' + SS + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-sizing:border-box;cursor:pointer;z-index:2',
         onOpen: () => this.setState({ inspTask: t.id, inspDays: 5 }),
       };
     });
@@ -2844,6 +2885,9 @@ class Component extends DCLogic {
       // shell
       isHome: S.layer === 'home', isPortfolio: S.layer === 'portfolio', isProject: S.layer === 'project',
       homeSingle, homeProgram, homeCustom, homeHasCustom: homeCustom.length > 0, homeDate: cal.fmt(today),
+      homeModified: storedEvents > 0,
+      homeModifiedNote: storedEvents + ' stored change' + (storedEvents > 1 ? 's' : '') + ' (' + [storedScenarios ? storedScenarios + ' scenario' + (storedScenarios > 1 ? 's' : '') : '', storedEvents - storedScenarios ? (storedEvents - storedScenarios) + ' edit' + (storedEvents - storedScenarios > 1 ? 's' : '') : ''].filter(Boolean).join(', ') + ') ' + (storedEvents > 1 ? 'are' : 'is') + ' still applied, so the cards below differ from the seeded demo. They stay until you reset.',
+      resetAll: () => { this.setState({ eventsBy: {}, toast: 'Demo reset to the seeded state.' }); this.persist({ eventsBy: {} }); clearTimeout(this._tt); this._tt = setTimeout(() => this.setState({ toast: null }), 4000); },
       portfolioBack: () => this.setState({ layer: 'home', inspTask: null }),
       projBack: () => this.setState({ layer: PROGRAM_IDS.includes(pid) ? 'portfolio' : 'home', inspTask: null }),
       projBackLabel: PROGRAM_IDS.includes(pid) ? '← Meridian programme' : '← All workspaces',
@@ -2851,7 +2895,7 @@ class Component extends DCLogic {
       projCycleShow: PROGRAM_IDS.includes(pid),
       projCyclePrev: () => cycleProject(-1), projCycleNext: () => cycleProject(1),
       projCycleLabel: PROGRAM_IDS.includes(pid) ? 'PROJECT ' + (PROGRAM_IDS.indexOf(pid) + 1) + ' OF ' + PROGRAM_IDS.length : '',
-      portfolioDate: cal.fmt(today) + ' · Day ' + today,
+      portfolioDate: pgCal.fmt(pgToday) + ' · Programme day ' + pgToday,
       portfolioHeadline: escAcross.length ? (escAcross.length === 1 ? 'One project in the programme needs a decision. Everything else is handled.' : escAcross.length + ' items across the programme need a decision. Everything else is handled.') : 'All four projects are self-managing today.',
       portfolioSub: 'Meridian is one commercial obligation split into four interlocking projects. Helm runs each like its own project manager — planning, sequencing, re-planning, idle-avoidance — and enforces the cross-project prerequisites, bringing you only what genuinely needs a human.',
       portfolioCards, portfolioWatch, portfolioLinks,
@@ -2920,7 +2964,7 @@ class Component extends DCLogic {
       metricEffortStyle: 'padding:6px 12px;cursor:pointer;' + (S.metric === 'effort' ? 'background:#26211C;color:#F3EDE0' : 'color:#625A4E'),
       setMetricTasks: () => this.setState({ metric: 'tasks' }), setMetricEffort: () => this.setState({ metric: 'effort' }),
       gates, needs: needsList, needsCount: String(needsList.length), needsEmpty: needsList.length === 0,
-      handled, handledCount: String(cur.notices.length + delta.added.length + Math.min(3, delta.earlier.length)),
+      handled, handledCount: String(handled.length),
       goChanges: () => this.setState({ view: 'changes' }),
       weekLabel: 'WEEK OF ' + cal.fmtShort(today).toUpperCase(), weekCols,
       // plan
@@ -2930,8 +2974,8 @@ class Component extends DCLogic {
       setPmOrig: () => this.setState({ planMode: 'original' }), setPmCur: () => this.setState({ planMode: 'current' }), setPmDelta: () => this.setState({ planMode: 'delta' }),
       pmDeltaOn: S.planMode === 'delta',
       zoomLabel: ZLABELS[zi],
-      zoomOut: () => this.setState({ zoom: Math.max(0, (S.zoom ?? 1) - 1) }),
-      zoomIn: () => this.setState({ zoom: Math.min(5, (S.zoom ?? 1) + 1) }),
+      zoomOut: () => this.setState({ zoom: Math.max(0, zi - 1) }),
+      zoomIn: () => this.setState({ zoom: Math.min(5, zi + 1) }),
       ganttInnerStyle: 'position:relative;min-width:' + Math.round(laneWpx + 196) + 'px',
       dEarlier: String(delta.earlier.length), dLater: String(delta.later.length), dAdded: String(delta.added.length),
       dFinishB: String(delta.finishBefore), dFinishA: String(delta.finishAfter), dBufB: String(delta.bufferBefore), dBufA: String(delta.bufferAfter),
@@ -2939,7 +2983,7 @@ class Component extends DCLogic {
       ganttStages, ganttGates, ganttWeekLines, ganttDayTicks, ganttRows,
       ganttTodayStyle: 'position:absolute;left:' + pct(today) + '%;top:0;bottom:0;width:2px;background:#B0512F',
       ganttTodayLabelStyle: 'position:absolute;left:calc(' + pct(today) + '% + 6px);top:-2px;font:600 10px ' + M + ';color:#FFFEFB;background:#B0512F;padding:2px 7px;border-radius:4px;z-index:5;white-space:nowrap',
-      ganttFootnote: S.planMode === 'original' ? 'The baseline plan as approved on Day 0 — locked and versioned. Switch to Current or Delta to see what the system has changed.' : S.planMode === 'delta' ? 'Grey underlines show where each moved task sat in the baseline. Everything else is unchanged.' : 'Bars are laid out by the scheduler: dependencies, approval waits, per-person capacity (no double-booking), and start guards.',
+      ganttFootnote: (ganttWider ? 'At this zoom the timeline is wider than the window — scroll the chart sideways to reach Day ' + seed.days + '. ' : ganttMaxEnd > seed.days ? 'Work runs past Day ' + seed.days + ' (to Day ' + ganttMaxEnd + ') — scroll the chart sideways to see it end. ' : '') + (S.planMode === 'original' ? 'The baseline plan as approved on Day 0 — locked and versioned. Switch to Current or Delta to see what the system has changed.' : S.planMode === 'delta' ? 'Grey underlines show where each moved task sat in the baseline. Everything else is unchanged.' : 'Bars are laid out by the scheduler: dependencies, approval waits, per-person capacity (no double-booking), and start guards.'),
       // board
       boardCols,
       // workstreams

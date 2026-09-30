@@ -14,11 +14,7 @@
 
   define("./windrose.js", function(module, exports, require){
     // ─────────────────────────────────────────────────────────────────────────────
-    // Windrose — the primary 90-day showcase project (anonymised from the real brief)
-    // Client "Windrose" · Streamline→Relay, Juro→Accord, OneTrust→Sentinel,
-    // ServiceNow→CaseDesk, Close→Compass, Jira→Tracker, Airtable→GridWorks,
-    // Catylex→ClauseLens. Resourcing: Christopher Farmer 1.0 FTE (€90/h) + Crystal Morris
-    // (junior analyst) 0.6 FTE (€32/h) + external engineering / security / vendor lanes.
+    // Windrose — the primary 90-day showcase project (anonymised from a client brief).
     // Snapshot "today" = Day 23 (Stage 2 · Design).
     // ─────────────────────────────────────────────────────────────────────────────
     
@@ -217,11 +213,9 @@
         { id: 'b1', label: 'Relay licences (year 1)', amount: 15000, when: 1, status: 'spent', guard: null, basis: 'Legal-request / matter-workflow SaaS for a small in-house team — European category benchmark ≈ €12k–€20k/yr.' },
         { id: 'b2', label: 'Accord licences (year 1)', amount: 21000, when: 1, status: 'spent', guard: null, basis: 'Mid-market CLM licence (contract lifecycle) — European category benchmark ≈ €14k–€45k/yr.' },
         { id: 'b3', label: 'Accord vendor configuration pack', amount: 10500, when: 34, status: 'committed', guard: 't212', guardNote: 'Not released until the design gate passes', basis: 'Vendor professional-services configuration — typically 30–70% of year-1 CLM licence (here ~50%).' },
-        // Implementation lead — Christopher Farmer · €90/h × 7.5h = €675/day · 1.0 FTE · ~64 working days = €43,200.
         { id: 'b4', label: 'Implementation lead — Christopher Farmer (€90/h · 1.0 FTE)', amount: 43200, when: 1, status: 'payroll', guard: null,
           pay: [{ day: 27, amount: 12825 }, { day: 55, amount: 13500 }, { day: 86, amount: 14850 }, { day: 90, amount: 2025 }],
           basis: '€90/h × 7.5h/day = €675/day, full-time across ~64 working days. Settled by monthly payroll in arrears (Days 27/55/86/90).' },
-        // Junior analyst — Crystal Morris · €32/h × 7.5h × 0.6 FTE = €144/day · ~64 working days = €9,216.
         { id: 'b5', label: 'Junior analyst — Crystal Morris (€32/h · 0.6 FTE)', amount: 9216, when: 1, status: 'payroll', guard: null,
           pay: [{ day: 27, amount: 2736 }, { day: 55, amount: 2880 }, { day: 86, amount: 3168 }, { day: 90, amount: 432 }],
           basis: 'Junior legal-ops analyst €32/h fully-loaded (EU market ≈ €30–€38/h) × 7.5h × 0.6 FTE = €144/day. Monthly payroll, same run dates.' },
@@ -1093,7 +1087,31 @@
       [/(migrate|test|pilot|train|roll\s?out|deploy|launch)/i, 3],
     ];
     
-    const clean = (s) => s.replace(/^[\s•·\-\*\d\.\)]+/, '').replace(/\s+/g, ' ').trim();
+    // strip a leading bullet ("- ", "• ", "1. ", "2) ") and collapse whitespace
+    const clean = (s) => s.replace(/^\s*(?:[•·\-\*–—▪◦]+|\d{1,2}[.)])\s*/, '').replace(/\s+/g, ' ').trim();
+    const isBullet = (l) => /^\s*(?:[•·\-\*–—▪◦]|\d{1,2}[.)])\s+/.test(l);
+    // a "Key: value" line — the lead clause is a heading or metadata, the remainder may be a list of tasks
+    const LEAD_RE = /^([^:]{2,80}):\s+(.+)$/;
+    // task-ish verbs — used to decide whether a clause reads as work rather than a statement
+    const VERB_RE = /\b(review|approve|sign\s?-?off|confirm|agree|kick\s?-?off|decide|draft|plan|design|map|define|scope|spec|research|audit|assess|build|implement|develop|configure|create|produce|write|set\s?up|integrat\w*|migrat\w*|test|pilot|train\w*|roll\s?out|deploy|launch|deliver|prepare|document|hire|recruit|procure|select|install|onboard|hand\s?over)\b/i;
+    // split "a, b; c and d" into items; an item's own "X and Y" is only split when both halves read as work
+    const splitAnd = (item) => { const m = item.match(/^(.+?)\s+and\s+(.+)$/i); return m && VERB_RE.test(m[1]) && VERB_RE.test(m[2]) ? [m[1].trim(), m[2].trim()] : [item]; };
+    const listItems = (s) => (/[;,]/.test(s) ? s.split(/\s*[;,]\s*/) : [s]).map((x) => x.replace(/^(and|then|plus)\s+/i, '').trim()).filter(Boolean).flatMap(splitAnd);
+    const startsWithCount = (s) => /^(one|two|three|four|five|six|\d+)\s+\w/i.test(s);
+    
+    // project name = the first clause of the first line (before ':' or a dash), cut at a word boundary
+    function projectName(first) {
+      let s = clean(first.replace(/^#+\s*/, ''));
+      const cut = s.search(/:|—|–|\s-\s/);
+      if (cut > 0) s = s.slice(0, cut);
+      s = s.replace(/[.!?,;\s]+$/, '');
+      if (s.length > 60) {
+        s = s.slice(0, 60);
+        const sp = s.lastIndexOf(' ');
+        s = (sp > 30 ? s.slice(0, sp) : s).replace(/[,;:\s]+$/, '') + '…';
+      }
+      return s || 'Untitled project';
+    }
     
     function parseBrief(raw, opts = {}) {
       const text = (raw || '').trim();
@@ -1102,7 +1120,7 @@
     
       // ── name & horizon ──
       const first = lines[0] || 'Untitled project';
-      const name = opts.name || clean(first.replace(/^#+\s*/, '')).slice(0, 60) || 'Untitled project';
+      const name = opts.name || projectName(first);
       const dayMatch = text.match(/(\d{2,3})[\s-]*day/i);
       const weekMatch = text.match(/(\d{1,2})[\s-]*week/i);
       const monthMatch = text.match(/(\d{1,2})[\s-]*month/i);
@@ -1116,11 +1134,27 @@
       if (!teams.length) teams.push(['delivery', 'Delivery', []]);
       if (teams.length > 4) teams.length = 4;
     
-      // ── candidate tasks: bullets & meaningful lines ──
-      const bulletish = lines.filter((l) => /^[\s]*[•·\-\*\d]/.test(l) || (l.length > 25 && l.length < 160 && !/^#+/.test(l)));
-      let candidates = bulletish.map(clean).filter((l) => l.length > 12 && l.split(' ').length >= 3);
-      const nameLower = name.toLowerCase();
-      candidates = [...new Set(candidates)].filter((c) => c.toLowerCase() !== nameLower && !c.toLowerCase().startsWith(nameLower.slice(0, 24))).slice(0, 28);
+      // ── candidate tasks: bullets, "lead: a, b, c" lists, comma/semicolon/"and" lists, and plain sentences ──
+      let candidates = [];
+      for (const line of lines) {
+        if (isBullet(line)) { const c = clean(line); if (c.length >= 4) candidates.push(c); continue; }   // a bullet is a task, however short
+        if (/^#+\s/.test(line)) continue;                                                                   // markdown heading
+        for (const sentence of line.split(/(?<=[.!?])\s+/)) {
+          const s = sentence.replace(/[.!?]+$/, '').replace(/\s+/g, ' ').trim();
+          if (!s) continue;
+          const m = s.match(LEAD_RE);
+          if (m) {   // "Launch X in 45 days: design, backend API, …" → items; "Deadline: 45 days" → metadata, skipped
+            const rest = m[2];
+            if (/[;,]/.test(rest) || (VERB_RE.test(rest) && rest.split(' ').length >= 2)) candidates.push(...listItems(rest));
+            continue;
+          }
+          if (/[;,]/.test(s) && listItems(s).length >= 3) { candidates.push(...listItems(s)); continue; }
+          if (s.length >= 12 && s.length <= 160 && !startsWithCount(s)) candidates.push(...splitAnd(s));
+        }
+      }
+      const nameLower = name.toLowerCase().replace(/…$/, '');
+      const isTitle = (c) => c.toLowerCase() === nameLower || (nameLower.length >= 12 && c.toLowerCase().startsWith(nameLower));   // the title line is not a task
+      candidates = [...new Set(candidates.map((c) => c.replace(/\s+/g, ' ').trim()))].filter((c) => c.length >= 4 && !isTitle(c)).slice(0, 28);
       const explicitCount = candidates.length;
       if (!candidates.length) {
         // a bare idea — draft the canonical shape of any delivery
@@ -1189,7 +1223,7 @@
       const seed = {
         id: opts.id || 'custom_' + Date.now().toString(36),
         name, client: 'Sandbox', custom: true,
-        tagline: (lines.find((l) => l !== first && l.length > 20 && l.length < 120) || 'Created from a brief by the system').slice(0, 110),
+        tagline: (lines.find((l) => l !== first && !isBullet(l) && !LEAD_RE.test(l) && l.length > 20 && l.length < 120) || 'Created from a brief by the system').slice(0, 110),
         start, days, today: 1, mcSeed: 5 + (name.length % 17),
         outcomes: candidates.slice(0, 4).map((c) => c.charAt(0).toUpperCase() + c.slice(1)),
         stages, resources, workstreams, tasks,

@@ -480,6 +480,8 @@
       return () => txt;
     }
     const parts = txt.split(/\{\{([\s\S]+?)\}\}/g);
+    // inside an SVG <text>/<tspan> an HTML <span> does not render, so interpolations there emit a <tspan>
+    const interpTag = node.parentNode && node.parentNode.namespaceURI === "http://www.w3.org/2000/svg" ? "tspan" : "span";
     return (vals, ctx, key) => h(
       getReact().Fragment,
       { key },
@@ -502,7 +504,7 @@
             return null;
           }
           return h(
-            "span",
+            interpTag,
             { key: i, className: "sc-interp sc-missing" },
             p.trim()
           );
@@ -511,7 +513,7 @@
           return h(getReact().Fragment, { key: i }, v);
         }
         if (v === null || typeof v === "boolean") return null;
-        return h("span", { key: i, className: "sc-interp" }, String(v));
+        return h(interpTag, { key: i, className: "sc-interp" }, String(v));
       })
     );
   }
