@@ -1,4 +1,13 @@
 # Christopher Farmer — portfolio
 # This site contains only public material; nothing here is restricted.
+# The Meridian static export carries ~6,600 generated leaf pages (companies,
+# instruments, matches, graphs, sectors). They are kept out of search so they do
+# not compete with the portfolio pages; the Meridian index and overview pages
+# stay crawlable. Paths are from the domain root: the site lives under /CV/.
 User-agent: *
+Disallow: /CV/projects/meridian/company/
+Disallow: /CV/projects/meridian/instrument/
+Disallow: /CV/projects/meridian/match/
+Disallow: /CV/projects/meridian/graph/company/
+Disallow: /CV/projects/meridian/sector/
 Allow: /

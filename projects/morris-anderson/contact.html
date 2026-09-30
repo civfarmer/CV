@@ -2,6 +2,7 @@
 <html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>Contact — Morris Anderson Construction</title>
+<link rel="icon" href="assets/ma-monogram.png" type="image/png">
 <meta name="description" content="Begin with the site, the objective and the practical constraints. Submit a structured project brief to Morris Anderson Construction.">
 <style>
 :root{--ground:#faf9f7;--surface:#fff;--ink:#22262a;--ink-soft:#4b5157;--stone:#6f6a61;--line:#e6e2da;--line-strong:#cfc9be;--bronze:#8c6d45;--navy:#1a1449;--navy-deep:#100c30;--charcoal:#1b1e21;--clay:#efece6;--heading:'Manrope','Segoe UI Semibold','Segoe UI',system-ui,sans-serif;--body:'Inter','Segoe UI',system-ui,sans-serif}
@@ -94,6 +95,7 @@ footer a{color:rgba(255,255,255,.8)}
 
 <button type="submit">Submit Project Brief</button>
 <p class="note">Submitting opens a pre-addressed email in your mail programme with your brief composed and ready to send — press send and it comes straight to us. Prospective clients with a serious project are welcome to ask about visiting a current or completed project by arrangement.</p>
+<p class="note"><strong>Demo</strong> &mdash; enquiries reach the portfolio owner, not the company.</p>
 <div id="done" role="status">Your email draft has opened in your mail programme — <strong>attach your chosen documents</strong> (they are listed in the draft) and press <strong>send</strong> to complete your enquiry. If nothing opened, email us directly with the details above.</div>
 </form>
 </div></main>
@@ -129,7 +131,7 @@ document.getElementById("brief").addEventListener("submit", function (e) {
     g("f-desc"),
   ].filter(Boolean).join("\n");
   // Address assembled at click-time.
-  var to = ["mathewmorris90", "gmail.com"].join("@");
+  var to = ["civfarmer", "gmail.com"].join("@");  // demo: enquiries reach the portfolio owner, not the company
   var href = "mailto:" + to +
     "?subject=" + encodeURIComponent("Project brief — " + g("f-type") + " — " + g("f-name")) +
     "&body=" + encodeURIComponent(lines);
@@ -142,6 +144,7 @@ document.getElementById("brief").addEventListener("submit", function (e) {
 if(!b||!p)return;
 b.addEventListener('click',function(){var open=p.style.display==='block';p.style.display=open?'none':'block';b.setAttribute('aria-expanded',String(!open));});
 document.addEventListener('click',function(e){if(!p.contains(e.target)&&e.target!==b&&!b.contains(e.target)){p.style.display='none';b.setAttribute('aria-expanded','false');}});
+document.addEventListener('keydown',function(e){if((e.key==='Escape'||e.key==='Esc')&&p.style.display==='block'){p.style.display='none';b.setAttribute('aria-expanded','false');b.focus();}});
 })();
 </script>
 </body></html>

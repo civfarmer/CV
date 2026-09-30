@@ -74,7 +74,7 @@ textarea:focus-visible, summary:focus-visible {
   padding: .5rem 1.2rem; font-size: .88rem; }
 .mode-banner::before { content: "⚠\FE0E"; content: "⚠\FE0E" / "";
   color: var(--warn); font-weight: 700; margin-right: .4em; }
-.shell { display: grid; grid-template-columns: 215px 1fr; min-height: calc(100vh - 60px); }
+.shell { display: grid; grid-template-columns: 215px minmax(0, 1fr); min-height: calc(100vh - 60px); }
 .sidenav { border-right: 1px solid var(--line); padding: .9rem .5rem;
   background: var(--surface); display: flex; flex-direction: column; gap: 2px; }
 .sidenav a { display: block; padding: .42rem .7rem; border-radius: 6px;
@@ -82,7 +82,7 @@ textarea:focus-visible, summary:focus-visible {
 .sidenav a:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
 .sidenav a.active { background: var(--accent); color: var(--accent-ink); font-weight: 600;
   box-shadow: inset 3px 0 0 0 color-mix(in srgb, var(--accent-ink) 80%, transparent); }
-main { padding: 1.1rem 1.4rem 3rem; max-width: 1350px; }
+main { padding: 1.1rem 1.4rem 3rem; max-width: 1350px; min-width: 0; }
 h1 { font-size: 1.45rem; margin: .2rem 0 .7rem; }
 h2 { font-size: 1.05rem; margin: 0 0 .5rem; }
 .card { background: var(--surface); border: 1px solid var(--line);
@@ -201,7 +201,7 @@ td small { color: var(--ink-soft); }
   border-radius: 999px; font-size: .78rem; font-weight: 500; color: var(--ink);
   border: 1px solid color-mix(in srgb, var(--chue, var(--unv)) 42%, var(--line));
   background: color-mix(in srgb, var(--chue, var(--unv)) var(--tint-chip), var(--surface));
-  white-space: nowrap; }
+  white-space: normal; }
 .chip::before { content: "●"; content: "●" / ""; color: var(--chue, var(--unv));
   font-size: .68em; margin-right: .38em; position: relative; top: -.07em; }
 .chip-region { border-radius: 5px; } /* shape distinguishes kind, not colour */
@@ -237,7 +237,7 @@ a.chip:hover { border-color: var(--accent, var(--ink)); }
 q { quotes: "«" "»"; color: var(--ink); background: color-mix(in srgb, var(--accent) 9%, transparent);
   padding: 0 .2rem; border-radius: 3px; }
 @media (max-width: 900px) {
-  .shell { grid-template-columns: 1fr; }
+  .shell { grid-template-columns: minmax(0, 1fr); }
   .sidenav { flex-direction: row; flex-wrap: wrap; border-right: none;
     border-bottom: 1px solid var(--line); position: static; }
   .brand-sub { display: none; }
@@ -323,3 +323,9 @@ body::before {
 .static-banner { background: color-mix(in srgb, var(--accent) 14%, var(--surface));
   border-bottom: 1px solid var(--line); color: var(--ink);
   padding: .45rem 1.2rem; font-size: .85rem; }
+/* portfolio copy (set by app.js at load): sidenav entries whose pages are not in
+   the snapshot, and the note under the filter forms */
+.sidenav a.nav-off { opacity: .55; cursor: not-allowed; }
+.sidenav a.nav-off:hover { background: none; }
+a.link-off { color: var(--ink-soft); text-decoration: underline dotted; cursor: help; }
+.filters-note { flex-basis: 100%; color: var(--ink-soft); font-size: .8rem; }

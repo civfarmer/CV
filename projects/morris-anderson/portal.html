@@ -2,6 +2,8 @@
 <html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>Client Portal — Morris Anderson Construction</title>
+<meta name="description" content="Client portal preview for Morris Anderson Construction — milestones, decisions awaiting the client and change control, shown with demonstration data.">
+<link rel="icon" href="assets/ma-monogram.png" type="image/png">
 <meta name="robots" content="noindex">
 <style>
 :root{--ground:#faf9f7;--surface:#fff;--ink:#22262a;--ink-soft:#4b5157;--stone:#6f6a61;--stone-light:#a39d92;--line:#e6e2da;--line-strong:#cfc9be;--bronze:#8c6d45;--bronze-deep:#74572f;--navy:#1a1449;--navy-deep:#100c30;--charcoal:#1b1e21;--clay:#efece6;--green:#3c6449;--heading:'Manrope','Segoe UI Semibold','Segoe UI',system-ui,sans-serif;--body:'Inter','Segoe UI',system-ui,sans-serif}
@@ -258,6 +260,7 @@ footer a{color:rgba(255,255,255,.8)}
               </select>
               <textarea id="npDesc" rows="3" placeholder="Site, rough size, timing — whatever you know so far." style="width:100%;margin-top:8px;padding:9px 10px;font-size:13px;border:1px solid var(--line-strong);border-radius:2px;font-family:var(--body)"></textarea>
               <button class="btn btn-navy" style="border:0;margin-top:8px;padding:9px 16px;font-size:13px" onclick="requestNewBuild()">Send to the director</button>
+              <span style="display:block;margin-top:6px;font-size:12px;color:var(--ink-soft)"><strong>Demo</strong> &mdash; enquiries reach the portfolio owner, not the company.</span>
             </span>
           </li>
         </ul>
@@ -603,7 +606,7 @@ window.requestNewBuild = function () {
   var type = document.getElementById('npType').value;
   var desc = (document.getElementById('npDesc').value || '').trim();
   if (!type || desc.length < 10) { alert('Please choose a project type and add a few lines about it.'); return; }
-  var to = ['mathewmorris90', 'gmail.com'].join('@');
+  var to = ['civfarmer', 'gmail.com'].join('@');  // demo: enquiries reach the portfolio owner, not the company
   var body = 'EXISTING CLIENT new project request\n\nFrom the client portal of: Hillside Residence (MAC-PRJ-26-DEMO01)\n\nRequested project type: ' + type + '\n\n' + desc;
   window.location.href = 'mailto:' + to + '?subject=' + encodeURIComponent('EXISTING CLIENT new project request — Hillside Residence') + '&body=' + encodeURIComponent(body);
   document.getElementById('npForm').innerHTML = '<span style="font-size:12px;color:var(--ink-soft);background:var(--clay);display:block;padding:8px 12px;border-left:2px solid var(--line-strong)">Your email draft has opened — press send and it goes straight to the director. Existing clients are reviewed first.</span>';
