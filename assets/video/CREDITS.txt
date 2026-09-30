@@ -1,0 +1,8 @@
+Backdrop clips — Geneva from the air. All from Pexels under the Pexels licence (free to use, no attribution required;
+https://www.pexels.com/license/). Credited anyway, with thanks. Re-encoded for the web: 960×540, light grade, crossfade loops.
+  hero-backdrop.*        Jet d'Eau Fountain Geneva – Aerial — The4KTravelChannel Travel — https://www.pexels.com/video/17242172/
+  hero-backdrop-lab.*    the same clip, mirrored, from a later start
+  hero-backdrop-pubs.*   Geneva Switzerland Aerial Mont Blanc Bridge — The4KTravelChannel Travel — https://www.pexels.com/video/17242140/
+  hero-backdrop-cases.*  Drone Footage of Geneva Switzerland — SwissHumanity Stories — https://www.pexels.com/video/7798070/
+
+profile-loop.*  Christopher's own footage (the phone shot and the enhanced close-up), cropped and looped.

@@ -228,12 +228,12 @@
   .cfload p{margin:0;color:var(--mut,#8b97ab);font-size:13px}
   @media (prefers-reduced-motion: reduce){ .cfload .jet{animation:none;stroke-dashoffset:0;stroke-opacity:.92}
     .cfload .plume{animation:none;stroke-opacity:.7} .cfload .drop{animation:none;fill-opacity:.8} }
-  /* video backdrop — the desert clip as a washed watermark across the hero (assets/herobg.js attaches the loop on
+  /* video backdrop — Geneva from the air as a washed watermark across the hero (Pexels, free licence; assets/video/CREDITS.txt) (assets/herobg.js attaches the loop on
      desktops; phones, reduced motion and data saver keep the poster). Washed towards the page colour on the text
      side, but legible: you can make out the desert, the mountains and the figure. */
   .herobg{position:absolute;left:0;right:0;top:0;height:clamp(380px,58vh,640px);z-index:0;overflow:hidden;pointer-events:none}
   @media(min-width:1080px){.herobg{left:264px}}
-  .herobg video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 38%;opacity:.72}
+  .herobg video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%;opacity:.72}
   html[data-theme="light"] .herobg video{opacity:.6}
   .herobg-wash{position:absolute;inset:0;background:linear-gradient(90deg,color-mix(in oklab,var(--bg) 92%,transparent) 0%,color-mix(in oklab,var(--bg) 55%,transparent) 34%,color-mix(in oklab,var(--bg) 14%,transparent) 66%,transparent 100%),linear-gradient(180deg,color-mix(in oklab,var(--bg) 58%,transparent) 0%,transparent 26%,transparent 60%,var(--bg) 100%)}
   main.wrap{position:relative;z-index:1}
