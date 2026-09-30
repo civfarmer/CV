@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>Morris Anderson Construction — Design &amp; Estimator Preview</title>
+<meta name="description" content="Morris Anderson Construction — design and estimator preview: turnkey builds, self-build support and development, with an early-stage cost estimator. Portfolio demonstration with demo data.">
+<link rel="icon" href="assets/ma-monogram.png" type="image/png">
 <style>
   /* Design tokens — mirror app/globals.css */
   :root{
@@ -166,6 +168,7 @@
 if(!b||!p)return;
 b.addEventListener('click',function(){var open=p.style.display==='block';p.style.display=open?'none':'block';b.setAttribute('aria-expanded',String(!open));});
 document.addEventListener('click',function(e){if(!p.contains(e.target)&&e.target!==b&&!b.contains(e.target)){p.style.display='none';b.setAttribute('aria-expanded','false');}});
+document.addEventListener('keydown',function(e){if((e.key==='Escape'||e.key==='Esc')&&p.style.display==='block'){p.style.display='none';b.setAttribute('aria-expanded','false');b.focus();}});
 })();
 </script>
 
@@ -452,6 +455,7 @@ document.addEventListener('click',function(e){if(!p.contains(e.target)&&e.target
         <button type="button" class="btn btn-ink" style="border:0;cursor:pointer" onclick="sendQuoteRequest()">Send for a formal quotation</button>
         <a class="btn btn-bronze" href="contact.html">Or complete a full project brief</a>
       </div>
+      <p class="note" style="margin-top:10px"><strong>Demo</strong> &mdash; enquiries reach the portfolio owner, not the company.</p>
     </div>
   </div>
 </section>
@@ -1176,7 +1180,7 @@ window.sendQuoteRequest = function(){
   if (r.level) L.push("Confidence: " + r.level);
   if (r.advisory) L.push("Advisory support: " + r.advisory.hours + " hrs/week over ~" + r.advisory.weeks + " weeks ≈ " + range(r.advisory.totalLow, r.advisory.totalHigh) + " (charged separately from the build cost, which remains your own)");
   L.push("","Please contact me to take this to a formal quotation.","(Sent from the website preview — figures are indicative, prepared without a site inspection.)");
-  var to = ["mathewmorris90","gmail.com"].join("@");
+  var to = ["civfarmer","gmail.com"].join("@");  // demo: enquiries reach the portfolio owner, not the company
   window.location.href = "mailto:" + to + "?subject=" + encodeURIComponent("Quotation request — " + (ROUTE_LABELS[sel.route]||sel.route) + " — " + sel.area + " m²") + "&body=" + encodeURIComponent(L.join("\n"));
 };
 document.querySelectorAll("#estForm select, #estForm input").forEach(i=>i.addEventListener("input", recalc));

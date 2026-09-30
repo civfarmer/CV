@@ -2,6 +2,7 @@
 <html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>Self-Build Support — Morris Anderson Construction</title>
+<link rel="icon" href="assets/ma-monogram.png" type="image/png">
 <meta name="description" content="Supported self-build with Morris Anderson: keep the control you want, hand over the coordination you do not — managed, guided and cost-controlled routes.">
 <style>
 :root{--ground:#faf9f7;--surface:#fff;--ink:#22262a;--ink-soft:#4b5157;--stone:#6f6a61;--line:#e6e2da;--line-strong:#cfc9be;--bronze:#8c6d45;--navy:#1a1449;--navy-deep:#100c30;--charcoal:#1b1e21;--clay:#efece6;--heading:'Manrope','Segoe UI Semibold','Segoe UI',system-ui,sans-serif;--body:'Inter','Segoe UI',system-ui,sans-serif}
@@ -83,6 +84,7 @@ dl.facts dd{margin:4px 0 0;font-size:13px;color:var(--ink-soft)}
 if(!b||!p)return;
 b.addEventListener('click',function(){var open=p.style.display==='block';p.style.display=open?'none':'block';b.setAttribute('aria-expanded',String(!open));});
 document.addEventListener('click',function(e){if(!p.contains(e.target)&&e.target!==b&&!b.contains(e.target)){p.style.display='none';b.setAttribute('aria-expanded','false');}});
+document.addEventListener('keydown',function(e){if((e.key==='Escape'||e.key==='Esc')&&p.style.display==='block'){p.style.display='none';b.setAttribute('aria-expanded','false');b.focus();}});
 })();
 </script>
 <section class="hero"><img class="wm" src="assets/ma-monogram.png" alt="" aria-hidden="true"><div class="wrap">

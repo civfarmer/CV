@@ -5,7 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f17'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='27' font-weight='700' fill='%23d4b24c' text-anchor='middle'%3ECF%3C/text%3E%3C/svg%3E">
 <title>Vantage — Case study · Christopher I. V. Farmer</title>
-<meta name="description" content="Case study: Vantage, a dependency-free demand-forecasting engine that shows its error before its forecast — rolling-origin back-testing, honest baselines and 80% prediction intervals as governance discipline. Synthetic data.">
+<meta name="description" content="Case study: Vantage, a dependency-free demand-forecasting engine that shows its error before its forecast — rolling-origin back-testing, honest baselines and 80% and 95% prediction intervals as governance discipline. Synthetic data.">
+<meta property="og:title" content="Vantage — Case study · Christopher I. V. Farmer">
+<meta property="og:description" content="Case study: Vantage, a dependency-free demand-forecasting engine that shows its error before its forecast — rolling-origin back-testing, honest baselines and 80% and 95% prediction intervals as governance discipline. Synthetic data.">
+<meta property="og:url" content="https://civfarmer.github.io/CV/case-studies/vantage.html">
+<meta property="og:type" content="article">
 <style>
   /* Offline-first: font families fall back to system fonts. No network requests, no CDN. */
   :root{
@@ -246,7 +250,7 @@
         <p>Vantage is a <b>self-contained, dependency-free forecasting engine</b> wrapped in five industry skins — brewery, direct-to-consumer, education, manufacturing and SaaS — plus a free sandbox for your own numbers.</p>
         <ul>
           <li>The engine implements <b>Holt-Winters, ETS, Croston</b> (for intermittent demand), <b>seasonal-naive and OLS regression</b>, and selects the model per series by the <b>lowest back-tested error on rolling origins</b> — WAPE (the selection metric), with MAE, RMSE, MAPE and bias, all evaluated on data the model was not fitted to.</li>
-          <li>Every forecast ships with an <b>80% prediction interval</b>, and horizons are planned in operationally sensible weekly or monthly steps.</li>
+          <li>Every forecast ships with <b>80% and 95% prediction intervals</b> (stock plans use the 95% band), and horizons are planned in operationally sensible weekly or monthly steps.</li>
           <li>The embedded version is the <b>live app</b>: the engine's real forecasts, charts and intervals are computed in the browser on a locally-vendored React 18 runtime, so it runs fully offline.</li>
         </ul>
       </section>
