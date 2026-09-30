@@ -1,0 +1,3 @@
+Circle Flags — round SVG country flags by HatScripts (https://github.com/HatScripts/circle-flags),
+MIT licence (LICENSE.md in this folder). Two-letter ISO 3166-1 codes plus eu.svg; unmodified.
+Used in Frontier, Sentinel, the Sanctions Suite and Ground Truth to mark jurisdictions and flag states.

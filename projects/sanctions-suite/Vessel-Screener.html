@@ -29,6 +29,8 @@
   th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
   th{color:var(--muted);font-size:.7rem;text-transform:uppercase}
   .pill{display:inline-block;font-size:.68rem;padding:1px 7px;border-radius:99px;border:1px solid var(--line);margin:1px 3px 1px 0}
+  /* round country flags (assets/flags — circle-flags, MIT) beside ISO codes */
+  .cflag{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:-2px;margin-right:4px;box-shadow:0 0 0 1px rgba(127,127,127,.35)}
   .flag{background:rgba(224,87,74,.15);border-color:var(--bad);color:var(--bad)}
   .ok{background:rgba(67,197,158,.13);border-color:var(--good);color:var(--good)}
   .muted{color:var(--muted);font-size:.8rem}
@@ -99,6 +101,11 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   var V = P ? P.vessels : [];
   var lastRows = null;
 
+  /* Round flags from assets/flags (circle-flags, MIT): a small flag before an ISO-2 code; a code with no file shows the code alone. */
+  var FLAGDIR='../../assets/flags/';
+  function flag(code){ code=String(code||'').toLowerCase().split('-')[0]; if(!/^[a-z]{2}$/.test(code)) return ''; return '<img class="cflag" src="'+FLAGDIR+code+'.svg" alt="" width="14" height="14" loading="lazy" decoding="async" onerror="this.remove()">'; }
+  function flagged(code){ code=String(code==null?'':code); return flag(code)+esc(code.toUpperCase()); }
+  function flaggedList(list){ return (list||[]).map(flagged).join(', '); }
   function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){
     return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
   // Unicode-aware, matching the other tools: an ASCII-only filter returned a
@@ -199,7 +206,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
          (designated(v) ? '<span class="pill flag">LISTED</span>'
                         : '<span class="pill" style="border-color:var(--warn);color:var(--warn)">RELATED — not itself designated</span>')+
          '<span class="pill">'+esc(v.s)+'</span>'+
-         (v.flag?'<span class="pill">flag '+esc(v.flag)+'</span>':'')+
+         (v.flag?'<span class="pill">flag '+flagged(v.flag)+'</span>':'')+
          '<span class="muted">matched on '+esc(x.why)+'</span></div>';
     h += '<table style="margin-top:8px"><tbody>';
     if(v.imo)  h += '<tr><th>IMO</th><td class="mono">'+esc(v.imo)+'</td></tr>';
@@ -289,7 +296,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
         '<td>'+(t?(designated(t.v)?'<span class="pill flag">LISTED</span>':'<span class="pill" style="border-color:var(--warn);color:var(--warn)">related</span>')
                  :'<span class="pill ok">not listed</span>')+'</td>'+
         '<td>'+(t?esc(t.v.n)+'<div class="muted">'+esc(t.why)+'</div>':'—')+'</td>'+
-        '<td>'+(t?esc(t.v.flag||""):"")+'</td>'+
+        '<td>'+(t?flagged(t.v.flag||""):"")+'</td>'+
         '<td>'+(t?(t.v.pg||[]).map(function(p){return '<span class="pill">'+esc(p)+'</span>'}).join(""):"")+'</td>'+
         '<td>'+(t?(ownFlag?'<span class="pill flag">yes</span>':'<span class="muted">none recorded</span>'):"")+'</td></tr>';
     });
@@ -302,7 +309,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     h += '<table><thead><tr><th>Name</th><th>Type</th><th>IMO</th><th>Flag</th><th>Programmes</th><th>Owners</th></tr></thead><tbody>';
     V.slice(0,600).forEach(function(v){
       h += '<tr><td><strong>'+esc(v.n)+'</strong></td><td>'+esc(v.s)+'</td><td class="mono">'+esc(v.imo||"")+'</td>'+
-        '<td>'+esc(v.flag||"")+'</td><td>'+(v.pg||[]).slice(0,3).map(function(p){return '<span class="pill">'+esc(p)+'</span>'}).join("")+'</td>'+
+        '<td>'+flagged(v.flag||"")+'</td><td>'+(v.pg||[]).slice(0,3).map(function(p){return '<span class="pill">'+esc(p)+'</span>'}).join("")+'</td>'+
         '<td>'+((v.own||[]).length||"")+'</td></tr>';
     });
     h += '</tbody></table>';
