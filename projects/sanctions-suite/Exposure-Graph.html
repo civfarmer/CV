@@ -9,7 +9,7 @@
     --line:#233145;--accent:#43b3a6;--accent-ink:#84d6ca;--bad:#e0574a;--warn:#e0a13a;--good:#43c59e;
     --mono:ui-monospace,'Cascadia Code',Consolas,monospace;--sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
   html[data-theme="light"]{--bg:#f4f1ec;--surface:#fff;--surface2:#faf7f2;--ink:#221e18;--ink2:#4c473e;
-    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f--good:#0f7a5a;--warn:#8a5a10;--bad:#a32a1e;}
+    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f;--good:#0f7a5a;--warn:#8a5a10;--bad:#a32a1e;}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55}
   header{border-bottom:1px solid var(--line);padding:14px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--surface)}
@@ -17,6 +17,7 @@
   .tag{font-size:.7rem;padding:2px 8px;border:1px solid var(--line);border-radius:99px;color:var(--muted)}
   .spacer{flex:1}
   button{background:var(--accent);color:#04211e;border:0;border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer;font-size:.86rem}
+  html[data-theme="light"] button:not(.ghost){color:#fff}
   button.ghost{background:transparent;color:var(--ink2);border:1px solid var(--line)}
   button:disabled{opacity:.5;cursor:not-allowed}
   main{padding:20px;max-width:1240px;margin:0 auto}
@@ -37,8 +38,20 @@
   .res{cursor:pointer;padding:7px 8px;border-bottom:1px solid var(--line)}
   .res:hover{background:var(--surface2)}
   .grid{display:grid;grid-template-columns:330px 1fr;gap:20px}
+  .grid>*{min-width:0}
+  #out,#hits{overflow-x:auto}
   @media(max-width:900px){.grid{grid-template-columns:1fr}}
   svg{width:100%;height:auto;background:var(--surface2);border-radius:8px;border:1px solid var(--line)}
+  /* The map takes its colours from the theme, so it reads in light mode too. */
+  svg .xg-edge{stroke:var(--muted);stroke-width:1.5}
+  svg .xg-edge.sanc{stroke:var(--bad)}
+  svg .xg-arw{fill:var(--muted)}
+  svg .xg-arw.sanc{fill:var(--bad)}
+  svg .xg-elabel{fill:var(--muted);font-size:9px;paint-order:stroke;stroke:var(--surface2);stroke-width:3px;stroke-linejoin:round}
+  svg .xg-node{fill:var(--surface);stroke:var(--muted);stroke-width:2}
+  svg .xg-node.root{fill:var(--accent);stroke:var(--accent-ink)}
+  svg .xg-node.sanc{fill:var(--bad);stroke:var(--bad)}
+  svg .xg-label{fill:var(--ink2);font-size:10px}
   @media print{.noprint{display:none!important}body{background:#fff;color:#000}}
 </style>
 <script>
@@ -57,10 +70,10 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   <span class="spacer"></span>
   <a class="tag" href="index.html" data-keep-theme style="text-decoration:none">← Suite</a>
   <button class="ghost noprint" id="themeBtn">Theme</button>
-  <button class="ghost noprint" id="selfTestBtn">Self-test</button>
+  <button class="ghost noprint" id="selfTestBtn" disabled>Self-test</button>
 </header>
 <main>
-  <div class="banner" id="provenance">Loading data pack…</div>
+  <div class="banner" id="provenance">Loading the 2 MB relationship pack… (a few seconds on a normal connection).</div>
   <div class="grid">
     <div>
       <div class="card">
@@ -75,9 +88,10 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
           <option value="4">4 — very wide (slower)</option>
         </select>
         <div style="margin-top:12px;display:flex;gap:8px">
-          <button id="searchBtn">Search</button>
+          <button id="searchBtn" disabled>Search</button>
           <button class="ghost" id="dossierBtn" disabled>Export dossier</button>
         </div>
+        <div class="muted" id="loadNote" style="margin-top:8px">Loading the 2 MB relationship pack… The buttons enable when it has parsed.</div>
       </div>
       <div class="card"><div id="hits"><div class="muted">Search results appear here.</div></div></div>
     </div>
@@ -215,10 +229,14 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
       employment: forward ? "is employed by" : "employs",
       membership: forward ? "is a member of" : "has as member",
       succession: forward ? "precedes" : "succeeds",
-      link: "is linked to"
+      link: "is associated with"
     };
     return (map[t]||t)+role+pct;
   }
+  // The source schema's "link" is an association of unstated kind; on the map
+  // and in the routes it reads as one rather than as a bare "link".
+  var EDGE_LABEL = {link:"association", associate:"association"};
+  function uniq(a){ return (a||[]).filter(function(v,i,arr){ return v && arr.indexOf(v)===i; }); }
   function sourceNote(step){
     var e = step.edge;
     if(e.r && DIRECTIONAL_ROLE.test(String(e.r).trim())){
@@ -230,13 +248,15 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   function designation(id){
     var n = NODES[id] || {};
     var bits = [];
-    if((n.pg||[]).length) bits.push((n.pg||[]).join(", "));
-    if((n.au||[]).length) bits.push((n.au||[]).join("; "));
+    // Programmes and authorities repeat in the source when several lists cite
+    // the same one; each is stated once.
+    if(uniq(n.pg).length) bits.push(uniq(n.pg).join(", "));
+    if(uniq(n.au).length) bits.push(uniq(n.au).join("; "));
     return bits.join(" · ");
   }
 
   function drawGraph(id, paths){
-    var W=680, cx=W/2, rowH=74;
+    var W=680, cx=W/2, rowH=84;
     var rows = [[{id:id, root:true}]];
     var placed = Object.create(null); placed[id]=true;
     paths.slice(0,6).forEach(function(p){
@@ -247,22 +267,26 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     });
     var H = Math.max(160, rows.length*rowH+40);
     var pos = Object.create(null);
+    // Colours come from the stylesheet (classes below), not from fixed fills, so
+    // the map follows the theme.
     var s = '<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="exposure graph">'+
       '<defs><marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">'+
-      '<path d="M0,0 L10,5 L0,10 z" fill="#7d8ba3"/></marker>'+
+      '<path d="M0,0 L10,5 L0,10 z" class="xg-arw"/></marker>'+
       '<marker id="arwS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">'+
-      '<path d="M0,0 L10,5 L0,10 z" fill="#e0574a"/></marker></defs>';
+      '<path d="M0,0 L10,5 L0,10 z" class="xg-arw sanc"/></marker></defs>';
     rows.forEach(function(row,ri){
       var y = 34+ri*rowH;
       row.forEach(function(cell,ci){
         var x = row.length===1 ? cx : (W/(row.length+1))*(ci+1);
-        pos[cell.id]={x:x,y:y};
+        // Labels are cut to the space a row gives each node and neighbours are
+        // staggered, so six names in a row no longer overprint one another.
+        pos[cell.id]={x:x,y:y, maxChars:Math.max(8, Math.floor((W/(row.length+1))/5.6)-1), dy:(ci%2?34:22)};
       });
     });
     // edges first
     rows.forEach(function(row,ri){
       if(!ri) return;
-      row.forEach(function(cell){
+      row.forEach(function(cell,ci){
         if(!cell.via) return;
         var a=pos[cell.via.from], b=pos[cell.id];
         if(!a||!b) return;
@@ -270,20 +294,32 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
         // Draw in the real direction of the relationship, not the walk order.
         var fwd = cell.via.dir==="out";
         var x1=(fwd?a.x:b.x), y1=(fwd?a.y+12:b.y-14), x2=(fwd?b.x:a.x), y2=(fwd?b.y-14:a.y+12);
-        s += '<line x1="'+x1.toFixed(1)+'" y1="'+y1+'" x2="'+x2.toFixed(1)+'" y2="'+y2+'" stroke="'+
-             (sanc?'#e0574a':'#2c3d54')+'" stroke-width="1.5" marker-end="url(#'+(sanc?'arwS':'arw')+')"/>';
-        var mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
-        s += '<text x="'+mx.toFixed(1)+'" y="'+my.toFixed(1)+'" fill="#7d8ba3" font-size="9" text-anchor="middle">'+
-             esc(cell.via.edge.t)+'</text>';
+        s += '<line class="xg-edge'+(sanc?' sanc':'')+'" x1="'+x1.toFixed(1)+'" y1="'+y1+'" x2="'+x2.toFixed(1)+'" y2="'+y2+
+             '" marker-end="url(#'+(sanc?'arwS':'arw')+')"/>';
+        // The relationship word sits well down the line, where a fan of routes
+        // from one node has spread apart, and alternates height with its neighbour.
+        var f=(ci%2?0.70:0.50), mx=a.x+(b.x-a.x)*f, my=a.y+(b.y-a.y)*f+3;
+        var t=cell.via.edge.t;
+        s += '<text class="xg-elabel" x="'+mx.toFixed(1)+'" y="'+my.toFixed(1)+'" text-anchor="middle">'+
+             esc(EDGE_LABEL[t]||t)+'</text>';
       });
     });
     // nodes
+    var hasChildren = Object.create(null);
+    rows.forEach(function(row,ri){ if(ri) row.forEach(function(cell){ if(cell.via) hasChildren[cell.via.from]=true; }); });
     Object.keys(pos).forEach(function(nid){
       var p=pos[nid], sanc=isSanctioned(nid), root=(nid===id);
-      var label=nodeLabel(nid); if(label.length>26) label=label.slice(0,25)+"…";
-      s += '<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y+'" r="'+(root?9:7)+'" fill="'+
-           (sanc?'#e0574a':(root?'#43b3a6':'#182133'))+'" stroke="'+(root?'#84d6ca':'#233145')+'" stroke-width="2"/>';
-      s += '<text x="'+p.x.toFixed(1)+'" y="'+(p.y+22)+'" fill="#aab7cc" font-size="10" text-anchor="middle">'+esc(label)+'</text>';
+      var full=nodeLabel(nid), label=full;
+      // The subject's name goes above its node and an intermediate node's beside
+      // it, so neither sits under the routes leaving it; leaves are labelled below.
+      var lx=p.x, ly=p.y+p.dy, anchor="middle", maxChars=p.maxChars;
+      if(root){ ly=p.y-16; }
+      else if(hasChildren[nid]){ lx=p.x+12; ly=p.y+4; anchor="start"; maxChars=Math.min(maxChars, 40); }
+      if(label.length>maxChars) label=label.slice(0,maxChars-1)+"…";
+      s += '<circle class="xg-node'+(sanc?' sanc':(root?' root':''))+'" cx="'+p.x.toFixed(1)+'" cy="'+p.y+'" r="'+(root?9:7)+'">'+
+           '<title>'+esc(full)+'</title></circle>';
+      s += '<text class="xg-label" x="'+lx.toFixed(1)+'" y="'+ly+'" text-anchor="'+anchor+'">'+
+           (label!==full?'<title>'+esc(full)+'</title>':'')+esc(label)+'</text>';
     });
     return s+'</svg>';
   }
@@ -325,7 +361,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
         result.targetCount+' sanctioned entit'+(result.targetCount===1?'y':'ies')+' reachable via '+
         paths.length+(result.truncated?'+':'')+' route'+(paths.length===1?'':'s')+
         ' — shortest is '+shortest+' hop'+(shortest>1?'s':'')+'.</strong>'+
-        (result.truncated?'<div class="muted">Route list truncated at 40; increase specificity or reduce depth to see the rest.</div>':'')+
+        (result.truncated?'<div class="muted">Showing the first 40 routes — reduce the depth to narrow them.</div>':'')+
         '</div>';
       h += drawGraph(id, paths);
       h += '<h3 style="font-size:.9rem;margin-top:14px">Routes</h3>';
@@ -350,13 +386,25 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     document.getElementById("out").innerHTML = h;
   }
 
+  // Every search starts from a blank map: the previous entity's panel must not
+  // stay on screen and read as the answer to the new name.
+  function resetPanel(msg){
+    current=null; currentPaths=null; currentResult=null;
+    document.getElementById("dossierBtn").disabled=true;
+    document.getElementById("out").innerHTML='<div class="muted">'+msg+'</div>';
+  }
   function doSearch(){
     if(!P) return;
     var q=document.getElementById("q").value.trim();
     if(!q){ alert("Enter a name."); return; }
     var ids=search(q);
     var el=document.getElementById("hits");
-    if(!ids.length){ el.innerHTML='<div class="muted">No entity of that name in the relationship graph. Note this graph holds only entities that have at least one recorded relationship — screen names in Sentinel instead.</div>'; return; }
+    if(!ids.length){
+      el.innerHTML='<div class="muted">No entity of that name in the relationship graph. Note this graph holds only entities that have at least one recorded relationship — screen names in Sentinel instead.</div>';
+      resetPanel('Nothing to map: no entity called "'+esc(q)+'" is in the relationship graph, so no routes were searched.');
+      return;
+    }
+    resetPanel(ids.length+' entit'+(ids.length===1?'y':'ies')+' found — select one to map its ownership and association exposure.');
     el.innerHTML = '<div class="muted" style="margin-bottom:6px">'+
       (ids.total && ids.total>ids.length ? 'showing '+ids.length+' of '+ids.total+' matches'
                                          : ids.length+' match(es)')+'</div>' +
@@ -423,15 +471,19 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
 
   function setProvenance(){
     var el=document.getElementById("provenance");
-    if(!P){ el.innerHTML='<strong style="color:var(--bad)">Data pack not found.</strong> Run 01-build\\BUILD-ALL.cmd, then reopen.'; return; }
+    if(!P){ el.innerHTML='<strong style="color:var(--bad)">The data pack did not load</strong> — reload the page or check your connection.'; return; }
     document.getElementById("verTag").textContent=P.meta.snapshot_version||"unknown";
     var pre = P.meta.demo_subset
       ? '<div style="color:var(--warn);margin-bottom:6px"><strong>Coverage.</strong> '+esc(P.meta.coverage_note||P.meta.demo_note||"")+'</div>'
       : (P.meta.coverage_note ? '<div class="muted" style="margin-bottom:6px"><strong>Coverage.</strong> '+esc(P.meta.coverage_note)+'</div>' : '');
+    var ids=Object.keys(NODES), nSanc=0;
+    ids.forEach(function(k){ if(isSanctioned(k)) nSanc++; });
     el.innerHTML=pre+'<strong>Dataset:</strong> OpenSanctions snapshot <span class="mono">'+esc(P.meta.snapshot_version)+'</span> · '+
-      Object.keys(NODES).length.toLocaleString()+' entities with relationships · '+EDGES.length.toLocaleString()+
+      ids.length.toLocaleString()+' entities with relationships · '+EDGES.length.toLocaleString()+
       ' recorded links (ownership, directorship, family, association, representation).<br>'+
-      'Only entities that appear in at least one relationship are in this graph. '+esc(P.meta.attribution||"");
+      'Only entities that appear in at least one relationship are in this graph, and most of them ('+nSanc.toLocaleString()+' of '+ids.length.toLocaleString()+
+      ') are themselves designated parties, because the relationships come from the sanctions sources: a search usually starts from a listed name and maps what it controls or is controlled by. '+
+      esc(P.meta.attribution||"");
   }
 
   function selfTest(){
@@ -499,6 +551,13 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
       return p.indexOf("Owned or Controlled By")<0;
     })());
     ok("non-directional role retained", relPhrase({dir:"out",edge:{t:"family",r:"son",p:"",d:""}}).indexOf("son")>0);
+    ok("designation states each programme and authority once", (function(){
+      var sN=NODES; NODES={D:{n:"D",pg:["A","A","B"],au:["X","X"]}};
+      var d=designation("D"); NODES=sN;
+      return d==="A, B · X";
+    })());
+    ok("an unspecified link reads as an association", EDGE_LABEL.link==="association" &&
+       relPhrase({dir:"out",edge:{t:"link",r:"",p:"",d:""}}).indexOf("associated")>=0);
     var anyName=null;
     for(var k in NODES){ if(NODES[k].n && toks(NODES[k].n).length>=2){ anyName=k; break; } }
     if(anyName) ok("entity found by its own name", search(NODES[anyName].n).indexOf(anyName)>=0, NODES[anyName].n);
@@ -515,6 +574,16 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   document.getElementById("q").addEventListener("keydown",function(e){ if(e.key==="Enter") doSearch(); });
   document.getElementById("depth").addEventListener("change",function(){ if(current) showEntity(current); });
   setProvenance();
+  // The pack is a blocking download and the handlers are bound only after it,
+  // so the action buttons start disabled in the markup. Now that it has parsed,
+  // open the tool and search anything the visitor typed meanwhile.
+  (function(){
+    var note=document.getElementById("loadNote");
+    if(note) note.parentNode.removeChild(note);
+    if(!P) return;
+    ["searchBtn","selfTestBtn"].forEach(function(id){ document.getElementById(id).disabled=false; });
+    if(document.getElementById("q").value.trim()) doSearch();
+  })();
 })();
 </script>
 <script>

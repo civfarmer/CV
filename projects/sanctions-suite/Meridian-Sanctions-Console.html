@@ -9,7 +9,7 @@
     --line:#233145;--accent:#43b3a6;--accent-ink:#84d6ca;--bad:#e0574a;--warn:#e0a13a;--good:#43c59e;
     --mono:ui-monospace,'Cascadia Code',Consolas,monospace;--sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
   html[data-theme="light"]{--bg:#f4f1ec;--surface:#fff;--surface2:#faf7f2;--ink:#221e18;--ink2:#4c473e;
-    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f--good:#0f7a5a;--warn:#8a5a10;--bad:#a32a1e;}
+    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f;--good:#0f7a5a;--warn:#8a5a10;--bad:#a32a1e;}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55}
   header{border-bottom:1px solid var(--line);padding:14px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--surface)}
@@ -17,15 +17,18 @@
   .tag{font-size:.7rem;padding:2px 8px;border:1px solid var(--line);border-radius:99px;color:var(--muted)}
   .spacer{flex:1}
   button{background:var(--accent);color:#04211e;border:0;border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer;font-size:.86rem}
+  html[data-theme="light"] button:not(.ghost){color:#fff}
   button.ghost{background:transparent;color:var(--ink2);border:1px solid var(--line)}
+  button:disabled{opacity:.5;cursor:not-allowed}
   main{padding:20px;max-width:1240px;margin:0 auto}
   .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+  #out{overflow-x:auto}
   .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px}
   .kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
   .kpi .v{font-size:1.6rem;font-weight:700;line-height:1.1}
   .kpi .l{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
   .kpi.alert .v{color:var(--bad)}
-  input,select{background:var(--surface2);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:.9rem}
+  input,select{background:var(--surface2);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:.9rem;max-width:100%}
   table{width:100%;border-collapse:collapse;font-size:.85rem}
   th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
   th{color:var(--muted);font-size:.7rem;text-transform:uppercase}
@@ -55,11 +58,11 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   <span class="spacer"></span>
   <a class="tag" href="index.html" data-keep-theme style="text-decoration:none">← Suite</a>
   <button class="ghost noprint" id="themeBtn">Theme</button>
-  <button class="ghost noprint" id="selfTestBtn">Self-test</button>
-  <button class="ghost noprint" id="csvBtn">Export CSV</button>
+  <button class="ghost noprint" id="selfTestBtn" disabled>Self-test</button>
+  <button class="ghost noprint" id="csvBtn" disabled>Export CSV</button>
 </header>
 <main>
-  <div class="banner" id="provenance">Loading data pack…</div>
+  <div class="banner" id="provenance">Loading the 0.05 MB Meridian pack…</div>
   <div class="kpis" id="kpis"></div>
   <div class="card noprint">
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
@@ -95,9 +98,19 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     return v.toLowerCase();
   }
   function arr(v){ return Array.isArray(v)?v:(v?[v]:[]); }
+  // Some source rows arrive still wrapped in CSV quoting, with inner quotes
+  // doubled: "Limited Liability Company ""Compass Group""". Shown unwrapped.
+  function dq(s){
+    s=String(s==null?"":s);
+    if(s.length>1 && s.charAt(0)==='"' && s.charAt(s.length-1)==='"' && s.indexOf('""')>=0)
+      s=s.slice(1,-1).replace(/""/g,'"');
+    return s;
+  }
+  // The "crime" collection is wider than its name: enforcement actions,
+  // procurement debarments and disqualifications sit alongside warrants.
   function listLabel(l){
     var a=arr(l); if(!a.length) return "Unknown";
-    return a.map(function(x){return x==="S"?"Sanctions":x==="C"?"Crime":x==="P"?"PEP":"Unknown";}).join(" + ");
+    return a.map(function(x){return x==="S"?"Sanctions":x==="C"?"Crime / enforcement / debarment":x==="P"?"PEP":"Unknown";}).join(" + ");
   }
   function listClass(l){
     var a=arr(l);
@@ -140,8 +153,8 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     if(!P || !P.available){
       document.getElementById("out").innerHTML =
         '<strong style="color:var(--bad)">Meridian company data not available.</strong>'+
-        '<div class="muted">The pack was built without access to meridian.db, or the build reported: '+
-        esc((P&&P.error)||"no error recorded")+'. Re-run 01-build\\BUILD-ALL.cmd on the machine holding Meridian.</div>';
+        '<div class="muted">This build was made without the Meridian register'+
+        ((P&&P.error)?' (build note: '+esc(P.error)+')':'')+', so there is nothing to screen here.</div>';
       return;
     }
     var rows=filtered();
@@ -156,7 +169,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
         '<td>'+(t?'<span class="pill p-'+listClass(t.l)+'">review</span>'
               :(c.belowBand?'<span class="pill p-U">below band</span>':'<span class="pill ok">no match</span>'))+'</td>'+
         '<td class="score">'+(t?t.sc.toFixed(2):'—')+'</td>'+
-        '<td>'+(t?esc(t.n)+(t.via&&t.via!==t.n?'<div class="muted">via '+esc(t.via)+'</div>':''):'<span class="muted">—</span>')+
+        '<td>'+(t?esc(dq(t.n))+(t.via&&t.via!==t.n?'<div class="muted">via '+esc(dq(t.via))+'</div>':''):'<span class="muted">—</span>')+
           (function(){
             var shown=c.h.length, real=(c.ht&&c.ht>shown)?c.ht:shown;
             if(real<=1) return '';
@@ -192,9 +205,11 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   // a literal 15 against a literal 15 and would have passed the very five-column
   // shift it was added to catch.
   function corpusLabel(){
-    var m=P.meta;
+    var m=P.meta, man=window.PACK_MANIFEST||{};
+    // This pack's meta carries no record count of its own; the manifest does.
+    var n=m.records||man.records||(man.counts&&man.counts.distinct_core_entities)||"";
     if(m.demo_subset) return "DEMO SUBSET: "+m.demo_records+" of "+m.full_records+" records";
-    if(m.full_corpus) return "full corpus: "+(m.records||"")+" sanctions + crime entities"+
+    if(m.full_corpus) return "full corpus: "+n+" sanctions + crime entities"+
       (m.pep_available===false ? "; PEP overlay not searched" : "");
     return "full build";
   }
@@ -225,15 +240,17 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
 
   function setProvenance(){
     var el=document.getElementById("provenance");
-    if(!P){ el.innerHTML='<strong style="color:var(--bad)">Data pack not found.</strong> Run 01-build\\BUILD-ALL.cmd, then reopen.'; return; }
+    if(!P){ el.innerHTML='<strong style="color:var(--bad)">The data pack did not load</strong> — reload the page or check your connection.'; return; }
     document.getElementById("verTag").textContent=P.meta.snapshot_version||"unknown";
     var pre="";
     if(P.meta.sample_build) pre+='<div style="color:var(--bad)"><strong>SAMPLE BUILD — truncated data, not valid for screening.</strong></div>';
     else if(P.meta.coverage_note) pre+='<div class="muted"><strong>Coverage.</strong> '+esc(P.meta.coverage_note)+'</div>';
     if(window.PACK_MANIFEST && window.PACK_MANIFEST.built_from_snapshot!==P.meta.built_from_snapshot)
-      pre+='<div style="color:var(--bad)"><strong>Pack mismatch — re-run BUILD-ALL.cmd.</strong></div>';
+      pre+='<div style="color:var(--bad)"><strong>Pack mismatch.</strong> This pack was built from a different snapshot than the manifest, so the stated snapshot cannot be relied on.</div>';
     if(P.error) pre+='<div style="color:var(--warn)"><strong>Build note:</strong> '+esc(P.error)+'</div>';
-    el.innerHTML=pre+'<strong>Screening:</strong> Meridian company register against the OpenSanctions consolidated snapshot '+
+    el.innerHTML=pre+'<strong>What Meridian is:</strong> the author’s own regulatory and market-intelligence research build; this console screens its register of '+
+      C.length.toLocaleString()+' companies — index constituents alongside Swiss issuers — as a portfolio, which is why household names appear in the review queue.<br>'+
+      '<strong>Screening:</strong> Meridian company register against the OpenSanctions consolidated snapshot '+
       '<span class="mono">'+esc(P.meta.snapshot_version)+'</span>, built <span class="mono">'+esc(P.meta.built_from_snapshot||P.meta.snapshot_version)+'</span>.<br>'+
       '<strong>These are candidates, not findings.</strong> Every row in the review queue is an automated name similarity that requires human adjudication; '+
       'a company sharing a name with a designated party is not thereby sanctioned. '+esc(P.meta.attribution||"");
@@ -252,7 +269,9 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     ok("build error surfaced when present", !P || !P.error || document.getElementById("provenance").innerHTML.indexOf("Build note")>=0);
     ok("html escaping", esc("<b>")==="&lt;b&gt;");
     ok("csv formula neutralised", csvCell("=cmd|calc").indexOf("'=")===1);
-    ok("multi-list label joins", listLabel(["S","C"])==="Sanctions + Crime");
+    ok("multi-list label joins", listLabel(["S","C"])==="Sanctions + Crime / enforcement / debarment");
+    ok("export names the corpus size", /full corpus: \d{5,}/.test(corpusLabel()) || !(P&&P.meta.full_corpus), corpusLabel());
+    ok("csv quoting artefacts are removed for display", dq('"Limited Liability Company ""Compass Group"""')==='Limited Liability Company "Compass Group"');
     ok("every CSV row has the same column count as the header", (function(){
       if(!P||!P.available) return true;
       var rows=buildCsvRows();
@@ -293,7 +312,9 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   document.getElementById("themeBtn").onclick=function(){var r=document.documentElement;
     r.setAttribute("data-theme", r.getAttribute("data-theme")==="dark"?"light":"dark");};
   setProvenance();
-  if(P&&P.available){ renderKpis(); } else { document.getElementById("csvBtn").disabled = true; }
+  // The buttons start disabled in the markup until the pack has parsed.
+  if(P&&P.available){ renderKpis(); document.getElementById("csvBtn").disabled = false; }
+  if(P) document.getElementById("selfTestBtn").disabled = false;
   render();
 })();
 </script>

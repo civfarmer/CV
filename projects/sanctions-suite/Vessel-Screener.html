@@ -9,7 +9,7 @@
     --line:#233145;--accent:#43b3a6;--accent-ink:#84d6ca;--bad:#e0574a;--warn:#e0a13a;--good:#43c59e;
     --mono:ui-monospace,'Cascadia Code',Consolas,monospace;--sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
   html[data-theme="light"]{--bg:#f4f1ec;--surface:#fff;--surface2:#faf7f2;--ink:#221e18;--ink2:#4c473e;
-    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f--good:#0f7a5a;--warn:#8a5a10;--bad:#a32a1e;}
+    --muted:#675f54;--line:#e0d9cc;--accent:#0d5f57;--accent-ink:#0a463f;--good:#0f7a5a;--warn:#8a5a10;--bad:#a32a1e;}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55}
   header{border-bottom:1px solid var(--line);padding:14px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--surface)}
@@ -17,6 +17,7 @@
   .tag{font-size:.7rem;padding:2px 8px;border:1px solid var(--line);border-radius:99px;color:var(--muted)}
   .spacer{flex:1}
   button{background:var(--accent);color:#04211e;border:0;border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer;font-size:.86rem}
+  html[data-theme="light"] button:not(.ghost){color:#fff}
   button.ghost{background:transparent;color:var(--ink2);border:1px solid var(--line)}
   button:disabled{opacity:.5;cursor:not-allowed}
   main{padding:20px;max-width:1180px;margin:0 auto}
@@ -35,6 +36,8 @@
   .banner{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:.78rem;color:var(--ink2);margin-bottom:16px}
   .chain{border-left:3px solid var(--bad);padding-left:10px;margin:6px 0}
   .grid{display:grid;grid-template-columns:330px 1fr;gap:20px}
+  .grid>*{min-width:0}
+  #out{overflow-x:auto}
   @media(max-width:900px){.grid{grid-template-columns:1fr}}
   @media print{.noprint{display:none!important}body{background:#fff;color:#000}}
 </style>
@@ -54,10 +57,10 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
   <span class="spacer"></span>
   <a class="tag" href="index.html" data-keep-theme style="text-decoration:none">← Suite</a>
   <button class="ghost noprint" id="themeBtn">Theme</button>
-  <button class="ghost noprint" id="selfTestBtn">Self-test</button>
+  <button class="ghost noprint" id="selfTestBtn" disabled>Self-test</button>
 </header>
 <main>
-  <div class="banner" id="provenance">Loading data pack…</div>
+  <div class="banner" id="provenance">Loading the 0.2 MB vessel pack…</div>
   <div class="grid">
     <div>
       <div class="card">
@@ -65,9 +68,10 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
         <label for="q">IMO / MMSI / call sign / registration / name</label>
         <input id="q" placeholder="IMO9422964 or ABRAU" autocomplete="off">
         <div style="margin-top:12px;display:flex;gap:8px">
-          <button id="runBtn">Screen</button>
-          <button class="ghost" id="allBtn">Browse all</button>
+          <button id="runBtn" disabled>Screen</button>
+          <button class="ghost" id="allBtn" disabled>Browse all</button>
         </div>
+        <div class="muted" id="loadNote" style="margin-top:8px">Loading the 0.2 MB vessel pack… The buttons enable when it has parsed.</div>
       </div>
       <div class="card">
         <strong style="font-size:.9rem">Manifest batch</strong>
@@ -77,7 +81,7 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
         <label for="file">…or a CSV/TXT file</label>
         <input type="file" id="file" accept=".csv,.txt">
         <div style="margin-top:12px;display:flex;gap:8px">
-          <button id="batchBtn">Screen manifest</button>
+          <button id="batchBtn" disabled>Screen manifest</button>
           <button class="ghost" id="csvBtn" disabled>Export CSV</button>
         </div>
       </div>
@@ -333,14 +337,16 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
 
   function setProvenance(){
     var el=document.getElementById("provenance");
-    if(!P){ el.innerHTML='<strong style="color:var(--bad)">Data pack not found.</strong> Run 01-build\\BUILD-ALL.cmd, then reopen.'; return; }
+    if(!P){ el.innerHTML='<strong style="color:var(--bad)">The data pack did not load</strong> — reload the page or check your connection.'; return; }
     document.getElementById("verTag").textContent = P.meta.snapshot_version||"unknown";
     var nv=V.filter(function(v){return v.s==="Vessel"}).length, na=V.length-nv;
+    var nal=0; V.forEach(function(v){ nal += (v.al||[]).length; });
     // This was gated on demo_subset, so the reassurance appeared only on a
     // reduced build, where it would have been false, and never on the full build,
-    // where it is true.
+    // where it is true. Every hull in the pack is itself designated, so the line
+    // says so rather than promising a RELATED class no row can carry.
     var pre = P.meta.full_corpus
-      ? '<div class="muted" style="margin-bottom:6px"><strong>Coverage.</strong> Every designated vessel and aircraft in the snapshot is included; rows are marked LISTED or RELATED.</div>'
+      ? '<div class="muted" style="margin-bottom:6px"><strong>Coverage.</strong> Every designated vessel and aircraft in the snapshot is included, each with its former and alias names ('+nal.toLocaleString()+' in all) so a hull renamed since listing is still found.</div>'
       : (P.meta.coverage_note ? '<div style="color:var(--warn);margin-bottom:6px"><strong>Coverage.</strong> '+esc(P.meta.coverage_note)+'</div>' : '');
     el.innerHTML=pre+'<strong>Dataset:</strong> OpenSanctions snapshot <span class="mono">'+esc(P.meta.snapshot_version)+
       '</span> · '+nv.toLocaleString()+' vessels, '+na.toLocaleString()+' aircraft · built <span class="mono">'+esc(P.meta.built_from_snapshot||P.meta.snapshot_version)+
@@ -440,6 +446,16 @@ if(q==="light"||q==="dark")document.documentElement.setAttribute("data-theme",q)
     var fr=new FileReader(); fr.onload=function(){ document.getElementById("batch").value=String(fr.result); }; fr.readAsText(f);
   });
   setProvenance();
+  // The pack is a blocking download and the handlers are bound only after it,
+  // so the action buttons start disabled in the markup. Now that it has parsed,
+  // open the desk and screen anything the visitor typed meanwhile.
+  (function(){
+    var note=document.getElementById("loadNote");
+    if(note) note.parentNode.removeChild(note);
+    if(!P) return;
+    ["runBtn","allBtn","batchBtn","selfTestBtn"].forEach(function(id){ document.getElementById(id).disabled=false; });
+    if(document.getElementById("q").value.trim()) runSingle();
+  })();
 })();
 </script>
 <script>
