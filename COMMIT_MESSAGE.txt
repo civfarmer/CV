@@ -1,6 +1,0 @@
-Front matter tidied in the emplaced-systems paper
-
-The Contents no longer lists the paper's own title, subtitle, abstract
-and method note as entries, and the article proper now begins on a
-fresh page after the Contents instead of running on mid-page under the
-Bibliography line. No text changed; 28 pages.
