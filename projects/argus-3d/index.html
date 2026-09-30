@@ -121,6 +121,7 @@
   .hud{position:absolute;top:12px;right:12px;text-align:right;z-index:4;display:flex;flex-direction:column;gap:6px;align-items:flex-end;max-width:calc(40% - 18px);pointer-events:none}
   .hud .chip{font-family:var(--fm);font-size:10.5px;color:var(--muted);background:color-mix(in oklab,var(--bg2),transparent 20%);padding:6px 10px;border-radius:7px}
   #forceBtn.on{background:color-mix(in oklab,var(--accent) 34%,transparent)!important;color:var(--ink)}
+  #pauseBtn.on{border-color:var(--gold)!important;background:color-mix(in oklab,var(--gold) 26%,transparent)!important;color:var(--ink)}
   .scaleinset{position:absolute;bottom:64px;right:12px;z-index:3;width:210px;padding:9px 11px;border-radius:9px;border:1px solid var(--line2);
     background:color-mix(in oklab,var(--bg2),transparent 8%);backdrop-filter:blur(6px);font-family:var(--fm);font-size:10px;color:var(--ink2)}
   .scaleinset .si-t{color:var(--muted);letter-spacing:.1em;margin-bottom:6px}
@@ -271,7 +272,7 @@
   @media (max-width:700px){
     #hudTgl{display:inline-flex;align-items:center;gap:6px}
     .viewbox:not(.hud-on) .modes,.viewbox:not(.hud-on) .hud,.viewbox:not(.hud-on) .scaleinset{display:none!important}
-    .viewbox:not(.hud-on) .controls>*:not(#fireBtn):not(#resetBtn){display:none!important}
+    .viewbox:not(.hud-on) .controls>*:not(#fireBtn):not(#resetBtn):not(#pauseBtn){display:none!important}
   }
   /* embedded in the Research Lab lightbox: no second header, introduction folded so the tool is on top */
   html.embed .top{display:none}
@@ -317,7 +318,7 @@ try{if(new URLSearchParams(location.search).get('embed')==='1')document.document
           <button id="camBtn" class="on" title="Toggle the picture-in-picture target camera (tracks the asteroid / current fragment so distant impacts stay legible)">◉ Target cam</button>
           <button id="fitBtn" title="Compact view: shrink the 3D viewport so the launch controls fit on screen without scrolling">⤡ Compact</button>
           <button id="fsBtn" title="Fill the screen with the 3D view">⛶ Full screen</button>
-          <button id="freeBtn" title="Free look: during a launch, keep dragging to orbit the camera around the flying projectile instead of being locked to the scripted chase view">🎥 Free look: OFF</button>
+          <button id="freeBtn" class="on">🎯 Camera: on the shot</button>
         </div>
         <div class="tgtcam" id="tgtcamFrame" style="display:none">
           <span class="tc-lab" id="tgtcamLab">◉ TARGET CAM</span>
@@ -333,6 +334,7 @@ try{if(new URLSearchParams(location.search).get('embed')==='1')document.document
           <button id="resetBtn" title="Restore the scene: intact body back on its Earth-bound track, scars and fragments cleared" style="border-color:var(--line2);background:color-mix(in oklab,var(--bg2),transparent 10%)">↺ Reset</button>
           <button id="salvoBtn" title="Multi-shot salvo: fire, then RECHARGE the pulse buffer before each next shot. The readout states the real recharge time (428.571 GJ ÷ 10 MW ≈ 11.9 h ideal) and the conservative ≈ 1 shot/day cadence — sped up in this demo. Cumulative deflection grows across the salvo.">▶▶ Fire salvo</button>
           <span class="speed" id="speedSel"><button data-s="0.1">0.1×</button><button data-s="0.25">0.25×</button><button data-s="0.5" class="on">0.5×</button><button data-s="1">1×</button></span>
+          <button id="pauseBtn" title="Hold the simulation where it is (Space). The camera still orbits and zooms, and the projectile's parts can be clicked." style="border-color:var(--line2);background:color-mix(in oklab,var(--bg2),transparent 10%)">⏸ Pause</button>
           <button id="forceBtn" style="border-color:var(--accent);background:color-mix(in oklab,var(--accent) 16%,transparent)">⇢ Show forces</button>
           <button id="slewBtn" style="border-color:#cf8a44;background:color-mix(in oklab,#cf8a44 20%,transparent)" title="Magnetorquer auto-aim: the whole apparatus slowly slews (τ = m × B) so the bore tracks the asteroid. Click to HOLD (freeze) the structure so the force vectors stay aligned.">◐ Auto-aim: ON</button>
           <span class="rd" id="vel">0 km/s</span>
@@ -477,7 +479,9 @@ function glowTexture(){ // soft radial glow (no square) for the Sun and impact p
 }
 let firing=false,fireT=0,phase='ready',speed=0.5,impactFlash=null,impacted=false,dragMoved=false;
 let FDT=0.016,_fdtPrev=0; // seconds since the previous frame, clamped to [0, 0.05]: the same pace on 60, 90 or 120 Hz displays
-let freeLook=false,freeZoom=1;   // free-look orbit around the flying projectile (opt-in)
+let freeLook=true,freeZoom=1;    // camera rides the flying projectile and the viewer orbits it (default; the scripted cinematic camera is the alternative)
+let paused=false;                 // freezes simulation time (FDT) — the camera, orbit and part picking keep working
+let homeOrbit=null;               // {yaw,pitch,dist} saved when a shot begins, restored when the scene is idle again
 // ---- SALVO (multi-shot campaign): fire N shots, RECHARGING the pulse buffer between each. Recharge time is
 //      tied to electricity per Paper II §8 (VERIFIED): a 428.571 GJ pulse ÷ 10 MW net charging ≈ 11.9 h ideal
 //      (longer in practice; conservative thermal cadence ≈ 1 shot/day). Sped-up here; the READOUT states the
@@ -623,6 +627,12 @@ function buildBoreProjectile(scale){
     isDiamond?mat(F.col,{shininess:90,specular:0x5a4a1a}):metal(F.col,{shininess:96,specular:0x7d8798}));
   core.rotation.z=Math.PI/2;
   label(core,'core','Core mass (32-gon)',PARTS[2].role+' THIS member: '+F.mat+' — the family varies core material/density at broadly fixed geometry (illustrative; the papers fix mass & velocity).', '32-gon · '+F.matShort+' · '+F.kg+' kg');g.add(core);
+  // functional skin: the thin graded surface over the core (an open shell, so the facets still read through it)
+  const skin=new THREE.Mesh(new THREE.CylinderGeometry(coreR*1.13,coreR*1.13,coreLen*1.03,32,1,true),mat(0x9fb3c8,{transparent:true,opacity:0.22,side:THREE.DoubleSide,depthWrite:false}));
+  skin.rotation.z=Math.PI/2;label(skin,'skin','Functional skin',PARTS[1].role,'graded surface · 0.015 kg');g.add(skin);
+  // load spreader: the disc between the collar and the body that keeps the small core from being point-loaded
+  const spreader=new THREE.Mesh(new THREE.CylinderGeometry(coreR*1.7,coreR*1.7,0.07*S,24),mat(0xb08cff,{emissive:0x241a40,emissiveIntensity:0.4}));
+  spreader.rotation.z=Math.PI/2;spreader.position.x=-coreLen/2-0.02*S;label(spreader,'spreader','Load spreader',PARTS[4].role,'0.020 kg');g.add(spreader);
   // guidance nose
   const nose=new THREE.Mesh(new THREE.ConeGeometry(coreR*1.05,0.7*S,32),mat(0x5ac8fa));nose.rotation.z=-Math.PI/2;nose.position.x=coreLen/2+0.3*S;label(nose,'guidance','Guidance & telemetry',PARTS[0].role,'graded BDD surface');g.add(nose);
   // release tail
@@ -1054,6 +1064,7 @@ function flybyTarget(){
    and both shrink away behind. Nothing is scaled at runtime. */
 function loop(){raf=requestAnimationFrame(loop);
   {const _n=performance.now();FDT=_fdtPrev?Math.min(0.05,Math.max(0,(_n-_fdtPrev)/1000)):0.016;_fdtPrev=_n;}
+  if(paused)FDT=0;   // ⏸ every simulated motion is FDT-scaled, so this alone holds the shot, the drift, the FX and the recharge
   // cinematic factor ramps up in coast/impact, down otherwise
   const cineGoal=(firing&&(phase==='coast'||phase==='impact'))?1:0;
   cine+=(cineGoal-cine)*0.06;
@@ -1098,11 +1109,11 @@ function loop(){raf=requestAnimationFrame(loop);
   if(earth){const _ec=earth.position,_cd=camera.position.distanceTo(_ec);
     if(_cd<302)camera.position.sub(_ec).setLength(302).add(_ec);}
   camera.lookAt(camLook);
-  if(earth)earth.rotation.y+=0.0004;
+  if(earth&&!paused)earth.rotation.y+=0.0004;
   // ---- the asteroid NEVER stops: it tumbles and drifts Earth-ward through launches, salvos and holds
   //      (sim-time step ∝ speed; the shot plan lead-corrects, so hits still land) ----
   if(asteroid&&asteroid.visible){
-    asteroid.rotation.x+=0.0016*speed;asteroid.rotation.y+=0.0011*speed;
+    if(!paused){asteroid.rotation.x+=0.0016*speed;asteroid.rotation.y+=0.0011*speed;}
     // HARD FLOOR. The pristine reset below is disarmed the moment the body carries damage
     // (scars), so without this a scarred body would keep closing until it flew through the
     // demonstrator and into Earth. It holds station at 900 u instead — the closest approach the
@@ -1583,7 +1594,8 @@ function stepFire(){
   } else if(fireT<=T_ACCEL+coastT){
     if(!shotPlan||!shotPlan.locked)shotPlan=mkShotPlan(true); // freeze ONCE at muzzle exit, lead-corrected for the drifting target
     const P=shotPlan;if(!P){resetFire();return;}
-    if(!P.camImpact)mkCamBasis(P); // derive the camera basis once, from THIS shot's approach axis
+    if(!P.camImpact){mkCamBasis(P); // derive the camera basis once, from THIS shot's approach axis
+      if(freeLook&&P.camChase){const n=P.camChase.clone().normalize();pitch=Math.asin(Math.max(-1,Math.min(1,n.y)));yaw=Math.atan2(n.x,n.z);}}   // the ride starts on this shot's chase view
     phase='coast';
     if(!impacted)document.getElementById('phase').textContent=P.willHit
       ?'coast · shot flies straight down the aimed bore · vector-control trims ≤1.5°'
@@ -1606,9 +1618,17 @@ function stepFire(){
     //      the TARGET so the fly-past is visible ----
     const kk=smoothstep(0.52,1.0,cf); // settle on the target well before arrival
     const focusPt=P.willHit?P.impactPt:(P.target?P.target.obj.position:end);
-    cineFocus.copy(wp).lerp(focusPt,kk);
-    cineZoom=Z_CHASE+((P.willHit?Z_IMPACT:Z_REVEAL*0.9)-Z_CHASE)*kk; // hit: close in · miss: pull wide to frame the fly-past
-    cineDir.copy(P.camChase||CAM_CHASE_DIR).lerp(P.camImpact||CAM_IMPACT_DIR,kk);
+    if(freeLook){
+      // ---- ON THE SHOT. The camera's job is the projectile, all the way in: the focus never drifts to
+      //      the target and never leans at the Moon or Mars. The follow distance tracks the projectile's
+      //      own scale (it is shrunk in flight as a range cue), so it keeps its size in frame; the wheel
+      //      or a pinch zooms on top of that, and a drag orbits it. Pause holds it for inspection. ----
+      cineFocus.copy(wp);cineZoom=Z_CHASE*Math.max(0.1,boreProjectile.scale.x);cineDir.copy(P.camChase||CAM_CHASE_DIR);
+    }else{
+      cineFocus.copy(wp).lerp(focusPt,kk);
+      cineZoom=Z_CHASE+((P.willHit?Z_IMPACT:Z_REVEAL*0.9)-Z_CHASE)*kk; // hit: close in · miss: pull wide to frame the fly-past
+      cineDir.copy(P.camChase||CAM_CHASE_DIR).lerp(P.camImpact||CAM_IMPACT_DIR,kk);
+    }
     if(cf>=0.985&&!impacted){
       if(P.willHit){triggerImpact();impacted=true;if(tracer)tracer.visible=false;
         P.ipOff=P.impactPt.clone().sub(P.target?P.target.obj.position:asteroid.position);} // scar offset from body centre, captured at the hit
@@ -1636,7 +1656,8 @@ function stepFire(){
       // MISS aftermath: hold on the untouched body; let the tracer recede down the bore line
       const past=P.muzzle.clone().addScaledVector(P.aim,P.range*(1.3+0.5*hf));
       if(tracer){tracer.position.copy(past);tracer.material.opacity=Math.max(0,0.7-hf*0.8);tracer.visible=true;}
-      cineFocus.copy(tgtPos);cineZoom=Z_REVEAL*0.9;cineDir.copy((P&&P.camReveal)||CAM_REVEAL_DIR);
+      if(freeLook){cineFocus.copy(past);cineZoom=Z_CHASE*0.4;cineDir.copy((P&&P.camChase)||CAM_CHASE_DIR);}
+      else{cineFocus.copy(tgtPos);cineZoom=Z_REVEAL*0.9;cineDir.copy((P&&P.camReveal)||CAM_REVEAL_DIR);}
     }else{
       // hold CLOSE on the surface reaction (flash / shock / ejecta), then ease back to reveal the outcome
       const back=smoothstep(0.66,1.0,hf); // stay on the impact, then ease out
@@ -1845,7 +1866,7 @@ function animateImpact(){
   const spike=Math.min(u.t/0.5,3);// the flash itself stays a quick spike
   if(u.flash){u.flash.scale.setScalar(u.flashBase*(1+spike*1.6));u.flash.material.opacity=Math.max(0,1.0-spike*1.35);}
   if(u.halo){u.halo.scale.setScalar(u.haloBase*(1+s*2.4));u.halo.material.opacity=Math.max(0,0.6-s*0.55);}
-  if(u.plume){u.plume.material.opacity=Math.max(0,u.plume.material.opacity-0.011*speed);u.plume.scale.x=u.plume.scale.z=1+s*0.25;u.plume.scale.y=1+s*0.9;}
+  if(u.plume){if(!paused)u.plume.material.opacity=Math.max(0,u.plume.material.opacity-0.011*speed);u.plume.scale.x=u.plume.scale.z=1+s*0.25;u.plume.scale.y=1+s*0.9;}
   // fast luminous shock spreads ACROSS the surface; the dust ring follows slower and lingers
   if(u.shock){const g=1+s*(u.hyper?7:4);u.shock.scale.set(g,g,1);u.shock.material.opacity=Math.max(0,0.85-s*0.8);}
   if(u.dust){const g2=1+s*1.6;u.dust.scale.set(g2,g2,1);u.dust.material.opacity=Math.max(0,0.34-s*0.16);}
@@ -1865,6 +1886,8 @@ function clearImpact(){
 //      clipping back" glitch). Only the explicit ↺ Reset restores the pristine scene. ----
 function softStop(){
   firing=false;recharging=false;salvoActive=false;salvoDone=false;fireT=0;impacted=false;rechargeT=0;
+  if(homeOrbit){yaw=homeOrbit.yaw;pitch=homeOrbit.pitch;dist=homeOrbit.dist;homeOrbit=null;}freeZoom=1;
+  if(paused)setPaused(false);
   phase='ready';nudgeDirV=null;nudgePrev=0;
   clearImpact(); // transient FX only — scars/fragments/positions persist
   boreProjectile.position.set(-LEN/2+0.9,0,0);boreProjectile.visible=true;boreProjectile.scale.setScalar(1);
@@ -1878,6 +1901,7 @@ function softStop(){
   updateAimBtn(); // the phase readout keeps the last outcome (impact summary / MISS) on screen
 }
 function resetFire(){firing=false;fireT=0;phase='ready';impacted=false;
+  if(homeOrbit){yaw=homeOrbit.yaw;pitch=homeOrbit.pitch;dist=homeOrbit.dist;homeOrbit=null;}freeZoom=1;if(paused)setPaused(false);
   salvoActive=false;recharging=false;salvoDone=false;salvoEnded=false;rechargeT=0;salvoLanded=0;interceptLog=[];lastInterceptU=0;
   const svp=document.getElementById('salvopanel');if(svp)svp.style.display='none';
   const svb=document.getElementById('salvoBtn');if(svb)svb.textContent='▶▶ Fire salvo';
@@ -1930,6 +1954,8 @@ function beginShot(){ // start ONE shot (shared by single Launch and each salvo 
   shotPlan=mkShotPlan(false);                       // provisional; re-frozen WITH LEAD at muzzle exit (coast start)
   coastT=coastFor(FAMILY[famIdx]);                  // slower dart ⇒ longer flight ⇒ the body drifts further under it
   firing=true;fireT=0;impacted=false;document.getElementById('fireBtn').textContent='■ Abort';
+  if(!homeOrbit)homeOrbit={yaw:yaw,pitch:pitch,dist:dist};
+  if(freeLook){const d=CAM_CHASE_DIR.clone().normalize();pitch=Math.asin(Math.max(-1,Math.min(1,d.y)));yaw=Math.atan2(d.x,d.z);freeZoom=1;}   // orbit starts on the chase view; drag from there
 }
 document.getElementById('fireBtn').addEventListener('click',()=>{
   if(mode!=='system')setMode('system');
@@ -1964,11 +1990,14 @@ document.getElementById('camBtn').addEventListener('click',function(){insetOn=!i
   if(fs&&vb){ if(imm)fs.addEventListener('click',()=>imm.toggle()); else fs.textContent='⛶ Full screen unavailable'; }
   // ---- FREE LOOK: opt-in orbit around the projectile while it is in transit ----
   const fl=document.getElementById('freeBtn');
+  function camLabel(){ if(!fl)return; fl.textContent=freeLook?'🎯 Camera: on the shot':'🎬 Camera: cinematic'; fl.classList.toggle('on',freeLook);
+    fl.title=freeLook?'The camera rides the projectile: drag to orbit it, wheel or pinch to zoom, ⏸ to hold it. Click for the scripted cinematic camera.':'Scripted camera: chases the shot, settles on the target and leans at the Moon and Mars as they pass. Click to ride the shot instead.'; }
   if(fl)fl.addEventListener('click',()=>{
     freeLook=!freeLook;freeZoom=1;
-    fl.textContent='🎥 Free look: '+(freeLook?'ON — drag to orbit the shot':'OFF');
-    fl.classList.toggle('on',freeLook);
+    if(freeLook&&firing){const d=(shotPlan&&shotPlan.camChase)||CAM_CHASE_DIR;const n=d.clone().normalize();pitch=Math.asin(Math.max(-1,Math.min(1,n.y)));yaw=Math.atan2(n.x,n.z);}
+    camLabel();
   });
+  camLabel();
 })();
 // ---- SALVO controller: fires SALVO_TOTAL_DEFAULT shots, RECHARGING the pulse buffer between each (recharge
 //      time tied to electricity: 428.571 GJ ÷ 10 MW ≈ 11.9 h ideal — Paper II §8). Does NOT touch single Launch. ----
@@ -2117,6 +2146,9 @@ function updateSalvoReadout(state){
       +' Real cadence ≈ 1 shot/day (≈ '+RECHARGE_H.toFixed(1)+' h recharge each). The end state stays on screen — <b>↺ Reset</b> restores the scene.';
   }
 }
+function setPaused(v){ paused=!!v; const pb=document.getElementById('pauseBtn'); if(pb){ pb.textContent=paused?'▶ Resume':'⏸ Pause'; pb.classList.toggle('on',paused); pb.setAttribute('aria-pressed',paused?'true':'false'); } }
+document.getElementById('pauseBtn').addEventListener('click',e=>{e.stopPropagation();setPaused(!paused);});
+document.addEventListener('keydown',e=>{ if(e.key!==' '||e.repeat)return; const t=e.target; if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.tagName==='BUTTON'||t.isContentEditable))return; e.preventDefault(); setPaused(!paused); });
 document.querySelectorAll('#speedSel button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#speedSel button').forEach(x=>x.classList.remove('on'));b.classList.add('on');speed=parseFloat(b.dataset.s);});
 // ---- magnetic force visualisation ----
 function buildForces(){
@@ -2378,12 +2410,13 @@ function buildList(){
     el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select(it.id);}});
     box.appendChild(el);});
 }
-function findMesh(id){let f=null;(mode==='projectile'?projGroup:scene).traverse(o=>{if(o.userData&&o.userData.pick===id)f=o;});return f;}
-function select(id){
+function findMesh(id){let f=null;const roots=mode==='projectile'?[projGroup]:[sysRoot,scene];for(const r of roots){r.traverse(o=>{if(!f&&o.userData&&o.userData.pick===id&&o!==projGroup&&!(mode==='system'&&projGroup&&isIn(o,projGroup)))f=o;});if(f)break;}return f;}
+function isIn(o,root){while(o){if(o===root)return true;o=o.parent;}return false;}
+function select(id,hit){
   if(id==='projectile'){setMode('projectile');return;}
   document.querySelectorAll('.part').forEach(e=>e.classList.toggle('on',e.dataset.id===id));
   if(emphasised){emphasised.scale.setScalar(emphasised.userData._s||1);}
-  const mesh=findMesh(id),spec=document.getElementById('spec');
+  const mesh=(hit&&hit.userData&&hit.userData.pick===id)?hit:findMesh(id),spec=document.getElementById('spec');
   let name,role,read,color;
   if(mode==='projectile'){const p=PARTS.find(x=>x.id===id);name=p.name;role=p.role;read=p.kg.toFixed(3)+' kg · '+Math.round(p.kg/TOTAL*100)+'% of 0.300 kg';color='#'+p.color.toString(16).padStart(6,'0');}
   else{const s=SUBSYS.find(x=>x.id===id)||{};name=mesh?.userData.name||s.name||id;role=mesh?.userData.role||s.role||'';read=mesh?.userData.read||'';color='#'+((s.color||0x8aa0bf).toString(16).padStart(6,'0'));}
@@ -2398,16 +2431,24 @@ const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();
 cv.addEventListener('click',e=>{if(dragMoved)return;const r=cv.getBoundingClientRect();ndc.x=((e.clientX-r.left)/r.width)*2-1;ndc.y=-((e.clientY-r.top)/r.height)*2+1;
   ray.setFromCamera(ndc,camera);const roots=mode==='projectile'?[projGroup]:[sysRoot,earth,sun,moon,mars,asteroid].filter(Boolean).concat(frags.map(f=>f.mesh));
   const hits=ray.intersectObjects(roots,true);
-  for(const h of hits){let o=h.object;while(o&&!(o.userData&&o.userData.pick))o=o.parent;if(o&&o.userData.pick){select(o.userData.pick);return;}}});
+  for(const h of hits){let o=h.object;while(o&&!(o.userData&&o.userData.pick))o=o.parent;if(o&&o.userData.pick){select(o.userData.pick,o);return;}}});
 
 // controls
-cv.addEventListener('pointerdown',e=>{dragging=true;dragMoved=false;lx=e.clientX;ly=e.clientY;cv.setPointerCapture(e.pointerId);});
-cv.addEventListener('pointermove',e=>{if(!dragging)return;const dx=e.clientX-lx,dy=e.clientY-ly;if(Math.abs(dx)+Math.abs(dy)>3)dragMoved=true;yaw-=dx*0.007;pitch=Math.max(-0.55,Math.min(1.2,pitch+dy*0.007));lx=e.clientX;ly=e.clientY;}); // lower pitch bound keeps the orbit from diving under the Earth limb
-cv.addEventListener('pointerup',()=>dragging=false);
+const ptrs=new Map();let pinchD=0;   // active pointers, for a two-finger pinch zoom
+function zoomBy(f){ if(freeLook&&firing&&(phase==='coast'||phase==='impact')) freeZoom=Math.max(0.15,Math.min(6,freeZoom*f)); else dist=Math.max(6,Math.min(14000,dist*f)); }
+cv.addEventListener('pointerdown',e=>{ptrs.set(e.pointerId,[e.clientX,e.clientY]);try{cv.setPointerCapture(e.pointerId);}catch(_){}
+  if(ptrs.size>=2){dragging=false;pinchD=0;return;}
+  dragging=true;dragMoved=false;lx=e.clientX;ly=e.clientY;});
+cv.addEventListener('pointermove',e=>{
+  if(ptrs.has(e.pointerId))ptrs.set(e.pointerId,[e.clientX,e.clientY]);
+  if(ptrs.size===2){ const [a,b]=[...ptrs.values()];const dNow=Math.hypot(a[0]-b[0],a[1]-b[1]); if(pinchD>0&&dNow>0)zoomBy(Math.pow(pinchD/dNow,1.0)); pinchD=dNow; dragMoved=true; return; }
+  if(!dragging)return;const dx=e.clientX-lx,dy=e.clientY-ly;if(Math.abs(dx)+Math.abs(dy)>3)dragMoved=true;yaw-=dx*0.007;pitch=Math.max(-0.55,Math.min(1.2,pitch+dy*0.007));lx=e.clientX;ly=e.clientY;}); // lower pitch bound keeps the orbit from diving under the Earth limb
+const endPtr=e=>{ptrs.delete(e.pointerId);if(ptrs.size<2)pinchD=0;if(ptrs.size===0)dragging=false;};
+cv.addEventListener('pointerup',endPtr);cv.addEventListener('pointercancel',endPtr);
 cv.addEventListener('wheel',e=>{e.preventDefault();
   // while free-looking at a shot in flight the wheel trims the follow distance, not the home orbit
   if(freeLook&&firing&&(phase==='coast'||phase==='impact')){
-    freeZoom=Math.max(0.35,Math.min(3.5,freeZoom*(e.deltaY>0?1.09:0.92)));return;}
+    freeZoom=Math.max(0.15,Math.min(6,freeZoom*(e.deltaY>0?1.09:0.92)));return;}
   // multiplicative zoom: the scene now spans 9,000 u, so a fixed 1.8-unit step could never cover it
   dist=Math.max(6,Math.min(14000,dist*(e.deltaY>0?1.10:0.909)));},{passive:false});
 window.addEventListener('resize',resize);
