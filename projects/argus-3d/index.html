@@ -56,11 +56,8 @@
   @media(max-width:900px){.stage{grid-template-columns:1fr}}
   .panel{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--line);border-radius:var(--radius);padding:16px}
   .viewbox{position:relative;background:#04060c;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
-  /* full screen: the viewbox becomes the whole display and the canvas fills it */
-  .viewbox:fullscreen{border-radius:0;border:0;width:100vw;height:100vh}
-  .viewbox:fullscreen #scene{height:100vh!important;width:100vw!important}
-  .viewbox:-webkit-full-screen{border-radius:0;border:0;width:100vw;height:100vh}
-  .viewbox:-webkit-full-screen #scene{height:100vh!important;width:100vw!important}
+  /* full screen is handled by ../_assets/immersive.js: the viewbox becomes a fixed full-viewport
+     stage, the subsystems panel rides along in a drawer, and phones are asked to turn landscape */
   /* FIXED heights only (vh-calc heights caused buffer/CSS mismatches on some window sizes);
      a ResizeObserver keeps the WebGL buffer glued to the CSS box in all cases */
   #scene{width:100%;height:600px;display:block;touch-action:none;cursor:grab}
@@ -285,7 +282,7 @@
   details.embedintro>summary::after{content:'\25B8';font-size:10px}
   details.embedintro[open]>summary::after{content:'\25BE'}
   /* the wrapped header is a quarter of a phone screen; let it scroll away */
-  @media (max-width:640px){.top{position:static}}
+  @media (max-width:640px),(max-height:520px){.top{position:static}}
 </style>
 <script>/* ?embed=1: opened inside the Research Lab lightbox, which has its own title bar and close
    control, so this page's header is dropped and its introduction folds below (see the end of the page). */
@@ -401,6 +398,7 @@ try{if(new URLSearchParams(location.search).get('embed')==='1')document.document
   </div>
 
 <script src="three.min.js"></script>
+<script src="../_assets/immersive.js"></script>
 <script src="../_assets/earth/earth-textures.js"></script>
 <script src="../_assets/earth/bodies-textures.js"></script>
 <script src="../_assets/earth/surface-assets.js"></script>
@@ -1956,20 +1954,14 @@ document.getElementById('camBtn').addEventListener('click',function(){insetOn=!i
     resize();}
   if(fb)fb.addEventListener('click',()=>{compact=!compact;try{localStorage.setItem('argus3d-compact',compact?'1':'0')}catch(e){}ap();});
   ap();
-  // ---- FULL SCREEN: promote the viewbox itself, so every overlay (target cam, HUD, controls) comes with it ----
+  // ---- FULL SCREEN: the viewbox becomes a fixed full-viewport stage (immersive.js), so every overlay
+  //      (target cam, HUD, controls) comes with it and the subsystems panel rides along in a drawer.
+  //      On a phone a tap on the scene opens it; the ⛶ button on the right edge and ✕/Esc/back close it. ----
   const fs=document.getElementById('fsBtn');
-  const inFS=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
-  if(fs&&vb){
-    fs.addEventListener('click',()=>{
-      if(inFS()){(document.exitFullscreen||document.webkitExitFullscreen).call(document);}
-      else{const r=vb.requestFullscreen||vb.webkitRequestFullscreen;
-        if(r)r.call(vb);else fs.textContent='⛶ Full screen unavailable';}
-    });
-    ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{
-      const on=inFS();fs.textContent=on?'⛶ Exit full screen':'⛶ Full screen';fs.classList.toggle('on',on);
-      setTimeout(resize,60);setTimeout(resize,320);   // let the browser settle the new box before measuring
-    }));
-  }
+  const imm=window.cfImmersive?cfImmersive({stage:vb,canvas:'#scene',drawers:[{title:'Subsystems',el:'.stage>.panel'}],resize:resize,button:'(max-width:700px)',
+    onEnter:()=>{if(fs){fs.textContent='⛶ Exit full screen';fs.classList.add('on');}},
+    onExit:()=>{if(fs){fs.textContent='⛶ Full screen';fs.classList.remove('on');}}}):null;
+  if(fs&&vb){ if(imm)fs.addEventListener('click',()=>imm.toggle()); else fs.textContent='⛶ Full screen unavailable'; }
   // ---- FREE LOOK: opt-in orbit around the projectile while it is in transit ----
   const fl=document.getElementById('freeBtn');
   if(fl)fl.addEventListener('click',()=>{
