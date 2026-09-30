@@ -324,14 +324,13 @@
     .cols{columns:1}
   }
   @media(max-width:520px){ .stats{grid-template-columns:1fr} }
-  /* Backdrop — the desert clip as a washed watermark across the Overview, Projects and Contact views (one element,
-     shared; hidden for the other views). Dimmed and washed towards the page colour on the text side, but not so far
-     that you cannot make out the desert, the mountains and the figure. Encoded at the source width with a little
-     contrast and sharpening so the strip survives being scaled up. Phones keep the poster only. */
+  /* Backdrop — Geneva from the air (the Jet d'Eau and the Rade) as a washed watermark across the Overview, Projects
+     and Contact views (one element, shared; hidden for the other views). Dimmed and washed towards the page colour
+     on the text side, but legible. Phones keep the poster only. Source: Pexels, free licence — see assets/video/CREDITS.txt */
   .view.on{position:relative;z-index:1}
   body[data-view="experience"] .herobg,body[data-view="warroom"] .herobg,body[data-view="expertise"] .herobg,body[data-view="credentials"] .herobg{display:none}
   .herobg{position:absolute;left:0;right:0;top:0;height:clamp(420px,64vh,700px);z-index:0;overflow:hidden;pointer-events:none}
-  .herobg video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 46%;opacity:.72}
+  .herobg video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 42%;opacity:.72}
   html[data-theme="light"] .herobg video{opacity:.6}
   .herobg-wash{position:absolute;inset:0;background:linear-gradient(90deg,color-mix(in oklab,var(--bg) 92%,transparent) 0%,color-mix(in oklab,var(--bg) 55%,transparent) 34%,color-mix(in oklab,var(--bg) 14%,transparent) 66%,transparent 100%),linear-gradient(180deg,color-mix(in oklab,var(--bg) 58%,transparent) 0%,transparent 26%,transparent 60%,var(--bg) 100%)}
   #v-overview .wrap.hero{z-index:1}
@@ -1400,8 +1399,8 @@ html[data-theme="light"] .skyline-canvas.cf-fixed{opacity:.38}
   var _saveData=!!(navigator.connection&&navigator.connection.saveData);
   function _attachSources(v){ if(v.getAttribute('data-armed')) return; v.setAttribute('data-armed','1');
     var w=v.getAttribute('data-webm'), m=v.getAttribute('data-mp4');
+    if(m){ var s2=document.createElement('source'); s2.src=m; s2.type='video/mp4'; v.appendChild(s2); }   /* the smaller file, and it plays everywhere; the browser falls through to the WebM if not */
     if(w&&v.canPlayType('video/webm')){ var s=document.createElement('source'); s.src=w; s.type='video/webm'; v.appendChild(s); }
-    if(m){ var s2=document.createElement('source'); s2.src=m; s2.type='video/mp4'; v.appendChild(s2); }
     v.load(); }
 
   /* Portrait: one play of the clip (the real phone shot, then the close-up), then it settles on the still. Click to play it again. */
