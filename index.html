@@ -74,7 +74,7 @@
   .btn.icon{padding:10px;width:42px}
   .btn.sm{padding:7px 11px;font-size:12.5px}
   /* AA contrast: in dark theme --accent/--accent-ink are light, so white button text fails AA — use a deeper teal under white. In light theme --gold is a dark olive, so gold buttons use white text (ghost links keep their accent text). */
-  html[data-theme="dark"] .btn.primary,html[data-theme="dark"] .lenses button.on,html[data-theme="dark"] .crest{background:linear-gradient(145deg,#0e7b6f,#0b655b)}
+  html[data-theme="dark"] .btn.primary,html[data-theme="dark"] .crest{background:linear-gradient(145deg,#0e7b6f,#0b655b)}
   html[data-theme="light"] .btn.gold,html[data-theme="light"] .plink:not(.ghost){color:#fff}
 
   .topbar{display:none;position:sticky;top:0;z-index:50;align-items:center;justify-content:space-between;
@@ -100,7 +100,7 @@
   .herowrap{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:clamp(22px,4vw,46px);align-items:start}
   .heromain{min-width:0}
   .heroaside{display:none;flex:0 0 auto}
-  /* Photo is a fixed, out-of-flow element: lens/text changes can never move it */
+  /* Photo is a fixed, out-of-flow element: text changes can never move it */
   .hero.has-photo .heroaside{display:block;position:absolute;top:0;right:0}
   .hero.has-photo .herowrap{grid-template-columns:1fr;padding-right:calc(clamp(150px,15vw,206px) + clamp(22px,4vw,46px))}
   .herophoto{width:clamp(150px,15vw,206px);height:clamp(150px,15vw,206px);border-radius:50%;object-fit:cover;flex:0 0 auto}
@@ -109,11 +109,6 @@
   @media(max-width:820px){ .herowrap{grid-template-columns:1fr} .heroaside{order:-1} .herophoto{width:118px;height:118px} .hero h1{max-width:none}
     .hero.has-photo .heroaside{position:static} .hero.has-photo .herowrap{padding-right:0} }
   .hero p.lead{margin:13px 0 0}
-  .lenses{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 18px}
-  .lenses .lb{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-right:2px}
-  .lenses button{font-size:12.5px;font-weight:600;color:var(--ink2);background:var(--surface);border:1px solid var(--line2);border-radius:999px;padding:6px 12px;cursor:pointer;transition:.14s}
-  .lenses button:hover{border-color:var(--accent);color:var(--ink)}
-  .lenses button.on{background:linear-gradient(145deg,var(--accent),var(--accent-ink));border-color:transparent;color:#fff}
   /* audience fork + wayfinding strip (the billboard, without the gate) */
   .fork{display:flex;gap:8px;margin:16px 0 2px;flex-wrap:wrap}
   .fork button{font-size:12.5px;font-weight:650;padding:7px 14px;border-radius:999px;cursor:pointer;border:1px solid var(--line2);background:var(--surface);color:var(--ink2);transition:.14s}
@@ -127,10 +122,6 @@
   .wf-contact{margin:10px 0 0;font-size:12.5px;color:var(--muted)}
   .wf-contact a{color:var(--ink2);text-decoration:underline;text-underline-offset:2px;text-decoration-color:color-mix(in oklab,var(--accent) 55%,transparent)}
   @media (max-width:960px){.wayfind{grid-template-columns:repeat(2,minmax(0,1fr))}}
-  html[data-lens="research"] .foot .avail{display:none}
-  html[data-lens="research"] .foot .btn.primary{display:none}
-  .foot .cite-btn{display:none}
-  html[data-lens="research"] .foot .cite-btn{display:inline-flex;flex:1;justify-content:center;text-decoration:none}
   .hero .focus{font-size:13.5px;color:var(--ink2);margin-top:14px}
   .hero .focus b{color:var(--ink)} .hero .focus a{cursor:pointer;font-weight:600;border-bottom:1px solid color-mix(in oklab,var(--accent) 45%,transparent)}
   .hero .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
@@ -164,34 +155,6 @@
   .client-grid .client-wide{grid-column:1/-1}
   @media(min-width:821px){.client-grid .client-wide{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr)} .client-grid .client-wide .pmedia{aspect-ratio:auto;height:100%;min-height:320px;border-bottom:0;border-right:1px solid var(--line)} .client-grid .client-wide .pbody{align-self:center} .client-grid .client-wide .pmedia .shot,.client-grid .client-wide .pmedia video{object-position:left top}}
   @media(max-width:820px){.client-grid{grid-template-columns:1fr}}
-  html[data-lens="legal"] .pcard[data-project="sanctions"]{order:0}
-  html[data-lens="hybrid"] .pcard[data-project="sanctions"]{order:0}
-  html[data-lens="governance"] .pcard[data-project="sanctions"]{order:0}
-  html[data-lens="research"] .pcard[data-project="sanctions"]{order:3}
-  html[data-lens="tech"] .pcard[data-project="sanctions"]{order:4}
-  html[data-lens="legal"] .pcard[data-project="groundtruth"]{order:0}
-  html[data-lens="governance"] .pcard[data-project="groundtruth"]{order:0}
-  html[data-lens="research"] .pcard[data-project="groundtruth"]{order:0}
-  html[data-lens="hybrid"] .pcard[data-project="groundtruth"]{order:1}
-  html[data-lens="tech"] .pcard[data-project="groundtruth"]{order:2}
-  html[data-lens="legal"] .pcard[data-project="fris"],html[data-lens="research"] .pcard[data-project="fris"]{order:1}
-  html[data-lens="legal"] .pcard[data-project="meridian"],html[data-lens="research"] .pcard[data-project="meridian"]{order:2}
-  html[data-lens="governance"] .pcard[data-project="meridian"]{order:1}
-  html[data-lens="governance"] .pcard[data-project="fris"]{order:2}
-  html[data-lens="tech"] .pcard[data-project="fris"]{order:1}
-  html[data-lens="tech"] .pcard[data-project="vantage"]{order:2}
-  html[data-lens="tech"] .pcard[data-project="helm"]{order:3}
-  html[data-lens="hybrid"] .pcard[data-project="fris"]{order:1}
-  html[data-lens="hybrid"] .pcard[data-project="frontier"]{order:2}
-  html[data-lens="legal"] .pcard[data-project="frontier"]{order:3}
-  html[data-lens="governance"] .pcard[data-project="frontier"]{order:3}
-  html[data-lens="research"] .pcard[data-project="frontier"]{order:4}
-  html[data-lens="tech"] .pcard[data-project="frontier"]{order:5}
-  html[data-lens="hybrid"] .pcard[data-project="sentinel"]{order:3}
-  html[data-lens="legal"] .pcard[data-project="sentinel"]{order:4}
-  html[data-lens="governance"] .pcard[data-project="sentinel"]{order:4}
-  html[data-lens="research"] .pcard[data-project="sentinel"]{order:5}
-  html[data-lens="tech"] .pcard[data-project="sentinel"]{order:6}
   .pcard{position:relative;display:flex;flex-direction:column;background:linear-gradient(180deg,var(--surface),var(--surface2));
     border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:.2s;text-align:left}
   .pcard:hover{transform:translateY(-3px);border-color:var(--line2);box-shadow:var(--shadow)}
@@ -372,14 +335,14 @@
   @media(max-width:400px){
     .kv{flex-wrap:wrap;gap:4px 12px} .kv .k{width:auto}
     .footer{flex-direction:column;gap:6px}
-    .lenses{gap:6px} .hero .cta{gap:8px} .stat{padding:14px 15px}
+    .hero .cta{gap:8px} .stat{padding:14px 15px}
     .xp .job{padding:18px 16px}
   }
   /* Print — a clean full dossier */
   @media print{
     /* Site defaults to the dark theme; without this, dark neutral tokens print faint on paper (esp. inline var(--ink2) copy). Force black-on-white for both themes. */
     :root,html[data-theme="dark"],html[data-theme="light"]{--bg:#fff;--bg2:#fff;--surface:#fff;--surface2:#fff;--line:#bbb;--line2:#bbb;--ink:#000;--ink2:#1e1e1e;--muted:#3a3a3a;--accent:#0b5a52;--accent-ink:#0a463f;--gold:#6f5714;--good:#0b6e47}
-    .side,.topbar,.scrim,.skip,.skyline-canvas,.viewer,.sheet,.lenses,.hero .cta,.sidebtns,.menutgl,.chrome,.byline,nav.main{display:none!important}
+    .side,.topbar,.scrim,.skip,.skyline-canvas,.viewer,.sheet,.hero .cta,.sidebtns,.menutgl,.chrome,.byline,nav.main{display:none!important}
     /* Keep each card's data-provenance label ("Synthetic data" / "Full platform · frozen dataset") in the printed dossier; hide only the interactive launch buttons around it */
     .pactions .plink{display:none!important} .pactions .note{margin-left:0}
     .app{display:block} main{min-width:0}
@@ -556,7 +519,6 @@ html[data-theme="light"] .skyline-canvas.cf-fixed{opacity:.38}
     <div class="foot">
       <div class="avail"><span class="dot"></span> Open to legal, strategy &amp; transformation roles — Geneva</div>
       <div class="sidebtns">
-        <a class="btn cite-btn" href="publications/index.html">Publications — 28 works</a>
         <button class="btn primary" style="flex:1" onclick="openDoc('docs/CV-Christopher-Farmer-2026-08.pdf','Christopher Farmer — CV')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg> CV</button>
         <button class="btn icon" id="theme" title="Toggle theme" aria-label="Toggle theme">
@@ -1130,7 +1092,7 @@ html[data-theme="light"] .skyline-canvas.cf-fixed{opacity:.38}
           </div>
           <div class="card">
             <h3>Currently</h3>
-            <p style="color:var(--ink2);font-size:14.5px;margin-top:10px">Open to <b>legal, risk and technology-transformation</b> roles in Geneva — legal operations and regulatory change, enterprise risk, controls and resilience, operating-model design and AI governance — and equally to the specialist lanes this portfolio evidences: <b>RegTech / legal engineering</b> and <b>sanctions / financial crime</b>, where owning both the regulatory outcome and the build is the advantage. On the counsel track, <b>solicitor route (England &amp; Wales)</b> — more than five years of confirmed SRA qualifying work experience; formal submission pending, SQE planned.</p>
+            <p style="color:var(--ink2);font-size:14.5px;margin-top:10px">Open to <b>legal, strategy and AI-transformation</b> roles in Geneva — legal operations and regulatory change, enterprise risk, controls and resilience, operating-model design and AI governance — and equally to the specialist lanes this portfolio evidences: <b>RegTech / legal engineering</b> and <b>sanctions / financial crime</b>, where owning both the regulatory outcome and the build is the advantage. On the counsel track, <b>solicitor route (England &amp; Wales)</b> — more than five years of confirmed SRA qualifying work experience; formal submission pending, SQE planned.</p>
             <div class="cta" style="margin-top:18px;display:flex;flex-wrap:wrap;gap:12px">
               <button class="btn gold" onclick="openDoc('docs/CV-Christopher-Farmer-2026-08.pdf','Christopher Farmer — CV')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg> Download CV</button>
               <a class="btn" href="mailto:civfarmer@gmail.com?subject=Intro%20%E2%80%94%20legal%2C%20risk%20%26%20technology%20role">Email me</a>
@@ -1243,7 +1205,7 @@ html[data-theme="light"] .skyline-canvas.cf-fixed{opacity:.38}
   /* Theme */
   var saved = store.get('cf-theme'); if(saved){ document.documentElement.setAttribute('data-theme', saved); }
   var _themeBtn=document.getElementById('theme');
-  /* Expose toggle state to assistive tech (pressed = dark theme active), matching the lenses' aria-pressed pattern */
+  /* Expose toggle state to assistive tech (pressed = dark theme active) */
   function _setThemePressed(){ if(_themeBtn){ try{_themeBtn.setAttribute('aria-pressed', (document.documentElement.getAttribute('data-theme')==='dark')?'true':'false');}catch(e){} } }
   _setThemePressed();
   _themeBtn.addEventListener('click', function(){
