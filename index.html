@@ -115,6 +115,8 @@
   .contact .ic{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;
     background:color-mix(in oklab,var(--accent) 14%,transparent);color:var(--accent)}
   .contact .ic svg{width:17px;height:17px}
+  .contact .ic-orcid{background:color-mix(in oklab,#A6CE39 16%,transparent)}
+  .contact .ic-orcid svg{width:20px;height:20px}
   .contact .t{display:flex;flex-direction:column;min-width:0}
   .contact .t small{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
   .contact .t span{font-size:14px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -129,8 +131,8 @@
 
   .qr{display:none}
   .foot{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:18px;font-size:11.5px;color:var(--muted)}
-  .foot a{display:inline-block;padding:10px 4px;text-decoration:underline;text-decoration-color:color-mix(in oklab,var(--muted) 45%,transparent);text-underline-offset:3px}
-  .foot span{padding:10px 0}
+  .foot a{display:inline-block;padding:12px 4px;text-decoration:underline;text-decoration-color:color-mix(in oklab,var(--muted) 45%,transparent);text-underline-offset:3px}
+  .foot span{padding:12px 0}
 
   /* reveal: each block rises in turn */
   .r{animation:rise .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0) * 70ms + 180ms)}
@@ -217,6 +219,7 @@
         <li><a href="tel:+33682913780"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2 4.2 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.6a16 16 0 0 0 6 6l1.1-1.1a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></span><span class="t"><small>Mobile</small><span>+33 6 82 91 37 80</span></span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></a></li>
         <li><a href="https://www.linkedin.com/in/civfarmer" rel="noopener"><span class="ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5A2.5 2.5 0 1 1 5 8.5a2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05 4 0 4.75 2.64 4.75 6.06V21H21v-5.6c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94V21H13z"/></svg></span><span class="t"><small>LinkedIn</small><span>linkedin.com/in/civfarmer</span></span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></a></li>
         <li><a href="https://github.com/civfarmer" rel="noopener"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M8 7l-5 5 5 5"/><path d="M16 7l5 5-5 5"/><path d="M14 4l-4 16"/></svg></span><span class="t"><small>GitHub</small><span>github.com/civfarmer</span></span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></a></li>
+        <li><a href="https://orcid.org/0009-0009-4995-2516" rel="noopener"><span class="ic ic-orcid"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#A6CE39"/><text x="12" y="16.2" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700" fill="#fff">iD</text></svg></span><span class="t"><small>ORCID</small><span>orcid.org/0009-0009-4995-2516</span></span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></a></li>
       </ul>
 
       <div class="savebox r" style="--i:10">
